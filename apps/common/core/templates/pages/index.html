@@ -1,0 +1,14 @@
+{% extends 'raw.html' %}
+
+{% load i18n %}
+
+{% block main %}
+<div>
+    <h1>{% trans 'Home' %}</h1>
+    {{form.as_p}}
+</div>
+{% endblock main %}
+
+{% block footer %}
+    {% include 'partials/footer.html' %}
+{% endblock footer %}

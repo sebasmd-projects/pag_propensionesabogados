@@ -1,0 +1,109 @@
+{% extends 'base_account.html' %}
+{% load static i18n %}
+
+{% block main %}
+  <div class="min-vh-100 d-flex align-items-center justify-content-center container">
+    <div class="card">
+      <div class="text-center mt-2">
+        <a href="{% url 'core:index' %}">
+          <img
+            src="{% static 'imgs/favicon/android-chrome-512x512.png' %}"
+            class="card-img-top img-fluid"
+            alt="..."
+            style="max-width: 128px"
+          />
+        </a>
+      </div>
+
+      <div class="card-body">
+        <h1 class="card-title text-center">
+          <a href="{% url 'core:index' %}" class="text-capitalize">{% trans 'Control of historical activos' %}</a>
+        </h1>
+
+        <form method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}" />
+          <div class="row">
+            <!-- Nombres -->
+            <div class="col-6 form-floating mb-3">
+              {{ form.first_name }}
+                <label for="register_first_name" class="form-label">Nombres</label>
+                {% for error in form.first_name.errors %}
+                  <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+      
+            <!-- Apellidos -->
+            <div class="col-6 form-floating mb-3">
+              {{ form.last_name }}
+                <label for="register_last_name" class="form-label">Apellidos</label>
+                {% for error in form.last_name.errors %}
+                  <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+      
+            <!-- Usuario -->
+            <div class="col-6 form-floating mb-3">
+              {{ form.username }}
+                <label for="register_username" class="form-label">Usuario</label>
+                {% for error in form.username.errors %}
+                  <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+      
+            <!-- Correo -->
+            <div class="col-6 form-floating mb-3">
+              {{ form.email }}
+                <label for="register_email" class="form-label">Correo</label>
+                {% for error in form.email.errors %}
+                  <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+      
+            <!-- Contraseña -->
+            <div class="col-6 form-floating mb-3">
+                {{ form.password }}
+                <label for="register_password" class="form-label">Contraseña</label>
+                {% for error in form.password.errors %}
+                  <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+      
+            <!-- Confirmar contraseña -->
+            <div class="col-6 form-floating mb-3">
+              {{ form.confirm_password }}
+                <label for="register_confirm_password" class="form-label"
+                  >Confirmar contraseña
+                </label>
+                {% for error in form.confirm_password.errors %}
+                  <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+          </div>
+      
+          <div class="d-grid gap-2 mb-2">
+            <!-- Botón de registro -->
+            <button type="submit" class="btn btn-success">
+              Registrarme
+            </button>
+
+            <!-- Iniciar sesión -->
+            <a class="btn btn-outline-success" href="{% url 'account:login' %}">
+              ¿Ya tienes cuenta? Inicia Sesión
+            </a>
+          </div>
+        </form>
+
+        <div class="text-center mt-3" style="font-size:11px">
+          <a href="" target="_blank">
+            Condiciones del Servicio
+          </a>
+          <span class="mx-1">&middot;</span>
+          <a href="" target="_blank">
+            Política de Privacidad
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock main %}

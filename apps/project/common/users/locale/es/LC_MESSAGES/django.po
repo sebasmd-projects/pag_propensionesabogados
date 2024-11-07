@@ -1,0 +1,94 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-30 15:10-0500\n"
+"PO-Revision-Date: 2024-08-23 17:06-0500\n"
+"Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Translated-Using: django-rosetta 0.10.0\n"
+
+#: .\apps\project\common\users\admin.py:32
+msgid "password"
+msgstr "contraseña"
+
+#: .\apps\project\common\users\admin.py:34
+msgid ""
+"Raw passwords are not stored, so there is no way to see this user’s "
+"password, but you can change the password using <a href=\"{}\">this form</a>."
+msgstr ""
+"Las contraseñas sin formato no se almacenan, por lo que no hay forma de ver "
+"la contraseña de este usuario, pero puede cambiarla usando <a href="
+"\"{}\">este formulario</a>."
+
+#: .\apps\project\common\users\admin.py:92
+msgid "User Information"
+msgstr "Información del usuario"
+
+#: .\apps\project\common\users\admin.py:100
+#: .\apps\project\common\users\admin.py:167
+msgid "Personal Information"
+msgstr "Información personal"
+
+#: .\apps\project\common\users\admin.py:110
+msgid "Permissions"
+msgstr "Permisos"
+
+#: .\apps\project\common\users\admin.py:121
+#: .\apps\project\common\users\admin.py:178
+msgid "Dates"
+msgstr "Fechas"
+
+#: .\apps\project\common\users\admin.py:130
+msgid "Priority"
+msgstr "Prioridad"
+
+#: .\apps\project\common\users\admin.py:216
+msgid "Groups"
+msgstr "Grupos"
+
+#: .\apps\project\common\users\admin.py:218
+msgid "Names"
+msgstr "Nombres"
+
+#: .\apps\project\common\users\models.py:39
+msgid "User"
+msgstr "Usuario"
+
+#: .\apps\project\common\users\models.py:40
+msgid "Users"
+msgstr "Usuarios"
+
+#: .\apps\project\common\users\validators.py:10
+msgid ""
+"Please enter a valid name. This value can contain only letters, min lenght: 3"
+msgstr ""
+"Por favor ingrese un nombre válido. Este valor puede contener sólo letras, "
+"longitud mínima: 3"
+
+#: .\apps\project\common\users\validators.py:19
+msgid ""
+"Please enter a valid last name. This value can contain only letters, min "
+"lenght: 3"
+msgstr ""
+"Por favor ingrese un apellido válido. Este valor puede contener sólo letras, "
+"longitud mínima: 3"
+
+#: .\apps\project\common\users\validators.py:28
+msgid ""
+"Please enter a valid username. This value can contain only letters, numbers "
+"and this characters /./+/-/_min lenght: 4"
+msgstr ""
+"Por favor ingrese un nombre de usuario válido. Este valor solo puede "
+"contener letras, números y estos caracteres . + - _ min longitud: 4"

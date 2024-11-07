@@ -1,0 +1,23 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+    <head>
+      <title>{% block title %}{% endblock title %}</title>
+      {% block meta %}{% endblock meta %}
+      {% block canonical %}{% endblock canonical %}
+      {% block fonts %}{% endblock fonts %}
+      {% block favicon %}{% endblock favicon %}
+      {% block third_css %}{% endblock third_css %}
+      {% block third_js %}{% endblock third_js %}
+      {% block custom_js %}{% endblock custom_js %}
+      {% block custom_css %}{% endblock custom_css %}
+    </head>
+  <body>
+    {% block header %}{% endblock header %}
+    {% block main %}{% endblock main %}
+    {% block content %}{% endblock content %}
+    {% block footer %}{% endblock footer %}
+    {% block body_third_js %}{% endblock body_third_js %}
+    {% block body_custom_js %}{% endblock body_custom_js %}
+  </body>
+</html>
