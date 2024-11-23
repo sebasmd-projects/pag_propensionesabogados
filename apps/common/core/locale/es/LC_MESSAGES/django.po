@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-23 02:55-0500\n"
-"PO-Revision-Date: 2024-11-23 03:11-0500\n"
+"POT-Creation-Date: 2024-11-23 03:17-0500\n"
+"PO-Revision-Date: 2024-11-23 03:17-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -24,15 +24,15 @@ msgid "Propensiones International: Legal Expertise and Human Quality"
 msgstr "Propensiones Internacional: Experiencia Jurídica y Calidad Humana"
 
 #: .\apps\common\core\templates\pages\index.html:6
-#: .\apps\common\core\templates\pages\index.html:15
-#: .\apps\common\core\templates\pages\index.html:26
+#: .\apps\common\core\templates\pages\index.html:10
+#: .\apps\common\core\templates\pages\index.html:21
 msgid "Legal Expertise and Human Quality, Propensiones International"
 msgstr "Experiencia Jurídica y Calidad Humana, Propensiones Internacional"
 
 #: .\apps\common\core\templates\pages\index.html:7
-#: .\apps\common\core\templates\pages\index.html:16
-#: .\apps\common\core\templates\pages\index.html:17
-#: .\apps\common\core\templates\pages\index.html:27
+#: .\apps\common\core\templates\pages\index.html:11
+#: .\apps\common\core\templates\pages\index.html:12
+#: .\apps\common\core\templates\pages\index.html:22
 msgid ""
 "Specialists in negative pensions and historical asset management. We recover"
 " your pension rights and offer strategic solutions for the legal "
@@ -325,6 +325,15 @@ msgstr ""
 msgid "Contact Us"
 msgstr "Contáctanos "
 
+#: .\apps\common\core\templates\pages\sections\4_contact_section.html:6
+#: .\apps\common\core\templates\partials\header.html:19
+msgid "Contact"
+msgstr "Contáctanos"
+
+#: .\apps\common\core\templates\pages\sections\4_contact_section.html:68
+msgid "Send Message"
+msgstr "Enviar Mensaje"
+
 #: .\apps\common\core\templates\pages\sections\4_contact_section.html:79
 msgid "Address"
 msgstr "Dirección"
@@ -473,10 +482,6 @@ msgstr "Conócenos"
 #: .\apps\common\core\templates\partials\header.html:18
 msgid "Services"
 msgstr "Servicios"
-
-#: .\apps\common\core\templates\partials\header.html:19
-msgid "Contact"
-msgstr "Contáctanos"
 
 #: .\apps\common\core\templates\partials\header.html:20
 msgid "Team"
