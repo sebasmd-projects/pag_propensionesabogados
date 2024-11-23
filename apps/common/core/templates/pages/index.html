@@ -1,14 +1,77 @@
-{% extends 'raw.html' %}
+{% extends 'base.html' %}
 
-{% load i18n %}
+{% load static i18n %}
+
+{% block meta_seo %}
+    <meta name="title" content="{% trans 'Legal Expertise and Human Quality, Propensiones International' %}">
+    <meta name="description" content="{% trans 'Specialists in negative pensions and historical asset management. We recover your pension rights and offer strategic solutions for the legal administration of historical bonds. More than 15 years of experience support you.' %}">
+    <meta name="keywords" content="{% trans 'buyers, intermediaries, holders, positions, historical assets, historical bonds, institutionalization of operations, international management, historical active lawyers, active regulatory compliance, pension lawyers, pension solution, denied pension, pension law, Colombia lawyers, international lawyers' %}">
+        
+    <meta content="{% trans 'Legal Expertise and Human Quality, Propensiones International' %}" property="og:title" />
+    <meta content="{% trans 'Specialists in negative pensions and historical asset management. We recover your pension rights and offer strategic solutions for the legal administration of historical bonds. More than 15 years of experience support you.' %}" property="og:description"/>
+    <meta content="{% trans 'Specialists in negative pensions and historical asset management. We recover your pension rights and offer strategic solutions for the legal administration of historical bonds. More than 15 years of experience support you.' %}" name="description" />
+    
+    <meta content="{% static 'assets/imgs/favicon/favicon.ico' %}" property="og:image"/>
+    <meta content="https://www.propensionesabogados.com/" property="og:url" />
+
+    <meta content="PROPENSIONES ABOGADOS" property="site_name" />
+    <meta content="PROPENSIONES ABOGADOS" property="og:site_name" />
+    <meta content="website" property="og:type" />
+
+    <meta content="{% trans 'Legal Expertise and Human Quality, Propensiones International' %}" name="twitter:title" />
+    <meta content="{% trans 'Specialists in negative pensions and historical asset management. We recover your pension rights and offer strategic solutions for the legal administration of historical bonds. More than 15 years of experience support you.' %}" name="twitter:description" />
+    <meta content="{% static 'assets/imgs/favicon/favicon.ico' %}" name="twitter:image" />
+    <meta content="summary_large_image" name="twitter:card" />
+{% endblock meta_seo %}
+
+{% block third_css %}
+    <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/aos/aos.css' %}" rel="stylesheet">
+{% endblock third_css %}
+
+{% block third_js %}{% endblock third_js %}
+
+{% block custom_js %}{% endblock custom_js %}
+
+{% block custom_css %}
+    <link href="{% static 'assets/custom/css/main.css' %}" rel="stylesheet">
+{% endblock custom_css %}
+
+{% block header %}
+    {% include 'partials/header.html' %}
+{% endblock header %}
 
 {% block main %}
-<div>
-    <h1>{% trans 'Home' %}</h1>
-    {{form.as_p}}
-</div>
+    <main class="main">
+        {% include 'pages/sections/1_hero_section.html' %}
+        {% include 'pages/sections/2_about_section.html' %}
+        {% include 'pages/sections/3_services_section.html' %}
+        {% include 'pages/sections/4_contact_section.html' %}
+        {% include 'pages/sections/5_corporate_social_responsibility_section.html' %}
+        {% include 'pages/sections/6_team_section.html' %}
+        {% include 'pages/sections/7_allies_section.html' %}
+        {% include 'pages/sections/8_stats_section.html' %}
+    </main>
 {% endblock main %}
+
+{% block content %}
+{% include 'partials/whatsapp.html' %}
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
+        <i class="bi bi-arrow-up-short"></i>
+    </a>
+    <div id="preloader"></div>
+{% endblock content %}
 
 {% block footer %}
     {% include 'partials/footer.html' %}
 {% endblock footer %}
+
+{% block body_third_js %}
+    <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/aos/aos.js' %}"></script>
+{% endblock body_third_js %}
+
+{% block body_custom_js %}
+    <script src="{% static 'assets/custom/js/main.js' %}"></script>
+{% endblock body_custom_js %}

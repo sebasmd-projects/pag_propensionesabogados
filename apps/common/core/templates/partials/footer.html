@@ -1,9 +1,64 @@
 {% load i18n %}
 
-<footer>
-    <div>
-        <div>
-            <p>{% trans 'Created by' %} <a href="https://propensionesabogados.com">Propensiones Abogados. {% trans 'Su aliado incondicional' %}</a> © {% now "M Y" %}</p>
+<footer id="footer" class="footer position-relative light-background">
+  <div class="container footer-top">
+    <div class="row gy-4 d-flex align-items-center justify-content-between">
+      <div class="col-lg-5 col-md-12 footer-about">
+        <a href="index.html" class="logo d-flex align-items-center">
+          <span class="sitename">PROPENSIONES</span>
+        </a>
+        <p>
+          {% blocktrans %} Specialists in negative pensions and historical asset
+          management. We recover your pension rights and offer strategic
+          solutions for the legal administration of historical bonds. More than
+          15 years of experience support you. {% endblocktrans %}
+        </p>
+        <div class="social-links d-flex mt-4">
+          <a href=""><i class="bi bi-twitter-x"></i></a>
+          <a href=""><i class="bi bi-facebook"></i></a>
+          <a href=""><i class="bi bi-instagram"></i></a>
+          <a href=""><i class="bi bi-linkedin"></i></a>
         </div>
+      </div>
+
+      <div class="col-lg-2 col-6 footer-links">
+        <h4>Useful Links</h4>
+        <ul>
+          <li><a href="{% url 'core:index' %}#hero">Home</a></li>
+          <li><a href="{% url 'core:index' %}#about">About us</a></li>
+          <li><a href="{% url 'core:index' %}#services">Services</a></li>
+          <li><a href="#">Terms of service</a></li>
+          <li><a href="#">Privacy policy</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+        <h4>Contact Us</h4>
+        <p>{% trans 'Calle 21 Number 16-37 Office 705' %}</p>
+        <p>Colombia, Armenia, Quindio</p>
+        <p class="mt-4">
+          <strong>{% trans 'Phone:' %}</strong> <span>+(57) 318 328 01 76</span>
+        </p>
+        <p>
+          <strong>{% trans 'Email:' %}</strong>
+          <span>info@propensionesabogados.com</span>
+        </p>
+        <p>
+          <strong>{% trans 'Email:' %}</strong>
+          <span>support@propensionesabogados.com</span>
+        </p>
+      </div>
     </div>
+  </div>
+
+  <div class="container copyright text-center mt-4">
+    <p>
+      © <span>Copyright</span>
+      <strong class="sitename">Propensiones Abogados</strong>
+      <span>{% trans 'All Rights Reserved' %}</span>
+    </p>
+    <div class="credits">
+      Designed by <a href="https://sebasmoralesd.com/">Sebastián Morales</a>
+    </div>
+  </div>
 </footer>

@@ -1,0 +1,47 @@
+{% extends 'raw.html' %}
+
+{% load static i18n %}
+
+{% block title %}
+    {% trans 'Propensiones International: Legal Expertise and Human Quality' %}
+{% endblock title %}
+
+{% block meta_basic %}
+    <meta charset="utf-8">
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="index, follow" name="robots"  />
+    <meta content="index, follow" name="googlebot" />
+{% endblock meta_basic %}
+
+{% block canonical %}
+    <link href="https://www.propensionesabogados.com/" rel="canonical"/>
+    <link href="https://www.propensionesabogados.com/" hreflang="x-default" rel="alternate"/>
+    <link href="https://www.propensionesabogados.com/" hreflang="{{ LANGUAGE_CODE }}" rel="alternate" />
+{% endblock canonical %}
+
+{% block favicon %}
+    <link rel="shortcut icon" href="{% static 'assets/imgs/favicon/favicon.ico' %}" />
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'assets/imgs/favicon/android-chrome-512x512.png' %}" />
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'assets/imgs/favicon/android-chrome-192x192.png' %}" />
+    <link rel="icon" type="image/png" sizes="32x32"   href="{% static 'assets/imgs/favicon/favicon-32x32.png' %}" />
+    <link rel="icon" type="image/png" sizes="16x16"   href="{% static 'assets/imgs/favicon/favicon-16x16.png' %}" />
+    <link rel="icon" type="image/svg+xml" href="{% static 'assets/imgs/favicon/favicon.svg' %}" />
+    <link rel="apple-touch-icon" type="image/png" href="{% static 'assets/imgs/favicon/apple-touch-icon.png' %}" sizes="180x180" />
+    <link rel="manifest" href="{% static 'assets/imgs/favicon/site.webmanifest' %}" />
+    <meta name="apple-mobile-web-app-title" content="Propensiones" />
+{% endblock favicon %}
+
+{% block fonts %}
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+{% endblock fonts %}
+
+{% block pre_load %}
+    <link rel="prefetch"                href="https://atlas.propensionesabogados.com/static/assets/js/site/main.js">
+    <link rel="preload"     as="script" href="https://atlas.propensionesabogados.com/static/assets/js/site/main.js">
+
+    <link rel="prefetch"                href="https://atlas.propensionesabogados.com/static/assets/css/site/main.css">
+    <link rel="preload"     as="style"  href="https://atlas.propensionesabogados.com/static/assets/css/site/main.css">
+{% endblock pre_load %}

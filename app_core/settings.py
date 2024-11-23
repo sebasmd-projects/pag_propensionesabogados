@@ -1,4 +1,3 @@
-import base64
 import logging
 import os
 from pathlib import Path
@@ -21,11 +20,11 @@ if os.getenv('DJANGO_DEBUG') == 'True':
     DEBUG = True
 else:
     DEBUG = False
-
-if os.getenv('DJANGO_SECURE_SSL_REDIRECT') == 'True':
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
     SECURE_SSL_REDIRECT = True
-else:
-    SECURE_SSL_REDIRECT = False
 
 if ',' in os.getenv('DJANGO_ALLOWED_HOSTS'):
     ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS').split(',')
@@ -46,13 +45,8 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'auditlog',
-    'corsheaders', # TODO rest cors
-    'rest_framework', # TODO rest framework
-    'rest_framework.authtoken', # TODO rest framework auth token
-    'rest_framework_simplejwt', # TODO rest framework simple jwt
-    'drf_yasg', # TODO rest swagger
-    'honeypot', # TODO forms honeypot
-    'django_recaptcha', # TODO forms recaptcha
+    'honeypot',
+    'django_recaptcha',
     'import_export',
     'parler',
     'rosetta',
@@ -63,8 +57,6 @@ CUSTOM_APPS = [
     'apps.common.utils',
 
     'apps.project.common.account',
-    'apps.project.common.notifications',
-    'apps.project.common.reports',
     'apps.project.common.users',
 ]
 
@@ -218,7 +210,7 @@ else:
 
 DEFAULT_FROM_EMAIL = os.getenv('DJANGO_EMAIL_DEFAULT_FROM_EMAIL')
 EMAIL_BACKEND = os.getenv('DJANGO_EMAIL_BACKEND')
-EMAIL_HOST = os.getenv('DJANGO_EMAIL_HOST', 'mail.fundacionleirion.com')
+EMAIL_HOST = os.getenv('DJANGO_EMAIL_HOST')
 EMAIL_HOST_PASSWORD = os.getenv('DJANGO_EMAIL_HOST_PASSWORD')
 EMAIL_HOST_USER = os.getenv('DJANGO_EMAIL_HOST_USER')
 EMAIL_PORT = int(os.getenv('DJANGO_EMAIL_PORT'))
@@ -226,5 +218,7 @@ EMAIL_PORT = int(os.getenv('DJANGO_EMAIL_PORT'))
 # reCaptchav3
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
+
+HONEYPOT_FIELD_NAME = os.getenv('HONEYPOT_FIELD_NAME')
 
 IP_BLOCKED_TIME_IN_MINUTES = int(os.getenv('IP_BLOCKED_TIME_IN_MINUTES'))

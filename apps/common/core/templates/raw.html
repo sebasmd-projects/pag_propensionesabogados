@@ -3,16 +3,18 @@
 <html lang="{{ LANGUAGE_CODE }}">
     <head>
       <title>{% block title %}{% endblock title %}</title>
-      {% block meta %}{% endblock meta %}
       {% block canonical %}{% endblock canonical %}
-      {% block fonts %}{% endblock fonts %}
+      {% block meta_basic %}{% endblock meta_basic %}
+      {% block meta_seo %}{% endblock meta_seo %}
       {% block favicon %}{% endblock favicon %}
+      {% block fonts %}{% endblock fonts %}
       {% block third_css %}{% endblock third_css %}
       {% block third_js %}{% endblock third_js %}
       {% block custom_js %}{% endblock custom_js %}
       {% block custom_css %}{% endblock custom_css %}
+      {% block pre_load %}{% endblock pre_load %}
     </head>
-  <body>
+  <body {% block body_css %}class="index-page"{% endblock body_css %}>
     {% block header %}{% endblock header %}
     {% block main %}{% endblock main %}
     {% block content %}{% endblock content %}

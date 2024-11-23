@@ -97,7 +97,9 @@ def set_language(request):
 
 
 class HttpRequestAttakView(View):
-    time_in_minutes = timedelta(seconds=60 * settings.IP_BLOCKED_TIME_IN_MINUTES)
+    time_in_minutes = timedelta(
+        seconds=60 * settings.IP_BLOCKED_TIME_IN_MINUTES)
+
     def get(self, request, *args, **kwargs):
         client_ip = request.META.get('REMOTE_ADDR')
 
@@ -116,10 +118,12 @@ class HttpRequestAttakView(View):
 
         if not created:
             # Incrementar el contador de intentos
-            attempt_count = blocked_entry.session_info.get('attempt_count', 0) + 1
+            attempt_count = blocked_entry.session_info.get(
+                'attempt_count', 0) + 1
             blocked_entry.session_info['attempt_count'] = attempt_count
-            blocked_entry.session_info['timestamp'] = timezone.now().isoformat()
-            
+            blocked_entry.session_info['timestamp'] = timezone.now(
+            ).isoformat()
+
             # Extender el bloqueo
             blocked_entry.blocked_until = timezone.now() + self.time_in_minutes
             blocked_entry.save()

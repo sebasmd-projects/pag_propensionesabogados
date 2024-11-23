@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-29 15:50-0500\n"
-"PO-Revision-Date: 2024-08-29 15:51-0500\n"
+"POT-Creation-Date: 2024-11-23 02:55-0500\n"
+"PO-Revision-Date: 2024-11-23 03:15-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -29,73 +29,100 @@ msgstr "No tienes permiso para ver esta página"
 
 #: .\apps\common\utils\forms.py:9
 msgid "Security Key"
-msgstr "LLave de seguridad"
+msgstr "Clave de seguridad"
 
-#: .\apps\common\utils\middleware.py:57
-msgid "Your IP has been blocked due to too many incorrect attempts."
-msgstr "Su IP ha sido bloqueada debido a demasiados intentos incorrectos."
+#: .\apps\common\utils\middleware.py:64
+msgid "This IP is temporarily blocked due to suspicious activity."
+msgstr "Esta IP está bloqueada temporalmente debido a actividad sospechosa."
 
-#: .\apps\common\utils\models.py:118
-#, python-brace-format
-msgid "Cannot convert value {value} to {self.data_type}: {e}"
-msgstr "No se puede convertir el valor {value} a {self.data_type}: {e}"
-
-#: .\apps\common\utils\models.py:181
-msgid "Spanish"
-msgstr "Español"
-
-#: .\apps\common\utils\models.py:182
-msgid "English"
-msgstr "Ingles"
-
-#: .\apps\common\utils\models.py:186
-msgid "language"
-msgstr "idioma"
-
-#: .\apps\common\utils\models.py:195
-msgid "created"
-msgstr "creado"
-
-#: .\apps\common\utils\models.py:201
-msgid "updated"
-msgstr "actualizado"
-
-#: .\apps\common\utils\models.py:207
-msgid "is active"
-msgstr "esta activo"
-
-#: .\apps\common\utils\models.py:212
-msgid "priority"
-msgstr "prioridad"
-
-#: .\apps\common\utils\views.py:67
-msgid "Error 400"
-msgstr "Error 400"
-
-#: .\apps\common\utils\views.py:68
-msgid "Bad Request"
-msgstr "Solicitud incorrecta"
-
-#: .\apps\common\utils\views.py:83
+#: .\apps\common\utils\middleware.py:65 .\apps\common\utils\views.py:49
 msgid "Error 403"
 msgstr "Error 403"
 
-#: .\apps\common\utils\views.py:84
-msgid "Prohibited Request"
-msgstr "Solicitud prohibida"
+#: .\apps\common\utils\middleware.py:66
+msgid "Access denied due to suspicious activity."
+msgstr "Acceso denegado debido a actividad sospechosa."
 
-#: .\apps\common\utils\views.py:99
+#: .\apps\common\utils\models.py:17
+msgid "Spanish"
+msgstr "Español"
+
+#: .\apps\common\utils\models.py:18
+msgid "English"
+msgstr "Inglés"
+
+#: .\apps\common\utils\models.py:22
+msgid "language"
+msgstr "Idioma"
+
+#: .\apps\common\utils\models.py:31
+msgid "created"
+msgstr "f. creación"
+
+#: .\apps\common\utils\models.py:37
+msgid "updated"
+msgstr "f. actualización"
+
+#: .\apps\common\utils\models.py:43
+msgid "is active"
+msgstr "está activo"
+
+#: .\apps\common\utils\models.py:48
+msgid "priority"
+msgstr "prioridad"
+
+#: .\apps\common\utils\models.py:61
+msgid "Attempts to obtain forbidden urls"
+msgstr "Intentos de obtener URL prohibidas"
+
+#: .\apps\common\utils\models.py:63
+msgid "Multiple failed security key entry attempts"
+msgstr "Múltiples intentos fallidos de ingreso de clave de seguridad"
+
+#: .\apps\common\utils\models.py:66
+msgid "is blocked"
+msgstr "está bloqueado"
+
+#: .\apps\common\utils\models.py:67
+msgid "current user IP"
+msgstr "IP del usuario actual"
+
+#: .\apps\common\utils\models.py:69
+msgid "reason"
+msgstr "razón"
+
+#: .\apps\common\utils\models.py:71
+msgid "blocked until"
+msgstr "bloqueado hasta"
+
+#: .\apps\common\utils\models.py:73
+msgid "session information"
+msgstr "Información de la sesión"
+
+#: .\apps\common\utils\views.py:33
+msgid "Error 400"
+msgstr "Error 400"
+
+#: .\apps\common\utils\views.py:34
+msgid "Bad Request"
+msgstr "Solicitud incorrecta"
+
+#: .\apps\common\utils\views.py:50
+msgid "Prohibited Request"
+msgstr "Solicitud Prohibida"
+
+#: .\apps\common\utils\views.py:65
 msgid "Error 404"
 msgstr "Error 404"
 
-#: .\apps\common\utils\views.py:100
+#: .\apps\common\utils\views.py:66
 msgid "Page not found"
 msgstr "Página no encontrada"
 
-#: .\apps\common\utils\views.py:114
+#: .\apps\common\utils\views.py:80
 msgid "Error 500"
 msgstr "Error 500"
 
-#: .\apps\common\utils\views.py:115
+#: .\apps\common\utils\views.py:81
 msgid "Server error"
 msgstr "Error del servidor"
