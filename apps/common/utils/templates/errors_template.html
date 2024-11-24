@@ -35,8 +35,30 @@
     </style>
 
     <div>
+      {% if status == 404 %}
+      <a href="https://propensionesabogados.com/">
+        <img src="https://propensionesabogados.com/static/assets/imgs/favicon/favicon-horizontal.png" style="width: 100%; max-height:100px" alt="{{ error }}" />
+      </a>
+      {% else %}
+        <img src="https://propensionesabogados.com/static/assets/imgs/favicon/favicon-horizontal.png" style="width: 100%; max-height:100px" alt="{{ error }}" />
+      {% endif %}
+
       <h1 className="error-message">{{ status }} |</h1>
       <h2 className="error-message">{{ error }}</h2>
+
+      
+      {% if status == 404 %}
+        <a href="https://propensionesabogados.com/">
+          {% trans 'Go to Home' %}
+        </a>
+      {% endif %}
+        
+
+      <h3>{% trans 'Go to Home' %}</h3>
+      {% if attempt_count %}
+        <p>{{attempt_count}}</p>
+      {% endif %}
+
     </div>
   </body>
 </html>
