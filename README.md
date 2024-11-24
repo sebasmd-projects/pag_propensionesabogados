@@ -1,4 +1,4 @@
-# Atlas
+# PROPENSIONES
 
 1. Estructura de Ramas
     main: La rama de producción, solo debe contener código aprobado y probado.

@@ -1,0 +1,57 @@
+{% load static i18n %}
+
+<section id="about" class="about section light-background">
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <div class="row align-items-xl-center gy-5">
+      <div class="col-xl-5 content">
+        <h2>{% trans 'PROPENSIONES LAWYERS S.A.S' %}</h2>
+
+        <p>
+          {% blocktrans %} Propensiones Abogados is a legally constituted law
+          firm that combines legal expertise with human quality to guarantee
+          comprehensive legal and legal advice to national and international
+          clients. {% endblocktrans %}
+        </p>
+
+        <p>
+          {% blocktrans %} We are proud to be a team of professionals committed
+          to improving the quality of life of our clients through obtaining and
+          enjoying their rights. {% endblocktrans %}
+        </p>
+      </div>
+
+      <div class="col-xl-7">
+        <div class="row gy-4 icon-boxes">
+          <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="icon-box">
+              <div class="d-flex justify-content-center align-items-center">
+                <i class="bi bi-mortarboard"></i>
+              </div>
+              <h3>{% trans 'Experience' %}</h3>
+              <p class="text-justify">
+                {% blocktrans %} In Colombia, we specialize in Denied Pensions,
+                Extracontractual Liability, Emergency Conciliations, Business
+                Consulting and Field Investigation, Civil Law, Criminal Law,
+                Family Law and Labor Law. {% endblocktrans %}
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="icon-box">
+              <div class="d-flex justify-content-center align-items-center">
+                <i class="bi bi-globe-americas"></i>
+              </div>
+              <h3>{% trans 'International' %}</h3>
+              <p class="text-justify">
+                {% blocktrans %} At International Law we offer emergency
+                conciliation services, risk analysis, commercial law, historical
+                asset management and Paymaster. {% endblocktrans %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

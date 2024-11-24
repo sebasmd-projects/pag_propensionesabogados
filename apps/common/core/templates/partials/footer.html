@@ -13,29 +13,27 @@
           solutions for the legal administration of historical bonds. More than
           15 years of experience support you. {% endblocktrans %}
         </p>
-        <div class="social-links d-flex mt-4">
-          <a href=""><i class="bi bi-twitter-x"></i></a>
+        <!-- <div class="social-links d-flex mt-4">
           <a href=""><i class="bi bi-facebook"></i></a>
           <a href=""><i class="bi bi-instagram"></i></a>
-          <a href=""><i class="bi bi-linkedin"></i></a>
-        </div>
+          <a href=""><i class="bi bi-youtube"></i></a>
+        </div> -->
       </div>
 
       <div class="col-lg-2 col-6 footer-links">
-        <h4>Useful Links</h4>
+        <h4>{% trans 'Useful Links' %}</h4>
         <ul>
-          <li><a href="{% url 'core:index' %}#hero">Home</a></li>
-          <li><a href="{% url 'core:index' %}#about">About us</a></li>
-          <li><a href="{% url 'core:index' %}#services">Services</a></li>
-          <li><a href="#">Terms of service</a></li>
-          <li><a href="#">Privacy policy</a></li>
+          <li><a href="{% url 'core:index' %}#hero">{% trans 'Home' %}</a></li>
+          <li><a href="{% url 'core:index' %}#about">{% trans 'About us' %}</a></li>
+          <li><a href="{% url 'core:index' %}#services">{% trans 'Services' %}</a></li>
+          <li><a href="{% url 'core:terms_and_conditions' %}">{% trans 'Terms of service' %}</a></li>
+          <li><a href="{% url 'core:privacy_policy' %}">{% trans 'Privacy policy' %}</a></li>
         </ul>
       </div>
 
       <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
-        <h4>Contact Us</h4>
-        <p>{% trans 'Calle 21 Number 16-37 Office 705' %}</p>
-        <p>Colombia, Armenia, Quindio</p>
+        <h4>{% trans 'Contact Us' %}</h4>
+        <p>Colombia</p>
         <p class="mt-4">
           <strong>{% trans 'Phone:' %}</strong> <span>+(57) 318 328 01 76</span>
         </p>
@@ -55,10 +53,10 @@
     <p>
       © <span>Copyright</span>
       <strong class="sitename">Propensiones Abogados</strong>
-      <span>{% trans 'All Rights Reserved' %}</span>
+      <span>{% trans 'All Rights Reserved' %}. Gracias por todo, vamos por más!</span>
     </p>
     <div class="credits">
-      Designed by <a href="https://sebasmoralesd.com/">Sebastián Morales</a>
+      {% trans 'Designed by' %} <a href="https://sebasmoralesd.com/">Sebastián Morales</a> & <a href="#">Carlos Morales</a>
     </div>
   </div>
 </footer>

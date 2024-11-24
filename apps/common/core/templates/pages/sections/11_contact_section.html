@@ -1,0 +1,157 @@
+{% load i18n honeypot %}
+
+<section id="contact" class="contact section light-background">
+  <!-- Section Title -->
+  <div class="container section-title" data-aos="fade-up">
+    <h2>{% trans 'Contact' %}</h2>
+  </div>
+  <!-- End Section Title -->
+
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <div class="row gy-4">
+      <div class="col-lg-6">
+        {% if success_message %}
+            <div class="alert alert-success text-center">
+                <h4>{% trans 'Your message has been sent successfully.' %}</h4>
+                <h5>{% trans 'We will contact you soon!' %}</h5>
+            </div>
+        {% else %}
+          <form
+            method="post"
+            class="contact-email-form"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+          {% csrf_token %}
+
+          {{ form.unique_id }}
+
+            <div class="row gy-4">
+              <div class="col-md-6">
+                {{form.name}}
+                {% if form.name.errors %}
+                  <div class="alert alert-danger" role="alert">
+                    {% for error in form.name.errors %}
+                    <i class="bi bi-exclamation-triangle-fill"></i><span>{{error}}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                {{form.last_name}}
+                {% if form.last_name.errors %}
+                  <div class="alert alert-danger" role="alert">
+                    {% for error in form.last_name.errors %}
+                    <i class="bi bi-exclamation-triangle-fill"></i><span>{{error}}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-12 ">
+                {{form.email}}
+                {% if form.email.errors %}
+                  <div class="alert alert-danger" role="alert">
+                    {% for error in form.email.errors %}
+                    <i class="bi bi-exclamation-triangle-fill"></i><span>{{error}}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-12">
+                {{form.subject}}
+                {% if form.subject.errors %}
+                  <div class="alert alert-danger" role="alert">
+                    {% for error in form.subject.errors %}
+                    <i class="bi bi-exclamation-triangle-fill"></i><span>{{error}}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-12 text-center">
+                {{form.message}}
+                {% if form.message.errors %}
+                <div class="alert alert-danger" role="alert">
+                  {% for error in form.message.errors %}
+                  <i class="bi bi-exclamation-triangle-fill"></i><span>{{error}}</span>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="col-12">
+                {{form.captcha}}
+                {% if form.captcha.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {% for error in form.captcha.errors %}
+                    <i class="bi bi-exclamation-triangle-fill"></i><span>{{error}}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+
+
+              {% render_honeypot_field honeypot_field %}
+
+
+              <div class="col-12 text-center">
+                <button type="submit" class="btn">{% trans 'Send Message' %}</button>
+                {% if form.non_field_errors %}
+                  <div class="alert alert-danger mt-2" role="alert">
+                    {% for error in form.non_field_errors %}
+                      <i class="bi bi-exclamation-triangle-fill"></i> <span>{{ error }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+
+            </div>
+          </form>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-6">
+        <div class="row gy-4">
+          <div class="col-md-6">
+            <div class="info-item" data-aos="fade" data-aos-delay="200">
+              <i class="bi bi-geo-alt"></i>
+              <h3>{% trans 'Address' %}</h3>
+              <p>Colombia</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="info-item" data-aos="fade" data-aos-delay="300">
+              <i class="bi bi-telephone"></i>
+              <h3>{% trans 'Call Us' %}</h3>
+              <p>+(57) 318 328 01 76</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="info-item" data-aos="fade" data-aos-delay="400">
+              <i class="bi bi-envelope"></i>
+              <h3>{% trans 'Email Us' %}</h3>
+              <p>info@propensionesabogados.com</p>
+              <p>support@propensionesabogados.com</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="info-item" data-aos="fade" data-aos-delay="500">
+              <i class="bi bi-clock"></i>
+              <h3>{% trans 'Open Hours' %}</h3>
+              <p>{% trans 'Monday - Friday' %}</p>
+              <p>8:00AM - 12:00PM</p>
+              <p>2:00AM - 5:00PM</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

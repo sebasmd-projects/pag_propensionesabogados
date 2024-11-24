@@ -4,20 +4,34 @@
   /**
    * Don't display # in the URL when clicking on hash links
    */
-
   document.querySelectorAll('a[href*="#"]').forEach((anchor) => {
     anchor.addEventListener("click", function (e) {
-      e.preventDefault();
-      const targetID = this.getAttribute("href").split("#")[1];
-      const targetElement = document.getElementById(targetID);
-      if (targetElement) {
-        window.scrollTo({
-          top: targetElement.offsetTop,
-          behavior: "smooth",
-        });
+      const href = this.getAttribute("href");
+      const isSamePage =
+        href.startsWith("#") ||
+        new URL(href, window.location.origin).pathname ===
+          window.location.pathname;
+
+      if (isSamePage) {
+        // Evitar el comportamiento por defecto y manejar navegación interna
+        e.preventDefault();
+        const targetID = href.split("#")[1];
+        const targetElement = document.getElementById(targetID);
+
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop,
+            behavior: "smooth",
+          });
+        }
+
+        // Actualizar la URL eliminando el hash
+        const newURL = window.location.origin + window.location.pathname;
+        window.history.pushState({}, "", newURL);
+      } else {
+        // Permitir la navegación a otras páginas (como Calendly)
+        return;
       }
-      const newURL = window.location.origin + window.location.pathname;
-      window.history.pushState({}, "", newURL);
     });
   });
 

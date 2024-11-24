@@ -3,11 +3,11 @@
 {% load static i18n %}
 
 {% block meta_seo %}
-    <meta name="title" content="{% trans 'Legal Expertise and Human Quality, Propensiones International' %}">
+    <meta name="title" content="{% trans 'Legal Expertise with Human Quality, Propensiones International' %}">
     <meta name="description" content="{% trans 'Specialists in negative pensions and historical asset management. We recover your pension rights and offer strategic solutions for the legal administration of historical bonds. More than 15 years of experience support you.' %}">
     <meta name="keywords" content="{% trans 'buyers, intermediaries, holders, positions, historical assets, historical bonds, institutionalization of operations, international management, historical active lawyers, active regulatory compliance, pension lawyers, pension solution, denied pension, pension law, Colombia lawyers, international lawyers' %}">
         
-    <meta content="{% trans 'Legal Expertise and Human Quality, Propensiones International' %}" property="og:title" />
+    <meta content="{% trans 'Legal Expertise with Human Quality, Propensiones International' %}" property="og:title" />
     <meta content="{% trans 'Specialists in negative pensions and historical asset management. We recover your pension rights and offer strategic solutions for the legal administration of historical bonds. More than 15 years of experience support you.' %}" property="og:description"/>
     <meta content="{% trans 'Specialists in negative pensions and historical asset management. We recover your pension rights and offer strategic solutions for the legal administration of historical bonds. More than 15 years of experience support you.' %}" name="description" />
     
@@ -18,7 +18,7 @@
     <meta content="PROPENSIONES ABOGADOS" property="og:site_name" />
     <meta content="website" property="og:type" />
 
-    <meta content="{% trans 'Legal Expertise and Human Quality, Propensiones International' %}" name="twitter:title" />
+    <meta content="{% trans 'Legal Expertise with Human Quality, Propensiones International' %}" name="twitter:title" />
     <meta content="{% trans 'Specialists in negative pensions and historical asset management. We recover your pension rights and offer strategic solutions for the legal administration of historical bonds. More than 15 years of experience support you.' %}" name="twitter:description" />
     <meta content="{% static 'assets/imgs/favicon/favicon.ico' %}" name="twitter:image" />
     <meta content="summary_large_image" name="twitter:card" />
@@ -45,13 +45,16 @@
 {% block main %}
     <main class="main">
         {% include 'pages/sections/1_hero_section.html' %}
-        {% include 'pages/sections/2_about_section.html' %}
-        {% include 'pages/sections/3_services_section.html' %}
-        {% include 'pages/sections/4_contact_section.html' %}
-        {% include 'pages/sections/5_corporate_social_responsibility_section.html' %}
-        {% include 'pages/sections/6_team_section.html' %}
-        {% include 'pages/sections/7_allies_section.html' %}
-        {% include 'pages/sections/8_stats_section.html' %}
+        {% include 'pages/sections/2_principles_section.html' %}
+        {% include 'pages/sections/3_CEO_jorge.html' %}
+        {% include 'pages/sections/4_social_sense.html' %}
+        {% include 'pages/sections/5_about_section.html' %}
+        {% include 'pages/sections/6_all_team_section.html' %}
+        {% include 'pages/sections/7_services_section.html' %}
+        {% include 'pages/sections/8_corporate_social_responsibility_section.html' %}
+        {% include 'pages/sections/9_team_section.html' %}
+        {% include 'pages/sections/10_stats_section.html' %}
+        {% include 'pages/sections/11_contact_section.html' %}
     </main>
 {% endblock main %}
 
@@ -61,6 +64,7 @@
         <i class="bi bi-arrow-up-short"></i>
     </a>
     <div id="preloader"></div>
+    {% include 'partials/banner.html' %}
 {% endblock content %}
 
 {% block footer %}

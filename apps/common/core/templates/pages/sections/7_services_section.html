@@ -1,0 +1,324 @@
+{% load static i18n %}
+
+<section id="services" class="services section light-background">
+  <!-- Section Title -->
+  <div class="container section-title" data-aos="fade-up">
+    <h2>{% trans 'Services' %}</h2>
+    <p>
+      {% blocktrans %}Our firm offers a comprehensive set of specialized
+      services to support financial, tax, risk management operations, and
+      humanitarian projects internationally. Each service can be contracted
+      individually or in a complete package, adapted to the client's specific
+      needs. {% endblocktrans %}
+    </p>
+  </div>
+  <!-- End Section Title -->
+
+  <div class="container">
+    <div class="row gy-4">
+      <!-- National Services -->
+      <div class="col-md-6">
+        <h2 class="text-center">Colombia</h2>
+
+          <div data-aos="fade-up" data-aos-delay="100">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-person-check-fill"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Denied Pensions')"
+                    >{% trans 'Denied Pensions' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}We specialize in representing clients in cases
+                  of denied pensions, ensuring they receive the benefits they
+                  are entitled to. {% endblocktrans %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="200">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-shield-lock-fill"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a
+                    href="#contact"
+                    onclick="setSubject('Extracontractual Liability')"
+                    >{% trans 'Extracontractual Liability' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}We offer expertise in cases of
+                  extracontractual liability, protecting clients from unjust
+                  claims and ensuring justice. {% endblocktrans %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="300">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-phone-fill"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a
+                    href="#contact"
+                    onclick="setSubject('Emergency Conciliations')"
+                    >{% trans 'Emergency Conciliations' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}Specialized services to handle urgent
+                  conciliations in disputes, ensuring quick and effective
+                  resolutions. {% endblocktrans %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="400">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-briefcase-fill"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a
+                    href="#contact"
+                    onclick="setSubject('Business Consultancy')"
+                    >{% trans 'Business Consultancy' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}We provide expert business consultancy,
+                  helping businesses streamline operations and maximize
+                  efficiency. {%endblocktrans%}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="500">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-search"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Field Research')"
+                    >{% trans 'Field Research' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}In-depth field research services to gather
+                  critical data and insights for legal and business purposes.
+                  {%endblocktrans%}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="600">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-gavel"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Civil Law')"
+                    >{% trans 'Civil Law' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}Our experts specialize in civil law, offering
+                  assistance with contracts, property disputes, and personal
+                  injury cases. {% endblocktrans %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="700">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-bricks"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Criminal Law')"
+                    >{% trans 'Criminal Law' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}We handle criminal law cases, ensuring
+                  effective defense strategies for our clients. {%endblocktrans%}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="800">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-heart-fill"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Family Law')"
+                    >{% trans 'Family Law' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}Our firm provides family law services
+                  including divorce, custody, and alimony. {% endblocktrans %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="900">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-person-workspace"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Labor Law')"
+                    >{% trans 'Labor Law' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}We assist in labor law matters including
+                  employment contracts, workplace disputes, and labor rights.
+                  {%endblocktrans%}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+      </div>
+
+      <!-- International Services -->
+      <div class="col-md-6">
+        <h2 class="text-center">{% trans 'International Services' %}</h2>
+        <!-- <img src="{% static 'assets/imgs/services/internacional.png' %}" alt="" class="img-fluid" style="max-height: 400px;"> -->
+
+          <div data-aos="fade-up" data-aos-delay="100">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-credit-card"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Paymaster Services')"
+                    >{% trans 'Paymaster Services' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}Specialized services to ensure smooth
+                  international financial transactions, with full transparency
+                  and security. {% endblocktrans %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="200">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-phone-fill"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a
+                    href="#contact"
+                    onclick="setSubject('Emergency Conciliations')"
+                    >{% trans 'Emergency Conciliations' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {%blocktrans%}We provide services for emergency conciliations
+                  in international disputes, ensuring swift conflict resolution.
+                  {%endblocktrans%}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="300">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-shield-check"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Risk Analysis')"
+                    >{% trans 'Risk Analysis' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}We provide detailed risk assessments to
+                  identify and mitigate potential threats in international
+                  operations. {%endblocktrans%}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="400">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-file-earmark-lock"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Commercial Law')"
+                    >{% trans 'Commercial Law' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}We provide legal services in international
+                  commercial law, including contract negotiation and dispute
+                  resolution. {% endblocktrans %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="500">
+            <div class="service-item d-flex">
+              <div class="icon flex-shrink-0">
+                <i class="bi bi-briefcase"></i>
+              </div>
+              <div>
+                <h4 class="title">
+                  <a href="#contact" onclick="setSubject('Asset Management')"
+                    >{% trans 'Asset Management' %}</a
+                  >
+                </h4>
+                <p class="description">
+                  {% blocktrans %}We offer services in managing and optimizing
+                  international assets, ensuring security and profitability.
+                  {%endblocktrans%}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="500" class="text-center mt-5">
+            <img src="{% static 'assets/imgs/services/justice.png' %}" alt="" class="img-fluid rounded-circle" style="max-height: 400px;">
+          </div>
+
+      </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,55 @@
+{% load static i18n %}
+
+<section id="principles" class="section light-background">
+  <!-- Section Title -->
+  <div class="container section-title" data-aos="fade-up">
+    <h2>{% trans 'Principles' %}</h2>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <!-- Justice -->
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="principle-item">
+          <h3>
+            <i class="bi bi-bank"></i> <strong>{% trans 'Justice' %}</strong>
+          </h3>
+          <p>
+            {% blocktrans %} We act with fairness and impartiality, ensuring
+            that everyone is treated equally and their rights are respected.
+            {%endblocktrans%}
+          </p>
+        </div>
+      </div>
+
+      <!-- Integrity -->
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="principle-item">
+          <h3>
+            <i class="bi bi-shield-check"></i>
+            <strong>{% trans 'Integrity' %}</strong>
+          </h3>
+          <p>
+            {% blocktrans %} We are consistent in our actions and beliefs,
+            always guided by the values of faith in God. {% endblocktrans %}
+          </p>
+        </div>
+      </div>
+
+      <!-- Dedication -->
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="principle-item">
+          <h3>
+            <i class="bi bi-lightning-charge"></i>
+            <strong>{% trans 'Dedication' %}</strong>
+          </h3>
+          <p>
+            {% blocktrans %} We are deeply committed to defending our clients'
+            rights with passion and determination, striving to achieve goals and
+            honor our commitments. {% endblocktrans %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

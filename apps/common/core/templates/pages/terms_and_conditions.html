@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block third_css %}
+    <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+{% endblock third_css %}
+
+{% block custom_css %}
+    <link href="{% static 'assets/custom/css/main.css' %}" rel="stylesheet">
+{% endblock custom_css %}
+
+{% block header %}
+    {% include 'partials/header.html' %}
+{% endblock header %}
+
+{% block footer %}
+    {% include 'partials/footer.html' %}
+{% endblock footer %}
+
+{% block body_third_js %}
+    <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+{% endblock body_third_js %}
+
+{% block body_custom_js %}
+    <script src="{% static 'assets/custom/js/main.js' %}"></script>
+{% endblock body_custom_js %}

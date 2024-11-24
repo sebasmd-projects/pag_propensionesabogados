@@ -1,0 +1,48 @@
+{% load static i18n %}
+
+<section id="social_responsibility" class="principles section light-background">
+  <div class="container d-flex align-items-center justify-content-center">
+    <div class="row gy-4">
+      <!-- Corporate Social Responsibility -->
+      <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+        <div class="content px-xl-5">
+          <h3>
+            <span>
+              <i class="bi bi-person-heart"></i>
+              {% trans 'Corporate Social Responsibility' %}
+            </span>
+          </h3>
+          <p>
+            {% blocktrans %} We strongly believe in giving back to the community
+            and supporting causes that reflect our values.{% endblocktrans %}
+          </p>
+          <p>
+            {% blocktrans %}We donate part of our income to rescuing street
+            animals because we understand the importance of caring for abandoned
+            pets and giving them a second chance.{% endblocktrans %}
+          </p>
+          <p>
+            {% blocktrans %} By supporting this noble cause, we not only improve
+            these animals' quality of life but also promote a more compassionate
+            and responsible society. {% endblocktrans %}
+          </p>
+          <p>
+            {% blocktrans %}Your contribution with us has a direct impact on
+            creating a better future for these animals in need.{%endblocktrans%}
+          </p>
+        </div>
+      </div>
+
+      <!-- Corporate Social Responsibility IMG -->
+      <div class="col-lg-6 text-center" data-aos="fade-up" data-aos-delay="200">
+          <img
+            src="{% static 'assets/imgs/about/responsabilidad_corporativa.webp' %}"
+            class="img-fluid rounded"
+            alt=""
+            style="max-height: 400px"
+          />
+      </div>
+
+    </div>
+  </div>
+</section>
