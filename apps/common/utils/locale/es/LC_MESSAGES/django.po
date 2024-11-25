@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-23 02:55-0500\n"
-"PO-Revision-Date: 2024-11-23 03:15-0500\n"
+"POT-Creation-Date: 2024-11-25 09:08-0500\n"
+"PO-Revision-Date: 2024-11-25 09:11-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -31,15 +31,15 @@ msgstr "No tienes permiso para ver esta página"
 msgid "Security Key"
 msgstr "Clave de seguridad"
 
-#: .\apps\common\utils\middleware.py:64
+#: .\apps\common\utils\middleware.py:58
 msgid "This IP is temporarily blocked due to suspicious activity."
 msgstr "Esta IP está bloqueada temporalmente debido a actividad sospechosa."
 
-#: .\apps\common\utils\middleware.py:65 .\apps\common\utils\views.py:49
+#: .\apps\common\utils\middleware.py:59 .\apps\common\utils\views.py:49
 msgid "Error 403"
 msgstr "Error 403"
 
-#: .\apps\common\utils\middleware.py:66
+#: .\apps\common\utils\middleware.py:60
 msgid "Access denied due to suspicious activity."
 msgstr "Acceso denegado debido a actividad sospechosa."
 
@@ -98,6 +98,10 @@ msgstr "bloqueado hasta"
 #: .\apps\common\utils\models.py:73
 msgid "session information"
 msgstr "Información de la sesión"
+
+#: .\apps\common\utils\templates\errors_template.html:52
+msgid "Go to Home"
+msgstr "Ir al Inicio"
 
 #: .\apps\common\utils\views.py:33
 msgid "Error 400"

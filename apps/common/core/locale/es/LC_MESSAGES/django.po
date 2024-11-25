@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-24 14:10-0500\n"
-"PO-Revision-Date: 2024-11-24 14:21-0500\n"
+"POT-Creation-Date: 2024-11-25 09:08-0500\n"
+"PO-Revision-Date: 2024-11-25 09:11-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -75,37 +75,37 @@ msgstr "Mensaje"
 msgid "state"
 msgstr "estado"
 
-#: .\apps\common\core\models.py:53
+#: .\apps\common\core\models.py:55
 #: .\apps\common\core\templates\pages\sections\11_contact_section.html:6
 #: .\apps\common\core\templates\partials\header.html:97
 msgid "Contact"
 msgstr "Contáctanos"
 
-#: .\apps\common\core\models.py:54
+#: .\apps\common\core\models.py:56
 msgid "Contacts"
 msgstr "Contáctanos"
 
-#: .\apps\common\core\models.py:63
+#: .\apps\common\core\models.py:65
 msgid "title"
 msgstr "título"
 
-#: .\apps\common\core\models.py:68
+#: .\apps\common\core\models.py:70
 msgid "description"
 msgstr "descripción"
 
-#: .\apps\common\core\models.py:73
+#: .\apps\common\core\models.py:75
 msgid "image file"
 msgstr "imagen"
 
-#: .\apps\common\core\models.py:80
+#: .\apps\common\core\models.py:82
 msgid "link"
 msgstr "url"
 
-#: .\apps\common\core\models.py:97
+#: .\apps\common\core\models.py:99
 msgid "Modal Banner"
 msgstr "Rompe tráfico "
 
-#: .\apps\common\core\models.py:98
+#: .\apps\common\core\models.py:100
 msgid "Modal Banners"
 msgstr "Rompe tráficos "
 
@@ -315,38 +315,55 @@ msgstr "C.E.O Jorge Uriel Vega Londoño"
 
 #: .\apps\common\core\templates\pages\sections\4_social_sense.html:9
 msgid "Why was our law firm born with a social sense?"
-msgstr "¿Por qué nuestro despacho de abogados nació con sentido social?"
+msgstr "¿Por qué nuestra firma de abogados nació con sentido social?"
 
-#: .\apps\common\core\templates\pages\sections\4_social_sense.html:15
+#: .\apps\common\core\templates\pages\sections\4_social_sense.html:16
+#| msgid ""
+#| " PROPENSIONES LAWYERS arose from my mother's tireless\n"
+#| "        fight to obtain her pension, after being denied it seven times over 17\n"
+#| "        years. After much research, perseverance and dedication, we managed to\n"
+#| "        secure your pension rights. "
 msgid ""
 " PROPENSIONES LAWYERS arose from my mother's tireless\n"
-"        fight to obtain her pension, after being denied it seven times over 17\n"
-"        years. After much research, perseverance and dedication, we managed to\n"
-"        secure your pension rights. "
+"          fight to obtain her pension, after being denied it seven times over 17\n"
+"          years. After much research, perseverance and dedication, we managed to\n"
+"          secure your pension rights. "
 msgstr ""
 "PROPENSIONES ABOGADOS surgió de la lucha incansable de mi madre por obtener "
 "su pensión, luego de que se la negaran siete veces a lo largo de 17 años. "
 "Luego de mucha investigación, perseverancia y dedicación, logramos asegurar "
 "sus derechos pensionales."
 
-#: .\apps\common\core\templates\pages\sections\4_social_sense.html:22
+#: .\apps\common\core\templates\pages\sections\4_social_sense.html:23
+#| msgid ""
+#| "Inspired by the joy and well-being that this brought to\n"
+#| "        my mother, we opened the DENIED PENSIONS service with a strong social\n"
+#| "        commitment, focused on helping others obtain and enjoy their pension\n"
+#| "        rights, thus improving their quality of life."
 msgid ""
 "Inspired by the joy and well-being that this brought to\n"
-"        my mother, we opened the DENIED PENSIONS service with a strong social\n"
-"        commitment, focused on helping others obtain and enjoy their pension\n"
-"        rights, thus improving their quality of life."
+"          my mother, we opened the DENIED PENSIONS service with a strong social\n"
+"          commitment, focused on helping others obtain and enjoy their pension\n"
+"          rights, thus improving their quality of life."
 msgstr ""
 "Inspirados por la alegría y el bienestar que esto\n"
 "trajo a mi madre, abrimos el servicio de PENSIONES NEGADAS con un fuerte compromiso social, enfocado en ayudar a otras personas a obtener y disfrutar sus derechos pensionales, mejorando así su calidad de vida."
 
-#: .\apps\common\core\templates\pages\sections\4_social_sense.html:31
+#: .\apps\common\core\templates\pages\sections\4_social_sense.html:32
+#| msgid ""
+#| " Today, thanks to GOD and personal effort, she enjoys\n"
+#| "        her pension. From the moment I saw THE HAPPINESS that obtaining pension\n"
+#| "        rights brings to a person, I started PROPENSIONES ABOGADOS as a line of\n"
+#| "        business with a social objective focused on improving people's quality\n"
+#| "        of life through obtaining and enjoying your pension right.\n"
+#| "        "
 msgid ""
 " Today, thanks to GOD and personal effort, she enjoys\n"
-"        her pension. From the moment I saw THE HAPPINESS that obtaining pension\n"
-"        rights brings to a person, I started PROPENSIONES ABOGADOS as a line of\n"
-"        business with a social objective focused on improving people's quality\n"
-"        of life through obtaining and enjoying your pension right.\n"
-"        "
+"          her pension. From the moment I saw THE HAPPINESS that obtaining pension\n"
+"          rights brings to a person, I started PROPENSIONES ABOGADOS as a line of\n"
+"          business with a social objective focused on improving people's quality\n"
+"          of life through obtaining and enjoying your pension right.\n"
+"          "
 msgstr ""
 "Hoy, gracias a DIOS y al esfuerzo personal, ella disfruta de su pensión. "
 "Desde el momento en que vi LA FELICIDAD que trae a una persona la obtención "
@@ -354,16 +371,15 @@ msgstr ""
 "negocio con un objeto social enfocado a mejorar la calidad de vida de las "
 "personas a través de la obtención y disfrute de su derecho pensional."
 
-#: .\apps\common\core\templates\pages\sections\4_social_sense.html:39
+#: .\apps\common\core\templates\pages\sections\4_social_sense.html:40
 #| msgid ""
-#| " Thanks to our rigorous work, little by little\n"
-#| "        we have achieved great successes that have allowed us to\n"
-#| "        internationalize to cover the corporate needs of our clients.\n"
-#| "        "
+#| " Thanks to our rigorous work, little by little we have\n"
+#| "        achieved great successes that have allowed us to internationalize to\n"
+#| "        cover the corporate needs of our clients. "
 msgid ""
 " Thanks to our rigorous work, little by little we have\n"
-"        achieved great successes that have allowed us to internationalize to\n"
-"        cover the corporate needs of our clients. "
+"          achieved great successes that have allowed us to internationalize to\n"
+"          cover the corporate needs of our clients. "
 msgstr ""
 "Gracias a nuestro riguroso trabajo, poco a poco hemos conseguido grandes "
 "éxitos que nos han permitido internacionalizarnos para cubrir las "
@@ -457,8 +473,8 @@ msgid ""
 "                  of denied pensions, ensuring they receive the benefits they\n"
 "                  are entitled to. "
 msgstr ""
-"Nos especializamos en representar a clientes en casos de pensiones "
-"denegadas, asegurando que reciban los beneficios a los que tienen derecho."
+"Nos especializamos en representar a clientes en casos de pensiones negadas, "
+"asegurando que reciban los beneficios a los que tienen derecho."
 
 #: .\apps\common\core\templates\pages\sections\7_services_section.html:53
 msgid "Extracontractual Liability"
@@ -471,15 +487,17 @@ msgid ""
 "                  claims and ensuring justice. "
 msgstr ""
 "Ofrecemos experiencia en casos de responsabilidad extracontractual, "
-"protegiendo a los clientes de reclamaciones injustas y garantizando la "
+"protegiendo a los clientes con reclamaciones justas y garantizando la "
 "justicia."
 
 #: .\apps\common\core\templates\pages\sections\7_services_section.html:75
 #: .\apps\common\core\templates\pages\sections\7_services_section.html:244
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:326
 msgid "Emergency Conciliations"
 msgstr "Conciliaciones de Emergencia"
 
 #: .\apps\common\core\templates\pages\sections\7_services_section.html:79
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:330
 msgid ""
 "Specialized services to handle urgent\n"
 "                  conciliations in disputes, ensuring quick and effective\n"
@@ -741,12 +759,10 @@ msgid "Our C.E.O"
 msgstr "Nuestro C.E.O"
 
 #: .\apps\common\core\templates\partials\header.html:57
-#| msgid "Why was our law firm born with a social sense?"
 msgid "Born with a social sense"
 msgstr "Nacimos con Sentido Social"
 
 #: .\apps\common\core\templates\partials\header.html:75
-#| msgid "Expertise in each area and human quality."
 msgid "Expertise in each area"
 msgstr "Experticia en cada área"
 
