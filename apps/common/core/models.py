@@ -65,6 +65,13 @@ class ModalBannerModel(TimeStampedModel):
         _('title'),
         max_length=255
     )
+    
+    title_en = models.CharField(
+        _('title (English)'),
+        max_length=255,
+        blank=True,
+        null=True
+    )
 
     description = models.TextField(
         _('description'),
@@ -73,13 +80,25 @@ class ModalBannerModel(TimeStampedModel):
 
     image_file = models.ImageField(
         _('image file'),
+        upload_to='modal_banners/'
+    )
+    
+    image_file_en = models.ImageField(
+        _('image file (English)'),
         upload_to='modal_banners/',
         blank=True,
         null=True
     )
-
+    
     link = models.URLField(
         _('link'),
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    
+    link_en = models.URLField(
+        _('link (English)'),
         max_length=255,
         blank=True,
         null=True

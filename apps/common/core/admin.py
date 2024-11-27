@@ -36,13 +36,18 @@ class ModalBannerModelAdmin(admin.ModelAdmin):
     ordering = ('-created',)
     readonly_fields = ('created', 'updated')
     fieldsets = (
-        (None, {
+        ('ES', {
             'fields': (
-                'title', 'description', 'link', 'image_file', 'is_active'
+                'title', 'description', 'link', 'image_file'
             )
         }),
-        ('Important dates', {
-            'fields': ('created', 'updated'),
+        ('EN', {
+            'fields': (
+                'title_en', 'link_en', 'image_file_en'
+            )
+        }),
+        ('Important', {
+            'fields': ('created', 'updated', 'is_active'),
             'classes': ('collapse',)
         }),
     )

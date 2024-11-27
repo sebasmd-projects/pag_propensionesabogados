@@ -5,17 +5,31 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body p-0">
-                {% if modal_banner.image_file %}
-                    <img src="{{ modal_banner.image_file.url }}" alt="{{ modal_banner.title }}" class="img-fluid">
+                {% if LANGUAGE_CODE == 'en' %}
+                    {% if modal_banner.image_file_en %}
+                        <img src="{{ modal_banner.image_file_en.url }}" alt="{{ modal_banner.title_en }}" class="img-fluid">
+                    {% else %}
+                        {% if modal_banner.image_file %}
+                            <img src="{{ modal_banner.image_file.url }}" alt="{{ modal_banner.title }}" class="img-fluid">
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    {% if modal_banner.image_file %}
+                        <img src="{{ modal_banner.image_file.url }}" alt="{{ modal_banner.title }}" class="img-fluid">
+                    {% endif %}
                 {% endif %}
-                {% if modal_banner.link %}
+                {% if LANGUAGE_CODE == 'en' and modal_banner.link_en %}
+                    <a href="{{ modal_banner.link_en }}" target="_blank" class="stretched-link"></a>
+                {% elif modal_banner.link %}
                     <a href="{{ modal_banner.link }}" target="_blank" class="stretched-link"></a>
                 {% endif %}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">{% trans 'Close' %}</button>
-                {% if modal_banner.link %}
-                <a href="{{ modal_banner.link }}" target="_blank"  class="btn btn-outline-success">{% trans 'View more' %}</a>
+                {% if LANGUAGE_CODE == 'en' and modal_banner.link_en %}
+                    <a href="{{ modal_banner.link_en }}" target="_blank" class="btn btn-outline-success">{% trans 'View more' %}</a>
+                {% elif modal_banner.link %}
+                    <a href="{{ modal_banner.link }}" target="_blank" class="btn btn-outline-success">{% trans 'View more' %}</a>
                 {% endif %}
             </div>
         </div>
