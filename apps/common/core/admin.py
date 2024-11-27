@@ -12,7 +12,6 @@ class ContactModelAdmin(admin.ModelAdmin):
     )
     search_fields = ('name', 'last_name', 'email', 'subject', 'message')
     list_filter = ('is_active', 'state')
-    date_hierarchy = 'created'
     ordering = ('-created',)
     readonly_fields = ('created', 'updated')
     fieldsets = (
@@ -34,7 +33,6 @@ class ModalBannerModelAdmin(admin.ModelAdmin):
     )
     search_fields = ('title', 'description')
     list_filter = ('is_active',)
-    date_hierarchy = 'created'
     ordering = ('-created',)
     readonly_fields = ('created', 'updated')
     fieldsets = (
