@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 16:45-0500\n"
-"PO-Revision-Date: 2024-12-16 16:46-0500\n"
+"POT-Creation-Date: 2024-12-16 17:10-0500\n"
+"PO-Revision-Date: 2024-12-16 17:14-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -437,31 +437,63 @@ msgstr ""
 msgid "Expertise in each area and human quality."
 msgstr "Experiencia Jurídica con Calidad Humana"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:6
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:7
 #: .\apps\common\core\templates\partials\footer.html:28
 #: .\apps\common\core\templates\partials\header.html:102
 msgid "Services"
 msgstr "Servicios"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:8
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:10
 msgid ""
-"Our firm offers a comprehensive set of specialized\n"
-"      services to support financial, tax, risk management operations, and\n"
-"      humanitarian projects internationally. Each service can be contracted\n"
-"      individually or in a complete package, adapted to the client's specific\n"
-"      needs. "
+"\n"
+"      Our firm provides a comprehensive range of specialized legal and financial services to address challenges effectively and deliver lasting solutions. We offer expert support at both national and international levels, ensuring your interests are protected and optimized.\n"
+"      "
 msgstr ""
-"Nuestra firma ofrece un conjunto integral de servicios especializados para "
-"apoyar operaciones financieras, tributarias, de gestión de riesgos y "
-"proyectos humanitarios a nivel internacional. Cada servicio puede "
-"contratarse de manera individual o en un paquete completo, adaptado a las "
-"necesidades específicas del cliente."
+"\n"
+"Nuestra firma ofrece una gama integral de servicios legales y financieros especializados para abordar desafíos de manera efectiva y brindar soluciones duraderas. Brindamos apoyo experto tanto a nivel nacional como internacional, asegurando que sus intereses estén protegidos y optimizados."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:31
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:16
+#| msgid "International Services"
+msgid "National Services:"
+msgstr "Servicios Nacionales:"
+
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:18
+msgid ""
+"\n"
+"          Solutions tailored to individuals and businesses in Colombia, including pensions, economic insolvency, civil and criminal law, family matters, labor disputes, and urgent conciliations. We focus on delivering justice, financial stability, and peace of mind.\n"
+"          "
+msgstr ""
+"\n"
+"Soluciones adaptadas a individuos y empresas en Colombia, que incluyen pensiones, insolvencia económica, derecho civil y penal, asuntos familiares, disputas laborales y conciliaciones urgentes. Nos enfocamos en brindar justicia, estabilidad financiera y tranquilidad."
+
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:24
+#| msgid "International Services"
+msgid "International Services:"
+msgstr "Servicios Internacionales:"
+
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:26
+msgid ""
+"\n"
+"          Specialized support for global operations, including asset management, risk analysis, paymaster services, commercial law, and emergency conciliations. We provide secure, transparent, and effective solutions for cross-border challenges.\n"
+"          "
+msgstr ""
+"\n"
+"Soporte especializado para operaciones globales, que incluye gestión de activos, análisis de riesgos, servicios de pago, derecho comercial y conciliaciones urgentes. Ofrecemos soluciones seguras, transparentes y efectivas para desafíos transfronterizos."
+
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:33
+msgid ""
+"\n"
+"      Each service can be contracted individually, specifically adapted to meet your needs and objectives with precision and excellence.\n"
+"      "
+msgstr ""
+"\n"
+"Cada servicio puede contratarse de forma individual, adaptado específicamente para satisfacer sus necesidades y objetivos con precisión y excelencia."
+
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:56
 msgid "Denied Pensions"
 msgstr "Pensiones negadas"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:35
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:60
 msgid ""
 "We specialize in representing clients in cases\n"
 "                  of denied pensions, ensuring they receive the benefits they\n"
@@ -470,11 +502,11 @@ msgstr ""
 "Nos especializamos en representar a clientes en casos de pensiones negadas, "
 "asegurando que reciban los beneficios a los que tienen derecho."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:53
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:78
 msgid "Extracontractual Liability"
 msgstr "Responsabilidad Extracontractual"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:57
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:82
 msgid ""
 "We offer expertise in cases of\n"
 "                  extracontractual liability, protecting clients from unjust\n"
@@ -484,12 +516,12 @@ msgstr ""
 "protegiendo a los clientes con reclamaciones justas y garantizando la "
 "justicia."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:75
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:265
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:100
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:290
 msgid "Emergency Conciliations"
 msgstr "Conciliaciones de Emergencia"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:79
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:104
 msgid ""
 "Specialized services to handle urgent\n"
 "                  conciliations in national disputes, ensuring quick and effective\n"
@@ -498,11 +530,11 @@ msgstr ""
 "Servicios especializados para manejar conciliaciones urgentes en disputas "
 "nacionales, asegurando resoluciones rápidas y efectivas."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:97
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:122
 msgid "Business Consultancy"
 msgstr "Consultoría Empresarial"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:101
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:126
 msgid ""
 "We provide expert business consultancy,\n"
 "                  helping businesses streamline operations and maximize\n"
@@ -511,11 +543,11 @@ msgstr ""
 "Brindamos consultoría empresarial experta, ayudando a las empresas a "
 "optimizar sus operaciones y maximizar la eficiencia."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:117
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:142
 msgid "Field Research"
 msgstr "Investigación de Campo"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:121
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:146
 msgid ""
 "In-depth field research services to gather\n"
 "                  critical data and insights for legal and business purposes.\n"
@@ -524,11 +556,11 @@ msgstr ""
 "Servicios de investigación de campo en profundidad para recopilar datos y "
 "conocimientos críticos con fines legales y comerciales."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:137
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:162
 msgid "Civil Law"
 msgstr "Derecho Civil"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:141
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:166
 msgid ""
 "Our experts specialize in civil law, offering\n"
 "                  assistance with contracts, property disputes, and personal\n"
@@ -538,11 +570,11 @@ msgstr ""
 "contratos, disputas de propiedad y casos de infracción de derechos "
 "civiles generarales."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:157
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:182
 msgid "Criminal Law"
 msgstr "Derecho Penal"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:161
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:186
 msgid ""
 "We handle criminal law cases, ensuring\n"
 "                  effective defense strategies for our clients. "
@@ -550,11 +582,11 @@ msgstr ""
 "Manejamos casos de derecho penal, asegurando estrategias de defensa "
 "efectivas para nuestros clientes."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:176
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:201
 msgid "Family Law"
 msgstr "Derecho de Familia"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:180
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:205
 msgid ""
 "Our firm provides family law services\n"
 "                  including divorce, custody, and alimony. "
@@ -562,11 +594,11 @@ msgstr ""
 "Nuestra firma brinda servicios de derecho familiar que incluyen divorcio, "
 "custodia y pensión alimenticia."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:195
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:220
 msgid "Labor Law"
 msgstr "Derecho Laboral"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:199
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:224
 msgid ""
 "We assist in labor law matters including\n"
 "                  employment contracts, workplace disputes, and labor rights.\n"
@@ -575,11 +607,11 @@ msgstr ""
 "Ayudamos en asuntos de derecho laboral, incluidos contratos laborales, "
 "conflictos laborales y derechos laborales."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:215
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:240
 msgid "Economic Insolvency"
 msgstr "Insolvencia Económica"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:219
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:244
 msgid ""
 "\n"
 "                  Our firm offers specialized services for handling cases of economic insolvency for both non-commercial individuals and commercial entities. We guide clients through restructuring their debts, negotiating with creditors, and ensuring compliance with legal requirements to achieve financial stability.\n"
@@ -588,15 +620,15 @@ msgstr ""
 "\n"
 "Nuestra firma ofrece servicios especializados para el manejo de casos de insolvencia económica tanto para personas no comerciantes como para entidades comerciales. Guiamos a los clientes en la reestructuración de sus deudas, la negociación con acreedores y el cumplimiento de los requisitos legales para lograr la estabilidad financiera."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:232
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:257
 msgid "International Services"
 msgstr "Internacional"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:243
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:268
 msgid "Paymaster Services"
 msgstr "Paymaster Internacional"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:247
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:272
 msgid ""
 "Specialized services to ensure smooth\n"
 "                  international financial transactions, with full transparency\n"
@@ -605,7 +637,7 @@ msgstr ""
 "Servicios especializados para gestionar los flujos de pago en transacciones "
 "internacionales de alto valor, garantizando la seguridad y la transparencia."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:269
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:294
 msgid ""
 "We provide services for emergency conciliations\n"
 "                  in international disputes, ensuring swift conflict resolution.\n"
@@ -614,11 +646,11 @@ msgstr ""
 "Servicios especializados para gestionar los flujos de pago en transacciones "
 "internacionales de alto valor, garantizando la seguridad y la transparencia."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:285
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:310
 msgid "Risk Analysis"
 msgstr "Análisis de riesgos"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:289
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:314
 msgid ""
 "We provide detailed risk assessments to\n"
 "                  identify and mitigate potential threats in international\n"
@@ -627,11 +659,11 @@ msgstr ""
 "Evaluaciones de riesgos integrales para transacciones internacionales, que "
 "abarcan factores financieros, regulatorios y operativos."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:305
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:330
 msgid "Commercial Law"
 msgstr "Derecho Comercial"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:309
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:334
 msgid ""
 "We provide legal services in international\n"
 "                  commercial law, including contract negotiation and dispute\n"
@@ -640,11 +672,11 @@ msgstr ""
 "Brindamos servicios legales en derecho comercial internacional, incluida la "
 "negociación de contratos y la resolución de disputas."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:325
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:350
 msgid "Asset Management"
 msgstr "Gestión de Activos"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:329
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:354
 msgid ""
 "We offer services in managing and optimizing\n"
 "                  international assets, ensuring security and profitability.\n"
@@ -801,6 +833,19 @@ msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."
+
+#~ msgid ""
+#~ "Our firm offers a comprehensive set of specialized\n"
+#~ "      services to support financial, tax, risk management operations, and\n"
+#~ "      humanitarian projects internationally. Each service can be contracted\n"
+#~ "      individually or in a complete package, adapted to the client's specific\n"
+#~ "      needs. "
+#~ msgstr ""
+#~ "Nuestra firma ofrece un conjunto integral de servicios especializados para "
+#~ "apoyar operaciones financieras, tributarias, de gestión de riesgos y "
+#~ "proyectos humanitarios a nivel internacional. Cada servicio puede "
+#~ "contratarse de manera individual o en un paquete completo, adaptado a las "
+#~ "necesidades específicas del cliente."
 
 #~ msgid ""
 #~ "Specialized services to handle urgent\n"
