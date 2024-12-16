@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-27 17:01-0500\n"
-"PO-Revision-Date: 2024-11-27 17:02-0500\n"
+"POT-Creation-Date: 2024-12-16 16:45-0500\n"
+"PO-Revision-Date: 2024-12-16 16:46-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -77,7 +77,7 @@ msgstr "estado"
 
 #: .\apps\common\core\models.py:55
 #: .\apps\common\core\templates\pages\sections\11_contact_section.html:6
-#: .\apps\common\core\templates\partials\header.html:97
+#: .\apps\common\core\templates\partials\header.html:114
 msgid "Contact"
 msgstr "Contáctanos"
 
@@ -102,7 +102,6 @@ msgid "image file"
 msgstr "imagen"
 
 #: .\apps\common\core\models.py:87
-#| msgid "image file"
 msgid "image file (English)"
 msgstr "imagen (EN)"
 
@@ -279,7 +278,7 @@ msgid "Contact Us Now"
 msgstr "Contáctanos ahora"
 
 #: .\apps\common\core\templates\pages\sections\2_principles_section.html:6
-#: .\apps\common\core\templates\partials\header.html:39
+#: .\apps\common\core\templates\partials\header.html:56
 msgid "Principles"
 msgstr "Principios"
 
@@ -440,7 +439,7 @@ msgstr "Experiencia Jurídica con Calidad Humana"
 
 #: .\apps\common\core\templates\pages\sections\7_services_section.html:6
 #: .\apps\common\core\templates\partials\footer.html:28
-#: .\apps\common\core\templates\partials\header.html:85
+#: .\apps\common\core\templates\partials\header.html:102
 msgid "Services"
 msgstr "Servicios"
 
@@ -486,7 +485,7 @@ msgstr ""
 "justicia."
 
 #: .\apps\common\core\templates\pages\sections\7_services_section.html:75
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:244
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:265
 msgid "Emergency Conciliations"
 msgstr "Conciliaciones de Emergencia"
 
@@ -576,15 +575,28 @@ msgstr ""
 "Ayudamos en asuntos de derecho laboral, incluidos contratos laborales, "
 "conflictos laborales y derechos laborales."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:211
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:215
+msgid "Economic Insolvency"
+msgstr "Insolvencia Económica"
+
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:219
+msgid ""
+"\n"
+"                  Our firm offers specialized services for handling cases of economic insolvency for both non-commercial individuals and commercial entities. We guide clients through restructuring their debts, negotiating with creditors, and ensuring compliance with legal requirements to achieve financial stability.\n"
+"                  "
+msgstr ""
+"\n"
+"Nuestra firma ofrece servicios especializados para el manejo de casos de insolvencia económica tanto para personas no comerciantes como para entidades comerciales. Guiamos a los clientes en la reestructuración de sus deudas, la negociación con acreedores y el cumplimiento de los requisitos legales para lograr la estabilidad financiera."
+
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:232
 msgid "International Services"
 msgstr "Internacional"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:222
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:243
 msgid "Paymaster Services"
 msgstr "Paymaster Internacional"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:226
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:247
 msgid ""
 "Specialized services to ensure smooth\n"
 "                  international financial transactions, with full transparency\n"
@@ -593,7 +605,7 @@ msgstr ""
 "Servicios especializados para gestionar los flujos de pago en transacciones "
 "internacionales de alto valor, garantizando la seguridad y la transparencia."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:248
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:269
 msgid ""
 "We provide services for emergency conciliations\n"
 "                  in international disputes, ensuring swift conflict resolution.\n"
@@ -602,11 +614,11 @@ msgstr ""
 "Servicios especializados para gestionar los flujos de pago en transacciones "
 "internacionales de alto valor, garantizando la seguridad y la transparencia."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:264
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:285
 msgid "Risk Analysis"
 msgstr "Análisis de riesgos"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:268
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:289
 msgid ""
 "We provide detailed risk assessments to\n"
 "                  identify and mitigate potential threats in international\n"
@@ -615,11 +627,11 @@ msgstr ""
 "Evaluaciones de riesgos integrales para transacciones internacionales, que "
 "abarcan factores financieros, regulatorios y operativos."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:284
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:305
 msgid "Commercial Law"
 msgstr "Derecho Comercial"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:288
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:309
 msgid ""
 "We provide legal services in international\n"
 "                  commercial law, including contract negotiation and dispute\n"
@@ -628,11 +640,11 @@ msgstr ""
 "Brindamos servicios legales en derecho comercial internacional, incluida la "
 "negociación de contratos y la resolución de disputas."
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:304
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:325
 msgid "Asset Management"
 msgstr "Gestión de Activos"
 
-#: .\apps\common\core\templates\pages\sections\7_services_section.html:308
+#: .\apps\common\core\templates\pages\sections\7_services_section.html:329
 msgid ""
 "We offer services in managing and optimizing\n"
 "                  international assets, ensuring security and profitability.\n"
@@ -707,7 +719,7 @@ msgid "Useful Links"
 msgstr "Enlaces útiles"
 
 #: .\apps\common\core\templates\partials\footer.html:26
-#: .\apps\common\core\templates\partials\header.html:24
+#: .\apps\common\core\templates\partials\header.html:41
 msgid "Home"
 msgstr "Inicio"
 
@@ -744,24 +756,24 @@ msgstr "Todos los derechos reservados"
 msgid "Designed by"
 msgstr "Diseñado por"
 
-#: .\apps\common\core\templates\partials\header.html:29
-#: .\apps\common\core\templates\partials\header.html:66
+#: .\apps\common\core\templates\partials\header.html:46
+#: .\apps\common\core\templates\partials\header.html:83
 msgid "About"
 msgstr "Conócenos"
 
-#: .\apps\common\core\templates\partials\header.html:48
+#: .\apps\common\core\templates\partials\header.html:65
 msgid "Our C.E.O"
 msgstr "Nuestro C.E.O"
 
-#: .\apps\common\core\templates\partials\header.html:57
+#: .\apps\common\core\templates\partials\header.html:74
 msgid "Born with a social sense"
 msgstr "Nacimos con Sentido Social"
 
-#: .\apps\common\core\templates\partials\header.html:75
+#: .\apps\common\core\templates\partials\header.html:92
 msgid "Expertise in each area"
 msgstr "Experticia en cada área"
 
-#: .\apps\common\core\templates\partials\header.html:90
+#: .\apps\common\core\templates\partials\header.html:107
 msgid "Team"
 msgstr "Equipo"
 
