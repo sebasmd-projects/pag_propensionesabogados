@@ -7,7 +7,7 @@
             <div class="modal-body p-0">
                 {% if LANGUAGE_CODE == 'en' %}
                     {% if modal_banner.image_file_en %}
-                        <img src="{{ modal_banner.image_file_en.url }}" alt="{{ modal_banner.title_en }}" class="img-fluid">
+                        <img src="{{ modal_banner.image_file_en.url }}" alt="{{ modal_banner.title_en }}" class="img-fluid vh-90">
                     {% else %}
                         {% if modal_banner.image_file %}
                             <img src="{{ modal_banner.image_file.url }}" alt="{{ modal_banner.title }}" class="img-fluid">
