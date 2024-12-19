@@ -1,0 +1,134 @@
+{% load static i18n %}
+
+<section id="social_projects" class="section light-background vh-100">
+    <div class="container section-title" data-aos="fade-up">
+        <h2>{% trans 'We Support Social and business Projects' %}</h2>
+    </div>
+
+    <!--
+        7 Lacteos
+        8 Vivienda digna
+    -->
+
+    <div id="carouselCaptions" class="carousel slide" data-bs-ride="carousel" data-bs-touch="true">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselCaptions" data-bs-slide-to="0" aria-label="Slide 1"
+                class="active" aria-current="true"></button>
+            <button type="button" data-bs-target="#carouselCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            <button type="button" data-bs-target="#carouselCaptions" data-bs-slide-to="3" aria-label="Slide 4"></button>
+            <button type="button" data-bs-target="#carouselCaptions" data-bs-slide-to="4" aria-label="Slide 5"></button>
+            <button type="button" data-bs-target="#carouselCaptions" data-bs-slide-to="5" aria-label="Slide 6"></button>
+            <button type="button" data-bs-target="#carouselCaptions" data-bs-slide-to="6" aria-label="Slide 7"></button>
+            <button type="button" data-bs-target="#carouselCaptions" data-bs-slide-to="7" aria-label="Slide 8"></button>
+        </div>
+
+        <div class="carousel-inner">
+            <!-- Metro -->
+            <div class="carousel-item active">
+                <img src="{% static 'assets/imgs/social_projects/proyecto_metrocable.jpg' %}" class="d-block w-100"
+                    alt="{% trans 'Public transportation' %}">
+                <div class="carousel-caption d-none d-md-block">
+                    <div class="highlight-bg">
+                        <h5>{% trans 'Public Transport (Metrocable)' %}</h5>
+                        <p>{% trans 'Symbolizing access to efficient and sustainable public transportation, connecting communities and improving quality of life.' %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Homeless people -->
+            <div class="carousel-item">
+                <img src="{% static 'assets/imgs/social_projects/proyecto_habitantes.jpg' %}" class="d-block w-100"
+                    alt="{% trans 'Animal welfare and protection' %}">
+                <div class="carousel-caption d-none d-md-block">
+                    <div class="highlight-bg">
+                        <h5>{% trans 'Dining rooms for homeless people' %}</h5>
+                        <p>{% trans 'Providing safe and welcoming spaces where homeless individuals can receive nutritious meals, fostering dignity, compassion, and a sense of community.' %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Animals -->
+            <div class="carousel-item">
+                <img src="{% static 'assets/imgs/social_projects/proyecto_animalista.jpg' %}" class="d-block w-100"
+                    alt="{% trans 'Animal welfare and protection' %}">
+                <div class="carousel-caption d-none d-md-block">
+                    <div class="highlight-bg">
+                        <h5>{% trans 'Animalist Project' %}</h5>
+                        <p>{% trans 'Care and protection of animals, promoting animal welfare in specialized environments and through the work of committed veterinarians.' %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nature -->
+            <div class="carousel-item">
+                <img src="{% static 'assets/imgs/social_projects/proyecto_reservas_reforestacion.jpg' %}" class="d-block w-100"
+                    alt="{% trans 'Preservation and reforestation' %}">
+                <div class="carousel-caption d-none d-md-block">
+                    <div class="highlight-bg">
+                        <h5>{% trans 'Preservation and Reforestation' %}</h5>
+                        <p>{% trans 'Showcasing sustainability initiatives through the protection of natural resources, reforestation, and water management for a greener and balanced future.' %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Senior -->
+            <div class="carousel-item ">
+                <img src="{% static 'assets/imgs/social_projects/proyecto_adulto_mayor.jpg' %}" class="d-block w-100"
+                    alt="{% trans 'Care and support for older adults' %}">
+                <div class="carousel-caption d-none d-md-block">
+                    <div class="highlight-bg">
+                        <h5>{% trans 'Support for Senior Citizens Homes' %}</h5>
+                        <p>{% trans 'Provide care and support to older adults, promoting their emotional and physical well-being in comfortable and natural environments.' %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brigades -->
+            <div class="carousel-item">
+                <img src="{% static 'assets/imgs/social_projects/proyecto_brigadas.jpg' %}" class="d-block w-100"
+                    alt="{% trans 'Social brigades' %}">
+                <div class="carousel-caption d-none d-md-block">
+                    <div class="highlight-bg">
+                        <h5>{% trans 'Social Brigades' %}</h5>
+                        <p>{% trans 'Mobile brigades providing health, legal, and animal welfare services to communities in need, improving quality of life.' %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dairy products -->
+            <div class="carousel-item">
+                <img src="{% static 'assets/imgs/social_projects/proyecto_productos_lacteos.jpg' %}" class="d-block w-100"
+                    alt="{% trans 'Dairy production' %}">
+                <div class="carousel-caption d-none d-md-block">
+                    <div class="highlight-bg">
+                        <h5>{% trans 'Dairy Production' %}</h5>
+                        <p>{% trans 'Promoting food security and rural work by highlighting the production of healthy foods and supporting families dedicated to agriculture.' %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Housing -->
+            <div class="carousel-item">
+                <img src="{% static 'assets/imgs/social_projects/proyecto_de_vivienda.jpg' %}" class="d-block w-100"
+                    alt="{% trans 'Housing projects' %}">
+                <div class="carousel-caption d-none d-md-block">
+                    <div class="highlight-bg">
+                        <h5>{% trans 'Housing Project' %}</h5>
+                        <p>{% trans 'Showcasing families in safe and comfortable homes, highlighting the importance of housing projects that ensure a stable and happy environment for family development.' %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselCaptions" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">{% trans 'Previous' %}</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselCaptions" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">{% trans 'Next' %}</span>
+        </button>
+    </div>
+</section>

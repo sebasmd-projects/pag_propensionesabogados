@@ -38,7 +38,10 @@ class ModalBannerModelAdmin(admin.ModelAdmin):
     fieldsets = (
         ('ES', {
             'fields': (
-                'title', 'description', 'link', 'image_file'
+                'title',
+                'description',
+                'link',
+                'image_file'
             )
         }),
         ('EN', {

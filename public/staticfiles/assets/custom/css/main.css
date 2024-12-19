@@ -1705,3 +1705,16 @@ section,
 .contact .contact-email-form button[type="submit"]:hover {
   background: color-mix(in srgb, var(--accent-color), transparent 20%);
 }
+
+
+/*--------------------------------------------------------------
+# Social Proyects Section
+--------------------------------------------------------------*/
+
+.highlight-bg {
+  background-color: rgba(0, 0, 0, 0.6); /* Fondo negro con transparencia */
+  color: white; /* Texto blanco para contraste */
+  padding: 15px; /* Espaciado interno */
+  border-radius: 10px; /* Bordes redondeados para un diseño más atractivo */
+  display: inline-block; /* Ajusta al contenido */
+}
