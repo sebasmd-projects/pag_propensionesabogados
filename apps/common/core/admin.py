@@ -46,7 +46,9 @@ class ModalBannerModelAdmin(admin.ModelAdmin):
         }),
         ('EN', {
             'fields': (
-                'title_en', 'link_en', 'image_file_en'
+                'title_en',
+                'link_en',
+                'image_file_en'
             )
         }),
         ('Important', {

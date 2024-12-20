@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-18 22:31-0500\n"
-"PO-Revision-Date: 2024-12-18 22:46-0500\n"
+"POT-Creation-Date: 2024-12-19 19:53-0500\n"
+"PO-Revision-Date: 2024-12-19 19:53-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -513,11 +513,11 @@ msgstr ""
 "de vivienda que garantizan un entorno estable y feliz para el desarrollo "
 "familiar."
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:126
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:127
 msgid "Previous"
 msgstr "Anterior"
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:130
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:131
 msgid "Next"
 msgstr "Siguiente"
 
@@ -551,16 +551,21 @@ msgid "Experience"
 msgstr "Experiencia"
 
 #: .\apps\common\core\templates\pages\sections\6_about_section.html:32
+#| msgid ""
+#| " In Colombia, we specialize in Denied Pensions,\n"
+#| "                Extracontractual Liability, Emergency Conciliations, Business\n"
+#| "                Consulting and Field Investigation, Civil Law, Criminal Law,\n"
+#| "                Family Law and Labor Law. "
 msgid ""
-" In Colombia, we specialize in Denied Pensions,\n"
+" In Colombia, we specialize in Denied Pensions, Insolvency,\n"
 "                Extracontractual Liability, Emergency Conciliations, Business\n"
 "                Consulting and Field Investigation, Civil Law, Criminal Law,\n"
 "                Family Law and Labor Law. "
 msgstr ""
-"En Colombia, nos especializamos en Pensiones Negadas, Responsabilidad "
-"Extracontractual, Conciliaciones de Emergencia, Asesoría Empresarial e "
-"Investigación de Campo, Derecho Civil, Derecho Penal, Derecho de Familia y "
-"Derecho Laboral."
+"En Colombia, nos especializamos en Pensiones Negadas, Insolvencia, "
+"Responsabilidad Extracontractual, Conciliaciones de Emergencia, Asesoría "
+"Empresarial e Investigación de Campo, Derecho Civil, Derecho Penal, Derecho "
+"de Familia y Derecho Laboral."
 
 #: .\apps\common\core\templates\pages\sections\6_about_section.html:45
 msgid "International"
