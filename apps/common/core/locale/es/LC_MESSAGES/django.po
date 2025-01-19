@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-19 20:08-0500\n"
-"PO-Revision-Date: 2025-01-10 10:45-0500\n"
+"POT-Creation-Date: 2025-01-19 16:45-0500\n"
+"PO-Revision-Date: 2025-01-19 16:46-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -551,11 +551,6 @@ msgid "Experience"
 msgstr "Experiencia"
 
 #: .\apps\common\core\templates\pages\sections\6_about_section.html:32
-#| msgid ""
-#| " In Colombia, we specialize in Denied Pensions, Insolvency,\n"
-#| "                Extracontractual Liability, Emergency Conciliations, Business\n"
-#| "                Consulting and Field Investigation, Civil Law, Criminal Law,\n"
-#| "                Family Law and Labor Law. "
 msgid ""
 " In Colombia, we specialize in Denied Pensions, Economic Insolvency,\n"
 "                Extracontractual Liability, Emergency Conciliations, Business\n"
@@ -586,7 +581,7 @@ msgid "Expertise in each area and human quality."
 msgstr "Experiencia Jurídica con Calidad Humana"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:7
-#: .\apps\common\core\templates\partials\footer.html:28
+#: .\apps\common\core\templates\partials\footer.html:47
 #: .\apps\common\core\templates\partials\header.html:111
 msgid "Services"
 msgstr "Servicios"
@@ -645,6 +640,7 @@ msgstr ""
 "Cada servicio puede contratarse de forma individual, adaptado específicamente para satisfacer sus necesidades y objetivos con precisión y excelencia."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:61
+#: .\apps\common\core\templates\partials\footer.html:12
 msgid "Denied Pensions"
 msgstr "Pensiones negadas"
 
@@ -750,6 +746,7 @@ msgstr ""
 "custodia y pensión alimenticia."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:225
+#: .\apps\common\core\templates\partials\footer.html:24
 msgid "Labor Law"
 msgstr "Derecho Laboral"
 
@@ -763,6 +760,7 @@ msgstr ""
 "conflictos laborales y derechos laborales."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:245
+#: .\apps\common\core\templates\partials\footer.html:16
 msgid "Economic Insolvency"
 msgstr "Insolvencia Económica"
 
@@ -889,57 +887,59 @@ msgstr "Cerrar"
 msgid "View more"
 msgstr "Ver más"
 
-#: .\apps\common\core\templates\partials\footer.html:11
-msgid ""
-" Specialists in negative pensions and historical asset\n"
-"          management. We recover your pension rights and offer strategic\n"
-"          solutions for the legal administration of historical assets. More than\n"
-"          10 years of experience support you. "
-msgstr ""
-"Especialistas en pensiones negadas y gestión de activos históricos. "
-"Recuperamos tus derechos pensoniales y ofrecemos soluciones estratégicas "
-"para la gestión legal de activos históricos. Más de 10 años de experiencia "
-"te respaldan."
+#: .\apps\common\core\templates\partials\footer.html:20
+#| msgid "Emergency Conciliations"
+msgid "Conciliations"
+msgstr "Conciliaciones"
 
-#: .\apps\common\core\templates\partials\footer.html:24
+#: .\apps\common\core\templates\partials\footer.html:28
+msgid "Corporate Training"
+msgstr "Capacitación Empresarial"
+
+#: .\apps\common\core\templates\partials\footer.html:32
+#| msgid "International"
+msgid "International Law"
+msgstr "Derecho Internacional"
+
+#: .\apps\common\core\templates\partials\footer.html:43
 msgid "Useful Links"
 msgstr "Enlaces útiles"
 
-#: .\apps\common\core\templates\partials\footer.html:26
+#: .\apps\common\core\templates\partials\footer.html:45
 #: .\apps\common\core\templates\partials\header.html:41
 msgid "Home"
 msgstr "Inicio"
 
-#: .\apps\common\core\templates\partials\footer.html:27
+#: .\apps\common\core\templates\partials\footer.html:46
 msgid "About us"
 msgstr "Conócenos "
 
-#: .\apps\common\core\templates\partials\footer.html:29
+#: .\apps\common\core\templates\partials\footer.html:48
 msgid "Terms of service"
 msgstr "Términos de servicio"
 
-#: .\apps\common\core\templates\partials\footer.html:30
+#: .\apps\common\core\templates\partials\footer.html:49
 msgid "Privacy policy"
 msgstr "Política de privacidad"
 
-#: .\apps\common\core\templates\partials\footer.html:35
+#: .\apps\common\core\templates\partials\footer.html:54
 msgid "Contact Us"
 msgstr "Contáctanos "
 
-#: .\apps\common\core\templates\partials\footer.html:38
+#: .\apps\common\core\templates\partials\footer.html:57
 msgid "Phone:"
 msgstr "Celular:"
 
-#: .\apps\common\core\templates\partials\footer.html:41
-#: .\apps\common\core\templates\partials\footer.html:45
+#: .\apps\common\core\templates\partials\footer.html:60
+#: .\apps\common\core\templates\partials\footer.html:64
 msgid "Email:"
 msgstr "Correo:"
 
-#: .\apps\common\core\templates\partials\footer.html:56
+#: .\apps\common\core\templates\partials\footer.html:75
 msgid "All Rights Reserved"
 msgstr "Todos los derechos reservados"
 
-#: .\apps\common\core\templates\partials\footer.html:59
+#: .\apps\common\core\templates\partials\footer.html:78
 msgid "Designed by"
 msgstr "Diseñado por"
 
@@ -992,6 +992,17 @@ msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."
+
+#~ msgid ""
+#~ " Specialists in negative pensions and historical asset\n"
+#~ "          management. We recover your pension rights and offer strategic\n"
+#~ "          solutions for the legal administration of historical assets. More than\n"
+#~ "          10 years of experience support you. "
+#~ msgstr ""
+#~ "Especialistas en pensiones negadas y gestión de activos históricos. "
+#~ "Recuperamos tus derechos pensoniales y ofrecemos soluciones estratégicas "
+#~ "para la gestión legal de activos históricos. Más de 10 años de experiencia "
+#~ "te respaldan."
 
 #~ msgid ""
 #~ "Our firm offers a comprehensive set of specialized\n"
