@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-05 23:49-0500\n"
-"PO-Revision-Date: 2025-02-05 23:50-0500\n"
+"POT-Creation-Date: 2025-02-07 11:57-0500\n"
+"PO-Revision-Date: 2025-02-07 12:10-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -423,10 +423,9 @@ msgstr "Empresarios, Emprendedores y Comerciantes"
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:58
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:61
-#, fuzzy
 #| msgid "Civil Law"
 msgid "Civil Labor Law"
-msgstr "Derecho Civil"
+msgstr "Derecho Civil y Laboral"
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:71
 msgid "Previous"
@@ -860,8 +859,9 @@ msgid "Born with a social sense"
 msgstr "Nacimos con Sentido Social"
 
 #: .\apps\common\core\templates\partials\header.html:83
-msgid "Social Projects"
-msgstr "Proyectos Sociales"
+#| msgid "Corporate Social Responsibility"
+msgid "Social Responsibility"
+msgstr "Responsabilidad Social"
 
 #: .\apps\common\core\templates\partials\header.html:101
 msgid "Expertise in each area"
@@ -895,6 +895,9 @@ msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."
+
+#~ msgid "Social Projects"
+#~ msgstr "Proyectos Sociales"
 
 #~ msgid "Public transportation"
 #~ msgstr "Transporte público"
