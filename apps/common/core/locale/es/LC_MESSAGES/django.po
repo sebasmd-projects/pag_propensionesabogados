@@ -379,9 +379,9 @@ msgstr ""
 "necesidades corporativas de nuestros clientes."
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:5
-msgid "Insolvency, Denied Pensions, Civil Labor Law and Business Training"
+msgid "Economic Insolvency, Denied Pensions, Civil Labor Law and Business Training"
 msgstr ""
-"Insolvencia, Pensiones Negadas, Capacitación Empresarial y Derecho Laboral y"
+"Insolvencia Economica, Pensiones Negadas, Capacitación Empresarial y Derecho Laboral y"
 " Civil"
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:25
