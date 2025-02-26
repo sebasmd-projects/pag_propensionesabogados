@@ -81,7 +81,34 @@ class IPBlockedModel(TimeStampedModel):
         verbose_name_plural = 'Blocked IPs'
 
 
+class WhiteListedIPModel(TimeStampedModel):
+    current_ip = models.CharField(
+        _('current user IP'),
+        max_length=150
+    )
+
+    reason = models.CharField(
+        _("reason"),
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return f"{self.current_ip}"
+
+    class Meta:
+        db_table = 'apps_utils_whitelistedip'
+        verbose_name = 'WhiteListed IP'
+        verbose_name_plural = 'WhiteListed IPs'
+
+
 auditlog.register(
     IPBlockedModel,
+    serialize_data=True
+)
+
+auditlog.register(
+    WhiteListedIPModel,
     serialize_data=True
 )

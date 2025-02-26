@@ -1,3 +1,5 @@
+import importlib.util
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -13,6 +15,12 @@ custom_apps = settings.CUSTOM_APPS
 utils_path = settings.UTILS_PATH
 
 apps_urls = [path('', include(f'{app}.urls')) for app in custom_apps]
+api_urls = [
+    path('api/v1/', include(f'{app}.api.urls'))
+    for app in custom_apps
+    if importlib.util.find_spec(f'{app}.api') is not None
+]
+
 
 handler400 = h400
 
@@ -33,7 +41,12 @@ admin_urls = [
     path(admin_url, admin.site.urls),
 ]
 
-urlpatterns = admin_urls + apps_urls + third_party_urls
+ckeditor_urls = [
+    path("ckeditor5/", include('django_ckeditor_5.urls')),
+]
+
+urlpatterns = admin_urls + apps_urls + \
+    api_urls + ckeditor_urls + third_party_urls
 
 if settings.DEBUG:
     urlpatterns += static(

@@ -28,7 +28,6 @@ class IndexTemplateView(FormView):
         honeypot_field = form.cleaned_data.get('email_confirm')
 
         if ContactModel.objects.filter(unique_id=unique_id).exists():
-            print('Form has already been sent.')
             form.add_error(None, _("This form has already been sent."))
             return self.form_invalid(form)
 
@@ -66,7 +65,6 @@ class IndexTemplateView(FormView):
         return render(self.request, self.template_name, {'form': None, 'success_message': True})
 
     def form_invalid(self, form):
-        print(form.errors)
         return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):

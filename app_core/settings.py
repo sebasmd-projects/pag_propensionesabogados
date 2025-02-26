@@ -52,6 +52,7 @@ THIRD_PARTY_APPS = [
     'import_export',
     'parler',
     'rosetta',
+    'django_ckeditor_5',
 ]
 
 CUSTOM_APPS = [
@@ -60,7 +61,11 @@ CUSTOM_APPS = [
 
     'apps.project.common.account',
     'apps.project.common.users',
+
+    'apps.project.api.pqrs',
+    'apps.project.api.financial_education',
 ]
+
 
 ALL_CUSTOM_APPS = CUSTOM_APPS
 
@@ -218,6 +223,60 @@ EMAIL_HOST_PASSWORD = os.getenv('DJANGO_EMAIL_HOST_PASSWORD')
 EMAIL_HOST_USER = os.getenv('DJANGO_EMAIL_HOST_USER')
 EMAIL_PORT = int(os.getenv('DJANGO_EMAIL_PORT'))
 
+
+# CKEditor
+customColorPalette = [
+    {
+        'color': 'hsl(4, 90%, 58%)',
+        'label': 'Red'
+    },
+    {
+        'color': 'hsl(340, 82%, 52%)',
+        'label': 'Pink'
+    },
+    {
+        'color': 'hsl(291, 64%, 42%)',
+        'label': 'Purple'
+    },
+    {
+        'color': 'hsl(262, 52%, 47%)',
+        'label': 'Deep Purple'
+    },
+    {
+        'color': 'hsl(231, 48%, 48%)',
+        'label': 'Indigo'
+    },
+    {
+        'color': 'hsl(207, 90%, 54%)',
+        'label': 'Blue'
+    },
+]
+
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'toolbar': [
+            'heading', '|',
+            'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'removeFormat', '|',
+            'bold', 'italic', 'underline', 'strikethrough', 'code', 'link', 'subscript', 'superscript', '|',
+            'bulletedList', 'numberedList', 'todoList', '|',
+            'insertImage', 'mediaEmbed', '|',
+            'outdent', 'indent', '|',
+            'blockQuote', 'insertTable', '|',
+            'sourceEditing',
+        ],
+    },
+    'list': {
+        'properties': {
+            'styles': 'true',
+            'startIndex': 'true',
+            'reversed': 'true',
+        }
+    }
+}
+
+CKEDITOR_5_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+
 # reCaptchav3
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
@@ -243,3 +302,8 @@ else:
         r"^https://[A-Za-z0-9-]+\.propensionesabogados\.com$",
         r"^https://[A-Za-z0-9-]+\.fundacionattlas\.com$"
     ]
+
+
+COMMON_ATTACK_TERMS = [
+    term.strip() for term in os.getenv('COMMON_ATTACK_TERMS').split(',')
+]
