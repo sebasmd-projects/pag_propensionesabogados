@@ -24,8 +24,9 @@ class GeneralAdminModel(ImportExportActionModelAdmin, admin.ModelAdmin):
                     messages.warning(
                         request,
                         _(
-                            f"Maximum allowed: {
-                                self.max_list_per_page} records."
+                            "Maximum allowed: {} records.".format(
+                                self.max_list_per_page
+                            )
                         )
                     )
                     list_per_page_value = self.max_list_per_page
