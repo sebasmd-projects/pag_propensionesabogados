@@ -12,6 +12,10 @@ class ContactModel(TimeStampedModel):
         ATTENDED = 'ATTENDED', _('Attended')
         IN_PROGRESS = 'IN_PROGRESS', _('In progress')
 
+    class PageChoices(models.TextChoices):
+        PROPENSIONES = 'PROPENSIONES', _('Propensiones')
+        ATTLAS = 'ATTLAS', _('Attlas')
+
     unique_id = models.UUIDField(
         default=uuid.uuid4,
         unique=True
@@ -50,6 +54,15 @@ class ContactModel(TimeStampedModel):
         null=True
     )
 
+    from_page = models.CharField(
+        _('from page'),
+        max_length=255,
+        choices=PageChoices.choices,
+        default=PageChoices.PROPENSIONES,
+        blank=True,
+        null=True
+    )
+
     class Meta:
         db_table = 'apps_common_core_contact'
         verbose_name = _('Contact')
@@ -65,7 +78,7 @@ class ModalBannerModel(TimeStampedModel):
         _('title'),
         max_length=255
     )
-    
+
     title_en = models.CharField(
         _('title (English)'),
         max_length=255,
@@ -82,21 +95,21 @@ class ModalBannerModel(TimeStampedModel):
         _('image file'),
         upload_to='modal_banners/'
     )
-    
+
     image_file_en = models.ImageField(
         _('image file (English)'),
         upload_to='modal_banners/',
         blank=True,
         null=True
     )
-    
+
     link = models.URLField(
         _('link'),
         max_length=255,
         blank=True,
         null=True
     )
-    
+
     link_en = models.URLField(
         _('link (English)'),
         max_length=255,

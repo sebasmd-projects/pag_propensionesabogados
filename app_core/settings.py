@@ -44,6 +44,8 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "corsheaders",
+    'rest_framework',
     'auditlog',
     'honeypot',
     'django_recaptcha',
@@ -109,6 +111,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
@@ -222,3 +225,14 @@ RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 HONEYPOT_FIELD_NAME = os.getenv('HONEYPOT_FIELD_NAME')
 
 IP_BLOCKED_TIME_IN_MINUTES = int(os.getenv('IP_BLOCKED_TIME_IN_MINUTES'))
+
+# Django Rest Framework
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://\w+\.propensionesabogados\.com$",
+]

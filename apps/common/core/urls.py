@@ -1,7 +1,9 @@
-from django.urls import path
+from django.urls import path, include
 
 from apps.common.core.views import (IndexTemplateView, PrivacyPolicyView,
                                     TermsAndConditionsView)
+
+from .api import urls as api_urls
 
 app_name = 'core'
 
@@ -20,5 +22,9 @@ urlpatterns = [
         'privacy-policy/',
         PrivacyPolicyView.as_view(),
         name='privacy_policy'
+    ),
+    path(
+        'api/v1/',
+        include(api_urls.urlpatterns)
     ),
 ]
