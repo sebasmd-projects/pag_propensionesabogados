@@ -8,7 +8,7 @@ class ConctactModelSerializer(ModelSerializer):
         model = ContactModel
         exclude = [
             'created',
-            'modified',
+            'updated',
             'unique_id',
             'state'
         ]
