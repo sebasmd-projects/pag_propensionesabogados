@@ -229,10 +229,17 @@ IP_BLOCKED_TIME_IN_MINUTES = int(os.getenv('IP_BLOCKED_TIME_IN_MINUTES'))
 # Django Rest Framework
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.AllowAny'
     ]
 }
 
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://\w+\.propensionesabogados\.com$",
-]
+if DEBUG:
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        'http://localhost:3000',
+        'http://0.0.0.0:3000',
+    ]
+else:
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"^https://[A-Za-z0-9-]+\.propensionesabogados\.com$",
+        r"^https://[A-Za-z0-9-]+\.fundacionattlas\.com$"
+    ]

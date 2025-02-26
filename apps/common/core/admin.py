@@ -10,15 +10,27 @@ class ContactModelAdmin(admin.ModelAdmin):
         'subject', 'message', 'created',
         'state'
     )
+    list_display_links = ('name', 'last_name', 'email')
     search_fields = ('name', 'last_name', 'email', 'subject', 'message')
     list_filter = ('is_active', 'state')
     ordering = ('-created',)
     readonly_fields = ('created', 'updated')
     fieldsets = (
-        (None, {
-            'fields': ('name', 'last_name', 'email', 'subject', 'message', 'state')
+        ('Otros', {
+            'fields': ('language', 'from_page'),
+            'classes': ('collapse',)
         }),
-        ('Important dates', {
+        (None, {
+            'fields': (
+                'name',
+                'last_name',
+                'email',
+                'subject',
+                'message',
+                'state'
+            )
+        }),
+        ('Fechas', {
             'fields': ('created', 'updated'),
             'classes': ('collapse',)
         }),
