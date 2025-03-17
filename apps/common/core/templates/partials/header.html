@@ -1,103 +1,66 @@
 {% load static i18n %}
 
 <header id="header" class="header d-flex align-items-center fixed-top">
-  <div
-    class="container-fluid position-relative d-flex align-items-center justify-content-between"
-  >
-    <a
-      href="{% url 'core:index' %}"
-      class="logo d-flex align-items-center me-auto me-xl-0"
-    >
-      <img
-        src="{% static 'assets/imgs/favicon/favicon-horizontal.png' %}"
-        alt=""
-      />
+  <div class="container-fluid position-relative d-flex align-items-center justify-content-between">
+    <a href="{% url 'core:index' %}" class="logo d-flex align-items-center me-auto me-xl-0">
+      <img src="{% static 'assets/imgs/favicon/favicon-horizontal.png' %}" alt="" />
     </a>
 
     <nav id="navmenu" class="navmenu">
       <ul>
         <li class="dropdown">
-          <a href="#"
-            ><span><i class="bi bi-translate mx-1"></i></span>
-            <i class="bi bi-chevron-down toggle-dropdown"></i
-          ></a>
+          <a href="#"><span><i class="bi bi-translate mx-1"></i></span>
+            <i class="bi bi-chevron-down toggle-dropdown"></i></a>
           <ul>
             {% for lang in LANGUAGES %}
             <li>
-              <a
-                class="dropdown-item text-capitalize"
-                href="{% url 'set_language' %}?lang={{ lang.0 }}"
-                >{{ lang.1 }}</a
-              >
+              <a class="dropdown-item text-capitalize" href="{% url 'set_language' %}?lang={{ lang.0 }}">
+                {{ lang.1 }}
+              </a>
             </li>
             {% endfor %}
           </ul>
         </li>
         <li>
-          <a
-            href="{% url 'core:index' %}#hero"
-            aria-label="Go to hero section"
-            class="active"
-            >{% trans 'Home' %}</a
-          >
+          <a href="{% url 'core:index' %}#hero" aria-label="Go to hero section" class="active">{% trans 'Home' %}</a>
         </li>
         <li class="dropdown">
-          <a href="#"
-            ><span>{% trans 'About' %}</span>
-            <i class="bi bi-chevron-down toggle-dropdown"></i
-          ></a>
+          <a href="#"><span>{% trans 'About' %}</span>
+            <i class="bi bi-chevron-down toggle-dropdown"></i></a>
           <ul>
 
             <li>
-              <a
-                href="{% url 'core:index' %}#principles"
-                aria-label="Go to about principles section"
-              >
+              <a href="{% url 'core:index' %}#principles" aria-label="Go to about principles section">
                 {% trans 'Principles' %}
               </a>
             </li>
 
             <li>
-              <a
-                href="{% url 'core:index' %}#ceo"
-                aria-label="Go to about C.E.O section"
-              >
+              <a href="{% url 'core:index' %}#ceo" aria-label="Go to about C.E.O section">
                 {% trans 'Our C.E.O' %}
               </a>
             </li>
 
             <li>
-              <a
-                href="{% url 'core:index' %}#social_sense"
-                aria-label="Go to about social sense section"
-              >
+              <a href="{% url 'core:index' %}#social_sense" aria-label="Go to about social sense section">
                 {% trans 'Born with a social sense' %}
               </a>
             </li>
 
             <li>
-              <a
-                href="{% url 'core:index' %}#about"
-                aria-label="Go to about section"
-              >
+              <a href="{% url 'core:index' %}#about" aria-label="Go to about section">
                 {% trans 'About' %}
               </a>
             </li>
 
             <li>
-              <a
-                href="{% url 'core:index' %}#all_team"
-                aria-label="Go to all team section"
-              >
+              <a href="{% url 'core:index' %}#all_team" aria-label="Go to all team section">
                 {% trans 'Expertise in each area' %}
               </a>
             </li>
 
             <li>
-              <a
-                href="{% url 'core:index' %}#social_responsibility"
-                aria-label="Social Responsibility"
-              >
+              <a href="{% url 'core:index' %}#social_responsibility" aria-label="Social Responsibility">
                 {% trans 'Social Responsibility' %}
               </a>
             </li>
@@ -105,35 +68,23 @@
         </li>
         <li></li>
         <li>
-          <a
-            href="{% url 'core:index' %}#services"
-            aria-label="Go to services section"
-            >{% trans 'Services' %}</a
-          >
+          <a href="{% url 'core:index' %}#services" aria-label="Go to services section">{% trans 'Services' %}</a>
         </li>
         <li>
-          <a href="{% url 'core:index' %}#team" aria-label="Go to team section"
-            >{% trans 'Team' %}</a
-          >
+          <a href="{% url 'core:index' %}#team" aria-label="Go to team section">{% trans 'Team' %}</a>
         </li>
         <li>
-          <a
-            href="{% url 'core:index' %}#contact"
-            aria-label="Go to contact section"
-            >{% trans 'Contact' %}</a
-          >
+          <a href="{% url 'core:index' %}#contact" aria-label="Go to contact section">{% trans 'Contact' %}</a>
         </li>
-        
+
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
 
-    <a
-      class="btn-getstarted"
-      href="https://attlasconciliacion.propensionesabogados.com/"
-      target="_blank"
-    >
-      ATTLAS
+    <a class="btn " href="https://attlasconciliacion.propensionesabogados.com/" target="_blank"
+      style="background-color: #fff;">
+      <img src="{% static 'assets/imgs/hero/attlas-horizontal-logo.png' %}" alt="" class="img-fluid"
+        style="max-height:40px;">
     </a>
   </div>
 </header>

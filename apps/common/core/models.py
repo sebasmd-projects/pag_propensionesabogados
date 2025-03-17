@@ -124,7 +124,7 @@ class ModalBannerModel(TimeStampedModel):
             ).update(
                 is_active=False
             )
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     class Meta:
         db_table = 'apps_common_core_modal_banner'

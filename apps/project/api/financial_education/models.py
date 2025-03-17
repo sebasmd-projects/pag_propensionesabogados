@@ -60,13 +60,17 @@ class FinancialEducationModel(TimeStampedModel):
         ordering = ['default_order', 'created']
 
     def save(self, *args, **kwargs):
-        if self.category:
-            self.category = self.category.lower().strip()
+        for field in ['category', 'category_en']:
+            if value := getattr(self, field):
+                categories = [cat.strip().replace(' ', '_') for cat in value.split(',')]
+                setattr(self, field, ','.join(categories))
+                
 
-        if self.category_en:
-            self.category_en = self.category_en.lower().strip()
+        for field in ['description', 'description_en']:
+            if getattr(self, field) in ["<p>&nbsp;</p>", "\u003Cp\u003E&nbsp;\u003C/p\u003E"]:
+                setattr(self, field, None)
 
-        return super().save(self, *args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.video_url

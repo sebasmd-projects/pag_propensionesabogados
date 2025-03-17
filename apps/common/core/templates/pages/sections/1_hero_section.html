@@ -2,43 +2,22 @@
 
 <section id="hero" class="hero section dark-background">
   <video autoplay muted loop playsinline class="hero-video">
-    <source
-      src="{% static 'assets/video/hero-bg-video.mp4' %}"
-      type="video/mp4"
-    />
+    <source src="{% static 'assets/video/hero-bg-video.mp4' %}" type="video/mp4" />
     {% trans 'Your browser does not support the video tag.' %}
   </video>
 
-  <div class="container">
+  <div class="containerHero">
     <div class="row">
-      <div class="col-lg-10">
-        <h1 data-aos="fade-right" data-aos-delay="100">
+      <div class="col-lg-6">
+        <h1 data-aos="fade-right" data-aos-delay="10">
           {% trans 'Legal Expertise with Human Quality' %}
         </h1>
-        <h2 data-aos="fade-right" data-aos-delay="200" style="color: #FED100;">
+        <h2 data-aos="fade-right" data-aos-delay="20" style="color: #FED100;">
           {% trans 'Professionals in Law and Social Sciences at National and International Level' %}
         </h2>
       </div>
-      <div class="col-lg-5 mt-5 text-center" data-aos="fade-up" data-aos-delay="300">
-        <div class="row align-items-center">
-          <div class="col-6">
-            <a class="btn " href="https://attlasconciliacion.propensionesabogados.com/" target="_blank" style="background-color: #fff;">
-              <img src="{% static 'assets/imgs/hero/attlas-horizontal-logo.png' %}" alt="" class="img-fluid" style="max-height:90px;">
-            </a>
-          </div>
-
-          <div class="col-6">
-            <div
-              class="btn btn-success btn-lg"
-              data-bs-toggle="modal"
-              data-bs-target="#whatsappModal">
-              {% trans 'Contact Us Now' %} <i class="bi bi-whatsapp mx-1 py-5"></i>
-            </div>
-          </div>
-
-          </div>
-        </div>
-      </div>
+      <div class="col-4"></div>
     </div>
+  </div>
   </div>
 </section>

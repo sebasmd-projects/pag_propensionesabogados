@@ -1,0 +1,48 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-03-17 15:03-0500\n"
+"PO-Revision-Date: 2025-03-17 15:07-0500\n"
+"Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Translated-Using: django-rosetta 0.10.0\n"
+
+#: .\apps\project\api\faq\models.py:10 .\apps\project\api\faq\models.py:30
+msgid "question"
+msgstr "pregunta"
+
+#: .\apps\project\api\faq\models.py:15 .\apps\project\api\faq\models.py:40
+msgid "answer"
+msgstr "respuesta"
+
+#: .\apps\project\api\faq\models.py:20
+msgid "Main FAQ"
+msgstr "Preguntas frecuentes principales"
+
+#: .\apps\project\api\faq\models.py:21
+msgid "Main FAQs"
+msgstr "Preguntas frecuentes principales"
+
+#: .\apps\project\api\faq\models.py:35
+msgid "short answer"
+msgstr "respuesta corta"
+
+#: .\apps\project\api\faq\models.py:45
+msgid "Other FAQ"
+msgstr "Otras preguntas frecuentes"
+
+#: .\apps\project\api\faq\models.py:46
+msgid "Other FAQs"
+msgstr "Otras preguntas frecuentes"

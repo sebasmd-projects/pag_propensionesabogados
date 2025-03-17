@@ -64,6 +64,7 @@ CUSTOM_APPS = [
 
     'apps.project.api.pqrs',
     'apps.project.api.financial_education',
+    'apps.project.api.faq',
 ]
 
 

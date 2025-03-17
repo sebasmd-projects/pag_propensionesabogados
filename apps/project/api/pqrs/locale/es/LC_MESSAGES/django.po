@@ -1,0 +1,136 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-03-17 15:03-0500\n"
+"PO-Revision-Date: 2025-03-17 15:11-0500\n"
+"Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Translated-Using: django-rosetta 0.10.0\n"
+
+#: .\apps\project\api\pqrs\models.py:31
+msgid "CC"
+msgstr "CC"
+
+#: .\apps\project\api\pqrs\models.py:32
+msgid "CE"
+msgstr "CE"
+
+#: .\apps\project\api\pqrs\models.py:33
+msgid "PA"
+msgstr "PA"
+
+#: .\apps\project\api\pqrs\models.py:34
+msgid "Other"
+msgstr "Otro"
+
+#: .\apps\project\api\pqrs\models.py:37 .\apps\project\api\pqrs\models.py:46
+msgid "request type"
+msgstr "tipo de petición"
+
+#: .\apps\project\api\pqrs\models.py:55
+msgid "is legal entity"
+msgstr "es entidad legal"
+
+#: .\apps\project\api\pqrs\models.py:60
+msgid "company name"
+msgstr "compañía"
+
+#: .\apps\project\api\pqrs\models.py:67
+msgid "NIT"
+msgstr "NIT"
+
+#: .\apps\project\api\pqrs\models.py:74
+msgid "legal representative"
+msgstr "representante legal"
+
+#: .\apps\project\api\pqrs\models.py:81
+msgid "name"
+msgstr "nombres"
+
+#: .\apps\project\api\pqrs\models.py:86
+msgid "surname"
+msgstr "apellidos"
+
+#: .\apps\project\api\pqrs\models.py:91
+msgid "ID type"
+msgstr "Tipo de identificación"
+
+#: .\apps\project\api\pqrs\models.py:100
+msgid "ID number"
+msgstr "Número de la identificación"
+
+#: .\apps\project\api\pqrs\models.py:105
+msgid "country"
+msgstr "País"
+
+#: .\apps\project\api\pqrs\models.py:110
+msgid "city"
+msgstr "Ciudad"
+
+#: .\apps\project\api\pqrs\models.py:115
+msgid "addres"
+msgstr "Dirección"
+
+#: .\apps\project\api\pqrs\models.py:120
+msgid "email"
+msgstr "Correo"
+
+#: .\apps\project\api\pqrs\models.py:125
+msgid "cell prefix"
+msgstr "Prefijo"
+
+#: .\apps\project\api\pqrs\models.py:130
+msgid "cellphone"
+msgstr "celular"
+
+#: .\apps\project\api\pqrs\models.py:135
+msgid "documents"
+msgstr "documentos"
+
+#: .\apps\project\api\pqrs\models.py:141
+msgid "description"
+msgstr "descripción"
+
+#: .\apps\project\api\pqrs\models.py:145
+msgid "contact methods"
+msgstr "métodos de contacto "
+
+#: .\apps\project\api\pqrs\models.py:152
+msgid "contact email"
+msgstr "correo"
+
+#: .\apps\project\api\pqrs\models.py:159
+msgid "contact cell prefix"
+msgstr "prefijo"
+
+#: .\apps\project\api\pqrs\models.py:166
+msgid "contact cellphone"
+msgstr "celular"
+
+#: .\apps\project\api\pqrs\models.py:173
+msgid "contact phone prefix"
+msgstr "prefijo (teléfono) "
+
+#: .\apps\project\api\pqrs\models.py:180
+msgid "contact phone"
+msgstr "teléfono"
+
+#: .\apps\project\api\pqrs\models.py:187
+msgid "terms accepted"
+msgstr "términos y condiciones"
+
+#: .\apps\project\api\pqrs\models.py:193 .\apps\project\api\pqrs\models.py:194
+msgid "PQRS"
+msgstr "PQRS"

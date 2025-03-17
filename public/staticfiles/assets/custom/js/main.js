@@ -10,7 +10,7 @@
       const isSamePage =
         href.startsWith("#") ||
         new URL(href, window.location.origin).pathname ===
-          window.location.pathname;
+        window.location.pathname;
 
       if (isSamePage) {
         // Evitar el comportamiento por defecto y manejar navegación interna
@@ -168,6 +168,22 @@
         sendMessage();
       }
     });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const whatsappButton = document.getElementById("whatsapp-button");
+
+    function toggleWhatsappText() {
+      if (window.scrollY > 100) {
+        whatsappButton.classList.add("scrolled");
+      } else {
+        whatsappButton.classList.remove("scrolled");
+      }
+    }
+
+    // Escuchar eventos de scroll
+    document.addEventListener("scroll", toggleWhatsappText);
+    window.addEventListener("load", toggleWhatsappText);
   });
 
   /**

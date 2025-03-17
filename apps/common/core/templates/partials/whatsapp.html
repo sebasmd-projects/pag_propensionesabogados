@@ -1,30 +1,17 @@
 {% load i18n %}
 <div class="action-buttons">
-  <div
-    class="whatsapp-button"
-    data-bs-toggle="modal"
-    data-bs-target="#whatsappModal"
-  >
+  <div id="whatsapp-button" class="whatsapp-button" data-bs-toggle="modal" data-bs-target="#whatsappModal">
+    <span id="whatsapp-text">{% trans 'Contact Us Now' %}</span>
     <i class="bi bi-whatsapp"></i>
   </div>
 </div>
 
-<div
-  class="modal fade modal-whatsapp"
-  id="whatsappModal"
-  tabindex="-1"
-  aria-hidden="true"
->
+<div class="modal fade modal-whatsapp" id="whatsappModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="chat-header">
         <span>WhatsApp</span>
-        <button
-          type="button"
-          class="btn-close btn-close-black"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="chat-body">
         <h5>⚖️{% trans 'Ask us your concerns and we can help you.' %}🤝</h5>
@@ -35,12 +22,7 @@
       </div>
       <div class="chat-footer">
         {% trans 'Write your message...' as message_placeholder %}
-        <input
-          type="text"
-          id="messageInput"
-          placeholder="{{message_placeholder}}"
-          class="form-control"
-        />
+        <input type="text" id="messageInput" placeholder="{{message_placeholder}}" class="form-control" />
         <button id="sendMessage">
           <i class="bi bi-send"></i>
         </button>

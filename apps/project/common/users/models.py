@@ -29,7 +29,7 @@ class UserModel(TimeStampedModel, AbstractUser):
         self.last_name = self.last_name.title()
         self.username = self.username.lower()
 
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f"{self.get_full_name()}"

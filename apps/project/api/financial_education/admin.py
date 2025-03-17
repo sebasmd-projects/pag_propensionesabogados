@@ -6,7 +6,7 @@ from .models import FinancialEducationModel
 @admin.register(FinancialEducationModel)
 class FinancialEducationModelAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'video_url', 'created'
+        'default_order', 'id', 'video_url', 'created'
     )
 
     list_display_links = list_display

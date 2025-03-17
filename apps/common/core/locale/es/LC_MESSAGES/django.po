@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-07 11:57-0500\n"
-"PO-Revision-Date: 2025-02-07 12:10-0500\n"
+"POT-Creation-Date: 2025-03-17 15:16-0500\n"
+"PO-Revision-Date: 2025-03-17 15:17-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -51,73 +51,85 @@ msgstr "Atendida"
 msgid "In progress"
 msgstr "En progreso"
 
-#: .\apps\common\core\models.py:21
+#: .\apps\common\core\models.py:16
+msgid "Propensiones"
+msgstr "Propensiones"
+
+#: .\apps\common\core\models.py:17
+msgid "Attlas"
+msgstr "Attlas"
+
+#: .\apps\common\core\models.py:25
 msgid "name"
 msgstr "nombres"
 
-#: .\apps\common\core\models.py:26
+#: .\apps\common\core\models.py:30
 msgid "last name"
 msgstr "apellidos"
 
-#: .\apps\common\core\models.py:31
+#: .\apps\common\core\models.py:35
 msgid "email"
 msgstr "correo"
 
-#: .\apps\common\core\models.py:36
+#: .\apps\common\core\models.py:40
 msgid "subject"
 msgstr "asunto"
 
-#: .\apps\common\core\models.py:41
+#: .\apps\common\core\models.py:45
 msgid "message"
 msgstr "Mensaje"
 
-#: .\apps\common\core\models.py:45
+#: .\apps\common\core\models.py:49
 msgid "state"
 msgstr "estado"
 
-#: .\apps\common\core\models.py:55
+#: .\apps\common\core\models.py:58
+msgid "from page"
+msgstr "desde"
+
+#: .\apps\common\core\models.py:68
 #: .\apps\common\core\templates\pages\sections\12_contact_section.html:6
-#: .\apps\common\core\templates\partials\header.html:123
+#: .\apps\common\core\templates\partials\header.html:77
 msgid "Contact"
 msgstr "Contáctanos"
 
-#: .\apps\common\core\models.py:56
+#: .\apps\common\core\models.py:69
 msgid "Contacts"
 msgstr "Contáctanos"
 
-#: .\apps\common\core\models.py:65
+#: .\apps\common\core\models.py:78
 msgid "title"
 msgstr "título"
 
-#: .\apps\common\core\models.py:70
+#: .\apps\common\core\models.py:83
 msgid "title (English)"
 msgstr "Título (EN)"
 
-#: .\apps\common\core\models.py:77
+#: .\apps\common\core\models.py:90
 msgid "description"
 msgstr "descripción"
 
-#: .\apps\common\core\models.py:82
+#: .\apps\common\core\models.py:95
 msgid "image file"
 msgstr "imagen"
 
-#: .\apps\common\core\models.py:87
+#: .\apps\common\core\models.py:100
 msgid "image file (English)"
 msgstr "imagen (EN)"
 
-#: .\apps\common\core\models.py:94
+#: .\apps\common\core\models.py:107
 msgid "link"
 msgstr "url"
 
-#: .\apps\common\core\models.py:101
+#: .\apps\common\core\models.py:114
 msgid "link (English)"
 msgstr "Enlace (EN)"
 
-#: .\apps\common\core\models.py:118
+#: .\apps\common\core\models.py:131
 msgid "Modal Banner"
 msgstr "Rompe tráfico "
 
-#: .\apps\common\core\models.py:119
+#: .\apps\common\core\models.py:132
 msgid "Modal Banners"
 msgstr "Rompe tráficos "
 
@@ -258,27 +270,23 @@ msgstr "Horario de atención"
 msgid "Monday - Friday"
 msgstr "Lunes - Viernes"
 
-#: .\apps\common\core\templates\pages\sections\1_hero_section.html:9
+#: .\apps\common\core\templates\pages\sections\1_hero_section.html:6
 msgid "Your browser does not support the video tag."
 msgstr "Su navegador no soporta la etiqueta de video."
 
-#: .\apps\common\core\templates\pages\sections\1_hero_section.html:16
+#: .\apps\common\core\templates\pages\sections\1_hero_section.html:13
 msgid "Legal Expertise with Human Quality"
 msgstr "Experticia Jurídica con Calidad Humana "
 
-#: .\apps\common\core\templates\pages\sections\1_hero_section.html:19
+#: .\apps\common\core\templates\pages\sections\1_hero_section.html:16
 msgid ""
 "Professionals in Law and Social Sciences at National and International Level"
 msgstr ""
 "Profesionales en Derecho y Ciencias Sociales a nivel Nacional e "
 "Internacional"
 
-#: .\apps\common\core\templates\pages\sections\1_hero_section.html:35
-msgid "Contact Us Now"
-msgstr "Contáctanos ahora"
-
 #: .\apps\common\core\templates\pages\sections\2_principles_section.html:6
-#: .\apps\common\core\templates\partials\header.html:56
+#: .\apps\common\core\templates\partials\header.html:34
 msgid "Principles"
 msgstr "Principios"
 
@@ -320,6 +328,33 @@ msgstr ""
 "Máximo compromiso para defender los derechos de nuestros clientes, con "
 "pasión y determinación, para alcanzar objetivos y cumplir con nuestros "
 "compromisos."
+
+#: .\apps\common\core\templates\pages\sections\2_principles_section.html:57
+#| msgid ""
+#| "\n"
+#| "          The law firm Propensiones Internacional supports the <a href=\"https://fundacionattlas.org/\"\n"
+#| "            target=\"_blank\" rel=\"opener referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>,\n"
+#| "          which is listed in the UN DESA civil society database, in its project \"Debt Relief Colombia: A New Beginning.\"\n"
+#| "          This initiative aims to strengthen asset recovery and economic stability through legal and financial mechanisms,\n"
+#| "          promoting international cooperation and sustainable development.\n"
+#| "          "
+msgid ""
+"The law firm Propensiones Internacional supports the <a "
+"href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"opener "
+"referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>, "
+"which is listed in the UN DESA civil society database, in its project \"Debt"
+" Relief Colombia: A New Beginning.\" This initiative aims to strengthen "
+"asset recovery and economic stability through legal and financial "
+"mechanisms, promoting international cooperation and sustainable development."
+msgstr ""
+"La firma de abogados Propensiones Internacional respalda a la <a "
+"href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"opener "
+"referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>, "
+"aceptada en la base de datos de la sociedad civil del DESA de la ONU, en su "
+"proyecto \"Alivio de Deuda Colombia: Un Nuevo Comienzo\". Esta iniciativa "
+"busca fortalecer la recuperación patrimonial y la estabilidad económica "
+"mediante mecanismos jurídicos y financieros, promoviendo la cooperación "
+"internacional y el desarrollo sostenible."
 
 #: .\apps\common\core\templates\pages\sections\3_CEO_jorge.html:5
 msgid "C.E.O Jorge Uriel Vega Londoño"
@@ -379,10 +414,11 @@ msgstr ""
 "necesidades corporativas de nuestros clientes."
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:5
-msgid "Economic Insolvency, Denied Pensions, Civil Labor Law and Business Training"
+msgid ""
+"Economic Insolvency, Denied Pensions, Civil Labor Law and Business Training"
 msgstr ""
-"Insolvencia Economica, Pensiones Negadas, Capacitación Empresarial y Derecho Laboral y"
-" Civil"
+"Insolvencia Economica, Pensiones Negadas, Capacitación Empresarial y Derecho"
+" Laboral y Civil"
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:25
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:28
@@ -423,7 +459,6 @@ msgstr "Empresarios, Emprendedores y Comerciantes"
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:58
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:61
-#| msgid "Civil Law"
 msgid "Civil Labor Law"
 msgstr "Derecho Civil y Laboral"
 
@@ -496,7 +531,7 @@ msgstr "Experiencia Jurídica con Calidad Humana"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:7
 #: .\apps\common\core\templates\partials\footer.html:47
-#: .\apps\common\core\templates\partials\header.html:111
+#: .\apps\common\core\templates\partials\header.html:71
 msgid "Services"
 msgstr "Servicios"
 
@@ -808,7 +843,7 @@ msgid "Useful Links"
 msgstr "Enlaces útiles"
 
 #: .\apps\common\core\templates\partials\footer.html:45
-#: .\apps\common\core\templates\partials\header.html:41
+#: .\apps\common\core\templates\partials\header.html:25
 msgid "Home"
 msgstr "Inicio"
 
@@ -845,53 +880,56 @@ msgstr "Todos los derechos reservados"
 msgid "Designed by"
 msgstr "Diseñado por"
 
-#: .\apps\common\core\templates\partials\header.html:46
-#: .\apps\common\core\templates\partials\header.html:92
+#: .\apps\common\core\templates\partials\header.html:28
+#: .\apps\common\core\templates\partials\header.html:52
 msgid "About"
 msgstr "Conócenos"
 
-#: .\apps\common\core\templates\partials\header.html:65
+#: .\apps\common\core\templates\partials\header.html:40
 msgid "Our C.E.O"
 msgstr "Nuestro C.E.O"
 
-#: .\apps\common\core\templates\partials\header.html:74
+#: .\apps\common\core\templates\partials\header.html:46
 msgid "Born with a social sense"
 msgstr "Nacimos con Sentido Social"
 
-#: .\apps\common\core\templates\partials\header.html:83
-#| msgid "Corporate Social Responsibility"
-msgid "Social Responsibility"
-msgstr "Responsabilidad Social"
-
-#: .\apps\common\core\templates\partials\header.html:101
+#: .\apps\common\core\templates\partials\header.html:58
 msgid "Expertise in each area"
 msgstr "Experticia en cada área"
 
-#: .\apps\common\core\templates\partials\header.html:116
+#: .\apps\common\core\templates\partials\header.html:64
+msgid "Social Responsibility"
+msgstr "Responsabilidad Social"
+
+#: .\apps\common\core\templates\partials\header.html:74
 msgid "Team"
 msgstr "Equipo"
 
-#: .\apps\common\core\templates\partials\whatsapp.html:30
+#: .\apps\common\core\templates\partials\whatsapp.html:4
+msgid "Contact Us Now"
+msgstr "Contáctanos ahora"
+
+#: .\apps\common\core\templates\partials\whatsapp.html:17
 msgid "Ask us your concerns and we can help you."
 msgstr "Consúltanos tus inquietudes y te ayudaremos."
 
-#: .\apps\common\core\templates\partials\whatsapp.html:32
+#: .\apps\common\core\templates\partials\whatsapp.html:19
 msgid "Talk to a Lawyer now"
 msgstr "Habla con un abogado ahora"
 
-#: .\apps\common\core\templates\partials\whatsapp.html:37
+#: .\apps\common\core\templates\partials\whatsapp.html:24
 msgid "Write your message..."
 msgstr "Escribe tu mensaje..."
 
-#: .\apps\common\core\views.py:32
+#: .\apps\common\core\views.py:31
 msgid "This form has already been sent."
 msgstr "Este formulario ya ha sido enviado."
 
-#: .\apps\common\core\views.py:48
+#: .\apps\common\core\views.py:47
 msgid "Message Received! | PROPENSIONES ABOGADOS"
 msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 
-#: .\apps\common\core\views.py:50
+#: .\apps\common\core\views.py:49
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."
