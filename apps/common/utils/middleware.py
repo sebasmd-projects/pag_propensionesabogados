@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 class RedirectWWWMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
+
     def __call__(self, request):
         host = request.get_host()
         if host.startswith('www.'):
@@ -50,6 +51,8 @@ class DetectSuspiciousRequestMiddleware:
         ).first()
 
         if blocked_entry:
+            logger.warning(
+                f"Blocked IP {client_ip} attempted access. Returning 403.")
             return render(
                 request,
                 template_name,
@@ -64,4 +67,10 @@ class DetectSuspiciousRequestMiddleware:
             )
 
         response = self.get_response(request)
+
+        if response.status_code > 400 and response.status_code < 500:
+            logger.warning(
+                f"Error {response.status_code} encountered for IP: {client_ip}"
+            )
+
         return response
