@@ -155,8 +155,8 @@ class HttpRequestAttakView(View):
             blocked_entry.session_info['timestamp'] = timezone.now().isoformat()
 
             # Calculate block time
-            if attempt_count > 3:
-                block_time = self.time_in_minutes * 10 * attempt_count
+            if attempt_count > 2:
+                block_time = self.time_in_minutes * 3600 * attempt_count
             else:
                 block_time = self.time_in_minutes
 
