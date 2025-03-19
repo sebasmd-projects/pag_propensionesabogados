@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-18 20:27-0500\n"
-"PO-Revision-Date: 2025-03-19 10:15-0500\n"
+"POT-Creation-Date: 2025-03-19 12:23-0500\n"
+"PO-Revision-Date: 2025-03-19 12:24-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -89,7 +89,7 @@ msgstr "desde"
 
 #: .\apps\common\core\models.py:68
 #: .\apps\common\core\templates\pages\sections\12_contact_section.html:6
-#: .\apps\common\core\templates\partials\header.html:80
+#: .\apps\common\core\templates\partials\header.html:82
 msgid "Contact"
 msgstr "Contáctanos"
 
@@ -195,23 +195,23 @@ msgid ""
 msgstr ""
 "Si no esperabas este correo o fue enviado por error, por favor ignóralo. "
 
-#: .\apps\common\core\templates\pages\documents.html:28
+#: .\apps\common\core\templates\pages\documents.html:29
 msgid "Required Documents"
 msgstr "Documentos requeridos"
 
-#: .\apps\common\core\templates\pages\documents.html:32
+#: .\apps\common\core\templates\pages\documents.html:33
 msgid "Please have the following documents ready for submission."
 msgstr "Tenga los siguientes documentos listos para enviar."
 
-#: .\apps\common\core\templates\pages\documents.html:39
+#: .\apps\common\core\templates\pages\documents.html:40
 msgid "Document: Broad and Sufficient Special Power"
 msgstr "Documento: Poder Especial Amplio y Suficiente"
 
-#: .\apps\common\core\templates\pages\documents.html:54
+#: .\apps\common\core\templates\pages\documents.html:55
 msgid "Document: Service Provision Contract"
 msgstr "Documento: Contrato de Prestación de Servicio"
 
-#: .\apps\common\core\templates\pages\documents.html:69
+#: .\apps\common\core\templates\pages\documents.html:70
 msgid "Document: Direct Application Submission"
 msgstr "Documento: Presentación Directa de la Solicitud"
 
@@ -348,25 +348,6 @@ msgstr ""
 "Máximo compromiso para defender los derechos de nuestros clientes, con "
 "pasión y determinación, para alcanzar objetivos y cumplir con nuestros "
 "compromisos."
-
-#: .\apps\common\core\templates\pages\sections\2_principles_section.html:57
-msgid ""
-"The law firm Propensiones Internacional supports the <a "
-"href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"opener "
-"referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>, "
-"which is listed in the UN DESA civil society database, in its project \"Debt"
-" Relief Colombia: A New Beginning.\" This initiative aims to strengthen "
-"asset recovery and economic stability through legal and financial "
-"mechanisms, promoting international cooperation and sustainable development."
-msgstr ""
-"La firma de abogados Propensiones Internacional respalda a la <a "
-"href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"opener "
-"referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>, "
-"aceptada en la base de datos de la sociedad civil del DESA de la ONU, en su "
-"proyecto \"Alivio de Deuda Colombia: Un Nuevo Comienzo\". Esta iniciativa "
-"busca fortalecer la recuperación patrimonial y la estabilidad económica "
-"mediante mecanismos jurídicos y financieros, promoviendo la cooperación "
-"internacional y el desarrollo sostenible."
 
 #: .\apps\common\core\templates\pages\sections\3_CEO_jorge.html:5
 msgid "C.E.O Jorge Uriel Vega Londoño"
@@ -829,6 +810,45 @@ msgstr ""
 "Tu contribución con nosotros tiene un impacto directo en crear un futuro "
 "mejor para estas mascotas necesitadas."
 
+#: .\apps\common\core\templates\pages\sections\onu_section.html:14
+#| msgid ""
+#| "The law firm Propensiones Internacional supports the <a "
+#| "href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"opener "
+#| "referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>, "
+#| "which is listed in the UN DESA civil society database, in its project \"Debt"
+#| " Relief Colombia: A New Beginning.\" This initiative aims to strengthen "
+#| "asset recovery and economic stability through legal and financial "
+#| "mechanisms, promoting international cooperation and sustainable development."
+msgid ""
+"The law firm Propensiones Internacional supports the <a "
+"href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"opener "
+"referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>, "
+"REGISTERED in the database of the United Nations Department of Economic and "
+"Social Affairs (UN DESA - ONU), within the framework of its project "
+"‘Colombia Debt Relief: A New Beginning’."
+msgstr ""
+"La firma de abogados Propensiones Internacional respalda a la <a "
+"href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"opener "
+"referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>, "
+"INSCRITA en la base de datos de United Nations Department of Economic and "
+"Social Affairs (UN DESA - ONU), en el marco de su proyecto ‘Alivio de Deuda "
+"Colombia: Un Nuevo Comienzo’."
+
+#: .\apps\common\core\templates\pages\sections\onu_section.html:24
+msgid ""
+"\n"
+"                    This initiative seeks to strengthen asset recovery and economic stability through legal and\n"
+"                    financial\n"
+"                    mechanisms, promoting international cooperation and sustainable development. Its purpose is to\n"
+"                    combat extreme\n"
+"                    poverty and economic vulnerability by providing legal tools for financial rehabilitation, access to\n"
+"                    decent\n"
+"                    opportunities, and the construction of a fair and sustainable social balance.\n"
+"                    "
+msgstr ""
+"\n"
+"Esta iniciativa busca fortalecer la recuperación patrimonial y la estabilidad económica mediante mecanismos jurídicos y financieros, fomentando la cooperación internacional y el desarrollo sostenible. Su propósito es combatir la pobreza extrema y la vulnerabilidad económica, brindando herramientas legales para la rehabilitación financiera, el acceso a oportunidades dignas y la construcción de un equilibrio social justo y sostenible."
+
 #: .\apps\common\core\templates\partials\banner.html:28
 msgid "Close"
 msgstr "Cerrar"
@@ -913,11 +933,11 @@ msgstr "Experticia en cada área"
 msgid "Social Responsibility"
 msgstr "Responsabilidad Social"
 
-#: .\apps\common\core\templates\partials\header.html:74
+#: .\apps\common\core\templates\partials\header.html:75
 msgid "Documents"
 msgstr "Documentos"
 
-#: .\apps\common\core\templates\partials\header.html:77
+#: .\apps\common\core\templates\partials\header.html:79
 msgid "Team"
 msgstr "Equipo"
 
