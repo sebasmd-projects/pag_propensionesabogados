@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-17 15:16-0500\n"
-"PO-Revision-Date: 2025-03-17 15:17-0500\n"
+"POT-Creation-Date: 2025-03-18 20:27-0500\n"
+"PO-Revision-Date: 2025-03-19 10:15-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -89,7 +89,7 @@ msgstr "desde"
 
 #: .\apps\common\core\models.py:68
 #: .\apps\common\core\templates\pages\sections\12_contact_section.html:6
-#: .\apps\common\core\templates\partials\header.html:77
+#: .\apps\common\core\templates\partials\header.html:80
 msgid "Contact"
 msgstr "Contáctanos"
 
@@ -194,6 +194,26 @@ msgid ""
 "it."
 msgstr ""
 "Si no esperabas este correo o fue enviado por error, por favor ignóralo. "
+
+#: .\apps\common\core\templates\pages\documents.html:28
+msgid "Required Documents"
+msgstr "Documentos requeridos"
+
+#: .\apps\common\core\templates\pages\documents.html:32
+msgid "Please have the following documents ready for submission."
+msgstr "Tenga los siguientes documentos listos para enviar."
+
+#: .\apps\common\core\templates\pages\documents.html:39
+msgid "Document: Broad and Sufficient Special Power"
+msgstr "Documento: Poder Especial Amplio y Suficiente"
+
+#: .\apps\common\core\templates\pages\documents.html:54
+msgid "Document: Service Provision Contract"
+msgstr "Documento: Contrato de Prestación de Servicio"
+
+#: .\apps\common\core\templates\pages\documents.html:69
+msgid "Document: Direct Application Submission"
+msgstr "Documento: Presentación Directa de la Solicitud"
 
 #: .\apps\common\core\templates\pages\index.html:6
 #: .\apps\common\core\templates\pages\index.html:10
@@ -330,14 +350,6 @@ msgstr ""
 "compromisos."
 
 #: .\apps\common\core\templates\pages\sections\2_principles_section.html:57
-#| msgid ""
-#| "\n"
-#| "          The law firm Propensiones Internacional supports the <a href=\"https://fundacionattlas.org/\"\n"
-#| "            target=\"_blank\" rel=\"opener referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>,\n"
-#| "          which is listed in the UN DESA civil society database, in its project \"Debt Relief Colombia: A New Beginning.\"\n"
-#| "          This initiative aims to strengthen asset recovery and economic stability through legal and financial mechanisms,\n"
-#| "          promoting international cooperation and sustainable development.\n"
-#| "          "
 msgid ""
 "The law firm Propensiones Internacional supports the <a "
 "href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"opener "
@@ -902,6 +914,10 @@ msgid "Social Responsibility"
 msgstr "Responsabilidad Social"
 
 #: .\apps\common\core\templates\partials\header.html:74
+msgid "Documents"
+msgstr "Documentos"
+
+#: .\apps\common\core\templates\partials\header.html:77
 msgid "Team"
 msgstr "Equipo"
 

@@ -1,7 +1,7 @@
 from django.urls import path
 
-from apps.common.core.views import (IndexTemplateView, PrivacyPolicyView,
-                                    TermsAndConditionsView)
+from apps.common.core.views import (DocumentsView, IndexTemplateView,
+                                    PrivacyPolicyView, TermsAndConditionsView)
 
 app_name = 'core'
 
@@ -20,5 +20,10 @@ urlpatterns = [
         'privacy-policy/',
         PrivacyPolicyView.as_view(),
         name='privacy_policy'
+    ),
+    path(
+        'documents/',
+        DocumentsView.as_view(),
+        name='documents'
     )
 ]

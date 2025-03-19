@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-17 15:16-0500\n"
+"POT-Creation-Date: 2025-03-18 20:27-0500\n"
 "PO-Revision-Date: 2025-03-17 15:06-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,15 +55,15 @@ msgstr "No tienes permiso para ver esta página"
 msgid "Security Key"
 msgstr "Clave de seguridad"
 
-#: .\apps\common\utils\middleware.py:58
+#: .\apps\common\utils\middleware.py:61
 msgid "This IP is temporarily blocked due to suspicious activity."
 msgstr "Esta IP está bloqueada temporalmente debido a actividad sospechosa."
 
-#: .\apps\common\utils\middleware.py:59 .\apps\common\utils\views.py:49
+#: .\apps\common\utils\middleware.py:62 .\apps\common\utils\views.py:49
 msgid "Error 403"
 msgstr "Error 403"
 
-#: .\apps\common\utils\middleware.py:60
+#: .\apps\common\utils\middleware.py:63
 msgid "Access denied due to suspicious activity."
 msgstr "Acceso denegado debido a actividad sospechosa."
 

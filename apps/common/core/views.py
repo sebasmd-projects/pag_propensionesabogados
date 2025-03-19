@@ -78,3 +78,6 @@ class TermsAndConditionsView(TemplateView):
     
 class PrivacyPolicyView(TemplateView):
     template_name = "pages/privacy_policy.html"
+
+class DocumentsView(TemplateView):
+    template_name = "pages/documents.html"
