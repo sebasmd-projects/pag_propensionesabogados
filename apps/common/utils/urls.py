@@ -1,3 +1,4 @@
+from django.conf import settings
 import re
 
 from django.http import HttpResponse
@@ -27,17 +28,13 @@ def simplify_regex(pattern):
 
 
 def robots_txt(request):
-    lines = [
-        "User-agent: *",
-        "Disallow: /*",
-        "Disallow: /",
-    ]
+    lines = ["User-agent: *"]
 
-    for pattern in common_attack_paths:
-        if hasattr(pattern, 'pattern'):
-            url_text = simplify_regex(pattern.pattern.describe())
-            if url_text:
-                lines.append(f"Disallow: /{url_text}")
+    attack_terms = sorted(set(settings.COMMON_ATTACK_TERMS))
+    for term in attack_terms:
+        if term:
+            lines.append(f"Disallow: /{term.strip('/')}")
+
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 

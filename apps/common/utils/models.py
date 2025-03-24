@@ -1,8 +1,14 @@
+import hashlib
+
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+
+def hash_value(value):
+    return hashlib.sha256(value.encode('utf-8')).hexdigest()
 
 
 class TimeStampedModel(models.Model):
@@ -11,6 +17,7 @@ class TimeStampedModel(models.Model):
     Args:
         models.Model (class): Base Django model class.
     """
+
     history = AuditlogHistoryField()
 
     language_choices = [

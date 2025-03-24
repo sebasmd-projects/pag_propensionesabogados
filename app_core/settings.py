@@ -16,6 +16,8 @@ logging.basicConfig(
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
+FIELD_ENCRYPTION_KEY = os.getenv('FIELD_ENCRYPTION_KEY')
+
 if os.getenv('DJANGO_DEBUG') == 'True':
     DEBUG = True
 else:
@@ -53,6 +55,7 @@ THIRD_PARTY_APPS = [
     'parler',
     'rosetta',
     'django_ckeditor_5',
+    'encrypted_model_fields',
 ]
 
 CUSTOM_APPS = [
@@ -65,6 +68,7 @@ CUSTOM_APPS = [
     'apps.project.api.pqrs',
     'apps.project.api.financial_education',
     'apps.project.api.faq',
+    'apps.project.api.platform.auth_platform',
 ]
 
 
@@ -301,7 +305,8 @@ if DEBUG:
 else:
     CORS_ALLOWED_ORIGIN_REGEXES = [
         r"^https://[A-Za-z0-9-]+\.propensionesabogados\.com$",
-        r"^https://[A-Za-z0-9-]+\.fundacionattlas\.com$"
+        r"^https://[A-Za-z0-9-]+\.fundacionattlas\.com$",
+        r"^https://[A-Za-z0-9-]+\.fundacionattlas\.org$",
     ]
 
 
