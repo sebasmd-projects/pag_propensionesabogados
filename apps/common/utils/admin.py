@@ -41,10 +41,10 @@ class GeneralAdminModel(ImportExportActionModelAdmin, admin.ModelAdmin):
 
 @admin.register(IPBlockedModel)
 class IPBlockedModelAdmin(GeneralAdminModel):
-    list_display = ('current_ip', 'attempt_count_display', 'reason', 'is_active',
+    list_display = ('current_ip', 'session_info', 'attempt_count_display', 'reason', 'is_active',
                     'blocked_until', 'created', 'updated')
     list_filter = ('is_active', 'reason')
-    search_fields = ('current_ip', 'reason')
+    search_fields = ('current_ip', 'reason', 'session_info')
     readonly_fields = ('pretty_session_info', 'created',
                        'updated', 'attempt_count_display')
     fieldsets = (
