@@ -20,7 +20,9 @@ class AttlasInsolvencyAuthModel(TimeStampedModel):
     )
 
     # Campos cifrados
-    document_number = EncryptedCharField()
+    document_number = EncryptedCharField(
+        max_length=100
+    )
     document_issue_date = EncryptedDateField()
     birth_date = EncryptedDateField()
 
