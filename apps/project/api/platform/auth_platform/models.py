@@ -1,3 +1,5 @@
+# apps/project/api/platform/auth_platform/models.py
+
 import uuid
 
 from auditlog.registry import auditlog
@@ -7,7 +9,6 @@ from encrypted_model_fields.fields import (EncryptedCharField,
                                            EncryptedDateField)
 
 from apps.common.utils.models import TimeStampedModel, hash_value
-
 
 class AttlasInsolvencyAuthModel(TimeStampedModel):
     id = models.UUIDField(

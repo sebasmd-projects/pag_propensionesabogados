@@ -31,6 +31,7 @@ drf-yasg==1.21.7
 et_xmlfile==2.0.0
 idna==3.7
 inflection==0.5.1
+itsdangerous==2.2.0
 mysqlclient==2.2.4
 openpyxl==3.1.2
 packaging==24.1
