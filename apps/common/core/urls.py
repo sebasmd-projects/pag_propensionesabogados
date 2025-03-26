@@ -1,7 +1,8 @@
 from django.urls import path
 
 from apps.common.core.views import (DocumentsView, IndexTemplateView,
-                                    PrivacyPolicyView, TermsAndConditionsView)
+                                    PrivacyPolicyView, TermsAndConditionsView,
+                                    security_txt_view)
 
 app_name = 'core'
 
@@ -25,5 +26,10 @@ urlpatterns = [
         'documents/',
         DocumentsView.as_view(),
         name='documents'
-    )
+    ),
+    path(
+        '.well-known/security.txt',
+        security_txt_view,
+        name='security_txt'
+    ),
 ]

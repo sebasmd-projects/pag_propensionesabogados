@@ -2,6 +2,7 @@ import logging
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
@@ -72,12 +73,24 @@ class IndexTemplateView(FormView):
         banner = ModalBannerModel.objects.filter(is_active=True).first()
         context['modal_banner'] = banner
         return context
-    
+
+
 class TermsAndConditionsView(TemplateView):
     template_name = "pages/terms_and_conditions.html"
-    
+
+
 class PrivacyPolicyView(TemplateView):
     template_name = "pages/privacy_policy.html"
 
+
 class DocumentsView(TemplateView):
     template_name = "pages/documents.html"
+
+
+def security_txt_view(request):
+    content = (
+        "Contact: mailto:info@propensionesabogados.com\n"
+        "Expires: 2030-12-31T05:00:00.000Z\n"
+        "Canonical: https://propensionesabogados.com/.well-known/security.txt\n"
+    )
+    return HttpResponse(content, content_type='text/plain')
