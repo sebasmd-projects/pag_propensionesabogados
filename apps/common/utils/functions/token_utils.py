@@ -11,7 +11,7 @@ def generate_token(user_id: str) -> str:
     return signer.sign(user_id).decode()
 
 
-def verify_token(token: str, max_age=3600) -> str:
+def verify_token(token: str, max_age=10800) -> str:
     try:
         return signer.unsign(token, max_age=max_age).decode()
     except SignatureExpired:

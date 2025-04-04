@@ -4,6 +4,9 @@
 ### Files ###
 database_schema.sql
 users.json
+vulnerabilities.py
+.safety-project.ini
+generar documento/*
 
 ### Django ###
 *.log

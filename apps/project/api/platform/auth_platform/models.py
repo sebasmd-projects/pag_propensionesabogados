@@ -31,15 +31,15 @@ class AttlasInsolvencyAuthModel(TimeStampedModel):
     document_number_hash = models.CharField(max_length=64, db_index=True)
     document_issue_date_hash = models.CharField(max_length=64, db_index=True)
     birth_date_hash = models.CharField(max_length=64, db_index=True)
+    
+    @property
+    def is_authenticated(self):
+        return True
 
     def save(self, *args, **kwargs):
         self.document_number_hash = hash_value(self.document_number)
-
-        self.document_issue_date_hash = hash_value(
-            str(self.document_issue_date)
-        )
-
-        self.birth_date_hash = hash_value(str(self.birth_date))
+        self.document_issue_date_hash = hash_value(self.document_issue_date.strftime('%Y-%m-%d'))
+        self.birth_date_hash = hash_value(self.birth_date.strftime('%Y-%m-%d'))
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -49,6 +49,9 @@ class AttlasInsolvencyAuthModel(TimeStampedModel):
         db_table = 'apps_project_api_platform_attlas_insolvency_auth'
         verbose_name = _('Attlas Insolvency Auth')
         verbose_name_plural = _('Attlas Insolvency Auths')
+        unique_together = (
+            ('document_number_hash', 'document_issue_date_hash', 'birth_date_hash'),
+        )
         ordering = ['-created']
 
 

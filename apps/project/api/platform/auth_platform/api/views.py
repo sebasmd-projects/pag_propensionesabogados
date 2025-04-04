@@ -2,10 +2,11 @@
 
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from apps.common.utils.token_utils import generate_token, verify_token
+
+from apps.common.utils.functions import generate_token, verify_token
 
 from ..models import AttlasInsolvencyAuthModel
 from .serializers import (AttlasInsolvencyAuthRegisterSerializer,
@@ -19,7 +20,6 @@ class TokenInfoAPIView(APIView):
         token = request.headers.get('Authorization', '').replace('Bearer ', '')
         if not token:
             return Response({'detail': 'Token no proporcionado'}, status=400)
-
         try:
             user_id = verify_token(token)
             user = AttlasInsolvencyAuthModel.objects.get(id=user_id)

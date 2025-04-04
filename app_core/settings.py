@@ -73,6 +73,7 @@ CUSTOM_APPS = [
     'apps.project.api.financial_education',
     'apps.project.api.faq',
     'apps.project.api.platform.auth_platform',
+    'apps.project.api.platform.insolvency_form',
 ]
 
 
