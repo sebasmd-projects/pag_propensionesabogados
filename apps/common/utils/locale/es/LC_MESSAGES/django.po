@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-18 20:27-0500\n"
-"PO-Revision-Date: 2025-03-17 15:06-0500\n"
+"POT-Creation-Date: 2025-04-05 20:55-0500\n"
+"PO-Revision-Date: 2025-04-05 21:21-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -67,63 +67,72 @@ msgstr "Error 403"
 msgid "Access denied due to suspicious activity."
 msgstr "Acceso denegado debido a actividad sospechosa."
 
-#: .\apps\common\utils\models.py:17
+#: .\apps\common\utils\models.py:24
 msgid "Spanish"
 msgstr "Español"
 
-#: .\apps\common\utils\models.py:18
+#: .\apps\common\utils\models.py:25
 msgid "English"
 msgstr "Inglés"
 
-#: .\apps\common\utils\models.py:22
+#: .\apps\common\utils\models.py:29
 msgid "language"
 msgstr "Idioma"
 
-#: .\apps\common\utils\models.py:31
+#: .\apps\common\utils\models.py:38
 msgid "created"
 msgstr "f. creación"
 
-#: .\apps\common\utils\models.py:37
+#: .\apps\common\utils\models.py:44
 msgid "updated"
 msgstr "f. actualización"
 
-#: .\apps\common\utils\models.py:43
+#: .\apps\common\utils\models.py:50
 msgid "is active"
 msgstr "está activo"
 
-#: .\apps\common\utils\models.py:48
+#: .\apps\common\utils\models.py:55
 msgid "priority"
 msgstr "prioridad"
 
-#: .\apps\common\utils\models.py:61
+#: .\apps\common\utils\models.py:68
 msgid "Attempts to obtain forbidden urls"
 msgstr "Intentos de obtener URL prohibidas"
 
-#: .\apps\common\utils\models.py:63
+#: .\apps\common\utils\models.py:70
 msgid "Multiple failed security key entry attempts"
 msgstr "Múltiples intentos fallidos de ingreso de clave de seguridad"
 
-#: .\apps\common\utils\models.py:66
+#: .\apps\common\utils\models.py:73
 msgid "is blocked"
 msgstr "está bloqueado"
 
-#: .\apps\common\utils\models.py:67 .\apps\common\utils\models.py:86
+#: .\apps\common\utils\models.py:74 .\apps\common\utils\models.py:93
 msgid "current user IP"
 msgstr "IP del usuario actual"
 
-#: .\apps\common\utils\models.py:69 .\apps\common\utils\models.py:91
+#: .\apps\common\utils\models.py:76 .\apps\common\utils\models.py:98
 msgid "reason"
 msgstr "razón"
 
-#: .\apps\common\utils\models.py:71
+#: .\apps\common\utils\models.py:78
 msgid "blocked until"
 msgstr "bloqueado hasta"
 
-#: .\apps\common\utils\models.py:73
+#: .\apps\common\utils\models.py:80
 msgid "session information"
 msgstr "Información de la sesión"
 
-#: .\apps\common\utils\templates\errors_template.html:52
+#: .\apps\common\utils\templates\errors_template.html:49
+msgid ""
+"\n"
+"      If you believe this is an error, please email us at: support&#64;propensionesabogados.com\n"
+"      "
+msgstr ""
+"\n"
+"Si considera que se trata de un error, envíenos un correo electrónico a: support&#64;propensionesabogados.com"
+
+#: .\apps\common\utils\templates\errors_template.html:57
 msgid "Go to Home"
 msgstr "Ir al Inicio"
 

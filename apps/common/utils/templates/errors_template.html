@@ -45,6 +45,11 @@
 
       <h1 className="error-message">{{ status }} |</h1>
       <h2 className="error-message">{{ error }}</h2>
+      <h3 className="error-message">
+      {% blocktrans %}
+      If you believe this is an error, please email us at: support&#64;propensionesabogados.com
+      {% endblocktrans %}
+      </h3>
 
       
       {% if status == 404 %}

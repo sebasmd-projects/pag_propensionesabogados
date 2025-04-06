@@ -159,7 +159,7 @@
       const message = messageInput.value.trim();
 
       if (message) {
-        const phoneNumber = "573183280176";
+        const phoneNumber = "573012283818";
         const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
           message
         )}`;

@@ -95,15 +95,22 @@ def marital_status_text(value):
         return "No aplica"
 
 
+def asset_type_text(value):
+    if value == 'Furniture':
+        return "Mueble"
+    if value == 'Real Estate':
+        return "Inmueble"
+
+
 def build_context(doc, instance, form_data):
     """Construye el contexto para la plantilla, formateando los valores monetarios y calculando el total global."""
     barcode_buffer = generate_barcode_from_form_id(
         instance["id"], instance["created"])
     barcode_image = InlineImage(doc, barcode_buffer, width=Cm(6))
+    support_docs = []
 
-    is_merchant = form_data.get("is_merchant", "No")
+    is_merchant = form_data.get("is_merchant", "no")
 
-    # Procesar las tablas y generar 'table_items' con valores numéricos y formateados.
     tables = [{
         **table,
         "table_items": [
@@ -116,22 +123,29 @@ def build_context(doc, instance, form_data):
         ]
     } for table in form_data.get("tables", [])]
 
-    # Calcular el total global a partir de las tablas.
     total_global = 0
     for table in tables:
         total_global += sum(item["value_num"] for item in table["table_items"])
 
-    # Construir el contexto general.
+    for doc_item in form_data.get("supportDocs", []):
+        image = process_image(doc, doc_item.get("file"))
+        if image:
+            support_docs.append({
+                "description": doc_item.get("description", ""),
+                "file": image
+            })
+
     context = {
         "barcode": barcode_image,
         "first_name": form_data.get("first_name", ""),
         "last_name": form_data.get("last_name", ""),
         "document_number": form_data.get("document_number", ""),
-        "is_merchant": "comerciante" if is_merchant == "Sí" else "NO comerciante",
+        "is_merchant": "comerciante" if is_merchant == "yes" else "NO comerciante",
         "assets": [{
             **asset,
             "commercial_value_formatted": format_currency(asset.get("commercial_value", "0")),
-            "commercial_value_num": parse_number(asset.get("commercial_value", "0"))
+            "commercial_value_num": parse_number(asset.get("commercial_value", "0")),
+            "asset_type": asset_type_text(asset.get("asset_type", "not_applicable")),
         } for asset in form_data.get("assets", [])],
         "creditors": [{
             **creditor,
@@ -143,16 +157,14 @@ def build_context(doc, instance, form_data):
         "total_global": format_currency(total_global/10),
         "marital_status_display": marital_status_text(form_data.get("marital_status", "not_applicable")),
         "marital_status_raw": form_data.get("marital_status", "not_applicable"),
-        # Resto de campos se pasan tal cual:
         **{k: v for k, v in form_data.items() if k not in ['assets', 'creditors', 'tables', 'proposedMonthlyValue']},
     }
 
-    context.update(
-        {
-            "signature": process_image(doc, form_data.get("signature")),
-            "cedulaFront": process_image(doc, form_data.get("cedulaFront")),
-            "cedulaBack": process_image(doc, form_data.get("cedulaBack")),
-        }
-    )
+    context.update({
+        "signature": process_image(doc, form_data.get("signature")),
+        "cedulaFront": process_image(doc, form_data.get("cedulaFront")),
+        "cedulaBack": process_image(doc, form_data.get("cedulaBack")),
+        "supportDocs": support_docs
+    })
 
     return context

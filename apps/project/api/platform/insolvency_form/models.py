@@ -3,13 +3,12 @@
 import uuid
 
 from django.db import models
+from django.db.models.signals import post_save
 from django.utils.translation import gettext_lazy as _
 
 from apps.common.utils.models import TimeStampedModel, hash_value
 from apps.project.api.platform.auth_platform.models import \
     AttlasInsolvencyAuthModel
-
-from django.db.models.signals import post_save
 
 from .signals import send_insolvency_email
 
@@ -57,8 +56,8 @@ class AttlasInsolvencyFormModel(TimeStampedModel):
 
     class Meta:
         db_table = 'apps_project_api_platform_attlas_insolvency_form'
-        verbose_name = 'Attlas Insolvency Form'
-        verbose_name_plural = 'Attlas Insolvency Forms'
+        verbose_name = _('Attlas Insolvency Form')
+        verbose_name_plural = _('Attlas Insolvency Forms')
         ordering = ['-created']
 
 

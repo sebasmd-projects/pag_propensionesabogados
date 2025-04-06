@@ -1,17 +1,22 @@
 import json
 import os
 
+from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.core.mail import EmailMessage
-from django.utils.safestring import mark_safe
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from pygments.lexers.data import JsonLexer
 
 from .functions import build_context, load_template
 from .models import AttlasInsolvencyFormModel
+
+
+class JSONPrettyTextarea(forms.Textarea):
+    def format_value(self, value):
+        if isinstance(value, dict):
+            return json.dumps(value, indent=4, ensure_ascii=False)
+        return value
 
 
 @admin.register(AttlasInsolvencyFormModel)
@@ -21,13 +26,13 @@ class AttlasInsolvencyFormAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'email_sent', 'created', 'updated')
 
     readonly_fields = (
-        'id', 'user', 'email_sent', 'pretty_data_info',
-        'email_error', 'created', 'updated', 'form_data'
+        'id', 'user', 'email_sent',
+        'email_error', 'created', 'updated',
     )
 
     fieldsets = (
         (_('Information'), {
-            'fields': ('id', 'user', 'pretty_data_info',)
+            'fields': ('id', 'user', 'form_data',)
         }),
         (_('Email'), {
             'fields': ('email_sent', 'email_error',)
@@ -38,27 +43,9 @@ class AttlasInsolvencyFormAdmin(admin.ModelAdmin):
         }),
     )
 
-    def pretty_data_info(self, obj):
-        """Muestra form_data con resaltado de sintaxis JSON."""
-        if not obj.form_data:
-            return "No hay datos"
-        formatted = json.dumps(obj.form_data, indent=4, ensure_ascii=False)
-        formatter = HtmlFormatter(
-            style='material',
-            noclasses=True,
-            cssstyles="""
-                background: #2b2b2b;
-                padding: 15px;
-                border-radius: 4px;
-                border: 1px solid #dee2e6;
-                font-family: 'Fira Code', monospace;
-                color: #eee;
-            """
-        )
-        highlighted = highlight(formatted, JsonLexer(), formatter)
-        return mark_safe(highlighted)
-
-    pretty_data_info.short_description = _('Form Data')
+    formfield_overrides = {
+        models.JSONField: {'widget': JSONPrettyTextarea(attrs={'cols': 120, 'rows': 30})},
+    }
 
     @admin.action(description='Reenviar correo con el documento')
     def reenviar_correo(self, request, queryset):
@@ -100,6 +87,9 @@ class AttlasInsolvencyFormAdmin(admin.ModelAdmin):
                 output_path = os.path.join(
                     settings.BASE_DIR, 'public', 'media', 'insolvency', 'documents', output_filename
                 )
+
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
                 doc.save(output_path)
 
                 # 5) Preparar y enviar el correo

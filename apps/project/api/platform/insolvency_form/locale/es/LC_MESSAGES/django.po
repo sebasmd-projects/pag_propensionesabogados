@@ -1,0 +1,44 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-04-06 01:03-0500\n"
+"PO-Revision-Date: 2025-04-06 01:04-0500\n"
+"Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Translated-Using: django-rosetta 0.10.0\n"
+
+#: .\apps\project\api\platform\insolvency_form\admin.py:34
+msgid "Information"
+msgstr "Información"
+
+#: .\apps\project\api\platform\insolvency_form\admin.py:37
+msgid "Email"
+msgstr "Correo"
+
+#: .\apps\project\api\platform\insolvency_form\admin.py:40
+msgid "Other"
+msgstr "Otro"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:35
+msgid "Form Data"
+msgstr "Información del formulario"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:59
+msgid "Attlas Insolvency Form"
+msgstr "ATTLAS | Formulario de insolvencia"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:60
+msgid "Attlas Insolvency Forms"
+msgstr "ATTLAS | Formulario de insolvencia"
