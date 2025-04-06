@@ -101,6 +101,11 @@ def asset_type_text(value):
     if value == 'Real Estate':
         return "Inmueble"
 
+def is_merchant_text(value):
+    if value == 'yes':
+        return "Comerciante"
+    if value == 'no':
+        return "NO Comerciante"
 
 def build_context(doc, instance, form_data):
     """Construye el contexto para la plantilla, formateando los valores monetarios y calculando el total global."""
@@ -108,8 +113,6 @@ def build_context(doc, instance, form_data):
         instance["id"], instance["created"])
     barcode_image = InlineImage(doc, barcode_buffer, width=Cm(6))
     support_docs = []
-
-    is_merchant = form_data.get("is_merchant", "no")
 
     tables = [{
         **table,
@@ -136,11 +139,12 @@ def build_context(doc, instance, form_data):
             })
 
     context = {
+        **{k: v for k, v in form_data.items() if k not in ['assets', 'creditors', 'tables', 'proposedMonthlyValue']},
         "barcode": barcode_image,
         "first_name": form_data.get("first_name", ""),
         "last_name": form_data.get("last_name", ""),
         "document_number": form_data.get("document_number", ""),
-        "is_merchant": "comerciante" if is_merchant == "yes" else "NO comerciante",
+        "is_merchant": is_merchant_text(form_data.get("is_merchant")),
         "assets": [{
             **asset,
             "commercial_value_formatted": format_currency(asset.get("commercial_value", "0")),
@@ -157,7 +161,6 @@ def build_context(doc, instance, form_data):
         "total_global": format_currency(total_global/10),
         "marital_status_display": marital_status_text(form_data.get("marital_status", "not_applicable")),
         "marital_status_raw": form_data.get("marital_status", "not_applicable"),
-        **{k: v for k, v in form_data.items() if k not in ['assets', 'creditors', 'tables', 'proposedMonthlyValue']},
     }
 
     context.update({
