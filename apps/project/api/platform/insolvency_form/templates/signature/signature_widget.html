@@ -1,0 +1,51 @@
+{% load i18n %}
+
+<div class="signature-container">
+    {% if widget.value %}
+    <div class="current-signature">
+        <img src="{{ widget.value }}" alt="Firma actual" style="max-width: 300px; border: 1px solid #ddd; padding: 5px;"/>
+        <div class="signature-actions">
+            <button type="button" class="button clear-signature">{% trans 'Delete signature' %}</button>
+        </div>
+    </div>
+    {% endif %}
+    
+    <input
+        type="file"
+        accept="image/png"
+        class="upload-signature"
+        style="margin-top: 10px;"
+    />
+    {{ widget.textarea }}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.signature-container');
+    const textarea = container.querySelector('textarea');
+    const fileInput = container.querySelector('.upload-signature');
+    const clearBtn = container.querySelector('.clear-signature');
+    
+    // Manejar subida de archivo
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                textarea.value = e.target.result.split(',')[1];
+                textarea.dispatchEvent(new Event('change'));
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Manejar borrado
+    if(clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            textarea.value = '';
+            container.querySelector('.current-signature').remove();
+            fileInput.style.display = 'block';
+        });
+    }
+});
+</script>

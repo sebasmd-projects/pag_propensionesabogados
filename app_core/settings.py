@@ -50,8 +50,10 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    "corsheaders",
+    'corsheaders',
+    'nested_admin',
     'rest_framework',
+    'drf_yasg',
     'auditlog',
     'honeypot',
     'django_recaptcha',
@@ -206,6 +208,7 @@ PASSWORD_HASHERS = [
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SESSION_COOKIE_AGE = 7200
+ATTLAS_TOKEN_TIMEOUT = int(os.getenv('ATTLAS_TOKEN_TIMEOUT'))*60*60
 
 ROSETTA_SHOW_AT_ADMIN_PANEL = True
 
@@ -291,6 +294,13 @@ CKEDITOR_5_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
+# chatgpt
+CHAT_GPT_API_KEY = os.getenv('CHAT_GPT_API_KEY')
+
+# Socrata
+SOCRATA_API_KEY = os.getenv('SOCRATA_API_KEY')
+SOCRATA_API_KEY_SECRET = os.getenv('SOCRATA_API_KEY_SECRET')
+
 HONEYPOT_FIELD_NAME = os.getenv('HONEYPOT_FIELD_NAME')
 
 IP_BLOCKED_TIME_IN_MINUTES = int(os.getenv('IP_BLOCKED_TIME_IN_MINUTES'))
@@ -309,9 +319,9 @@ if DEBUG:
     ]
 else:
     CORS_ALLOWED_ORIGIN_REGEXES = [
-        r"^https://[A-Za-z0-9-]+\.propensionesabogados\.com$",
-        r"^https://[A-Za-z0-9-]+\.fundacionattlas\.com$",
-        r"^https://[A-Za-z0-9-]+\.fundacionattlas\.org$",
+        r'^https://[A-Za-z0-9-]+\.propensionesabogados\.com$',
+        r'^https://[A-Za-z0-9-]+\.fundacionattlas\.com$',
+        r'^https://[A-Za-z0-9-]+\.fundacionattlas\.org$',
     ]
 
 

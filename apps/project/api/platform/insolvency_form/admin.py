@@ -1,64 +1,226 @@
-import json
+# apps\project\api\platform\insolvency_form\admin.py
 import os
 
+import nested_admin
+from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.core.mail import EmailMessage
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from pygments.lexers.data import JsonLexer
 
 from .functions import build_context, load_template
-from .models import AttlasInsolvencyFormModel
+from .models import (AttlasInsolvencyAssetModel,
+                     AttlasInsolvencyCreditorsModel, AttlasInsolvencyFormModel,
+                     AttlasInsolvencyIncomeModel,
+                     AttlasInsolvencyIncomeOtherModel,
+                     AttlasInsolvencyJudicialProcessModel,
+                     AttlasInsolvencyResourceItemModel,
+                     AttlasInsolvencyResourceModel,
+                     AttlasInsolvencyResourceTableModel,
+                     AttlasInsolvencySignatureModel)
+from .widgets import Base64SignatureWidget
+
+
+class SignatureForm(forms.ModelForm):
+    class Meta:
+        model = AttlasInsolvencySignatureModel
+        fields = '__all__'
+        widgets = {
+            'signature': Base64SignatureWidget(attrs={
+                'rows': 4,
+                'cols': 100,
+                # 'style': 'display: none;'
+            })
+        }
+
+
+class GeneralInline(nested_admin.NestedStackedInline):
+    extra = 0
+    exclude = ('is_active', 'created', 'updated', 'language', 'default_order')
+
+
+class CreditorsInline(GeneralInline):
+    model = AttlasInsolvencyCreditorsModel
+    fk_name = 'form'
+
+
+class IncomeOtherInline(GeneralInline):
+    model = AttlasInsolvencyIncomeOtherModel
+    fk_name = 'income'
+
+
+class IncomeInline(GeneralInline):
+    model = AttlasInsolvencyIncomeModel
+    fk_name = 'form'
+    inlines = [IncomeOtherInline]
+
+
+class ResourceItemInline(GeneralInline):
+    model = AttlasInsolvencyResourceItemModel
+    fk_name = 'table'
+
+
+class ResourceTableInline(GeneralInline):
+    model = AttlasInsolvencyResourceTableModel
+    fk_name = 'resource'
+    inlines = [ResourceItemInline]
+
+
+class ResourceInline(GeneralInline):
+    model = AttlasInsolvencyResourceModel
+    fk_name = 'form'
+    inlines = [ResourceTableInline]
+
+
+class AssetInline(GeneralInline):
+    model = AttlasInsolvencyAssetModel
+    fk_name = 'form'
+
+
+class JudicialProcessInline(GeneralInline):
+    model = AttlasInsolvencyJudicialProcessModel
+    fk_name = 'form'
+
+
+class SignatureInline(GeneralInline):
+    model = AttlasInsolvencySignatureModel
+    form = SignatureForm
+    max_num = 1
+    fk_name = 'form'
 
 
 @admin.register(AttlasInsolvencyFormModel)
-class AttlasInsolvencyFormAdmin(admin.ModelAdmin):
-    actions = ['reenviar_correo']
-
-    list_display = ('id', 'user', 'email_sent', 'created', 'updated')
+class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin):
+    list_display = (
+        'id',
+        'created',
+        'user',
+        'current_step',
+        'is_completed',
+        'email_sent',
+        'email_error',
+    )
+    list_filter = (
+        'current_step',
+        'is_completed',
+        'email_sent',
+    )
+    search_fields = (
+        'debtor_document_number',
+        'debtor_first_name',
+        'debtor_last_name',
+        'debtor_cell_phone',
+        'debtor_email',
+    )
+    fieldsets = (
+        (
+            None,
+            {
+                'fields': (
+                    'id',
+                    'user',
+                ),
+            }
+        ),
+        (
+            _('1. Legal requirements'),
+            {
+                'fields': (
+                    'accept_legal_requirements',
+                    'accept_terms_and_conditions'
+                ),
+            }
+        ),
+        (
+            _('2. Personal data'),
+            {
+                'fields': (
+                    'debtor_document_number',
+                    'debtor_expedition_city',
+                    'debtor_first_name',
+                    'debtor_last_name',
+                    'debtor_is_merchant',
+                    'debtor_cell_phone',
+                    'debtor_email',
+                    'debtor_birth_date',
+                    'debtor_address',
+                ),
+            }
+        ),
+        (
+            _('3. Cessation of payments Statement'),
+            {
+                'fields': (
+                    'debtor_statement_accepted',
+                ),
+            }
+        ),
+        (
+            _('4. Cessation of payments Report'),
+            {
+                'fields': (
+                    'debtor_cessation_report',
+                ),
+            }
+        ),
+        (
+            _('9. Partner data'),
+            {
+                'fields': (
+                    'partner_marital_status',
+                    'partner_document_number',
+                    'partner_name',
+                    'partner_last_name',
+                    'partner_email',
+                    'partner_cell_phone',
+                    'partner_relationship_duration'
+                ),
+            }
+        ),
+        (
+            _('Status'),
+            {
+                'fields': (
+                    'current_step',
+                    'is_completed',
+                    'email_sent',
+                    'email_error',
+                    'is_active',
+                ),
+            }
+        ),
+        (
+            _('Stamped Times'),
+            {
+                'fields': (
+                    'created',
+                    'updated'
+                ),
+            }
+        )
+    )
 
     readonly_fields = (
-        'id', 'user', 'email_sent', 'pretty_data_info',
-        'email_error', 'created', 'updated', 'form_data'
+        'id',
+        'created',
+        'updated',
+        'user',
+        'current_step',
+        'is_completed',
+        'email_sent',
+        'email_error',
     )
 
-    fieldsets = (
-        (_('Information'), {
-            'fields': ('id', 'user', 'pretty_data_info',)
-        }),
-        (_('Email'), {
-            'fields': ('email_sent', 'email_error',)
-        }),
-        (_('Other'), {
-            'fields': ('default_order', 'is_active', 'created', 'updated',),
-            'classes': ('collapse',)
-        }),
-    )
+    inlines = [
+        CreditorsInline,
+        AssetInline,
+        JudicialProcessInline,
+        IncomeInline,
+        ResourceInline,
+        SignatureInline,
+    ]
 
-    def pretty_data_info(self, obj):
-        """Muestra form_data con resaltado de sintaxis JSON."""
-        if not obj.form_data:
-            return "No hay datos"
-        formatted = json.dumps(obj.form_data, indent=4, ensure_ascii=False)
-        formatter = HtmlFormatter(
-            style='material',
-            noclasses=True,
-            cssstyles="""
-                background: #2b2b2b;
-                padding: 15px;
-                border-radius: 4px;
-                border: 1px solid #dee2e6;
-                font-family: 'Fira Code', monospace;
-                color: #eee;
-            """
-        )
-        highlighted = highlight(formatted, JsonLexer(), formatter)
-        return mark_safe(highlighted)
-
-    pretty_data_info.short_description = _('Form Data')
+    actions = ['reenviar_correo']
 
     @admin.action(description='Reenviar correo con el documento')
     def reenviar_correo(self, request, queryset):
@@ -100,9 +262,9 @@ class AttlasInsolvencyFormAdmin(admin.ModelAdmin):
                 output_path = os.path.join(
                     settings.BASE_DIR, 'public', 'media', 'insolvency', 'documents', output_filename
                 )
-                
+
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
-                
+
                 doc.save(output_path)
 
                 # 5) Preparar y enviar el correo
@@ -136,3 +298,19 @@ class AttlasInsolvencyFormAdmin(admin.ModelAdmin):
                 instance.email_sent = False
                 instance.email_error = str(e)
                 instance.save()
+
+
+other_models = [
+    AttlasInsolvencyAssetModel,
+    AttlasInsolvencyCreditorsModel,
+    AttlasInsolvencyIncomeModel,
+    AttlasInsolvencyIncomeOtherModel,
+    AttlasInsolvencyJudicialProcessModel,
+    AttlasInsolvencyResourceItemModel,
+    AttlasInsolvencyResourceModel,
+    AttlasInsolvencyResourceTableModel,
+    AttlasInsolvencySignatureModel
+]
+
+for model in other_models:
+    admin.site.register(model, admin.ModelAdmin)
