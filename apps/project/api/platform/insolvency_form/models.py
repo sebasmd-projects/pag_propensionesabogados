@@ -113,7 +113,12 @@ class AttlasInsolvencyFormModel(TimeStampedModel):
         blank=True,
         null=True
     )
-
+    debtor_sex = models.CharField(
+        _('Sex'),
+        max_length=10,
+        blank=True,
+        null=True,
+    )
     """
     Step 3: Cessation of Payments Acceptance
     """
@@ -434,7 +439,7 @@ class AttlasInsolvencyJudicialProcessModel(TimeStampedModel):
         _('Case Code'),
         max_length=100
     )
-    process_status = models.CharField(
+    process_status = models.JSONField(
         _('Process Status'),
         max_length=100
     )
@@ -563,8 +568,8 @@ class AttlasInsolvencyResourceTableModel(TimeStampedModel):
         OTHER = 'OTRO', 'OTRO'
 
     class GenderChoices(models.TextChoices):
-        MALE = 'male', _('Male')
-        FEMALE = 'female', _('Female')
+        MALE = 'MASCULINO', _('Male')
+        FEMALE = 'FEMENINO', _('Female')
 
     resource = models.ForeignKey(
         AttlasInsolvencyResourceModel,

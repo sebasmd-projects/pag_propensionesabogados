@@ -50,6 +50,7 @@ class Step2Serializer(StepMixin):
             'debtor_first_name',
             'debtor_is_merchant',
             'debtor_last_name',
+            'debtor_sex',
             'id',
             'user',
         ]
@@ -68,7 +69,7 @@ class Step3Serializer(StepMixin):
 
 class Step4Serializer(StepMixin):
     use_ai = serializers.BooleanField(
-        default=True,
+        default=False,
         help_text="Indica si el reporte debe pulirse con IA"
     )
 

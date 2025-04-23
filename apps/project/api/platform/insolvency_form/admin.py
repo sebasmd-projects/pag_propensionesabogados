@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.core.mail import EmailMessage
 from django.utils.translation import gettext_lazy as _
+from import_export.admin import ImportExportActionModelAdmin
 
 from .functions import build_context, load_template
 from .models import (AttlasInsolvencyAssetModel,
@@ -90,7 +91,7 @@ class SignatureInline(GeneralInline):
 
 
 @admin.register(AttlasInsolvencyFormModel)
-class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin):
+class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActionModelAdmin):
     list_display = (
         'id',
         'created',
@@ -98,7 +99,6 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin):
         'current_step',
         'is_completed',
         'email_sent',
-        'email_error',
     )
     list_filter = (
         'current_step',
@@ -144,6 +144,7 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin):
                     'debtor_email',
                     'debtor_birth_date',
                     'debtor_address',
+                    'debtor_sex'
                 ),
             }
         ),

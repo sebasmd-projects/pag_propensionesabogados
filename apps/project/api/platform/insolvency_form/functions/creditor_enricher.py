@@ -8,8 +8,7 @@ import re
 import unicodedata
 from typing import Optional, Tuple
 
-from django.db.models import Q, Value
-from django.db.models.functions import Upper
+from django.db.models import Q
 
 from ..models import AttlasInsolvencyCreditorsModel
 from .chatgpt_api import ChatGPTAPI
@@ -62,7 +61,7 @@ def _find_via_chatgpt(creditor_name: str) -> Tuple[Optional[str], Optional[str]]
     try:
         api = ChatGPTAPI()
         messages, model = api.creditor_nit_contact_prompt(creditor_name)
-        response = api.get_response_json(model, messages)
+        response = '' # api.get_response_json(model, messages)
 
         match = _RE_JSON.search(response)
 
