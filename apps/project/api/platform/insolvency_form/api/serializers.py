@@ -4,18 +4,17 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from ..models import (
-    AttlasInsolvencyAssetModel,
-    AttlasInsolvencyCreditorsModel,
-    AttlasInsolvencyFormModel,
-    AttlasInsolvencyIncomeModel,
-    AttlasInsolvencyIncomeOtherModel,
-    AttlasInsolvencyJudicialProcessModel,
-    AttlasInsolvencyResourceItemModel,
-    AttlasInsolvencyResourceModel,
-    AttlasInsolvencyResourceTableModel,
-    AttlasInsolvencySignatureModel
-)
+from apps.common.utils.models import hash_value
+
+from ..models import (AttlasInsolvencyAssetModel, AttlasInsolvencyAuthModel,
+                      AttlasInsolvencyCreditorsModel,
+                      AttlasInsolvencyFormModel, AttlasInsolvencyIncomeModel,
+                      AttlasInsolvencyIncomeOtherModel,
+                      AttlasInsolvencyJudicialProcessModel,
+                      AttlasInsolvencyResourceItemModel,
+                      AttlasInsolvencyResourceModel,
+                      AttlasInsolvencyResourceTableModel,
+                      AttlasInsolvencySignatureModel)
 
 
 class StepMixin(serializers.ModelSerializer):
@@ -353,3 +352,44 @@ class Step11Serializer(serializers.Serializer):
                 defaults={'signature': sig_data}
             )
         return instance
+
+
+class SignatureCreateSerializer(serializers.Serializer):
+    cedula = serializers.CharField(write_only=True)
+    signature = serializers.CharField(write_only=True)
+    signed = serializers.SerializerMethodField(read_only=True)
+
+    def get_signed(self, obj):
+        # Siempre devolvemos true si llegamos aquí
+        return True
+
+    def validate(self, data):
+        cedula_hash = hash_value(data['cedula'])
+        try:
+            auth = AttlasInsolvencyAuthModel.objects.get(
+                document_number_hash=cedula_hash
+            )
+        except AttlasInsolvencyAuthModel.DoesNotExist:
+            raise serializers.ValidationError({
+                'cedula': 'No se encontró un usuario con esta cédula'
+            })
+        data['auth_user'] = auth
+        return data
+
+    def create(self, validated_data):
+        auth_user = validated_data.pop('auth_user')
+        sig_b64 = validated_data['signature']
+
+        # Obtener o crear el formulario del usuario
+        form, _ = AttlasInsolvencyFormModel.objects.get_or_create(user=auth_user)
+
+        # Crear o actualizar la firma
+        sig_obj, _ = AttlasInsolvencySignatureModel.objects.update_or_create(
+            form=form,
+            defaults={'signature': sig_b64}
+        )
+        return sig_obj
+
+    def to_representation(self, instance):
+        # Sólo devolvemos si quedó firmado
+        return {'signed': True}

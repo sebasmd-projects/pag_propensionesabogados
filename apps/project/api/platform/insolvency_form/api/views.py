@@ -1,5 +1,8 @@
 #  apps/project/api/platform/insolvency_form/api/views.py
 
+from .serializers import SignatureCreateSerializer
+from rest_framework.permissions import AllowAny
+from rest_framework.generics import CreateAPIView
 import logging
 
 from django.db import transaction
@@ -194,3 +197,23 @@ class SignatureUpdateView(RetrieveUpdateAPIView):
             form=form
         )
         return signature
+
+
+class SignatureCreateAPIView(CreateAPIView):
+    """
+    POST /api/platform/signature/
+    {
+      "cedula": "0000000000",
+      "signature": "<base64string>"
+    }
+    """
+    serializer_class = SignatureCreateSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        # Validar y guardar
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        sig_obj = serializer.save()
+        # Devolver sólo el payload de to_representation()
+        return Response(serializer.to_representation(sig_obj), status=status.HTTP_200_OK)

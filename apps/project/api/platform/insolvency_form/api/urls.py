@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from .views import InsolvencyFormWizardView, SignatureUpdateView
+from .views import InsolvencyFormWizardView, SignatureUpdateView, SignatureCreateAPIView
 
 app_name = 'insolvency_form_api'
 
@@ -21,5 +21,10 @@ urlpatterns = [
         'insolvency-form/signature/<uuid:id>/',
         SignatureUpdateView.as_view(),
         name='signature-update'
+    ),
+    path(
+        'insolvency-form/signature/',
+        SignatureCreateAPIView.as_view(),
+        name='signature-create'
     ),
 ]
