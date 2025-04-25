@@ -1,4 +1,5 @@
 # apps\project\api\platform\insolvency_form\admin.py
+import json
 import os
 
 import nested_admin
@@ -7,6 +8,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.core.mail import EmailMessage
 from django.utils.translation import gettext_lazy as _
+from import_export import fields, resources
 from import_export.admin import ImportExportActionModelAdmin
 
 from .functions import build_context, load_template
@@ -20,6 +22,94 @@ from .models import (AttlasInsolvencyAssetModel,
                      AttlasInsolvencyResourceTableModel,
                      AttlasInsolvencySignatureModel)
 from .widgets import Base64SignatureWidget
+
+
+class FormResource(resources.ModelResource):
+    # campos básicos del form
+    id = fields.Field(column_name='form_id', attribute='id')
+    user = fields.Field(column_name='user_id', attribute='user__id')
+    current_step = fields.Field(
+        column_name='current_step', attribute='current_step')
+    is_completed = fields.Field(
+        column_name='is_completed', attribute='is_completed')
+    created = fields.Field(column_name='created', attribute='created')
+    updated = fields.Field(column_name='updated', attribute='updated')
+
+    # inline / nested: los serializamos como JSON para no perder estructura
+    creditors = fields.Field(column_name='creditors_json')
+    assets = fields.Field(column_name='assets_json')
+    judicial_processes = fields.Field(column_name='judicial_processes_json')
+    incomes = fields.Field(column_name='incomes_json')
+    resources = fields.Field(column_name='resources_json')
+    signature = fields.Field(column_name='signature_b64')
+
+    def dehydrate_creditors(self, form):
+        qs = form.creditors_form.all().values(
+            'creditor', 'nit', 'creditor_contact', 'nature_type', 'other_nature',
+            'capital_value', 'days_overdue'
+        )
+        return json.dumps(list(qs), ensure_ascii=False, default=str)
+
+    def dehydrate_assets(self, form):
+        qs = form.asset_form.all().values(
+            'asset_type', 'name', 'identification', 'lien', 'affectation',
+            'legal_measure', 'patrimonial_society', 'commercial_value', 'exclusion'
+        )
+        return json.dumps(list(qs), ensure_ascii=False, default=str)
+
+    def dehydrate_judicial_processes(self, form):
+        qs = form.judicial_form.all().values(
+            'affectation', 'court', 'description', 'case_code', 'process_status'
+        )
+        return json.dumps(list(qs), ensure_ascii=False, default=str)
+
+    def dehydrate_incomes(self, form):
+        out = []
+        for inc in form.incomes.all():
+            others = list(
+                inc.incomeother_income.all().values('detail', 'amount')
+            )
+            out.append({
+                'type': inc.type,
+                'amount': inc.amount,
+                'others': others
+            })
+        return json.dumps(out, ensure_ascii=False, default=str)
+
+    def dehydrate_resources(self, form):
+        out = []
+        for r in form.resources.all():
+            tables = []
+            for t in r.tables.all():
+                items = list(
+                    t.items.all().values('label', 'legal_support', 'value')
+                )
+                tables.append({
+                    'title': t.title,
+                    'relationship': t.relationship,
+                    'disability': t.disability,
+                    'age': t.age,
+                    'gender': t.gender,
+                    'items': items
+                })
+            out.append({
+                'has_food_obligation': r.has_food_obligation,
+                'proposed_monthly_value': r.proposed_monthly_value,
+                'children_count': r.children_count,
+                'tables': tables
+            })
+        return json.dumps(out, ensure_ascii=False, default=str)
+
+    def dehydrate_signature(self, form):
+        sig = form.signature_form.first()
+        return sig.signature if sig else ''
+
+    class Meta:
+        model = AttlasInsolvencyFormModel
+        fields = (
+            'id', 'user', 'current_step', 'is_completed', 'created', 'updated',
+            'creditors', 'assets', 'judicial_processes', 'incomes', 'resources', 'signature'
+        )
 
 
 class SignatureForm(forms.ModelForm):
@@ -92,6 +182,8 @@ class SignatureInline(GeneralInline):
 
 @admin.register(AttlasInsolvencyFormModel)
 class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActionModelAdmin):
+    resource_class = FormResource
+
     list_display = (
         'id',
         'created',
@@ -104,6 +196,7 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
         'current_step',
         'is_completed',
         'email_sent',
+        'debtor_is_merchant'
     )
     search_fields = (
         'debtor_document_number',
