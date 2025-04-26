@@ -311,7 +311,13 @@ class AttlasInsolvencyCreditorsModel(TimeStampedModel):
         blank=True,
         null=True
     )
-
+    credit_classification = models.CharField(
+        _('Credit Classification'),
+        max_length=100,
+        default='',
+        blank=True,
+        null=True
+    )
     def clean(self):
         super().clean()
 
@@ -662,6 +668,19 @@ class AttlasInsolvencySignatureModel(TimeStampedModel):
         blank=True,
         null=True
     )
+    client_ip = models.CharField(
+        _('Client IP'),
+        max_length=100,
+        blank=True,
+        null=True
+    )
+    user_agent = models.CharField(
+        _('User Agent'),
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    
 
     def get_signature(self):
         return ContentFile(
