@@ -143,6 +143,40 @@ def _build_creditors(instance: AttlasInsolvencyFormModel) -> list:
     return creditors
 
 
+def _build_creditors_unique(instance: AttlasInsolvencyFormModel) -> list:
+    """
+    Devuelve una lista de acreedores únicos, mostrando la versión más completa de cada uno.
+    Prioriza registros que tengan tanto NIT como contacto, luego los que tengan NIT,
+    y finalmente los que solo tienen nombre.
+    """
+    creditors_dict = {}  # Usaremos el nombre normalizado como clave
+
+    for c in instance.creditors_form.all().order_by("created"):
+        norm_creditor = (c.creditor or "").strip().lower()
+
+        # Si es la primera vez que vemos este acreedor, lo agregamos directamente
+        if norm_creditor not in creditors_dict:
+            creditors_dict[norm_creditor] = {
+                "creditor": c.creditor,
+                "nit": c.nit,
+                "creditor_contact": c.creditor_contact,
+            }
+        else:
+            # Si ya existe, decidimos si actualizarlo con datos más completos
+            existing = creditors_dict[norm_creditor]
+
+            # Actualizamos NIT si el nuevo lo tiene y el existente no
+            if not existing["nit"] and c.nit:
+                existing["nit"] = c.nit
+
+            # Actualizamos contacto si el nuevo lo tiene y el existente no
+            if not existing["creditor_contact"] and c.creditor_contact:
+                existing["creditor_contact"] = c.creditor_contact
+
+    # Convertimos el diccionario a lista manteniendo solo los valores
+    return list(creditors_dict.values())
+
+
 def _build_incomes(instance: AttlasInsolvencyFormModel) -> list[dict]:
     """
     Serializa ingresos y sus 'others'.
@@ -282,6 +316,7 @@ def build_context(doc: DocxTemplate, instance: AttlasInsolvencyFormModel) -> dic
     """
     debtor, partner = _build_debtor_partner(instance)
     creditors = _build_creditors(instance)
+    unique_creditors = _build_creditors_unique(instance)
     assets = _build_assets(instance)
     judicial = _build_judicial_processes(instance)
     incomes = _build_incomes(instance)
@@ -316,6 +351,7 @@ def build_context(doc: DocxTemplate, instance: AttlasInsolvencyFormModel) -> dic
         "debtor": debtor,
         "partner": partner,
         "creditors": creditors,
+        "unique_creditors": unique_creditors,
         "assets": assets,
         "judicial_processes": judicial,
         "incomes": incomes,

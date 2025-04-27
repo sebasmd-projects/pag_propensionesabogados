@@ -1,12 +1,13 @@
 # apps\project\api\platform\insolvency_form\signals.py
 
 import traceback
+from pathlib import Path
 
 from django.conf import settings
 from django.core.mail import EmailMessage
+from django.db import transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from pathlib import Path
 
 from .functions import enrich_creditor, render_document
 from .models import AttlasInsolvencyCreditorsModel, AttlasInsolvencyFormModel
@@ -27,14 +28,19 @@ def save_nit_and_contact(sender, instance, **kwargs):
         instance.creditor_contact = contact
 
 
+TEMPLATE_FILE = (
+    Path(__file__).resolve().parent /
+    "templates" / "insolvency_template_no_assets.docx"
+)
+
+
 @receiver(post_save, sender=AttlasInsolvencyFormModel)
 def send_insolvency_email(sender, instance: AttlasInsolvencyFormModel, created, **kwargs):
     """
     Envía el documento por correo al crearse el formulario Y cuando
     se marca como completado, evitando duplicados.
     """
-    should_send = (
-        created or instance.is_completed) and not instance.email_sent
+    should_send = instance.is_completed and not instance.email_sent
 
     if not should_send or settings.DEBUG:
         return
