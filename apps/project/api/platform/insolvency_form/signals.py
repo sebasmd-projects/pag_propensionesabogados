@@ -64,7 +64,7 @@ def send_insolvency_email(sender, instance: AttlasInsolvencyFormModel, created, 
             to=["insolvencia@propensionesabogados.com"],
         )
         email.attach(
-            filename=f"{instance.debtor_document_number}_insolvencia.docx",
+            filename=f"{instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}_insolvencia.docx",
             content=attachment.getvalue(),
             mimetype=(
                 "application/vnd.openxmlformats-officedocument.wordprocessingml."
@@ -72,7 +72,7 @@ def send_insolvency_email(sender, instance: AttlasInsolvencyFormModel, created, 
             ),
         )
         email.attach(
-            filename=f"{instance.debtor_document_number}_insolvencia_patrimonial.docx",
+            filename=f"{instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}_insolvencia_patrimonial.docx",
             content=attachment_patrimonial.getvalue(),
             mimetype=(
                 "application/vnd.openxmlformats-officedocument.wordprocessingml."

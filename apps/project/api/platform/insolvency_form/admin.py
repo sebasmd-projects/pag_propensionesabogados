@@ -333,7 +333,7 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
                     to=["insolvencia@propensionesabogados.com"],
                 )
                 email.attach(
-                    f"{instance.debtor_document_number}_insolvencia.docx",
+                    f"{instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}_insolvencia.docx",
                     doc_file.getvalue(),
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 )
@@ -382,7 +382,7 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
                     to=["insolvencia@propensionesabogados.com"],
                 )
                 email.attach(
-                    f"{instance.debtor_document_number}_insolvencia_patrimonial.docx",
+                    f"{instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}_insolvencia_patrimonial.docx",
                     doc_file.getvalue(),
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 )
