@@ -4,14 +4,14 @@ import os
 
 import nested_admin
 from django import forms
-from django.conf import settings
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.mail import EmailMessage
 from django.utils.translation import gettext_lazy as _
 from import_export import fields, resources
 from import_export.admin import ImportExportActionModelAdmin
+from django.conf import settings
 
-from .functions import build_context, load_template
+from .functions import render_document
 from .models import (AttlasInsolvencyAssetModel,
                      AttlasInsolvencyCreditorsModel, AttlasInsolvencyFormModel,
                      AttlasInsolvencyIncomeModel,
@@ -187,6 +187,7 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
     list_display = (
         'id',
         'created',
+        'updated',
         'user',
         'current_step',
         'is_completed',
@@ -300,7 +301,6 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
         'updated',
         'user',
         'current_step',
-        'is_completed',
         'email_sent',
         'email_error',
     )
@@ -316,82 +316,47 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
 
     actions = ['reenviar_correo']
 
-    @admin.action(description='Reenviar correo con el documento')
+    @admin.action(description="Reenviar correo con el documento")
     def reenviar_correo(self, request, queryset):
-        """
-        Acción de Admin para regenerar el documento y reenviar el correo
-        seleccionado manualmente.
-        """
+        ok, fail = 0, 0
         for instance in queryset:
             try:
-                form_data = instance.form_data or {}
-                if not form_data:
-                    continue
-
-                # 1) Cargar la plantilla .docx
-                template_path = os.path.join(
-                    settings.BASE_DIR,
-                    'apps', 'project', 'api', 'platform', 'insolvency_form', 'templates',
-                    'insolvency_template.docx'
+                doc_file = render_document(instance)
+                email = EmailMessage(
+                    subject=f"ADMIN | Attlas | Solicitud de insolvencia {instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}",
+                    body=(
+                        "Adjunto encontrarás el documento generado automáticamente desde la plataforma de insolvencia.\n\n"
+                        f"{instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=["insolvencia@propensionesabogados.com"],
                 )
-                doc = load_template(template_path)
-
-                # 2) Construir contexto
-                instance_dict = {
-                    "id": str(instance.id),
-                    "created": instance.created
-                }
-                context = build_context(doc, instance_dict, form_data)
-
-                # 3) Renderizar
-                doc.render(context)
-
-                # 4) Guardar archivo
-                first_name = form_data.get("first_name", "")
-                last_name = form_data.get("last_name", "")
-                document_number = form_data.get("document_number", "")
-                form_id = str(instance.id)
-
-                output_filename = f"Formulario_Insolvencia_{first_name}_{last_name}_{document_number}_{form_id}.docx"
-                output_path = os.path.join(
-                    settings.BASE_DIR, 'public', 'media', 'insolvency', 'documents', output_filename
+                email.attach(
+                    f"{instance.debtor_document_number}_insolvencia.docx",
+                    doc_file.getvalue(),
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 )
-
-                os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
-                doc.save(output_path)
-
-                # 5) Preparar y enviar el correo
-                subject = f"Documento de Insolvencia | {first_name} {last_name}"
-                body = (
-                    f"Se adjunta el documento de insolvencia de la persona "
-                    f"{first_name} {last_name} - {document_number} - {form_id}."
+                email.send(fail_silently=False)
+                ok += 1
+            except Exception as exc:
+                self.message_user(
+                    request,
+                    f"Error al enviar {instance}: {exc}",
+                    level=messages.ERROR,
                 )
-                from_email = settings.DEFAULT_FROM_EMAIL
-                # Ajusta destinatario
-                to_email = ['insolvencia@propensionesabogados.com']
-
-                email_msg = EmailMessage(subject, body, from_email, to_email)
-                with open(output_path, 'rb') as f:
-                    email_msg.attach(
-                        output_filename,
-                        f.read(),
-                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                    )
-                email_msg.send()
-
-                # 6) Actualizar estado en la instancia
-                instance.email_sent = True
-                instance.email_error = ""
-                instance.save()
-
-                # 7) Eliminar archivo temporal (opcional)
-                os.remove(output_path)
-
-            except Exception as e:
-                instance.email_sent = False
-                instance.email_error = str(e)
-                instance.save()
+                fail += 1
+        if ok:
+            self.message_user(
+                request,
+                f"Documento reenviado correctamente para {ok} registro(s).",
+                level=messages.SUCCESS,
+            )
+        if fail and not ok:
+            self.message_user(
+                request,
+                "Ningún documento pudo ser reenviado.",
+                level=messages.ERROR,
+            )
 
 
 other_models = [
