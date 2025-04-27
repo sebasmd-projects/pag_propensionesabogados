@@ -329,10 +329,10 @@ def build_context(doc: DocxTemplate, instance: AttlasInsolvencyFormModel) -> dic
     return form_data
 
 
-def render_document(instance: AttlasInsolvencyFormModel) -> BytesIO:
+def render_document(instance: AttlasInsolvencyFormModel, path=None) -> BytesIO:
     """Genera el DOCX en memoria y lo devuelve como BytesIO."""
     try:
-        doc = load_template()
+        doc = load_template(path)
         context = build_context(doc, instance)
         doc.render(context)
         output = BytesIO()

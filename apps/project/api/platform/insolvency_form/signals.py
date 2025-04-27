@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from pathlib import Path
 
 from .functions import enrich_creditor, render_document
 from .models import AttlasInsolvencyCreditorsModel, AttlasInsolvencyFormModel
@@ -34,15 +35,21 @@ def send_insolvency_email(sender, instance: AttlasInsolvencyFormModel, created, 
     """
     should_send = (
         created or instance.is_completed) and not instance.email_sent
-    
+
     if not should_send or settings.DEBUG:
         return
 
+    TEMPLATE_FILE = (
+        Path(__file__).resolve().parent /
+        "templates" / "insolvency_template_no_assets.docx"
+    )
+
     try:
         attachment = render_document(instance)
+        attachment_patrimonial = render_document(instance, TEMPLATE_FILE)
 
         email = EmailMessage(
-            subject=f"Attlas | Solicitud de insolvencia {instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}",
+            subject=f"Attlas | Solicitud de insolvencia AMBOS DOCUMENTOS {instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}",
             body=(
                 "Adjunto encontrarás el documento generado automáticamente desde la plataforma de insolvencia.\n\n"
                 f"{instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}"
@@ -53,6 +60,14 @@ def send_insolvency_email(sender, instance: AttlasInsolvencyFormModel, created, 
         email.attach(
             filename=f"{instance.debtor_document_number}_insolvencia.docx",
             content=attachment.getvalue(),
+            mimetype=(
+                "application/vnd.openxmlformats-officedocument.wordprocessingml."
+                "document"
+            ),
+        )
+        email.attach(
+            filename=f"{instance.debtor_document_number}_insolvencia_patrimonial.docx",
+            content=attachment_patrimonial.getvalue(),
             mimetype=(
                 "application/vnd.openxmlformats-officedocument.wordprocessingml."
                 "document"

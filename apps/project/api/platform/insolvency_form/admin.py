@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from import_export import fields, resources
 from import_export.admin import ImportExportActionModelAdmin
 from django.conf import settings
+from pathlib import Path
 
 from .functions import render_document
 from .models import (AttlasInsolvencyAssetModel,
@@ -314,7 +315,7 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
         SignatureInline,
     ]
 
-    actions = ['reenviar_correo']
+    actions = ['reenviar_correo', 'reenviar_correo_patrimonial']
 
     @admin.action(description="Reenviar correo con el documento")
     def reenviar_correo(self, request, queryset):
@@ -333,6 +334,55 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
                 )
                 email.attach(
                     f"{instance.debtor_document_number}_insolvencia.docx",
+                    doc_file.getvalue(),
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+                email.send(fail_silently=False)
+                ok += 1
+            except Exception as exc:
+                self.message_user(
+                    request,
+                    f"Error al enviar {instance}: {exc}",
+                    level=messages.ERROR,
+                )
+                fail += 1
+        if ok:
+            self.message_user(
+                request,
+                f"Documento reenviado correctamente para {ok} registro(s).",
+                level=messages.SUCCESS,
+            )
+        if fail and not ok:
+            self.message_user(
+                request,
+                "Ningún documento pudo ser reenviado.",
+                level=messages.ERROR,
+            )
+
+    @admin.action(description="Reenviar correo con el documento - PATRIMONIOAL")
+    def reenviar_correo_patrimonial(self, request, queryset):
+        TEMPLATE_FILE = (
+            Path(__file__).resolve().parent /
+            "templates" / "insolvency_template_no_assets.docx"
+        )
+
+        ok, fail = 0, 0
+        for instance in queryset:
+            try:
+                doc_file = render_document(
+                    instance, path=TEMPLATE_FILE
+                )
+                email = EmailMessage(
+                    subject=f"ADMIN | Attlas | Solicitud de insolvencia patrimonial {instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}",
+                    body=(
+                        "Adjunto encontrarás el documento de insolvencia patrimonial generado automáticamente desde la plataforma de insolvencia.\n\n"
+                        f"{instance.debtor_first_name} {instance.debtor_last_name} - {instance.debtor_document_number}"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=["insolvencia@propensionesabogados.com"],
+                )
+                email.attach(
+                    f"{instance.debtor_document_number}_insolvencia_patrimonial.docx",
                     doc_file.getvalue(),
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 )
