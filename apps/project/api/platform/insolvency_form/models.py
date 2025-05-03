@@ -314,10 +314,11 @@ class AttlasInsolvencyCreditorsModel(TimeStampedModel):
     credit_classification = models.CharField(
         _('Credit Classification'),
         max_length=100,
-        default='',
+        default='5',
         blank=True,
         null=True
     )
+
     def clean(self):
         super().clean()
 
@@ -434,9 +435,8 @@ class AttlasInsolvencyJudicialProcessModel(TimeStampedModel):
         _('Affectation'),
         max_length=100
     )
-    court = models.CharField(
+    court = models.TextField(
         _('Court'),
-        max_length=100
     )
     description = models.TextField(
         _('Description')
@@ -680,7 +680,6 @@ class AttlasInsolvencySignatureModel(TimeStampedModel):
         blank=True,
         null=True
     )
-    
 
     def get_signature(self):
         return ContentFile(

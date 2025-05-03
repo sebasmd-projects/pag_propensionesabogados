@@ -122,7 +122,11 @@ def _build_creditors(instance: AttlasInsolvencyFormModel) -> list:
     Serializa los acreedores para Jinja.
     """
     creditors = []
+    total_capital = 0.0
+    
     for c in instance.creditors_form.all().order_by("created"):
+        capital = float(c.capital_value or 0)
+        total_capital += capital
         creditors.append(
             {
                 "creditor": c.creditor,
@@ -140,7 +144,7 @@ def _build_creditors(instance: AttlasInsolvencyFormModel) -> list:
                 "credit_classification": c.credit_classification,
             }
         )
-    return creditors
+    return creditors, total_capital
 
 
 def _build_creditors_unique(instance: AttlasInsolvencyFormModel) -> list:
@@ -315,7 +319,7 @@ def build_context(doc: DocxTemplate, instance: AttlasInsolvencyFormModel) -> dic
     Construye el diccionario de contexto para docxtpl.
     """
     debtor, partner = _build_debtor_partner(instance)
-    creditors = _build_creditors(instance)
+    creditors, total_capital = _build_creditors(instance)
     unique_creditors = _build_creditors_unique(instance)
     assets = _build_assets(instance)
     judicial = _build_judicial_processes(instance)
@@ -351,6 +355,7 @@ def build_context(doc: DocxTemplate, instance: AttlasInsolvencyFormModel) -> dic
         "debtor": debtor,
         "partner": partner,
         "creditors": creditors,
+        "total_capital": total_capital,
         "unique_creditors": unique_creditors,
         "assets": assets,
         "judicial_processes": judicial,

@@ -105,7 +105,7 @@ class AttlasInsolvencyAuthModel(TimeStampedModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.document_number} - {self.id}"
+        return f"{self.document_number} - {self.birth_date}"
 
     class Meta:
         db_table = 'apps_project_api_platform_attlas_insolvency_auth'

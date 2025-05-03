@@ -187,9 +187,9 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
 
     list_display = (
         'id',
+        'user',
         'created',
         'updated',
-        'user',
         'current_step',
         'is_completed',
         'email_sent',
@@ -214,6 +214,18 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
                 'fields': (
                     'id',
                     'user',
+                ),
+            }
+        ),
+        (
+            _('Status'),
+            {
+                'fields': (
+                    'current_step',
+                    'is_completed',
+                    'email_sent',
+                    'email_error',
+                    'is_active',
                 ),
             }
         ),
@@ -270,18 +282,6 @@ class AttlasInsolvencyFormAdmin(nested_admin.NestedModelAdmin, ImportExportActio
                     'partner_email',
                     'partner_cell_phone',
                     'partner_relationship_duration'
-                ),
-            }
-        ),
-        (
-            _('Status'),
-            {
-                'fields': (
-                    'current_step',
-                    'is_completed',
-                    'email_sent',
-                    'email_error',
-                    'is_active',
                 ),
             }
         ),
