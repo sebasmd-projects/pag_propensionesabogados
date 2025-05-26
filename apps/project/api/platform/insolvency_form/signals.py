@@ -5,7 +5,6 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.db import transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 

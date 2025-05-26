@@ -344,6 +344,15 @@ class AttlasInsolvencyCreditorsModel(TimeStampedModel):
             )
 
     def save(self, *args, **kwargs):
+        if self.nature_type in [self.NATURE_OPTIONS.CFT]:
+            self.credit_classification = '1'  # Alimentos, impuestos, laboral
+        elif self.nature_type in [self.NATURE_OPTIONS.CGM, self.NATURE_OPTIONS.CM]:
+            self.credit_classification = '2'  # Prendas y garantías mobiliarias
+        elif self.nature_type == self.NATURE_OPTIONS.CH:
+            self.credit_classification = '3'  # Hipotecas
+        else:
+            self.credit_classification = '5'  # Quirografarios (default)
+        
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -696,4 +705,40 @@ class AttlasInsolvencySignatureModel(TimeStampedModel):
         db_table = 'apps_project_api_platform_attlas_insolvency_signature'
         verbose_name = _('Attlas Insolvency Signature')
         verbose_name_plural = _('Attlas Insolvency Signatures')
+        ordering = ['-created']
+
+
+class AttlasInsolvencySummaryModel(TimeStampedModel):
+    # ---------- Step12: Summary ----------
+    form = models.ForeignKey(
+        AttlasInsolvencyFormModel,
+        on_delete=models.CASCADE,
+        related_name='summary_form'
+    )
+    
+    conciliation_value = models.DecimalField(
+        _('Conciliation Value'),
+        max_digits=15,
+        decimal_places=2,
+        blank=True,
+        null=True
+    )
+    
+    propensiones_value = models.DecimalField(
+        _('Propensiones Value'),
+        max_digits=15,
+        decimal_places=2,
+        blank=True,
+        null=True
+    )
+    
+    
+
+    def __str__(self):
+        return f"Summary for {self.form.debtor_first_name} {self.form.debtor_last_name}"
+
+    class Meta:
+        db_table = 'apps_project_api_platform_attlas_insolvency_summary'
+        verbose_name = _('Attlas Insolvency Summary')
+        verbose_name_plural = _('Attlas Insolvency Summaries')
         ordering = ['-created']

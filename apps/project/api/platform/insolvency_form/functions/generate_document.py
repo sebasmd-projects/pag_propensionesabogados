@@ -152,6 +152,8 @@ def _build_creditors_unique(instance: AttlasInsolvencyFormModel) -> list:
     Devuelve una lista de acreedores únicos, mostrando la versión más completa de cada uno.
     Prioriza registros que tengan tanto NIT como contacto, luego los que tengan NIT,
     y finalmente los que solo tienen nombre.
+    Si el acreedor es 'CRÉDITO PERSONAL' y no tiene contacto, se asigna 
+    'Se desconoce la dirección de notificación' al contacto.
     """
     creditors_dict = {}  # Usaremos el nombre normalizado como clave
 
@@ -163,7 +165,11 @@ def _build_creditors_unique(instance: AttlasInsolvencyFormModel) -> list:
             creditors_dict[norm_creditor] = {
                 "creditor": c.creditor,
                 "nit": c.nit,
-                "creditor_contact": c.creditor_contact,
+                "creditor_contact": (
+                    "Se desconoce la dirección de notificación"
+                    if norm_creditor == 'crédito personal' and not c.creditor_contact
+                    else c.creditor_contact
+                ),
             }
         else:
             # Si ya existe, decidimos si actualizarlo con datos más completos
@@ -174,8 +180,11 @@ def _build_creditors_unique(instance: AttlasInsolvencyFormModel) -> list:
                 existing["nit"] = c.nit
 
             # Actualizamos contacto si el nuevo lo tiene y el existente no
-            if not existing["creditor_contact"] and c.creditor_contact:
-                existing["creditor_contact"] = c.creditor_contact
+            if not existing["creditor_contact"]:
+                if c.creditor_contact:
+                    existing["creditor_contact"] = c.creditor_contact
+                elif norm_creditor == 'crédito personal':
+                    existing["creditor_contact"] = "Se desconoce la dirección de notificación"
 
     # Convertimos el diccionario a lista manteniendo solo los valores
     return list(creditors_dict.values())

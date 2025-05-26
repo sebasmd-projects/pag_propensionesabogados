@@ -53,6 +53,48 @@ def _find_in_local_db(creditor_name: str) -> tuple[Optional[str], Optional[str]]
 _RE_JSON = re.compile(r"\{.*\}", re.S)
 
 
+def creditor_nit_contact_prompt(self, creditor_name):
+    prompt = f"""
+    Eres un asistente jurídico colombiano.
+    Cuando se te pida 'Dame el NIT y el correo de contacto de X',
+    debes responder únicamente un JSON plano con las claves:
+    'nit' (número de identificación tributaria) y 'contact' (correo electrónico).
+    
+    Instrucciones clave:
+    - No incluyas explicaciones, descripciones ni texto adicional.
+    - El JSON debe estar sin encabezados, sin ```json ni backticks, solo las llaves y el contenido.
+    - Si conoces el correo de notificaciones judiciales de la entidad, usa ese. Si no, usa el correo general de contacto.
+    - Para los siguientes bancos usa exactamente estos correos judiciales (sin intentar buscar otros):
+      Bancolombia: notificacijudicial@bancolombia.com.co
+      Banco de Bogotá: rjudicial@bancodebogota.com.co
+      Banco Davivienda: notificacionesjudiciales@davivienda.com
+      Banco Popular: notificacionesjudicialesvjuridica@bancopopular.com.co
+      Banco BBVA: notifica.co@bbva.com
+      Banco AV Villas: notificacionesjudiciales@bancoavvillas.com.co
+      Banco Itaú: notificaciones.juridico@itau.co
+      Banco Colpatria: notificbancolpatria@scotiabankcolpatria.com
+      Banco BCSC: notificacionesjudiciales@fundaciongruposocial.co
+      Banco Citibank: legalnotificacionescitibank@citi.com.co
+      Banco Agrario de Colombia: notificacionesjudiciales@bancoagrario.gov.co
+    
+    Ejemplo de respuesta:
+    {{
+        "nit": "123456789",
+        "contact": "notificaciones@empresa.com"
+    }}
+    """
+
+    messages = [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": f"Dame el NIT y el correo de contacto de {creditor_name}."}
+    ]
+
+    model = "gpt-4o"
+    temperature = 0
+
+    return messages, model, temperature
+
+
 def _find_via_chatgpt(creditor_name: str) -> Tuple[Optional[str], Optional[str]]:
     """
     Pregunta a ChatGPT por el NIT y al menos un dato de contacto.
@@ -60,8 +102,8 @@ def _find_via_chatgpt(creditor_name: str) -> Tuple[Optional[str], Optional[str]]
     """
     try:
         api = ChatGPTAPI()
-        messages, model = api.creditor_nit_contact_prompt(creditor_name)
-        response = api.get_response_json(model, messages)
+        messages, model, temperature = creditor_nit_contact_prompt(creditor_name)
+        response = api.get_response_json(model, messages, temperature)
 
         match = _RE_JSON.search(response)
 

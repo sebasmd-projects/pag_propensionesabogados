@@ -130,6 +130,63 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
         # 5) Devolver datos actualizados
         return Response(self.get_serializer(instance).data)
 
+
+    def debtor_cessation_report_prompt(self, user_text):
+        prompt = f"""
+        Eres un asistente jurídico experto en insolvencia para Colombia, 
+        trabajando en una firma de abogados especializada en proteger los derechos y la dignidad de las personas endeudadas.
+        
+        Tienes frente a ti un relato escrito por un cliente:
+        \"\"\"{user_text}\"\"\"
+
+        Tu tarea es transformarlo en una declaración jurídica bien estructurada, 
+        que exprese de forma conmovedora, humana y comprensible las causas que llevaron al estado de insolvencia.
+
+        Ten en cuenta:
+        - No inventes información ni agregues hechos que no estén en el texto original.
+        - Usa términos jurídicos precisos para sustituir verbos o frases genéricas.
+        - Resalta las categorías legales que aplican (sin enumerarlas explícitamente).
+        - Identifica claramente la relación causa-efecto entre los hechos narrados y la incapacidad de pago.
+        - Usa un lenguaje emotivo pero profesional, que refleje el sufrimiento humano detrás de los hechos.
+        - No incluyas referencias a leyes, artículos ni normas.
+        - Mantén la coherencia, fluidez y conexión entre ideas.
+        - Escribe en texto corrido pero con parrafos, sin listas, manteniendo un tono serio, empático y creíble.
+        
+        Causas legales de insolvencia:
+        - Pérdida de empleo o disminución sustancial de ingresos
+        - Enfermedades graves, tratamientos médicos costosos o discapacidad
+        - Dependencia económica de familiares o personas a cargo
+        - Endeudamiento excesivo por crédito de consumo, libranzas o tarjetas
+        - Eventos fortuitos o de fuerza mayor (desastres naturales, robos, pandemias)
+        - Negocios fallidos o pérdidas patrimoniales
+        - Embargos, secuestros de cuentas o descuentos por libranza desproporcionados
+        - Fallecimiento de un aportante del hogar
+        - Desempleo prolongado del deudor o del cónyuge
+        - Alteración severa en la economía del país o del sector donde trabaja
+        - Pérdida o reducción del contrato de prestación de servicios
+        - Incremento desproporcionado en el costo de vida (inflación, servicios, arriendo)
+        - Errores en la estructuración de los créditos otorgados (sobreendeudamiento inducido)
+        - Separación o ruptura conyugal que afectó la economía del hogar
+        - Pago simultáneo de cuotas hipotecarias y otras obligaciones conyugales
+        - Carga financiera por estudios o educación de hijos
+        - Incumplimientos contractuales de terceros que afectaron el flujo de caja del deudor
+        
+        Recuerda: el resultado debe sonar más elaborado y profundo, 
+        reflejando la lucha, las dificultades y la esperanza de la persona,
+        sin cambiar el fondo de lo relatado ni exagerar los hechos.
+        """
+
+        messages = [
+            {"role": "system", "content": "Eres un transformador de texto legal, capaz de redactar declaraciones conmovedoras, humanas y bien argumentadas."},
+            {"role": "user", "content": prompt}
+        ]
+
+        model = "gpt-4o"
+        temperature = 0.6
+
+        return messages, model, temperature
+
+
     def perform_update(self, serializer, step):
         """
         Si estamos en el paso 4 y llegó debtor_cessation_report,
@@ -145,9 +202,8 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
             if raw_report and use_ai:
                 try:
                     api = ChatGPTAPI()
-                    msgs, model = api.debtor_cessation_report_prompt(
-                        raw_report)
-                    polished = api.get_response(model, msgs)
+                    msgs, model, temperature = self.debtor_cessation_report_prompt(raw_report)
+                    polished = api.get_response(model=model, messages=msgs, temperature=temperature)
                     save_kwargs['debtor_cessation_report'] = polished
                 except Exception as e:
                     logger.error(
