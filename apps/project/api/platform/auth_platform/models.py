@@ -59,7 +59,7 @@ class AttlasInsolvencyAuthConsultantsModel(TimeStampedModel):
         return f"{self.user} {self.first_name} {self.last_name}"
 
     def save(self, *args, **kwargs):
-        if self.password:
+        if self.password and not self.password.startswith("argon2$"):
             self.password = make_password(self.password)
         if not self.user:
             self.user = self.get_initials

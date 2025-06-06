@@ -181,7 +181,7 @@ class AttlasInsolvencyFormModel(TimeStampedModel):
         null=True
     )
     partner_relationship_duration = models.IntegerField(
-        _('Partner Relationship Duration (months)'),
+        _('Partner Relationship Duration (years)'),
         blank=True,
         default=0,
     )

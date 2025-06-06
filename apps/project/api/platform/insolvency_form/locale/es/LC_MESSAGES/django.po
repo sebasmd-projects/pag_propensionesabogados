@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-06 01:03-0500\n"
-"PO-Revision-Date: 2025-04-06 01:04-0500\n"
+"POT-Creation-Date: 2025-06-06 08:16-0500\n"
+"PO-Revision-Date: 2025-06-06 08:03-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19,26 +19,423 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.10.0\n"
 
-#: .\apps\project\api\platform\insolvency_form\admin.py:34
-msgid "Information"
-msgstr "Información"
+#: .\apps\project\api\platform\insolvency_form\admin.py:221
+msgid "Status"
+msgstr "Estado"
 
-#: .\apps\project\api\platform\insolvency_form\admin.py:37
-msgid "Email"
-msgstr "Correo"
+#: .\apps\project\api\platform\insolvency_form\admin.py:233
+msgid "1. Legal requirements"
+msgstr "1. Requisitos legales"
 
-#: .\apps\project\api\platform\insolvency_form\admin.py:40
-msgid "Other"
-msgstr "Otro"
+#: .\apps\project\api\platform\insolvency_form\admin.py:242
+msgid "2. Personal data"
+msgstr "2. Datos personales"
 
-#: .\apps\project\api\platform\insolvency_form\models.py:35
-msgid "Form Data"
-msgstr "Información del formulario"
+#: .\apps\project\api\platform\insolvency_form\admin.py:259
+msgid "3. Cessation of payments Statement"
+msgstr "3. Declaración de cese de pagos"
 
-#: .\apps\project\api\platform\insolvency_form\models.py:59
+#: .\apps\project\api\platform\insolvency_form\admin.py:267
+msgid "4. Cessation of payments Report"
+msgstr "4. Informe de cese de pagos"
+
+#: .\apps\project\api\platform\insolvency_form\admin.py:275
+msgid "9. Partner data"
+msgstr "9. Datos de la pareja"
+
+#: .\apps\project\api\platform\insolvency_form\admin.py:289
+msgid "Stamped Times"
+msgstr "Tiempos"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:40
+msgid "Current Step"
+msgstr "Paso actual"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:44
+msgid "Is Completed"
+msgstr "Está completado"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:54
+msgid "Accepted Legal Requirements"
+msgstr "Requisitos legales aceptados"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:58
+msgid "Accepted Terms and Conditions"
+msgstr "Términos y condiciones aceptados"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:66
+msgid "Debtor Document Number"
+msgstr "Número de documento del deudor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:72
+msgid "Debtor Expedition City"
+msgstr "Ciudad de la Expedición del Deudor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:78
+msgid "Debtor First Name"
+msgstr "Nombre del deudor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:84
+msgid "Debtor Last Name"
+msgstr "Apellido del deudor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:90
+msgid "Debtor is Merchant"
+msgstr "El deudor es comerciante"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:94
+msgid "Debtor Cell Phone"
+msgstr "Teléfono celular del deudor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:100
+msgid "Debtor Email"
+msgstr "Correo electrónico del deudor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:106
+msgid "Debtor Birth Date"
+msgstr "Fecha de nacimiento del deudor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:111
+msgid "Debtor Location/Address"
+msgstr "Ubicación/Dirección del deudor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:117
+msgid "Sex"
+msgstr "Sexo de nacimiento"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:126
+msgid "Debtor Statement Accepted"
+msgstr "Declaración aceptada"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:133
+msgid "Debtor Cessation Report"
+msgstr "Informe de Cese de Deudores"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:147
+msgid "Marital Status"
+msgstr "Estado civil"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:154
+msgid "Partner Document Number"
+msgstr "Número de documento de la pareja"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:160
+msgid "Partner Name"
+msgstr "Nombres de la pareja"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:166
+msgid "Partner Last Name"
+msgstr "Apellidos de la pareja"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:172
+msgid "Partner Email"
+msgstr "Correo de la pareja"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:178
+msgid "Partner Phone"
+msgstr "Celular/Teléfono de la pareja "
+
+#: .\apps\project\api\platform\insolvency_form\models.py:184
+msgid "Partner Relationship Duration (years)"
+msgstr "Tiempo de la relación (años)"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:211
 msgid "Attlas Insolvency Form"
 msgstr "ATTLAS | Formulario de insolvencia"
 
-#: .\apps\project\api\platform\insolvency_form\models.py:60
+#: .\apps\project\api\platform\insolvency_form\models.py:212
 msgid "Attlas Insolvency Forms"
 msgstr "ATTLAS | Formulario de insolvencia"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:254
+msgid "Creditor"
+msgstr "Acreedor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:260
+msgid "NIT"
+msgstr "NIT"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:266
+msgid "Creditor Contact"
+msgstr "Contacto del acreedor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:272
+msgid "Nature Type"
+msgstr "Tipo de naturaleza"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:277
+msgid "Other Nature"
+msgstr "Otra naturaleza"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:283
+msgid "Personal Credit Interest Rate"
+msgstr "Tasa de interés del crédito personal"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:290
+msgid "Personal Consanguinity"
+msgstr "Consanguinidad "
+
+#: .\apps\project\api\platform\insolvency_form\models.py:297
+msgid "Guarantee"
+msgstr "Garantía"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:303
+msgid "Capital Value"
+msgstr "Valor capital"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:310
+msgid "Days Overdue"
+msgstr "Días en mora"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:315
+msgid "Credit Classification"
+msgstr "Clase"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:328
+msgid "This field is required when 'Other' is selected."
+msgstr "Este campo es obligatorio cuando se selecciona 'Otro'."
+
+#: .\apps\project\api\platform\insolvency_form\models.py:335
+#: .\apps\project\api\platform\insolvency_form\models.py:342
+msgid "This field is required when 'Personal Credit' is selected."
+msgstr "Este campo es obligatorio cuando se selecciona “Crédito personal”."
+
+#: .\apps\project\api\platform\insolvency_form\models.py:364
+#: .\apps\project\api\platform\insolvency_form\models.py:365
+msgid "Attlas Insolvency Creditors"
+msgstr "ATTLAS | Acreedores"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:381
+msgid "Asset Type"
+msgstr "Tipo de activo"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:386
+msgid "Description/Name"
+msgstr "Descripción/Nombre"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:390
+msgid "Identification"
+msgstr "Identificación"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:394
+msgid "Lien"
+msgstr "Retención"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:400
+#: .\apps\project\api\platform\insolvency_form\models.py:444
+msgid "Affectation"
+msgstr "Afectación"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:406
+msgid "Legal Measure"
+msgstr "Medida legal"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:411
+msgid "Patrimonial Society"
+msgstr "Sociedad Patrimonial"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:417
+msgid "Commercial Value"
+msgstr "Valor comercial"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:422
+msgid "Exclusion"
+msgstr "Exclusión"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:431
+msgid "Attlas Insolvency Asset"
+msgstr "ATTLAS | Activo"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:432
+msgid "Attlas Insolvency Assets"
+msgstr "ATTLAS | Activos"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:448
+msgid "Court"
+msgstr "Juzgado"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:451
+msgid "Description"
+msgstr "Descripción"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:454
+msgid "Case Code"
+msgstr "Radicado "
+
+#: .\apps\project\api\platform\insolvency_form\models.py:458
+msgid "Process Status"
+msgstr "Estado del proceso"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:467
+msgid "Attlas Insolvency Judicial Process"
+msgstr "ATTLAS | Proceso judicial"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:468
+msgid "Attlas Insolvency Judicial Processes"
+msgstr "ATTLAS | Procesos judiciales"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:487
+msgid "Income Type"
+msgstr "Tipo de ingreso"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:492
+#: .\apps\project\api\platform\insolvency_form\models.py:521
+msgid "Amount"
+msgstr "Cantidad"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:504
+msgid "Attlas Insolvency Income"
+msgstr "ATTLAS | Ingreso"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:505
+msgid "Attlas Insolvency Incomes"
+msgstr "ATTLAS | Ingresos"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:517
+msgid "Detail"
+msgstr "Detalles"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:531
+msgid "Attlas Insolvency Income Other"
+msgstr "ATTLAS | Ingreso - Otro"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:532
+msgid "Attlas Insolvency Incomes Other"
+msgstr "ATTLAS | Ingresos - Otros"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:542
+msgid "Insolvency Form"
+msgstr "ATTLAS | Formulario de insolvencia"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:545
+msgid "Has Food Obligation"
+msgstr "Tiene obligación alimentaria"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:549
+msgid "Proposed Monthly Value"
+msgstr "Valor mensual propuesto"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:556
+msgid "Children Count"
+msgstr "Cantidad de hijos"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:562
+msgid "Attlas Insolvency Resource"
+msgstr "ATTLAS | Gasto"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:563
+msgid "Attlas Insolvency Resources"
+msgstr "ATTLAS | Gastos"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:586
+msgid "Male"
+msgstr "Hombre"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:587
+msgid "Female"
+msgstr "Mujer"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:593
+msgid "Resource"
+msgstr "Recursos"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:596
+msgid "Table Title"
+msgstr "Título de la tabla"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:600
+msgid "Relationship"
+msgstr "Relación"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:605
+msgid "Has Disability"
+msgstr "Tiene discapacidad"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:609
+msgid "Age"
+msgstr "Edad"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:614
+msgid "Gender"
+msgstr "Sexo de nacimiento"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:623
+msgid "Attlas Insolvency Resource Table"
+msgstr "ATTLAS | Tabla de dependiente"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:624
+msgid "Attlas Insolvency Resource Tables"
+msgstr "ATTLAS | Tablas de dependientes"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:639
+msgid "Resource Table"
+msgstr "Tabla de dependientes"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:642
+msgid "Expense Label"
+msgstr "Etiqueta de gastos"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:646
+msgid "Legal Support"
+msgstr "Soporte legal"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:651
+msgid "Value"
+msgstr "Valor"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:659
+msgid "Attlas Insolvency Resource Item"
+msgstr "ATTLAS | Elemento de la tabla de dependientes"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:660
+msgid "Attlas Insolvency Resource Items"
+msgstr "ATTLAS | Elementos de la tabla de dependientes"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:676
+msgid "Signature"
+msgstr "Firma"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:681
+msgid "Client IP"
+msgstr "IP del cliente"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:687
+msgid "User Agent"
+msgstr "Agente de usuario"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:706
+msgid "Attlas Insolvency Signature"
+msgstr "ATTLAS | Firma"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:707
+msgid "Attlas Insolvency Signatures"
+msgstr "ATTLAS | Firmas"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:720
+msgid "Conciliation Value"
+msgstr "Valor de conciliación"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:728
+msgid "Propensiones Value"
+msgstr "Valor de Propensiones"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:742
+msgid "Attlas Insolvency Summary"
+msgstr "ATTLAS | Resumen"
+
+#: .\apps\project\api\platform\insolvency_form\models.py:743
+msgid "Attlas Insolvency Summaries"
+msgstr "ATTLAS | Resumen"
+
+#: .\apps\project\api\platform\insolvency_form\templates\signature\signature_widget.html:8
+msgid "Delete signature"
+msgstr "Eliminar firma"
+
+#~ msgid "Email"
+#~ msgstr "Correo"
+
+#~ msgid "Other"
+#~ msgstr "Otro"
+
+#~ msgid "Form Data"
+#~ msgstr "Información del formulario"

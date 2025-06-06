@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-05 20:55-0500\n"
-"PO-Revision-Date: 2025-04-05 21:22-0500\n"
+"POT-Creation-Date: 2025-06-06 07:10-0500\n"
+"PO-Revision-Date: 2025-06-06 07:09-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19,14 +19,40 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.10.0\n"
 
-#: .\apps\project\api\platform\auth_platform\api\serializers.py:27
+#: .\apps\project\api\platform\auth_platform\api\serializers.py:33
+#: .\apps\project\api\platform\auth_platform\api\serializers.py:39
+msgid "Invalid code"
+msgstr "Código invalido"
+
+#: .\apps\project\api\platform\auth_platform\api\serializers.py:37
 msgid "Invalid credentials"
 msgstr "Credenciales invalidas"
 
-#: .\apps\project\api\platform\auth_platform\models.py:50
-msgid "Attlas Insolvency Auth"
-msgstr "ATTLAS Insolvencia | Auth"
+#: .\apps\project\api\platform\auth_platform\models.py:26
+msgid "first name"
+msgstr "Nombres"
 
-#: .\apps\project\api\platform\auth_platform\models.py:51
+#: .\apps\project\api\platform\auth_platform\models.py:31
+msgid "last name"
+msgstr "Apellidos"
+
+#: .\apps\project\api\platform\auth_platform\models.py:36
+msgid "user"
+msgstr "Usuario"
+
+#: .\apps\project\api\platform\auth_platform\models.py:44
+msgid "password"
+msgstr "Contraseña"
+
+#: .\apps\project\api\platform\auth_platform\models.py:72
+#: .\apps\project\api\platform\auth_platform\models.py:73
+msgid "ATTLAS Insolvency | Consultants"
+msgstr "ATTLAS Insolvencia | Consultores"
+
+#: .\apps\project\api\platform\auth_platform\models.py:112
+msgid "Attlas Insolvency Auth"
+msgstr "ATTLAS Insolvencia | Sesión"
+
+#: .\apps\project\api\platform\auth_platform\models.py:113
 msgid "Attlas Insolvency Auths"
-msgstr "ATTLAS Insolvencia | Auth"
+msgstr "ATTLAS Insolvencia | Sesión"

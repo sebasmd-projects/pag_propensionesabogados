@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-05 20:55-0500\n"
-"PO-Revision-Date: 2025-03-19 12:24-0500\n"
+"POT-Creation-Date: 2025-06-06 08:16-0500\n"
+"PO-Revision-Date: 2025-06-06 07:42-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -219,32 +219,23 @@ msgstr "Experticia Jurídica con Calidad Humana , Propensiones Internacional"
 
 #: .\apps\common\core\templates\pages\index.html:7
 #: .\apps\common\core\templates\pages\index.html:11
-#: .\apps\common\core\templates\pages\index.html:12
 #: .\apps\common\core\templates\pages\index.html:22
 msgid ""
-"Specialists in negative pensions and historical asset management. We recover "
-"your pension rights and offer strategic solutions for the legal "
-"administration of historical assets. More than 10 years of experience "
-"support you."
+"Specialized legal and financial consulting in Colombia and internationally. "
+"Pensions, insolvency, foreign investments, and more."
 msgstr ""
-"Especialistas en pensiones negadas y gestión de activos históricos. "
-"Recuperamos sus derechos de pensión y ofrecemos soluciones estratégicas para "
-"la administración legal de bonos históricos. Más de 10 años de experiencia "
-"te avalan."
+"Asesoría legal y financiera especializada en Colombia e internacionalmente. "
+"Pensiones, insolvencia, inversiones extranjeras y más."
 
 #: .\apps\common\core\templates\pages\index.html:8
 msgid ""
-"buyers, intermediaries, holders, positions, historical assets, historical "
-"assets, institutionalization of operations, international management, "
-"historical active lawyers, active regulatory compliance, pension lawyers, "
-"pension solution, denied pension, pension law, Colombia lawyers, "
-"international lawyers"
+"Legal advice, financial insolvency, denied pensions, foreign investments, "
+"civil law, criminal law, paymaster, urgent conciliation, Propensiones "
+"Internacional"
 msgstr ""
-"compradores, intermediarios, posturas, activos históricos, bonos históricos, "
-"institucionalización de operaciones, gestión internacional, abogados activos "
-"históricos, cumplimiento normativo activos, abogados en pensiones, solución "
-"pensional, pensión negada, derecho pensional, abogados Colombia, abogados "
-"internacionales"
+"Asesoría legal, insolvencia económica, pensiones negadas, inversiones "
+"extranjeras, derecho civil, derecho penal, paymaster, conciliación urgente, "
+"Propensiones Internacional"
 
 #: .\apps\common\core\templates\pages\sections\11_stats_section.html:19
 msgid "Won Cases"
@@ -420,7 +411,7 @@ msgstr ""
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:25
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:28
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:61
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:96
 #: .\apps\common\core\templates\partials\footer.html:16
 msgid "Economic Insolvency"
 msgstr "Insolvencia Económica"
@@ -431,7 +422,7 @@ msgstr "Proceso de insolvencia económica para personas físicas no comerciantes
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:36
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:39
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:81
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:117
 #: .\apps\common\core\templates\partials\footer.html:12
 msgid "Denied Pensions"
 msgstr "Pensiones negadas"
@@ -542,21 +533,35 @@ msgstr "Servicios"
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:10
 msgid ""
 "\n"
-"        Legal services nationwide in Armenia, Bogota, Buenaventura, Buga, "
-"Cali, Cartago, Cucuta, Ibague, Medellin, Quimbaya y Tulua.\n"
+"      Propensiones Internacional acts as advisory agent and accredited "
+"representative in Colombia for a group of foreign\n"
+"      investors.\n"
+"      "
+msgstr ""
+"\n"
+"Propensiones Internacional actúa como agente asesor y representante "
+"acreditado en Colombia para un grupo de inversionistas extranjeros."
+
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:17
+msgid ""
+"\n"
+"      Legal services nationwide in Armenia, Bogota, Buenaventura, Buga, "
+"Cali, Cartago, Cucuta, Ibague, Medellin,\n"
+"      Quimbaya y Tulua.\n"
 "      "
 msgstr ""
 "\n"
 "Servicios legales a nivel nacional en Armenia, Bogotá, Buenaventura, Buga, "
 "Cali, Cartago, Cúcuta, Ibagué, Medellín, Quimbaya y Tuluá."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:15
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:24
 msgid ""
 "\n"
 "      Our firm provides a comprehensive range of specialized legal and "
-"financial services to address challenges effectively and deliver lasting "
-"solutions. We offer expert support at both national and international "
-"levels, ensuring your interests are protected and optimized.\n"
+"financial services to address challenges\n"
+"      effectively and deliver lasting solutions. We offer expert support at "
+"both national and international levels,\n"
+"      ensuring your interests are protected and optimized.\n"
 "      "
 msgstr ""
 "\n"
@@ -565,17 +570,73 @@ msgstr ""
 "duraderas. Brindamos apoyo experto tanto a nivel nacional como "
 "internacional, asegurando que sus intereses estén protegidos y optimizados."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:21
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:32
+msgid "Strategic International Representation:"
+msgstr "Representación Internacional Estratégica:"
+
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:34
+msgid ""
+"\n"
+"          We act as advisory agent and accredited representative in Colombia "
+"for a group of foreign investors, with\n"
+"          scope in:\n"
+"          "
+msgstr ""
+"\n"
+"Actuamos como agente consejero y representante acreditado en Colombia de un "
+"grupo de inversionistas extranjeros, con alcance en:"
+
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:41
+msgid ""
+"Structuring and management of hotel projects with foreign capital for "
+"Colombia."
+msgstr ""
+"Estructuración y gestión de proyectos hoteleros con capital extranjero para "
+"Colombia."
+
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:42
+msgid "Government investment supported by PPP schemes for Colombia."
+msgstr "Inversión gubernamental respaldada por esquemas APP para Colombia."
+
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:43
+msgid "Purchase and consolidation of carbon credits for Colombia."
+msgstr "Compra y consolidación de bonos de carbono para Colombia."
+
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:44
+msgid ""
+"Arbitration financing and acquisition of final court judgments for Colombia."
+msgstr ""
+"Financiación de arbitrajes y adquisición de sentencias judiciales en firme "
+"para Colombia."
+
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:45
+msgid "Purchase of final judgments against government entities for Colombia."
+msgstr ""
+"Compra de sentencias ejecutoriadas en turno de pago contra entidades del "
+"Estado para Colombia."
+
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:47
+msgid ""
+"We provide legal advice, legal structuring, and institutional coordination "
+"for high-impact operations in\n"
+"            the public and private sectors of the country."
+msgstr ""
+"Prestamos asesoría legal, estructuración jurídica y articulación "
+"institucional para operaciones de alto impacto en el ámbito público y "
+"privado del país."
+
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:52
 msgid "National Services:"
 msgstr "Servicios Nacionales:"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:23
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:54
 msgid ""
 "\n"
 "          Solutions tailored to individuals and businesses in Colombia, "
-"including pensions, economic insolvency, civil and criminal law, family "
-"matters, labor disputes, and urgent conciliations. We focus on delivering "
-"justice, financial stability, and peace of mind.\n"
+"including pensions, economic insolvency, civil\n"
+"          and criminal law, family matters, labor disputes, and urgent "
+"conciliations. We focus on delivering justice,\n"
+"          financial stability, and peace of mind.\n"
 "          "
 msgstr ""
 "\n"
@@ -584,17 +645,18 @@ msgstr ""
 "disputas laborales y conciliaciones urgentes. Nos enfocamos en brindar "
 "justicia, estabilidad financiera y tranquilidad."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:29
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:62
 msgid "International Services:"
 msgstr "Servicios Internacionales:"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:31
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:64
 msgid ""
 "\n"
 "          Specialized support for global operations, including asset "
-"management, risk analysis, paymaster services, commercial law, and emergency "
-"conciliations. We provide secure, transparent, and effective solutions for "
-"cross-border challenges.\n"
+"management, risk analysis, paymaster services,\n"
+"          commercial law, and emergency conciliations. We provide secure, "
+"transparent, and effective solutions for\n"
+"          cross-border challenges.\n"
 "          "
 msgstr ""
 "\n"
@@ -603,11 +665,12 @@ msgstr ""
 "conciliaciones urgentes. Ofrecemos soluciones seguras, transparentes y "
 "efectivas para desafíos transfronterizos."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:38
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:73
 msgid ""
 "\n"
 "      Each service can be contracted individually, specifically adapted to "
-"meet your needs and objectives with precision and excellence.\n"
+"meet your needs and objectives with precision\n"
+"      and excellence.\n"
 "      "
 msgstr ""
 "\n"
@@ -615,15 +678,16 @@ msgstr ""
 "específicamente para satisfacer sus necesidades y objetivos con precisión y "
 "excelencia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:65
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:99
 msgid ""
 "\n"
-"                  Our firm offers specialized services for handling cases of "
-"economic insolvency for both non-commercial individuals and commercial "
-"entities. We guide clients through restructuring their debts, negotiating "
-"with creditors, and ensuring compliance with legal requirements to achieve "
-"financial stability.\n"
-"                  "
+"                Our firm offers specialized services for handling cases of "
+"economic insolvency for both non-commercial\n"
+"                individuals and commercial entities. We guide clients "
+"through restructuring their debts, negotiating\n"
+"                with creditors, and ensuring compliance with legal "
+"requirements to achieve financial stability.\n"
+"                "
 msgstr ""
 "\n"
 "Nuestra firma ofrece servicios especializados para el manejo de casos de "
@@ -632,192 +696,176 @@ msgstr ""
 "deudas, la negociación con acreedores y el cumplimiento de los requisitos "
 "legales para lograr la estabilidad financiera."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:85
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:121
 msgid ""
 "We specialize in representing clients in cases\n"
-"                  of denied pensions, ensuring they receive the benefits "
-"they\n"
-"                  are entitled to. "
+"                of denied pensions, ensuring they receive the benefits they\n"
+"                are entitled to. "
 msgstr ""
 "Nos especializamos en representar a clientes en casos de pensiones negadas, "
 "asegurando que reciban los beneficios a los que tienen derecho."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:103
-msgid "Extracontractual Liability"
-msgstr "Responsabilidad Extracontractual"
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:107
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:140
 msgid ""
 "We offer expertise in cases of\n"
-"                  extracontractual liability, protecting clients from "
-"unjust\n"
-"                  claims and ensuring justice. "
+"                extracontractual liability, protecting clients from unjust\n"
+"                claims and ensuring justice. "
 msgstr ""
 "Ofrecemos experiencia en casos de responsabilidad extracontractual, "
 "protegiendo a los clientes con reclamaciones justas y garantizando la "
 "justicia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:125
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:294
-msgid "Emergency Conciliations"
-msgstr "Conciliaciones de Emergencia"
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:129
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:159
 msgid ""
 "Specialized services to handle urgent\n"
-"                  conciliations in national disputes, ensuring quick and "
+"                conciliations in national disputes, ensuring quick and "
 "effective\n"
-"                  resolutions. "
+"                resolutions. "
 msgstr ""
 "Servicios especializados para manejar conciliaciones urgentes en disputas "
 "nacionales, asegurando resoluciones rápidas y efectivas."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:147
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:174
 msgid "Business Consultancy"
 msgstr "Consultoría Empresarial"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:151
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:177
 msgid ""
 "We provide expert business consultancy,\n"
-"                  helping businesses streamline operations and maximize\n"
-"                  efficiency. "
+"                helping businesses streamline operations and maximize\n"
+"                efficiency. "
 msgstr ""
 "Brindamos consultoría empresarial experta, ayudando a las empresas a "
 "optimizar sus operaciones y maximizar la eficiencia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:167
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:192
 msgid "Field Research"
 msgstr "Investigación de Campo"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:171
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:195
 msgid ""
 "In-depth field research services to gather\n"
-"                  critical data and insights for legal and business "
-"purposes.\n"
-"                  "
+"                critical data and insights for legal and business purposes.\n"
+"                "
 msgstr ""
 "Servicios de investigación de campo en profundidad para recopilar datos y "
 "conocimientos críticos con fines legales y comerciales."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:187
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:210
 msgid "Civil Law"
 msgstr "Derecho Civil"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:191
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:213
 msgid ""
 "Our experts specialize in civil law, offering\n"
-"                  assistance with contracts, property disputes, and "
-"personal\n"
-"                  injury cases. "
+"                assistance with contracts, property disputes, and personal\n"
+"                injury cases. "
 msgstr ""
 "Nuestros expertos se especializan en derecho civil y ofrecen asistencia con "
 "contratos, disputas de propiedad y casos de infracción de derechos "
 "civiles generarales."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:207
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:228
 msgid "Criminal Law"
 msgstr "Derecho Penal"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:211
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:231
 msgid ""
 "We handle criminal law cases, ensuring\n"
-"                  effective defense strategies for our clients. "
+"                effective defense strategies for our clients. "
 msgstr ""
 "Manejamos casos de derecho penal, asegurando estrategias de defensa "
 "efectivas para nuestros clientes."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:226
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:245
 msgid "Family Law"
 msgstr "Derecho de Familia"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:230
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:248
 msgid ""
 "Our firm provides family law services\n"
-"                  including divorce, custody, and alimony. "
+"                including divorce, custody, and alimony. "
 msgstr ""
 "Nuestra firma brinda servicios de derecho familiar que incluyen divorcio, "
 "custodia y pensión alimenticia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:245
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:262
 #: .\apps\common\core\templates\partials\footer.html:24
 msgid "Labor Law"
 msgstr "Derecho Laboral"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:249
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:265
 msgid ""
 "We assist in labor law matters including\n"
-"                  employment contracts, workplace disputes, and labor "
-"rights.\n"
-"                  "
+"                employment contracts, workplace disputes, and labor rights.\n"
+"                "
 msgstr ""
 "Ayudamos en asuntos de derecho laboral, incluidos contratos laborales, "
 "conflictos laborales y derechos laborales."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:261
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:277
 msgid "International Services"
 msgstr "Internacional"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:272
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:287
 msgid "Paymaster Services"
 msgstr "Paymaster Internacional"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:276
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:290
 msgid ""
 "Specialized services to ensure smooth\n"
-"                  international financial transactions, with full "
+"                international financial transactions, with full "
 "transparency\n"
-"                  and security. "
+"                and security. "
 msgstr ""
 "Servicios especializados para gestionar los flujos de pago en transacciones "
 "internacionales de alto valor, garantizando la seguridad y la transparencia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:298
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:309
 msgid ""
 "We provide services for emergency conciliations\n"
-"                  in international disputes, ensuring swift conflict "
+"                in international disputes, ensuring swift conflict "
 "resolution.\n"
-"                  "
+"                "
 msgstr ""
 "Servicios especializados para manejar conciliaciones urgentes en disputas "
 "internacionales, asegurando resoluciones rápidas y efectivas."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:314
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:324
 msgid "Risk Analysis"
 msgstr "Análisis de riesgos"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:318
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:327
 msgid ""
 "We provide detailed risk assessments to\n"
-"                  identify and mitigate potential threats in international\n"
-"                  operations. "
+"                identify and mitigate potential threats in international\n"
+"                operations. "
 msgstr ""
 "Evaluaciones de riesgos integrales para transacciones internacionales, que "
 "abarcan factores financieros, regulatorios y operativos."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:334
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:342
 msgid "Commercial Law"
 msgstr "Derecho Comercial"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:338
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:345
 msgid ""
 "We provide legal services in international\n"
-"                  commercial law, including contract negotiation and "
-"dispute\n"
-"                  resolution. "
+"                commercial law, including contract negotiation and dispute\n"
+"                resolution. "
 msgstr ""
 "Brindamos servicios legales en derecho comercial internacional, incluida la "
 "negociación de contratos y la resolución de disputas."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:354
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:360
 msgid "Asset Management"
 msgstr "Gestión de Activos"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:358
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:363
 msgid ""
 "We offer services in managing and optimizing\n"
-"                  international assets, ensuring security and "
-"profitability.\n"
-"                  "
+"                international assets, ensuring security and profitability.\n"
+"                "
 msgstr ""
 "Ofrecemos servicios de gestión y optimización de activos internacionales de "
 "alto valor, garantizando la seguridad y la transparencia."
@@ -1025,6 +1073,36 @@ msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."
+
+#~ msgid ""
+#~ "Specialists in negative pensions and historical asset management. We "
+#~ "recover your pension rights and offer strategic solutions for the legal "
+#~ "administration of historical assets. More than 10 years of experience "
+#~ "support you."
+#~ msgstr ""
+#~ "Especialistas en pensiones negadas y gestión de activos históricos. "
+#~ "Recuperamos sus derechos de pensión y ofrecemos soluciones estratégicas "
+#~ "para la administración legal de bonos históricos. Más de 10 años de "
+#~ "experiencia te avalan."
+
+#~ msgid ""
+#~ "buyers, intermediaries, holders, positions, historical assets, historical "
+#~ "assets, institutionalization of operations, international management, "
+#~ "historical active lawyers, active regulatory compliance, pension lawyers, "
+#~ "pension solution, denied pension, pension law, Colombia lawyers, "
+#~ "international lawyers"
+#~ msgstr ""
+#~ "compradores, intermediarios, posturas, activos históricos, bonos "
+#~ "históricos, institucionalización de operaciones, gestión internacional, "
+#~ "abogados activos históricos, cumplimiento normativo activos, abogados en "
+#~ "pensiones, solución pensional, pensión negada, derecho pensional, "
+#~ "abogados Colombia, abogados internacionales"
+
+#~ msgid "Extracontractual Liability"
+#~ msgstr "Responsabilidad Extracontractual"
+
+#~ msgid "Emergency Conciliations"
+#~ msgstr "Conciliaciones de Emergencia"
 
 #~ msgid "Document: Direct Application Submission"
 #~ msgstr "Documento: Presentación Directa de la Solicitud"
@@ -1247,9 +1325,6 @@ msgstr "Gracias %(name)s por contactarnos."
 #~ "Solución tecnológica avanzada para la gestión de operaciones "
 #~ "internacionales, disponible individualmente o como parte de un paquete de "
 #~ "servicios."
-
-#~ msgid "Training for International Operations"
-#~ msgstr "Capacitación para operaciones internacionales"
 
 #~ msgid ""
 #~ "Tailored training programs to enhance the skills\n"
