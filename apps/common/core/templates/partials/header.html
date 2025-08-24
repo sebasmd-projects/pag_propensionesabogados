@@ -2,9 +2,23 @@
 
 <header id="header" class="header d-flex align-items-center fixed-top">
   <div class="container-fluid position-relative d-flex align-items-center justify-content-between">
+
+    <!-- Logo -->
     <a href="{% url 'core:index' %}" class="logo d-flex align-items-center me-auto me-xl-0">
       <img src="{% static 'assets/imgs/favicon/favicon-horizontal.png' %}" alt="" />
     </a>
+
+    <!-- Botones en pantallas grandes (fuera del nav y al inicio) -->
+    <div class="d-none d-xl-flex order-1">
+      <a class="btn mx-2" href="https://gea.propensionesabogados.com/" target="_blank" style="background-color: #fff;">
+        <img src="{% static 'assets/imgs/hero/gea-horizontal-logo.png' %}" alt="" class="img-fluid"
+          style="max-height:40px; width:auto; min-height:40px;" />
+      </a>
+      <a class="btn mx-2" href="https://fundacionattlas.org/" target="_blank" style="background-color: #fff;">
+        <img src="{% static 'assets/imgs/hero/attlas-horizontal-logo.png' %}" alt="" class="img-fluid"
+          style="max-height:40px; width:auto; min-height:40px; min-width:90px;" />
+      </a>
+    </div>
 
     <nav id="navmenu" class="navmenu">
       <ul>
@@ -82,13 +96,24 @@
           <a href="{% url 'core:index' %}#contact" aria-label="Go to contact section">{% trans 'Contact' %}</a>
         </li>
 
+        <!-- Botones en pantallas pequeñas (dentro del nav y centrados) -->
+        <li class="d-xl-none">
+          <div class="d-flex justify-content-center w-100">
+            <a class="btn mx-2 my-2" href="https://gea.propensionesabogados.com/" target="_blank"
+              style="background-color: #fff;">
+              <img src="{% static 'assets/imgs/hero/gea-horizontal-logo.png' %}" alt="" class="img-fluid"
+                style="max-height:40px; width:auto; min-height:40px;" />
+            </a>
+            <a class="btn mx-2 my-2" href="https://fundacionattlas.org/" target="_blank"
+              style="background-color: #fff;">
+              <img src="{% static 'assets/imgs/hero/attlas-horizontal-logo.png' %}" alt="" class="img-fluid"
+                style="max-height:40px; width:auto; min-height:40px; min-width:90px;" />
+            </a>
+          </div>
+        </li>
+
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
-
-    <a class="btn mx-2" href="https://fundacionattlas.org/" target="_blank" style="background-color: #fff;">
-      <img src="{% static 'assets/imgs/hero/attlas-horizontal-logo.png' %}" alt="" class="img-fluid"
-        style="max-height:40px; width:auto;" />
-    </a>
   </div>
 </header>

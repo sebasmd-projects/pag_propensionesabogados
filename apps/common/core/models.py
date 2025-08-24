@@ -15,6 +15,7 @@ class ContactModel(TimeStampedModel):
     class PageChoices(models.TextChoices):
         PROPENSIONES = 'PROPENSIONES', _('Propensiones')
         ATTLAS = 'ATTLAS', _('Attlas')
+        GEA = 'GEA', _('GEA')
 
     unique_id = models.UUIDField(
         default=uuid.uuid4,
