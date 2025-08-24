@@ -29,8 +29,8 @@
                 {% endif %}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">{% trans 'Close'
-                    %}</button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                    {% trans 'Close' %}</button>
                 {% if LANGUAGE_CODE == 'en' and modal_banner.link_en %}
                 <a href="{{ modal_banner.link_en }}" target="_blank" class="btn btn-outline-success">
                     {% trans 'View more' %}</a>
