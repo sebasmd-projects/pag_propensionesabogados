@@ -1,10 +1,9 @@
 {% load static i18n %}
 
 <section id="hero" class="hero section dark-background">
-  <video autoplay muted loop playsinline class="hero-video">
-    <source src="{% static 'assets/video/hero-bg-video.webp' %}" type="video/mp4" />
-    {% trans 'Your browser does not support the video tag.' %}
-  </video>
+  <div class="hero-video">
+    <img src="{% static 'assets/video/hero-bg-video.webp' %}" alt="Hero background">
+  </div>
 
   <div class="containerHero">
     <div class="row mx-4">
