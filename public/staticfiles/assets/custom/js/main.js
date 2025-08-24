@@ -119,8 +119,15 @@
    */
   const preloader = document.querySelector("#preloader");
   if (preloader) {
+    // Remover el preloader a los 1000ms como máximo
+    const forceRemove = setTimeout(() => {
+      if (preloader) preloader.remove();
+    }, 1000);
+
+    // Si la página carga antes, lo quitamos y cancelamos el timeout
     window.addEventListener("load", () => {
-      preloader.remove();
+      if (preloader) preloader.remove();
+      clearTimeout(forceRemove);
     });
   }
 
