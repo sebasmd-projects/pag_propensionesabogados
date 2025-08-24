@@ -119,10 +119,15 @@
    */
   const preloader = document.querySelector("#preloader");
   if (preloader) {
+    // Inicializar AOS apenas se cargue el DOM
+    document.addEventListener("DOMContentLoaded", () => {
+      AOS.init();
+    });
+
     // Remover el preloader a los 1000ms como máximo
     const forceRemove = setTimeout(() => {
       if (preloader) preloader.remove();
-    }, 2000);
+    }, 3000);
 
     // Si la página carga antes, lo quitamos y cancelamos el timeout
     window.addEventListener("load", () => {
