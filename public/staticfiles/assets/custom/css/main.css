@@ -865,9 +865,9 @@ section,
 }
 
 .section-title h2 {
-  font-size: 35px;
   font-weight: 700;
   position: relative;
+  font-size: clamp(20px, 5vw, 35px);
 }
 
 .section-title h2:before,

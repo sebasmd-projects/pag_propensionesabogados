@@ -3,12 +3,12 @@
 <section id="team" class="team section light-background">
   <!-- Section Title -->
   <div class="container section-title" data-aos="fade-up">
-    <h2>Team</h2>
+    <h2>{% trans 'Team' %}</h2>
   </div>
-  <!-- End Section Title -->
 
   <div class="container">
     <div class="row gy-5 d-flex align-items-center justify-content-center">
+      <!-- Jorge Vega CEO -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
@@ -20,9 +20,9 @@
             class="img-fluid"
             alt="CEO image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
           <h4>Dr. Jorge Vega</h4>
@@ -30,6 +30,7 @@
         </div>
       </div>
 
+      <!-- Carlos Morales COO -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
@@ -41,9 +42,9 @@
             class="img-fluid"
             alt="COO image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
           <h4>Carlos Morales</h4>
@@ -51,6 +52,7 @@
         </div>
       </div>
 
+      <!-- Diana Trujillo -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
@@ -62,9 +64,9 @@
             class="img-fluid"
             alt="CAO image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
           <h4>Diana Trujillo</h4>
@@ -72,27 +74,29 @@
         </div>
       </div>
 
+      <!-- Sebastián Morales CTO -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
-        data-aos-delay="40"
+        data-aos-delay="70"
       >
         <div class="member-img">
           <img
-            src="{% static 'assets/imgs/team/Carlos Espinal.png' %}"
+            src="{% static 'assets/imgs/team/Sebastián Morales.png' %}"
             class="img-fluid"
-            alt="Tax Analyst image"
+            alt="Chief Technology Officer image"
           />
           <div class="social">
-            <a href="#"><i class="bi bi-linkedin"></i></a>
+            <a href="https://www.linkedin.com/in/sebasti%C3%A1n-morales-delgado-33902b1a1/"><i class="bi bi-linkedin"></i></a>
           </div>
         </div>
         <div class="member-info text-center">
-          <h4>Carlos Espinal</h4>
-          <span>International Tax Analyst</span>
+          <h4>Sebastián Morales</h4>
+          <span>Chief Technology Officer (CTO)</span>
         </div>
       </div>
-
+      
+      <!-- Aura Pineda -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
@@ -104,9 +108,9 @@
             class="img-fluid"
             alt="Legal Analyst image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
           <h4>Aura Pineda</h4>
@@ -114,7 +118,8 @@
         </div>
       </div>
 
-      <!-- <div
+      <!-- Humberto Turriago -->
+      <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
         data-aos-delay="60"
@@ -125,37 +130,39 @@
             class="img-fluid"
             alt="Legal Analyst image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
           <h4>Humberto Turriago</h4>
           <span>International Legal Analyst</span>
         </div>
-      </div> -->
+      </div>
 
+      <!-- Carlos Espinal -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
-        data-aos-delay="70"
+        data-aos-delay="40"
       >
         <div class="member-img">
           <img
-            src="{% static 'assets/imgs/team/Sebastián Morales.png' %}"
+            src="{% static 'assets/imgs/team/Carlos Espinal.png' %}"
             class="img-fluid"
-            alt="Security Analyst image"
+            alt="Tax Analyst image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
-          <h4>Sebastián Morales</h4>
-          <span>Chief Technology Officer</span>
+          <h4>Carlos Espinal</h4>
+          <span>International Tax Analyst</span>
         </div>
       </div>
 
+      <!-- Lida Beltrán -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
@@ -167,9 +174,9 @@
             class="img-fluid"
             alt="Banking Analyst image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
           <h4>Lida Beltrán</h4>
@@ -177,6 +184,7 @@
         </div>
       </div>
 
+      <!-- Maxmiliano Jiménez -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
@@ -184,13 +192,13 @@
       >
         <div class="member-img">
           <img
-            src="{% static 'assets/imgs/team/Maximiliano Jiménez.jpg' %}"
+            src="{% static 'assets/imgs/team/Maximiliano Jiménez.png' %}"
             class="img-fluid"
             alt="Legal Analyst image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
           <h4>Maximiliano Jiménez</h4>
@@ -198,6 +206,7 @@
         </div>
       </div>
 
+      <!-- José Henry -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
@@ -205,20 +214,21 @@
       >
         <div class="member-img">
           <img
-            src="{% static 'assets/imgs/team/James Sabogal.jpg' %}"
+            src="{% static 'assets/imgs/team/Jose Henry.png' %}"
             class="img-fluid"
-            alt="Risk Analyst image"
+            alt="Asset Raising Specialist image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
-          <h4>James Sabogal</h4>
-          <span>International Risk Analyst</span>
+          <h4>José Henry Ramírez</h4>
+          <span>Asset Raising Specialist</span>
         </div>
       </div>
 
+      <!-- Luis Carlos Turriago -->
       <div
         class="col-lg-3 col-md-4 member"
         data-aos="fade-up"
@@ -226,17 +236,39 @@
       >
         <div class="member-img">
           <img
-            src="{% static 'assets/imgs/team/Andrés Ciro.jpg' %}"
+            src="{% static 'assets/imgs/team/Luis Turriago.png' %}"
             class="img-fluid"
-            alt="Risk Analyst image"
+            alt="Project Management and Finances image"
           />
-          <div class="social">
+          <!-- <div class="social">
             <a href="#"><i class="bi bi-linkedin"></i></a>
-          </div>
+          </div> -->
         </div>
         <div class="member-info text-center">
-          <h4>Andrés Ciro</h4>
-          <span>International Risk Analyst</span>
+          <h4>Luis Carlos Turriago</h4>
+          <span>Project Management and Finances</span>
+        </div>
+      </div>
+
+      <!-- José Norbey Ocampo -->
+      <div
+        class="col-lg-3 col-md-4 member"
+        data-aos="fade-up"
+        data-aos-delay="110"
+      >
+        <div class="member-img">
+          <img
+            src="{% static 'assets/imgs/team/Jose Norvey.png' %}"
+            class="img-fluid"
+            alt="International Legal Analyst image"
+          />
+          <!-- <div class="social">
+            <a href="#"><i class="bi bi-linkedin"></i></a>
+          </div> -->
+        </div>
+        <div class="member-info text-center">
+          <h4>José Norbey Ocampo</h4>
+          <span>International Legal Analyst</span>
         </div>
       </div>
     </div>

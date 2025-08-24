@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-24 06:58-0500\n"
-"PO-Revision-Date: 2025-08-24 06:59-0500\n"
+"POT-Creation-Date: 2025-08-24 09:39-0500\n"
+"PO-Revision-Date: 2025-08-24 09:42-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -241,6 +241,11 @@ msgstr ""
 "extranjeras, derecho civil, derecho penal, paymaster, conciliación urgente, "
 "Propensiones Internacional"
 
+#: .\apps\common\core\templates\pages\sections\10_team_section.html:6
+#: .\apps\common\core\templates\partials\header.html:93
+msgid "Team"
+msgstr "Equipo"
+
 #: .\apps\common\core\templates\pages\sections\11_stats_section.html:19
 msgid "Won Cases"
 msgstr "Casos ganados"
@@ -340,7 +345,7 @@ msgstr ""
 "pasión y determinación, para alcanzar objetivos y cumplir con nuestros "
 "compromisos."
 
-#: .\apps\common\core\templates\pages\sections\3_CEO_jorge.html:5
+#: .\apps\common\core\templates\pages\sections\3_CEO_jorge.html:33
 msgid "C.E.O Jorge Uriel Vega Londoño"
 msgstr "C.E.O Jorge Uriel Vega Londoño"
 
@@ -398,32 +403,40 @@ msgstr ""
 "necesidades corporativas de nuestros clientes."
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:5
+#| msgid ""
+#| "Economic Insolvency, Denied Pensions, Civil Labor Law and Business Training"
 msgid ""
-"Economic Insolvency, Denied Pensions, Civil Labor Law and Business Training"
+"International, Civil, Labor and Criminal Law, Economic Insolvency, Denied "
+"Pensions, and Business Training"
 msgstr ""
-"Insolvencia Economica, Pensiones Negadas, Capacitación Empresarial y Derecho"
-" Laboral y Civil"
+"Derecho Internacional, Civil, Laboral y Penal, Insolvencia Económica, "
+"Pensiones Negadas y Formación Empresarial"
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:25
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:28
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:96
-#: .\apps\common\core\templates\partials\footer.html:16
-msgid "Economic Insolvency"
-msgstr "Insolvencia Económica"
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:21
+msgid "Civil Labor Law"
+msgstr "Derecho Civil y Laboral"
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:29
-msgid "Economic insolvency process for non-trading natural persons"
-msgstr ""
-"Proceso de insolvencia económica para personas físicas no comerciantes"
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:24
+msgid "International, Civil, Labor and Criminal Law"
+msgstr "Derecho Internacional, Civil, Laboral y Penal"
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:36
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:39
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:31
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:34
+msgid "Business Training"
+msgstr "Capacitación Empresarial"
+
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:35
+msgid "Businessmen, Entrepreneurs and Merchants"
+msgstr "Empresarios, Emprendedores y Comerciantes"
+
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:42
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:45
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:117
 #: .\apps\common\core\templates\partials\footer.html:12
 msgid "Denied Pensions"
 msgstr "Pensiones negadas"
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:40
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:46
 msgid ""
 "We are your unconditional ally so that you can enjoy the fruits of a "
 "lifetime of work"
@@ -431,26 +444,23 @@ msgstr ""
 "Somos tu aliado incondicional para que goces del fruto de toda "
 "una vida de trabajo"
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:47
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:50
-msgid "Business Training"
-msgstr "Capacitación Empresarial"
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:53
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:56
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:96
+#: .\apps\common\core\templates\partials\footer.html:16
+msgid "Economic Insolvency"
+msgstr "Insolvencia Económica"
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:51
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:62
-msgid "Businessmen, Entrepreneurs and Merchants"
-msgstr "Empresarios, Emprendedores y Comerciantes"
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:57
+msgid "Economic insolvency process for non-trading natural persons"
+msgstr ""
+"Proceso de insolvencia económica para personas físicas no comerciantes"
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:58
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:61
-msgid "Civil Labor Law"
-msgstr "Derecho Civil y Laboral"
-
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:71
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:66
 msgid "Previous"
 msgstr "Anterior"
 
-#: .\apps\common\core\templates\pages\sections\5_social_projects.html:75
+#: .\apps\common\core\templates\pages\sections\5_social_projects.html:70
 msgid "Next"
 msgstr "Siguiente"
 
@@ -769,8 +779,9 @@ msgstr ""
 "conflictos laborales y derechos laborales."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:279
-msgid "International Services"
-msgstr "Internacional"
+#: .\apps\common\core\templates\partials\footer.html:32
+msgid "International Law"
+msgstr "Derecho Internacional"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:289
 msgid "Paymaster Services"
@@ -873,6 +884,27 @@ msgstr ""
 "Tu contribución con nosotros tiene un impacto directo en crear un futuro "
 "mejor para estas mascotas necesitadas."
 
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:6
+#| msgid "International Services"
+msgid "New International Alliances"
+msgstr "Nuevas Alianzas Internacionales"
+
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:12
+msgid "Global alliance"
+msgstr "Alianza Global"
+
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:16
+msgid "We continue to grow internationally"
+msgstr "Continuamos creciendo a nivel internacional"
+
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:17
+msgid "We are now Global Alliance"
+msgstr "Ahora somos Global Alliance"
+
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:23
+msgid "Private alliance with AM PRO holdings"
+msgstr "Alianza privada con AM PRO Holdings"
+
 #: .\apps\common\core\templates\pages\sections\onu_section.html:14
 msgid ""
 "The law firm Propensiones Internacional supports the <a "
@@ -920,10 +952,6 @@ msgstr "Conciliaciones"
 #: .\apps\common\core\templates\partials\footer.html:28
 msgid "Corporate Training"
 msgstr "Capacitación Empresarial"
-
-#: .\apps\common\core\templates\partials\footer.html:32
-msgid "International Law"
-msgstr "Derecho Internacional"
 
 #: .\apps\common\core\templates\partials\footer.html:43
 msgid "Useful Links"
@@ -991,10 +1019,6 @@ msgstr "Responsabilidad Social"
 #: .\apps\common\core\templates\partials\header.html:89
 msgid "Documents"
 msgstr "Documentos"
-
-#: .\apps\common\core\templates\partials\header.html:93
-msgid "Team"
-msgstr "Equipo"
 
 #: .\apps\common\core\templates\partials\whatsapp.html:4
 msgid "Contact Us Now"
