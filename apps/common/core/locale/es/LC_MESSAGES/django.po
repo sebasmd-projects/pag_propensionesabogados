@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-24 09:39-0500\n"
-"PO-Revision-Date: 2025-08-24 09:42-0500\n"
+"POT-Creation-Date: 2025-08-24 16:56-0500\n"
+"PO-Revision-Date: 2025-08-24 17:00-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -286,15 +286,11 @@ msgstr "Horario de atención"
 msgid "Monday - Friday"
 msgstr "Lunes - Viernes"
 
-#: .\apps\common\core\templates\pages\sections\1_hero_section.html:6
-msgid "Your browser does not support the video tag."
-msgstr "Su navegador no soporta la etiqueta de video."
-
-#: .\apps\common\core\templates\pages\sections\1_hero_section.html:13
+#: .\apps\common\core\templates\pages\sections\1_hero_section.html:12
 msgid "Legal Expertise with Human Quality"
 msgstr "Experticia Jurídica con Calidad Humana "
 
-#: .\apps\common\core\templates\pages\sections\1_hero_section.html:16
+#: .\apps\common\core\templates\pages\sections\1_hero_section.html:15
 msgid ""
 "Professionals in Law and Social Sciences at National and International Level"
 msgstr ""
@@ -403,8 +399,6 @@ msgstr ""
 "necesidades corporativas de nuestros clientes."
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:5
-#| msgid ""
-#| "Economic Insolvency, Denied Pensions, Civil Labor Law and Business Training"
 msgid ""
 "International, Civil, Labor and Criminal Law, Economic Insolvency, Denied "
 "Pensions, and Business Training"
@@ -687,7 +681,7 @@ msgstr ""
 "justicia."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:157
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:308
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:306
 msgid "Emergency Conciliations"
 msgstr "Conciliaciones de Emergencia"
 
@@ -783,11 +777,11 @@ msgstr ""
 msgid "International Law"
 msgstr "Derecho Internacional"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:289
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:287
 msgid "Paymaster Services"
 msgstr "Paymaster Internacional"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:292
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:290
 msgid ""
 "Specialized services to ensure smooth\n"
 "                international financial transactions, with full transparency\n"
@@ -796,7 +790,7 @@ msgstr ""
 "Servicios especializados para gestionar los flujos de pago en transacciones "
 "internacionales de alto valor, garantizando la seguridad y la transparencia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:312
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:310
 msgid ""
 "We provide services for emergency conciliations\n"
 "                in international disputes, ensuring swift conflict resolution.\n"
@@ -805,11 +799,11 @@ msgstr ""
 "Servicios especializados para manejar conciliaciones urgentes en disputas "
 "internacionales, asegurando resoluciones rápidas y efectivas."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:327
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:325
 msgid "Risk Analysis"
 msgstr "Análisis de riesgos"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:330
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:328
 msgid ""
 "We provide detailed risk assessments to\n"
 "                identify and mitigate potential threats in international\n"
@@ -818,11 +812,11 @@ msgstr ""
 "Evaluaciones de riesgos integrales para transacciones internacionales, que "
 "abarcan factores financieros, regulatorios y operativos."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:345
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:343
 msgid "Commercial Law"
 msgstr "Derecho Comercial"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:348
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:346
 msgid ""
 "We provide legal services in international\n"
 "                commercial law, including contract negotiation and dispute\n"
@@ -831,11 +825,11 @@ msgstr ""
 "Brindamos servicios legales en derecho comercial internacional, incluida la "
 "negociación de contratos y la resolución de disputas."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:363
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:361
 msgid "Asset Management"
 msgstr "Gestión de Activos"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:366
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:364
 msgid ""
 "We offer services in managing and optimizing\n"
 "                international assets, ensuring security and profitability.\n"
@@ -884,8 +878,56 @@ msgstr ""
 "Tu contribución con nosotros tiene un impacto directo en crear un futuro "
 "mejor para estas mascotas necesitadas."
 
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:68
+#| msgid ""
+#| " We strongly believe in giving back to the community\n"
+#| "            and supporting causes that reflect our values."
+msgid ""
+"We firmly believe in giving back to society and supporting causes that reflect our\n"
+"            principles."
+msgstr ""
+"Creemos firmemente en retribuir a la sociedad y en apoyar causas que "
+"reflejan nuestros principios."
+
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:72
+msgid ""
+"With our own resources, we allocate part of our income to the rescue and protection of\n"
+"            animals as sentient beings, convinced of the importance of providing them with care, dignity, and a new\n"
+"            chance at life."
+msgstr ""
+"Con recursos propios destinamos parte de nuestros ingresos al rescate y "
+"protección de animales como seres sintientes, convencidos de la importancia "
+"de brindarles cuidado, dignidad y una nueva oportunidad de vida."
+
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:77
+msgid ""
+"Similarly, we develop programs aimed at the elderly, children, and homeless\n"
+"            people—populations that deserve special protection and concrete actions that restore hope and well-being.\n"
+"            "
+msgstr ""
+"De igual manera, desarrollamos programas orientados al adulto mayor, a la "
+"niñez y a las personas habitantes de calle, poblaciones que merecen una "
+"protección especial y acciones concretas que les devuelvan esperanza y "
+"bienestar."
+
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:82
+msgid ""
+"For us, this commitment is not only social, but also an obligation to God, who reminds us of\n"
+"            the duty to serve, protect, and dignify the most vulnerable."
+msgstr ""
+"Para nosotros, este compromiso no es solo social, sino también una "
+"obligación con Dios, quien nos recuerda el deber de servir, proteger y "
+"dignificar a los más vulnerables."
+
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:86
+msgid ""
+"Each of these initiatives is realized in actions, not promises. Our commitment is fulfilled\n"
+"            directly, without intermediaries."
+msgstr ""
+"Cada una de estas iniciativas se materializa en hechos, no en promesas. "
+"Nuestro compromiso se cumple directamente, sin intermediarios."
+
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:6
-#| msgid "International Services"
 msgid "New International Alliances"
 msgstr "Nuevas Alianzas Internacionales"
 
@@ -1048,6 +1090,9 @@ msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."
+
+#~ msgid "Your browser does not support the video tag."
+#~ msgstr "Su navegador no soporta la etiqueta de video."
 
 #~ msgid ""
 #~ "Specialists in negative pensions and historical asset management. We recover"
