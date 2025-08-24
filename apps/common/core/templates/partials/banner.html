@@ -32,11 +32,11 @@
                 <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">{% trans 'Close'
                     %}</button>
                 {% if LANGUAGE_CODE == 'en' and modal_banner.link_en %}
-                <a href="{{ modal_banner.link_en }}" target="_blank" class="btn btn-outline-success">{% trans 'View
-                    more' %}</a>
+                <a href="{{ modal_banner.link_en }}" target="_blank" class="btn btn-outline-success">
+                    {% trans 'View more' %}</a>
                 {% elif modal_banner.link %}
-                <a href="{{ modal_banner.link }}" target="_blank" class="btn btn-outline-success">{% trans 'View more'
-                    %}</a>
+                <a href="{{ modal_banner.link }}" target="_blank" class="btn btn-outline-success">
+                    {% trans 'View more' %}</a>
                 {% endif %}
             </div>
         </div>
