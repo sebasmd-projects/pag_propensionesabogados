@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-24 16:56-0500\n"
-"PO-Revision-Date: 2025-08-24 17:00-0500\n"
+"POT-Creation-Date: 2025-08-30 15:50-0500\n"
+"PO-Revision-Date: 2025-08-30 15:52-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -287,14 +287,17 @@ msgid "Monday - Friday"
 msgstr "Lunes - Viernes"
 
 #: .\apps\common\core\templates\pages\sections\1_hero_section.html:12
-msgid "Legal Expertise with Human Quality"
-msgstr "Experticia Jurídica con Calidad Humana "
+#| msgid "Legal Expertise with Human Quality"
+msgid "Legal Expertise With Human Quality"
+msgstr "Experticia Jurídica Con Calidad Humana "
 
 #: .\apps\common\core\templates\pages\sections\1_hero_section.html:15
+#| msgid ""
+#| "Professionals in Law and Social Sciences at National and International Level"
 msgid ""
-"Professionals in Law and Social Sciences at National and International Level"
+"Professionals In Law And Social Sciences At National And International Level"
 msgstr ""
-"Profesionales en Derecho y Ciencias Sociales a nivel Nacional e "
+"Profesionales en Derecho y Ciencias Sociales a Nivel Nacional e "
 "Internacional"
 
 #: .\apps\common\core\templates\pages\sections\2_principles_section.html:6
@@ -346,8 +349,9 @@ msgid "C.E.O Jorge Uriel Vega Londoño"
 msgstr "C.E.O Jorge Uriel Vega Londoño"
 
 #: .\apps\common\core\templates\pages\sections\4_social_sense.html:9
-msgid "Why was our law firm born with a social sense?"
-msgstr "¿Por qué nace nuestra firma con un sentido social?"
+#| msgid "Why was our law firm born with a social sense?"
+msgid "Why Was Our Law Firm Born With A Social Sense?"
+msgstr "¿Por Qué Nace Nuestra Firma Con Un Sentido Social?"
 
 #: .\apps\common\core\templates\pages\sections\4_social_sense.html:16
 msgid ""
@@ -425,7 +429,7 @@ msgstr "Empresarios, Emprendedores y Comerciantes"
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:42
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:45
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:117
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:97
 #: .\apps\common\core\templates\partials\footer.html:12
 msgid "Denied Pensions"
 msgstr "Pensiones negadas"
@@ -440,7 +444,7 @@ msgstr ""
 
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:53
 #: .\apps\common\core\templates\pages\sections\5_social_projects.html:56
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:96
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:76
 #: .\apps\common\core\templates\partials\footer.html:16
 msgid "Economic Insolvency"
 msgstr "Insolvencia Económica"
@@ -514,8 +518,13 @@ msgstr ""
 "históricos y Paymaster."
 
 #: .\apps\common\core\templates\pages\sections\7_all_team_section.html:5
-msgid "Expertise in each area and human quality."
+#| msgid "Expertise in each area and human quality."
+msgid "Expertise In Each Area And Human Quality."
 msgstr "Experiencia Jurídica con Calidad Humana"
+
+#: .\apps\common\core\templates\pages\sections\7_all_team_section.html:6
+msgid "Executive Team"
+msgstr "Grupo Ejecutivo "
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:7
 #: .\apps\common\core\templates\partials\footer.html:47
@@ -555,62 +564,10 @@ msgstr ""
 "Nuestra firma ofrece una gama integral de servicios legales y financieros especializados para abordar desafíos de manera efectiva y brindar soluciones duraderas. Brindamos apoyo experto tanto a nivel nacional como internacional, asegurando que sus intereses estén protegidos y optimizados."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:32
-msgid "Strategic International Representation:"
-msgstr "Representación Internacional Estratégica:"
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:34
-msgid ""
-"\n"
-"          We act as advisory agent and accredited representative in Colombia for a group of foreign investors, with\n"
-"          scope in:\n"
-"          "
-msgstr ""
-"\n"
-"Actuamos como agente consejero y representante acreditado en Colombia de un grupo de inversionistas extranjeros, con alcance en:"
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:41
-msgid ""
-"Structuring and management of hotel projects with foreign capital for "
-"Colombia."
-msgstr ""
-"Estructuración y gestión de proyectos hoteleros con capital extranjero para "
-"Colombia."
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:42
-msgid "Government investment supported by PPP schemes for Colombia."
-msgstr "Inversión gubernamental respaldada por esquemas APP para Colombia."
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:43
-msgid "Purchase and consolidation of carbon credits for Colombia."
-msgstr "Compra y consolidación de bonos de carbono para Colombia."
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:44
-msgid ""
-"Arbitration financing and acquisition of final court judgments for Colombia."
-msgstr ""
-"Financiación de arbitrajes y adquisición de sentencias judiciales en firme "
-"para Colombia."
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:45
-msgid "Purchase of final judgments against government entities for Colombia."
-msgstr ""
-"Compra de sentencias ejecutoriadas en turno de pago contra entidades del "
-"Estado para Colombia."
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:47
-msgid ""
-"We provide legal advice, legal structuring, and institutional coordination for high-impact operations in\n"
-"            the public and private sectors of the country."
-msgstr ""
-"Prestamos asesoría legal, estructuración jurídica y articulación "
-"institucional para operaciones de alto impacto en el ámbito público y "
-"privado del país."
-
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:52
 msgid "National Services:"
 msgstr "Servicios Nacionales:"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:54
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:34
 msgid ""
 "\n"
 "          Solutions tailored to individuals and businesses in Colombia, including pensions, economic insolvency, civil\n"
@@ -621,11 +578,11 @@ msgstr ""
 "\n"
 "Soluciones adaptadas a individuos y empresas en Colombia, que incluyen pensiones, insolvencia económica, derecho civil y penal, asuntos familiares, disputas laborales y conciliaciones urgentes. Nos enfocamos en brindar justicia, estabilidad financiera y tranquilidad."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:62
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:42
 msgid "International Services:"
 msgstr "Servicios Internacionales:"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:64
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:44
 msgid ""
 "\n"
 "          Specialized support for global operations, including asset management, risk analysis, paymaster services,\n"
@@ -636,7 +593,7 @@ msgstr ""
 "\n"
 "Soporte especializado para operaciones globales, que incluye gestión de activos, análisis de riesgos, servicios de pago, derecho comercial y conciliaciones urgentes. Ofrecemos soluciones seguras, transparentes y efectivas para desafíos transfronterizos."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:73
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:53
 msgid ""
 "\n"
 "      Each service can be contracted individually, specifically adapted to meet your needs and objectives with precision\n"
@@ -646,7 +603,7 @@ msgstr ""
 "\n"
 "Cada servicio puede contratarse de forma individual, adaptado específicamente para satisfacer sus necesidades y objetivos con precisión y excelencia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:99
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:79
 msgid ""
 "\n"
 "                Our firm offers specialized services for handling cases of economic insolvency for both non-commercial\n"
@@ -657,7 +614,7 @@ msgstr ""
 "\n"
 "Nuestra firma ofrece servicios especializados para el manejo de casos de insolvencia económica tanto para personas no comerciantes como para entidades comerciales. Guiamos a los clientes en la reestructuración de sus deudas, la negociación con acreedores y el cumplimiento de los requisitos legales para lograr la estabilidad financiera."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:121
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:101
 msgid ""
 "We specialize in representing clients in cases\n"
 "                of denied pensions, ensuring they receive the benefits they\n"
@@ -666,11 +623,11 @@ msgstr ""
 "Nos especializamos en representar a clientes en casos de pensiones negadas, "
 "asegurando que reciban los beneficios a los que tienen derecho."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:137
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:117
 msgid "Extracontractual Liability"
 msgstr "Responsabilidad Extracontractual"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:141
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:121
 msgid ""
 "We offer expertise in cases of\n"
 "                extracontractual liability, protecting clients from unjust\n"
@@ -680,12 +637,12 @@ msgstr ""
 "protegiendo a los clientes con reclamaciones justas y garantizando la "
 "justicia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:157
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:306
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:137
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:286
 msgid "Emergency Conciliations"
 msgstr "Conciliaciones de Emergencia"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:161
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:141
 msgid ""
 "Specialized services to handle urgent\n"
 "                conciliations in national disputes, ensuring quick and effective\n"
@@ -694,11 +651,11 @@ msgstr ""
 "Servicios especializados para manejar conciliaciones urgentes en disputas "
 "nacionales, asegurando resoluciones rápidas y efectivas."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:176
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:156
 msgid "Business Consultancy"
 msgstr "Consultoría Empresarial"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:179
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:159
 msgid ""
 "We provide expert business consultancy,\n"
 "                helping businesses streamline operations and maximize\n"
@@ -707,11 +664,11 @@ msgstr ""
 "Brindamos consultoría empresarial experta, ayudando a las empresas a "
 "optimizar sus operaciones y maximizar la eficiencia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:194
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:174
 msgid "Field Research"
 msgstr "Investigación de Campo"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:197
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:177
 msgid ""
 "In-depth field research services to gather\n"
 "                critical data and insights for legal and business purposes.\n"
@@ -720,11 +677,11 @@ msgstr ""
 "Servicios de investigación de campo en profundidad para recopilar datos y "
 "conocimientos críticos con fines legales y comerciales."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:212
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:192
 msgid "Civil Law"
 msgstr "Derecho Civil"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:215
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:195
 msgid ""
 "Our experts specialize in civil law, offering\n"
 "                assistance with contracts, property disputes, and personal\n"
@@ -734,11 +691,11 @@ msgstr ""
 "contratos, disputas de propiedad y casos de infracción de derechos "
 "civiles generarales."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:230
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:210
 msgid "Criminal Law"
 msgstr "Derecho Penal"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:233
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:213
 msgid ""
 "We handle criminal law cases, ensuring\n"
 "                effective defense strategies for our clients. "
@@ -746,11 +703,11 @@ msgstr ""
 "Manejamos casos de derecho penal, asegurando estrategias de defensa "
 "efectivas para nuestros clientes."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:247
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:227
 msgid "Family Law"
 msgstr "Derecho de Familia"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:250
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:230
 msgid ""
 "Our firm provides family law services\n"
 "                including divorce, custody, and alimony. "
@@ -758,12 +715,12 @@ msgstr ""
 "Nuestra firma brinda servicios de derecho familiar que incluyen divorcio, "
 "custodia y pensión alimenticia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:264
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:244
 #: .\apps\common\core\templates\partials\footer.html:24
 msgid "Labor Law"
 msgstr "Derecho Laboral"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:267
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:247
 msgid ""
 "We assist in labor law matters including\n"
 "                employment contracts, workplace disputes, and labor rights.\n"
@@ -772,16 +729,16 @@ msgstr ""
 "Ayudamos en asuntos de derecho laboral, incluidos contratos laborales, "
 "conflictos laborales y derechos laborales."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:279
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:259
 #: .\apps\common\core\templates\partials\footer.html:32
 msgid "International Law"
 msgstr "Derecho Internacional"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:287
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:267
 msgid "Paymaster Services"
 msgstr "Paymaster Internacional"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:290
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:270
 msgid ""
 "Specialized services to ensure smooth\n"
 "                international financial transactions, with full transparency\n"
@@ -790,7 +747,7 @@ msgstr ""
 "Servicios especializados para gestionar los flujos de pago en transacciones "
 "internacionales de alto valor, garantizando la seguridad y la transparencia."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:310
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:290
 msgid ""
 "We provide services for emergency conciliations\n"
 "                in international disputes, ensuring swift conflict resolution.\n"
@@ -799,11 +756,11 @@ msgstr ""
 "Servicios especializados para manejar conciliaciones urgentes en disputas "
 "internacionales, asegurando resoluciones rápidas y efectivas."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:325
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:305
 msgid "Risk Analysis"
 msgstr "Análisis de riesgos"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:328
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:308
 msgid ""
 "We provide detailed risk assessments to\n"
 "                identify and mitigate potential threats in international\n"
@@ -812,11 +769,11 @@ msgstr ""
 "Evaluaciones de riesgos integrales para transacciones internacionales, que "
 "abarcan factores financieros, regulatorios y operativos."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:343
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:323
 msgid "Commercial Law"
 msgstr "Derecho Comercial"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:346
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:326
 msgid ""
 "We provide legal services in international\n"
 "                commercial law, including contract negotiation and dispute\n"
@@ -825,11 +782,11 @@ msgstr ""
 "Brindamos servicios legales en derecho comercial internacional, incluida la "
 "negociación de contratos y la resolución de disputas."
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:361
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:341
 msgid "Asset Management"
 msgstr "Gestión de Activos"
 
-#: .\apps\common\core\templates\pages\sections\8_services_section.html:364
+#: .\apps\common\core\templates\pages\sections\8_services_section.html:344
 msgid ""
 "We offer services in managing and optimizing\n"
 "                international assets, ensuring security and profitability.\n"
@@ -842,46 +799,7 @@ msgstr ""
 msgid "Corporate Social Responsibility"
 msgstr "Responsabilidad Social Corporativa"
 
-#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:16
-msgid ""
-" We strongly believe in giving back to the community\n"
-"            and supporting causes that reflect our values."
-msgstr ""
-"Creemos firmemente en retribuir a la comunidad y apoyar causas que reflejan "
-"nuestros valores."
-
-#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:20
-msgid ""
-"We donate part of our income to rescuing street\n"
-"            animals because we understand the importance of caring for abandoned\n"
-"            pets and giving them a second chance."
-msgstr ""
-"Donamos parte de nuestros ingresos al rescate de mascotas de la calle porque"
-" entendemos la importancia de cuidar a los animales abandonados y brindarles"
-" una segunda oportunidad."
-
-#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:25
-msgid ""
-" By supporting this noble cause, we not only improve\n"
-"            these animals' quality of life but also promote a more compassionate\n"
-"            and responsible society. "
-msgstr ""
-"Al apoyar esta noble causa, no solo mejoramos la calidad de vida de estos "
-"animales, sino que también promovemos una sociedad más compasiva y "
-"responsable."
-
-#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:30
-msgid ""
-"Your contribution with us has a direct impact on\n"
-"            creating a better future for these animals in need."
-msgstr ""
-"Tu contribución con nosotros tiene un impacto directo en crear un futuro "
-"mejor para estas mascotas necesitadas."
-
-#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:68
-#| msgid ""
-#| " We strongly believe in giving back to the community\n"
-#| "            and supporting causes that reflect our values."
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:17
 msgid ""
 "We firmly believe in giving back to society and supporting causes that reflect our\n"
 "            principles."
@@ -889,7 +807,7 @@ msgstr ""
 "Creemos firmemente en retribuir a la sociedad y en apoyar causas que "
 "reflejan nuestros principios."
 
-#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:72
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:21
 msgid ""
 "With our own resources, we allocate part of our income to the rescue and protection of\n"
 "            animals as sentient beings, convinced of the importance of providing them with care, dignity, and a new\n"
@@ -899,7 +817,7 @@ msgstr ""
 "protección de animales como seres sintientes, convencidos de la importancia "
 "de brindarles cuidado, dignidad y una nueva oportunidad de vida."
 
-#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:77
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:26
 msgid ""
 "Similarly, we develop programs aimed at the elderly, children, and homeless\n"
 "            people—populations that deserve special protection and concrete actions that restore hope and well-being.\n"
@@ -910,7 +828,7 @@ msgstr ""
 "protección especial y acciones concretas que les devuelvan esperanza y "
 "bienestar."
 
-#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:82
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:31
 msgid ""
 "For us, this commitment is not only social, but also an obligation to God, who reminds us of\n"
 "            the duty to serve, protect, and dignify the most vulnerable."
@@ -919,7 +837,7 @@ msgstr ""
 "obligación con Dios, quien nos recuerda el deber de servir, proteger y "
 "dignificar a los más vulnerables."
 
-#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:86
+#: .\apps\common\core\templates\pages\sections\9_corporate_social_responsibility_section.html:35
 msgid ""
 "Each of these initiatives is realized in actions, not promises. Our commitment is fulfilled\n"
 "            directly, without intermediaries."
@@ -928,24 +846,29 @@ msgstr ""
 "Nuestro compromiso se cumple directamente, sin intermediarios."
 
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:6
-msgid "New International Alliances"
-msgstr "Nuevas Alianzas Internacionales"
+#| msgid "We continue to grow internationally"
+msgid "We Continue to Grow Internationally"
+msgstr "Continuamos Creciendo a Nivel Internacional"
 
-#: .\apps\common\core\templates\pages\sections\alliance_section.html:12
-msgid "Global alliance"
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:7
+#| msgid "New International Alliances"
+msgid "New Private Alliance US"
+msgstr "Nuevas Alianzas Internacionales EE. UU."
+
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:13
+#| msgid "Global alliance"
+msgid "Global Alliance"
 msgstr "Alianza Global"
 
-#: .\apps\common\core\templates\pages\sections\alliance_section.html:16
-msgid "We continue to grow internationally"
-msgstr "Continuamos creciendo a nivel internacional"
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:18
+#| msgid "We are now Global Alliance"
+msgid "We are now Global Alliance US"
+msgstr "Ahora somos Global Alliance EE. UU."
 
-#: .\apps\common\core\templates\pages\sections\alliance_section.html:17
-msgid "We are now Global Alliance"
-msgstr "Ahora somos Global Alliance"
-
-#: .\apps\common\core\templates\pages\sections\alliance_section.html:23
-msgid "Private alliance with AM PRO holdings"
-msgstr "Alianza privada con AM PRO Holdings"
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:24
+#| msgid "Private alliance with AM PRO holdings"
+msgid "Private Alliance With AM PRO Holdings"
+msgstr "Alianza Privada con AM PRO Holdings EE. UU."
 
 #: .\apps\common\core\templates\pages\sections\onu_section.html:14
 msgid ""
@@ -978,12 +901,12 @@ msgstr ""
 "\n"
 "Esta iniciativa busca fortalecer la recuperación patrimonial y la estabilidad económica mediante mecanismos jurídicos y financieros, fomentando la cooperación internacional y el desarrollo sostenible. Su propósito es combatir la pobreza extrema y la vulnerabilidad económica, brindando herramientas legales para la rehabilitación financiera, el acceso a oportunidades dignas y la construcción de un equilibrio social justo y sostenible."
 
-#: .\apps\common\core\templates\partials\banner.html:28
+#: .\apps\common\core\templates\partials\banner.html:30
 msgid "Close"
 msgstr "Cerrar"
 
-#: .\apps\common\core\templates\partials\banner.html:30
 #: .\apps\common\core\templates\partials\banner.html:32
+#: .\apps\common\core\templates\partials\banner.html:34
 msgid "View more"
 msgstr "Ver más"
 
@@ -1090,6 +1013,82 @@ msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."
+
+#~ msgid "Strategic International Representation:"
+#~ msgstr "Representación Internacional Estratégica:"
+
+#~ msgid ""
+#~ "\n"
+#~ "          We act as advisory agent and accredited representative in Colombia for a group of foreign investors, with\n"
+#~ "          scope in:\n"
+#~ "          "
+#~ msgstr ""
+#~ "\n"
+#~ "Actuamos como agente consejero y representante acreditado en Colombia de un grupo de inversionistas extranjeros, con alcance en:"
+
+#~ msgid ""
+#~ "Structuring and management of hotel projects with foreign capital for "
+#~ "Colombia."
+#~ msgstr ""
+#~ "Estructuración y gestión de proyectos hoteleros con capital extranjero para "
+#~ "Colombia."
+
+#~ msgid "Government investment supported by PPP schemes for Colombia."
+#~ msgstr "Inversión gubernamental respaldada por esquemas APP para Colombia."
+
+#~ msgid "Purchase and consolidation of carbon credits for Colombia."
+#~ msgstr "Compra y consolidación de bonos de carbono para Colombia."
+
+#~ msgid ""
+#~ "Arbitration financing and acquisition of final court judgments for Colombia."
+#~ msgstr ""
+#~ "Financiación de arbitrajes y adquisición de sentencias judiciales en firme "
+#~ "para Colombia."
+
+#~ msgid "Purchase of final judgments against government entities for Colombia."
+#~ msgstr ""
+#~ "Compra de sentencias ejecutoriadas en turno de pago contra entidades del "
+#~ "Estado para Colombia."
+
+#~ msgid ""
+#~ "We provide legal advice, legal structuring, and institutional coordination for high-impact operations in\n"
+#~ "            the public and private sectors of the country."
+#~ msgstr ""
+#~ "Prestamos asesoría legal, estructuración jurídica y articulación "
+#~ "institucional para operaciones de alto impacto en el ámbito público y "
+#~ "privado del país."
+
+#~ msgid ""
+#~ " We strongly believe in giving back to the community\n"
+#~ "            and supporting causes that reflect our values."
+#~ msgstr ""
+#~ "Creemos firmemente en retribuir a la comunidad y apoyar causas que reflejan "
+#~ "nuestros valores."
+
+#~ msgid ""
+#~ "We donate part of our income to rescuing street\n"
+#~ "            animals because we understand the importance of caring for abandoned\n"
+#~ "            pets and giving them a second chance."
+#~ msgstr ""
+#~ "Donamos parte de nuestros ingresos al rescate de mascotas de la calle porque"
+#~ " entendemos la importancia de cuidar a los animales abandonados y brindarles"
+#~ " una segunda oportunidad."
+
+#~ msgid ""
+#~ " By supporting this noble cause, we not only improve\n"
+#~ "            these animals' quality of life but also promote a more compassionate\n"
+#~ "            and responsible society. "
+#~ msgstr ""
+#~ "Al apoyar esta noble causa, no solo mejoramos la calidad de vida de estos "
+#~ "animales, sino que también promovemos una sociedad más compasiva y "
+#~ "responsable."
+
+#~ msgid ""
+#~ "Your contribution with us has a direct impact on\n"
+#~ "            creating a better future for these animals in need."
+#~ msgstr ""
+#~ "Tu contribución con nosotros tiene un impacto directo en crear un futuro "
+#~ "mejor para estas mascotas necesitadas."
 
 #~ msgid "Your browser does not support the video tag."
 #~ msgstr "Su navegador no soporta la etiqueta de video."
