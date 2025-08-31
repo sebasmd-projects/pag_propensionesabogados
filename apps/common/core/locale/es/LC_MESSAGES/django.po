@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-30 15:50-0500\n"
-"PO-Revision-Date: 2025-08-30 15:52-0500\n"
+"POT-Creation-Date: 2025-08-31 13:28-0500\n"
+"PO-Revision-Date: 2025-08-31 13:29-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -287,13 +287,10 @@ msgid "Monday - Friday"
 msgstr "Lunes - Viernes"
 
 #: .\apps\common\core\templates\pages\sections\1_hero_section.html:12
-#| msgid "Legal Expertise with Human Quality"
 msgid "Legal Expertise With Human Quality"
 msgstr "Experticia Jurídica Con Calidad Humana "
 
 #: .\apps\common\core\templates\pages\sections\1_hero_section.html:15
-#| msgid ""
-#| "Professionals in Law and Social Sciences at National and International Level"
 msgid ""
 "Professionals In Law And Social Sciences At National And International Level"
 msgstr ""
@@ -349,7 +346,6 @@ msgid "C.E.O Jorge Uriel Vega Londoño"
 msgstr "C.E.O Jorge Uriel Vega Londoño"
 
 #: .\apps\common\core\templates\pages\sections\4_social_sense.html:9
-#| msgid "Why was our law firm born with a social sense?"
 msgid "Why Was Our Law Firm Born With A Social Sense?"
 msgstr "¿Por Qué Nace Nuestra Firma Con Un Sentido Social?"
 
@@ -518,7 +514,6 @@ msgstr ""
 "históricos y Paymaster."
 
 #: .\apps\common\core\templates\pages\sections\7_all_team_section.html:5
-#| msgid "Expertise in each area and human quality."
 msgid "Expertise In Each Area And Human Quality."
 msgstr "Experiencia Jurídica con Calidad Humana"
 
@@ -846,27 +841,29 @@ msgstr ""
 "Nuestro compromiso se cumple directamente, sin intermediarios."
 
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:6
-#| msgid "We continue to grow internationally"
-msgid "We Continue to Grow Internationally"
-msgstr "Continuamos Creciendo a Nivel Internacional"
+#| msgid "International Services:"
+msgid "Two International Strategic Alliances USA"
+msgstr "Dos Alianzas Estratégicas Internacionales en EE.UU."
 
-#: .\apps\common\core\templates\pages\sections\alliance_section.html:7
-#| msgid "New International Alliances"
-msgid "New Private Alliance US"
-msgstr "Nuevas Alianzas Internacionales EE. UU."
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:8
+msgid "One Global Purpose"
+msgstr "Un Mismo Propósito Global"
 
-#: .\apps\common\core\templates\pages\sections\alliance_section.html:13
-#| msgid "Global alliance"
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:11
+msgid ""
+"\n"
+"            We are proud to announce that we have consolidated our direct and active presence in the North\n"
+"            American market.\n"
+"            "
+msgstr ""
+"\n"
+"Con orgullo anunciamos que hemos consolidando nuestra presencia directa y activa en el mercado Norte Americano."
+
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:23
 msgid "Global Alliance"
 msgstr "Alianza Global"
 
-#: .\apps\common\core\templates\pages\sections\alliance_section.html:18
-#| msgid "We are now Global Alliance"
-msgid "We are now Global Alliance US"
-msgstr "Ahora somos Global Alliance EE. UU."
-
-#: .\apps\common\core\templates\pages\sections\alliance_section.html:24
-#| msgid "Private alliance with AM PRO holdings"
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:29
 msgid "Private Alliance With AM PRO Holdings"
 msgstr "Alianza Privada con AM PRO Holdings EE. UU."
 
@@ -1013,6 +1010,15 @@ msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."
+
+#~ msgid "We Continue to Grow Internationally"
+#~ msgstr "Continuamos Creciendo a Nivel Internacional"
+
+#~ msgid "New Private Alliance US"
+#~ msgstr "Nuevas Alianzas Internacionales EE. UU."
+
+#~ msgid "We are now Global Alliance US"
+#~ msgstr "Ahora somos Global Alliance EE. UU."
 
 #~ msgid "Strategic International Representation:"
 #~ msgstr "Representación Internacional Estratégica:"
