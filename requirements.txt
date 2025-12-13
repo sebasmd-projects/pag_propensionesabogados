@@ -14,7 +14,7 @@ asgiref==3.8.1
 attrs==25.3.0
 babel==2.17.0
 certifi==2024.7.4
-cffi==1.16.0
+cffi
 charset-normalizer==3.3.2
 cryptography==44.0.1
 diff-match-patch==20230430
@@ -53,13 +53,11 @@ jiter==0.9.0
 jsonschema-specifications==2024.10.1
 jsonschema==4.23.0
 lxml==5.3.1
-mysqlclient==2.2.4
+mysqlclient
 openai==1.72.0
 openpyxl==3.1.2
 packaging==24.1
-pillow==10.3.0
 polib==1.2.0
-psycopg2-binary==2.9.9
 pycparser==2.22
 pydantic==2.11.3
 pydantic_core==2.33.1
