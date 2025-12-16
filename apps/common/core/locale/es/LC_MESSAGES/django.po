@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-05 17:36-0500\n"
-"PO-Revision-Date: 2025-12-05 17:41-0500\n"
+"POT-Creation-Date: 2025-12-16 09:35-0500\n"
+"PO-Revision-Date: 2025-12-16 09:40-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -858,17 +858,24 @@ msgstr ""
 "Con orgullo anunciamos que hemos consolidado nuestra presencia directa y activa en el mercado Norte Americano."
 
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:22
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:42
 msgid "Global Alliance"
 msgstr "Alianza Global"
 
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:29
+msgid "IPCON BUSINESS ECOSYSTEM"
+msgstr "ECOSISTEMA EMPRESARIAL IPCON"
+
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:31
+msgid ""
+"\n"
+"            A dynamic and interactive collaborative environment to generate efficiency, innovation and shared competitive advantage.\n"
+"            "
+msgstr ""
+"\n"
+"Entorno colaborativo dinámico e interactivo para generar eficiencia, innovación y ventaja competitiva compartida."
+
 #: .\apps\common\core\templates\pages\sections\onu_section.html:14
-#| msgid ""
-#| "The law firm Propensiones Internacional supports the <a "
-#| "href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"opener "
-#| "referrer\" class=\"text-decoration-underline\">Fundación Attlas Org</a>, "
-#| "REGISTERED in the database of the United Nations Department of Economic and "
-#| "Social Affairs (UN DESA - ONU), within the framework of its project "
-#| "‘Colombia Debt Relief: A New Beginning’."
 msgid ""
 "The law firm Propensiones Internacional supports the <a "
 "href=\"https://fundacionattlas.org/\" target=\"_blank\" rel=\"noopener "
