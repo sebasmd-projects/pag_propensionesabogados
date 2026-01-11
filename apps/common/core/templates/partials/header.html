@@ -78,22 +78,26 @@
                 {% trans 'Social Responsibility' %}
               </a>
             </li>
+
+            <li>
+              <a href="{% url 'core:index' %}#team" aria-label="Go to team section">
+                {% trans 'Team' %}
+              </a>
+            </li>
+
           </ul>
         </li>
-        <li></li>
+
         <li>
           <a href="{% url 'core:index' %}#services" aria-label="Go to services section">{% trans 'Services' %}</a>
         </li>
 
-        <!-- <li>
-          <a href="{% url 'core:documents' %}" aria-label="Go to documents section">{% trans 'Documents' %}</a>
-        </li> -->
-
-        <li>
-          <a href="{% url 'core:index' %}#team" aria-label="Go to team section">{% trans 'Team' %}</a>
-        </li>
         <li>
           <a href="{% url 'core:index' %}#contact" aria-label="Go to contact section">{% trans 'Contact' %}</a>
+        </li>
+
+        <li>
+          <a href="http://geausa.propensionesabogados.com/certificates/" target="_blank" >{% trans "Certificates" %}</a>
         </li>
 
         <!-- Botones en pantallas pequeñas (dentro del nav y centrados) -->
@@ -111,7 +115,6 @@
             </a>
           </div>
         </li>
-
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
