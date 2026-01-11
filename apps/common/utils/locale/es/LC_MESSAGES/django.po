@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-05 20:55-0500\n"
+"POT-Creation-Date: 2026-01-11 15:04-0500\n"
 "PO-Revision-Date: 2025-04-05 21:21-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,6 +20,7 @@ msgstr ""
 "X-Translated-Using: django-rosetta 0.10.0\n"
 
 #: .\apps\common\utils\admin.py:27
+#, python-brace-format
 msgid "Maximum allowed: {} records."
 msgstr "Máximo permitido: {} registros."
 
@@ -126,11 +127,13 @@ msgstr "Información de la sesión"
 #: .\apps\common\utils\templates\errors_template.html:49
 msgid ""
 "\n"
-"      If you believe this is an error, please email us at: support&#64;propensionesabogados.com\n"
+"      If you believe this is an error, please email us at: "
+"support&#64;propensionesabogados.com\n"
 "      "
 msgstr ""
 "\n"
-"Si considera que se trata de un error, envíenos un correo electrónico a: support&#64;propensionesabogados.com"
+"Si considera que se trata de un error, envíenos un correo electrónico a: "
+"support&#64;propensionesabogados.com"
 
 #: .\apps\common\utils\templates\errors_template.html:57
 msgid "Go to Home"
