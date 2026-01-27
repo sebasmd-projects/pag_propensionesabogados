@@ -83,7 +83,7 @@ h6 {
   font-family: var(--heading-font);
 }
 
-/* PHP Email Form Messages
+/* Email Form Messages
 ------------------------------*/
 .contact-email-form .error-message {
   display: none;

@@ -10,10 +10,11 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from django.views.generic.detail import DetailView
 from honeypot.decorators import check_honeypot
 
 from .forms import ContactForm
-from .models import ContactModel, ModalBannerModel
+from .models import ContactModel, ModalBannerModel, TeamMemberModel
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,6 @@ class IndexTemplateView(FormView):
             return render(self.request, self.template_name, {'form': None, 'success_message': True})
 
         contact = form.save()
-
         user_language = self.request.LANGUAGE_CODE
 
         html_message = render_to_string('email/contact_email_template.html', {
@@ -46,7 +46,6 @@ class IndexTemplateView(FormView):
         })
 
         subject = _('Message Received! | PROPENSIONES ABOGADOS')
-
         plain_message = _('Thank you %(name)s for contacting us.') % {
             'name': contact.name}
 
@@ -65,14 +64,28 @@ class IndexTemplateView(FormView):
 
         return render(self.request, self.template_name, {'form': None, 'success_message': True})
 
-    def form_invalid(self, form):
-        return super().form_invalid(form)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         banner = ModalBannerModel.objects.filter(is_active=True).first()
+        team_members = TeamMemberModel.objects.filter(
+            is_active=True).order_by("display_order", "full_name")
+
         context['modal_banner'] = banner
+        context['team_members'] = team_members
+
         return context
+
+
+class TeamMemberDetailView(DetailView):
+    model = TeamMemberModel
+    template_name = "pages/team_detail.html"
+    context_object_name = "member"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
+
+    def get_queryset(self):
+        return TeamMemberModel.objects.filter(is_active=True)
 
 
 class TermsAndConditionsView(TemplateView):

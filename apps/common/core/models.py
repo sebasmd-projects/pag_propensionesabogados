@@ -2,9 +2,57 @@ import uuid
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
+from django.utils.text import slugify
 
 from apps.common.utils.models import TimeStampedModel
 
+class TeamMemberModel(TimeStampedModel):
+    """
+    Mini-blog por empleado: perfil, resumen, foto y LinkedIn.
+    Estable a largo plazo: orden fijo y bandera is_active.
+    """
+    unique_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+
+    full_name = models.CharField(_("full name"), max_length=255)
+    role = models.CharField(_("role"), max_length=255)
+
+    slug = models.SlugField(_("slug"), max_length=255, unique=True, blank=True)
+    linkedin_url = models.URLField(_("LinkedIn URL"), max_length=500, blank=True, null=True)
+
+    # Texto del mini-blog (resumen + contenido extendido opcional)
+    professional_summary = models.TextField(_("professional summary"), blank=True, null=True)
+    bio = models.TextField(_("bio (extended)"), blank=True, null=True)
+
+    # Foto (si ya manejas static, puedes dejarlo como ImageField o como ruta static)
+    photo = models.ImageField(_("photo"), upload_to="team/", blank=True, null=True)
+
+    # Control estable
+    is_active = models.BooleanField(_("is active"), default=True)
+    display_order = models.PositiveIntegerField(_("display order"), default=0)
+
+    class Meta:
+        db_table = "apps_common_core_team_member"
+        verbose_name = _("Team Member")
+        verbose_name_plural = _("Team Members")
+        ordering = ["display_order", "full_name"]
+
+    def __str__(self):
+        return self.full_name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = slugify(self.full_name)
+            candidate = base
+            i = 2
+            while TeamMemberModel.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
+                candidate = f"{base}-{i}"
+                i += 1
+            self.slug = candidate
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("core:team_member_detail", kwargs={"slug": self.slug})
 
 class ContactModel(TimeStampedModel):
     class StatesChoices(models.TextChoices):

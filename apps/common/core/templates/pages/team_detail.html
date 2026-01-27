@@ -1,0 +1,73 @@
+{% extends 'pages/index.html' %}
+{% load static i18n %}
+
+{% block main %}
+  <style>
+    /* --- Offset para páginas con header transparente (evita mt-5 repetido) --- */
+    .page-offset-header {
+      padding-top: 98px; /* igual a scroll-margin-top desktop */
+    }
+    
+    @media (max-width: 1199px) {
+      .page-offset-header {
+        padding-top: 64px; /* igual a scroll-margin-top mobile */
+      }
+    }
+  </style>
+
+  <main class="main page-offset-header">
+    <section class="section">
+      <div class="container">
+        <div class="row g-4 align-items-center mx-5">
+          <!-- col-md-8: contenido (SEGUNDO en mobile, PRIMERO en desktop) -->
+          <div class="col-12 col-md-8 order-2 order-md-1">
+            {% if member.professional_summary %}
+              <h3 class="h5">{% trans 'Professional summary' %}</h3>
+              <div class="mb-4">{{ member.professional_summary|linebreaks }}</div>
+            {% else %}
+              <p class="text-muted">
+                {% trans 'Profile summary will be available soon.' %}
+              </p>
+            {% endif %}
+
+            {% if member.bio %}
+              <h3 class="h5">{% trans 'Bio' %}</h3>
+              <div>{{ member.bio|linebreaks }}</div>
+            {% endif %}
+          </div>
+
+          <!-- col-md-4: card persona (PRIMERO en mobile, SEGUNDO en desktop) -->
+          <div class="col-12 col-md-4 order-1 order-md-2">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body d-flex flex-column">
+                <!-- Imagen centrada verticalmente -->
+                <div class="flex-grow-1 d-flex align-items-center">
+                  <div class="w-100">
+                    {% if member.photo %}
+                      <img src="{{ member.photo.url }}" class="img-fluid rounded w-100" alt="{{ member.full_name }}" />
+                    {% else %}
+                      <img src="{% static 'assets/imgs/team/default.webp' %}" class="img-fluid rounded w-100" alt="{{ member.full_name }}" />
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Texto y botones abajo -->
+                <div class="mt-3">
+                  <h1 class="h4 mb-1">{{ member.full_name }}</h1>
+                  <p class="text-muted mb-3">{{ member.role }}</p>
+
+                  <div class="d-grid gap-2">
+                    {% if member.linkedin_url %}
+                      <a class="btn btn-outline-primary" href="{{ member.linkedin_url }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    {% endif %}
+                    <a class="btn btn-outline-secondary" href="{% url 'core:index' %}#team">{% trans 'Back to team' %}</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock %}

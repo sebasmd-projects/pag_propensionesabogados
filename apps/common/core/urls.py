@@ -1,7 +1,7 @@
 from django.urls import path
 
 from apps.common.core.views import (DocumentsView, IndexTemplateView,
-                                    PrivacyPolicyView, TermsAndConditionsView,
+                                    PrivacyPolicyView, TermsAndConditionsView, TeamMemberDetailView,
                                     security_txt_view)
 
 app_name = 'core'
@@ -31,5 +31,10 @@ urlpatterns = [
         '.well-known/security.txt',
         security_txt_view,
         name='security_txt'
+    ),
+    path(
+        "team/<slug:slug>/",
+        TeamMemberDetailView.as_view(),
+        name="team_member_detail"
     ),
 ]
