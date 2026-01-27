@@ -1,6 +1,6 @@
 import uuid
 
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 from django.utils.text import slugify
@@ -39,7 +39,7 @@ class TeamMemberModel(TimeStampedModel):
 
     def __str__(self):
         return self.full_name
-
+    
     def save(self, *args, **kwargs):
         if not self.slug:
             base = slugify(self.full_name)
@@ -49,6 +49,14 @@ class TeamMemberModel(TimeStampedModel):
                 candidate = f"{base}-{i}"
                 i += 1
             self.slug = candidate
+
+        if self._state.adding and self.display_order == 0:
+            with transaction.atomic():
+                max_order = TeamMemberModel.objects.select_for_update().aggregate(models.Max('display_order'))['display_order__max'] or 0
+                self.display_order = max_order + 1
+        
+        self.full_name:str = (self.full_name or "").strip().title()
+        
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
