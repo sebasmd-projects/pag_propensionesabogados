@@ -1,13 +1,15 @@
 {% load static i18n %}
 
-<section id="gold_service" class="section light-background">
+<section id="gold_service" class="section light-background container">
   <div data-aos="fade-up">
     <div class="section-title" data-aos="fade-up">
       <h2>{% trans 'Official Mineral Trading Company' %}</h2>
     </div>
 
     <div style="position: relative; display: inline-block;">
-      <img src="{% static 'assets/imgs/services/gold_img.webp' %}" alt="gold service img" class="img-fluid rounded-end" style="display:block;" />
+      <div class="w-100 text-center" style="position: relative;">
+        <img src="{% static 'assets/imgs/services/gold_img.webp' %}" alt="gold service img" class="img-fluid rounded-end mx-auto d-block w-100" />
+      </div>
     </div>
 
     <div class="container mt-4" data-aos="fade-up">
