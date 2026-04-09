@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-08 21:36-0500\n"
-"PO-Revision-Date: 2026-04-08 22:20-0500\n"
+"POT-Creation-Date: 2026-04-09 17:55-0500\n"
+"PO-Revision-Date: 2026-04-09 17:55-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -916,6 +916,30 @@ msgstr ""
 msgid "Official Mineral Trading Company"
 msgstr "Empresa de Comercialización Oficial de Minerales"
 
+#: .\apps\common\core\templates\pages\sections\9_gold.html:14
+msgid ""
+"Institutional structure specializing in the national and international "
+"marketing of precious metals, with reach in the United States, Canada, "
+"Europe and South Africa."
+msgstr ""
+"Estructura institucional especializada en la comercialización nacional e "
+"internacional de metales preciosos, con alcance en Estados Unidos, Canadá, "
+"Europa y Sudáfrica."
+
+#: .\apps\common\core\templates\pages\sections\9_gold.html:15
+msgid ""
+"Through Propensiones S.A.S., comprehensive processes of purchase, sale, "
+"transformation, benefit, intermediation and export of minerals such as gold,"
+" silver, diamonds and emeralds are developed, under criteria of legality, "
+"traceability and compliance with international regulations throughout the "
+"value chain."
+msgstr ""
+"A través de Propensiones S.A.S., se desarrollan procesos integrales de "
+"compra, venta, transformación, beneficio, intermediación y exportación de "
+"minerales como oro, plata, diamantes y esmeraldas, bajo criterios de "
+"legalidad, trazabilidad y cumplimiento normativo internacional en toda la "
+"cadena de valor."
+
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:8
 msgid "International Private Consortium with a global purpose."
 msgstr "Consorcio Privado Internacional con propósito global."
@@ -925,10 +949,6 @@ msgid "One Global Purpose"
 msgstr "Un Mismo Propósito Global"
 
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:10
-#| msgid ""
-#| "\n"
-#| "            We are proud to announce that we have consolidated our direct and active presence in the North American market.\n"
-#| "            "
 msgid ""
 "We are proud to announce that we have consolidated our direct and active "
 "presence in the North American market."
@@ -945,10 +965,6 @@ msgid "Propensiones Group"
 msgstr "Grupo Propensiones"
 
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:25
-#| msgid ""
-#| "\n"
-#| "            A dynamic and interactive collaborative environment to generate efficiency, innovation and shared competitive advantage.\n"
-#| "            "
 msgid ""
 "A dynamic and interactive collaborative environment to generate efficiency, "
 "innovation and shared competitive advantage."
@@ -958,7 +974,6 @@ msgstr ""
 
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:33
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:35
-#| msgid "Propensiones Group"
 msgid "Propensiones Group Alliance"
 msgstr "Alianza del Grupo Propensiones"
 
