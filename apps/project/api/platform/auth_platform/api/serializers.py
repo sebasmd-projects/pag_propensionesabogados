@@ -11,32 +11,45 @@ class AttlasInsolvencyAuthSerializer(serializers.Serializer):
     document_number = serializers.CharField()
     birth_date = serializers.DateField()
     password = serializers.CharField()
-    user = serializers.CharField()
+    user = serializers.CharField()  # Iniciales del asesor
 
     def validate(self, data):
         doc_hash = hash_value(data['document_number'])
         birth_hash = hash_value(str(data['birth_date']))
         password = data['password']
-        user: str = data['user']
+        user = data['user'].upper()
 
+        # 1. Verificar existencia del usuario (cliente)
         try:
-            record = AttlasInsolvencyAuthModel.objects.get(
+            auth_user = AttlasInsolvencyAuthModel.objects.get(
                 document_number_hash=doc_hash,
                 birth_date_hash=birth_hash
             )
-
-            consultant = AttlasInsolvencyAuthConsultantsModel.objects.get(
-                user=user.upper()
-            )
-
-            if not consultant.check_password(password):
-                raise serializers.ValidationError(_('Invalid code'))
-
-            return {"user_id": record.id,  "document_number": data['document_number']}
         except AttlasInsolvencyAuthModel.DoesNotExist:
-            raise serializers.ValidationError(_('Invalid credentials'))
+            raise serializers.ValidationError({
+                'document_number': _('Cédula no encontrada con esa fecha de nacimiento.')
+            })
+
+        # 2. Verificar existencia del asesor con las iniciales
+        try:
+            consultant = AttlasInsolvencyAuthConsultantsModel.objects.get(
+                user=user)
         except AttlasInsolvencyAuthConsultantsModel.DoesNotExist:
-            raise serializers.ValidationError(_('Invalid code'))
+            raise serializers.ValidationError({
+                'user': _('Asesor inválido. No existe un asesor con las iniciales proporcionadas.')
+            })
+
+        # 3. Verificar contraseña del asesor
+        if not consultant.check_password(password):
+            raise serializers.ValidationError({
+                'password': _('Contraseña incorrecta para el asesor indicado.')
+            })
+
+        return {
+            "user_id": auth_user.id,
+            "document_number": data['document_number'],
+            "consultant_id": consultant.id
+        }
 
 
 class AttlasInsolvencyAuthRegisterSerializer(serializers.ModelSerializer):

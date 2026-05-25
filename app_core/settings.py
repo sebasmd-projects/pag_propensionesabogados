@@ -76,6 +76,7 @@ CUSTOM_APPS = [
     'apps.project.api.faq',
     'apps.project.api.platform.auth_platform',
     'apps.project.api.platform.insolvency_form',
+    'apps.project.api.platform.calculator',
 ]
 
 
@@ -168,19 +169,29 @@ WSGI_APPLICATION = 'app_core.wsgi.application'
 
 ASGI_APPLICATION = 'app_core.asgi.application'
 
-DATABASES = {
-    'default': {
-        'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE')),
-        'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': int(os.getenv('DB_PORT')),
-        'CHARSET': os.getenv('DB_CHARSET'),
-        'ATOMIC_REQUESTS': True
+DB_ENGINE = os.getenv('DB_ENGINE')
+
+if DB_ENGINE != "django.db.backends.sqlite3":
+    DATABASES = {
+        'default': {
+            'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE')),
+            'ENGINE': DB_ENGINE,
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': int(os.getenv('DB_PORT')),
+            'CHARSET': os.getenv('DB_CHARSET'),
+            'ATOMIC_REQUESTS': True
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite',
+        }
+    }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
