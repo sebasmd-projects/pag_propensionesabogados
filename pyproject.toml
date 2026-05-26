@@ -41,7 +41,7 @@ dependencies = [
     "docx>=0.2.4",
     "docxcompose==1.4.0",
     "docxtpl==0.19.1",
-    "drf-yasg==1.21.7",
+    "drf-spectacular>=0.29.0",
     "et-xmlfile==2.0.0",
     "h11==0.16.0",
     "httpcore==1.0.9",

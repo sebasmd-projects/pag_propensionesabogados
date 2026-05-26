@@ -7,6 +7,7 @@ users.json
 vulnerabilities.py
 .safety-project.ini
 generar documento/*
+.continue
 
 ### Django ###
 *.log

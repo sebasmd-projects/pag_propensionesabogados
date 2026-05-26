@@ -53,7 +53,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'nested_admin',
     'rest_framework',
-    'drf_yasg',
+    'drf_spectacular',
     'auditlog',
     'honeypot',
     'django_recaptcha',
@@ -320,7 +320,17 @@ IP_BLOCKED_TIME_IN_MINUTES = int(os.getenv('IP_BLOCKED_TIME_IN_MINUTES'))
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny'
-    ]
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Propensiones Abogados API',
+    'DESCRIPTION': 'API',
+    'VERSION': 'v1',
+    'CONTACT': {'email': 'support@propensionesabogados.com'},
+    'TERMS_OF_SERVICE': 'https://fundacionattlas.org/es/documentos/legales/terminos-y-condiciones',
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated', 'rest_framework.permissions.IsAdminUser'],
 }
 
 if DEBUG:
