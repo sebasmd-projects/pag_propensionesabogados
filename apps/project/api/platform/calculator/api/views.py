@@ -3,18 +3,15 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.generics import ListCreateAPIView
 
 from apps.common.utils.models import hash_value
 from apps.project.api.platform.auth_platform.models import AttlasInsolvencyAuthModel
 from apps.project.api.platform.insolvency_form.models import AttlasInsolvencyFormModel
-from ..models import InterestRateModel
 from .serializers import (
     ClientSearchSerializer,
     ClientDataSerializer,
     ClientCreateSerializer,
     ClientUpdateSerializer,
-    InterestRateSerializer,
 )
 
 
@@ -95,19 +92,3 @@ class ClientViewSet(mixins.CreateModelMixin,
         updated_instance = serializer.save()
         output_serializer = ClientDataSerializer(updated_instance)
         return Response(output_serializer.data)
-
-
-class InterestRateView(ListCreateAPIView):
-    """
-    Endpoint que maneja la tasa de usura. Solo existe un único registro (el último).
-    - GET: retorna la tasa más reciente (única).
-    - POST: sobre-escribe la tasa existente creando un nuevo registro.
-    """
-    serializer_class = InterestRateSerializer
-
-    def get_queryset(self):
-        return InterestRateModel.objects.all().order_by('-effective_date')[:1]
-
-    def perform_create(self, serializer):
-        InterestRateModel.objects.all().delete()
-        serializer.save()
