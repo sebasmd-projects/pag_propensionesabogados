@@ -73,8 +73,8 @@ class RegisterSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         user = AttlasInsolvencyAuthModel.objects.create(
-            document_number=validated_data['documentNumber'],
-            birth_date=validated_data['birthDate'],
+            document_number=validated_data['document_number'],
+            birth_date=validated_data['birth_date'],
         )
         form, _ = AttlasInsolvencyFormModel.objects.get_or_create(
             user=user,
@@ -137,7 +137,7 @@ class AttlasInsolvencyAuthSerializer(serializers.Serializer):
 
 class AttlasInsolvencyAuthRegisterSerializer(serializers.ModelSerializer):
 
-    def validate_documentNumber(self, value):
+    def validate_document_number(self, value):
         if AttlasInsolvencyAuthModel.objects.filter(
             document_number_hash=hash_value(value)
         ).exists():
@@ -148,8 +148,8 @@ class AttlasInsolvencyAuthRegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = AttlasInsolvencyAuthModel.objects.create(
-            document_number=validated_data['documentNumber'],
-            birth_date=validated_data['birthDate'],
+            document_number=validated_data['document_number'],
+            birth_date=validated_data['birth_date'],
         )
         form, _ = AttlasInsolvencyFormModel.objects.get_or_create(
             user=user,
