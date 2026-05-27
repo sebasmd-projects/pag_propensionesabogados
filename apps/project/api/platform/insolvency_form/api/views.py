@@ -130,7 +130,6 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
         # 5) Devolver datos actualizados
         return Response(self.get_serializer(instance).data)
 
-
     def debtor_cessation_report_prompt(self, user_text):
         prompt = f"""
         Eres un asistente jurídico experto en insolvencia para Colombia, 
@@ -186,7 +185,6 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
 
         return messages, model, temperature
 
-
     def perform_update(self, serializer, step):
         """
         Si estamos en el paso 4 y llegó debtor_cessation_report,
@@ -202,8 +200,10 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
             if raw_report and use_ai:
                 try:
                     api = ChatGPTAPI()
-                    msgs, model, temperature = self.debtor_cessation_report_prompt(raw_report)
-                    polished = api.get_response(model=model, messages=msgs, temperature=temperature)
+                    msgs, model, temperature = self.debtor_cessation_report_prompt(
+                        raw_report)
+                    polished = api.get_response(
+                        model=model, messages=msgs, temperature=temperature)
                     save_kwargs['debtor_cessation_report'] = polished
                 except Exception as e:
                     logger.error(
@@ -226,8 +226,9 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
 
         form, _ = AttlasInsolvencyFormModel.objects.get_or_create(
             user=self.request.user,
-            defaults={"current_step": 1}
+            defaults={'current_step': 1},
         )
+        self.check_object_permissions(self.request, form)
         return form
 
 

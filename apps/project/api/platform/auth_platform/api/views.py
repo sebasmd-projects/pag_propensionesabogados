@@ -8,11 +8,51 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.common.utils.functions import generate_token, verify_token
+from apps.common.utils.models import hash_value
 
 from ..models import AttlasInsolvencyAuthModel
-from .serializers import (AttlasInsolvencyAuthConsultantsRegisterSerializer,
-                          AttlasInsolvencyAuthRegisterSerializer,
-                          AttlasInsolvencyAuthSerializer)
+from .serializers import (
+    AttlasInsolvencyAuthConsultantsRegisterSerializer,
+    AttlasInsolvencyAuthRegisterSerializer,
+    AttlasInsolvencyAuthSerializer,
+    ClientSearchSerializer,
+    ClientResponseSerializer
+)
+
+
+class ClientSearchView(APIView):
+    """
+    GET /api/v1/clients/search/?documentNumber=xxx&birthDate=yyyy-mm-dd
+
+    Busca por los campos _hash para no comparar texto cifrado.
+    Devuelve datos en claro + form_id del formulario de insolvencia.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        params = ClientSearchSerializer(data=request.query_params)
+        if not params.is_valid():
+            return Response(params.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        dn_hash = hash_value(params.validated_data['documentNumber'])
+        bd_hash = hash_value(
+            params.validated_data['birthDate'].strftime('%Y-%m-%d')
+        )
+
+        try:
+            user = AttlasInsolvencyAuthModel.objects.select_related(
+                'insolvency_form'
+            ).get(
+                document_number_hash=dn_hash,
+                birth_date_hash=bd_hash,
+            )
+        except AttlasInsolvencyAuthModel.DoesNotExist:
+            return Response(
+                {'detail': 'No encontrado'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(ClientResponseSerializer().to_representation(user))
 
 
 class AttlasInsolvencyAuthRegisterAPIView(CreateAPIView):

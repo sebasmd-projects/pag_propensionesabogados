@@ -331,6 +331,17 @@ SPECTACULAR_SETTINGS = {
     'CONTACT': {'email': 'support@propensionesabogados.com'},
     'TERMS_OF_SERVICE': 'https://fundacionattlas.org/es/documentos/legales/terminos-y-condiciones',
     'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated', 'rest_framework.permissions.IsAdminUser'],
+
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'displayOperationId': False,
+        'defaultModelsExpandDepth': 1,
+        'defaultModelExpandDepth': 1,
+        'docExpansion': 'list',
+    },
+
+    'SORT_OPERATIONS': True,
+    'SORT_OPERATION_PARAMETERS': True,
 }
 
 if DEBUG:

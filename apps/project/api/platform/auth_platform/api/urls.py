@@ -1,7 +1,13 @@
 # apps/project/api/platform/auth_platform/api/urls.py
 
 from django.urls import path
-from .views import AttlasInsolvencyAuthLoginAPIView, AttlasInsolvencyAuthRegisterAPIView, TokenInfoAPIView, AttlasInsolvencyAuthConsultantsRegisterAPIView
+from .views import (
+    AttlasInsolvencyAuthLoginAPIView,
+    AttlasInsolvencyAuthRegisterAPIView,
+    TokenInfoAPIView,
+    AttlasInsolvencyAuthConsultantsRegisterAPIView,
+    ClientSearchView
+)
 
 urlpatterns = [
     path(
@@ -13,6 +19,12 @@ urlpatterns = [
         'register/',
         AttlasInsolvencyAuthRegisterAPIView.as_view(),
         name='api-insolvency-register'
+    ),
+
+    path(
+        'clients/search/',
+        ClientSearchView.as_view(),
+        name='api-calc-client-search'
     ),
     path(
         'register-consultants/',
