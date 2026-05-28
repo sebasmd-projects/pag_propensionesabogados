@@ -4,6 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from drf_spectacular.utils import extend_schema
+
 from apps.common.utils.models import hash_value
 from apps.project.api.platform.auth_platform.models import AttlasInsolvencyAuthModel
 from apps.project.api.platform.insolvency_form.models import AttlasInsolvencyFormModel
@@ -15,6 +17,7 @@ from .serializers import (
 )
 
 
+@extend_schema(tags=['Clients'])
 class ClientViewSet(mixins.CreateModelMixin,
                     mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,

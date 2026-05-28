@@ -9,6 +9,9 @@ from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import (AuthenticationFailed,
                                        NotFound)
+
+from drf_spectacular.utils import extend_schema
+
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -59,6 +62,7 @@ class BearerTokenAuthentication:
         return 'Bearer'
 
 
+@extend_schema(tags=['Insolvency Forms Attlas'])
 class InsolvencyFormWizardView(RetrieveUpdateAPIView):
     """
     GET  /api/v1/insolvency-form/<id>/?step=N
@@ -130,6 +134,7 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
         # 5) Devolver datos actualizados
         return Response(self.get_serializer(instance).data)
 
+    @extend_schema(tags=['Insolvency Forms Attlas'])
     def debtor_cessation_report_prompt(self, user_text):
         prompt = f"""
         Eres un asistente jurídico experto en insolvencia para Colombia, 
@@ -231,7 +236,7 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
         self.check_object_permissions(self.request, form)
         return form
 
-
+@extend_schema(tags=['Insolvency Forms Attlas'])
 class SignatureUpdateView(RetrieveUpdateAPIView):
     """
     GET  /api/v1/insolvency-form/signature/<id>/
@@ -255,7 +260,7 @@ class SignatureUpdateView(RetrieveUpdateAPIView):
         )
         return signature
 
-
+@extend_schema(tags=['Insolvency Forms Attlas'])
 class SignatureCreateAPIView(CreateAPIView):
     """
     POST /api/platform/signature/

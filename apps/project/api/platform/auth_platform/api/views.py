@@ -7,6 +7,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from drf_spectacular.utils import extend_schema
+
 from apps.common.utils.functions import generate_token, verify_token
 from apps.common.utils.models import hash_value
 
@@ -20,6 +22,7 @@ from .serializers import (
 )
 
 
+@extend_schema(tags=['Clients'])
 class ClientSearchView(APIView):
     """
     GET /api/v1/clients/search/?documentNumber=xxx&birthDate=yyyy-mm-dd
@@ -55,16 +58,19 @@ class ClientSearchView(APIView):
         return Response(ClientResponseSerializer().to_representation(user))
 
 
+@extend_schema(tags=['Auth Attlas'])
 class AttlasInsolvencyAuthRegisterAPIView(CreateAPIView):
     serializer_class = AttlasInsolvencyAuthRegisterSerializer
     queryset = AttlasInsolvencyAuthModel.objects.all()
 
 
+@extend_schema(tags=['Auth Attlas'])
 class AttlasInsolvencyAuthConsultantsRegisterAPIView(CreateAPIView):
     serializer_class = AttlasInsolvencyAuthConsultantsRegisterSerializer
     queryset = AttlasInsolvencyAuthModel.objects.all()
 
 
+@extend_schema(tags=['Auth Attlas'])
 class AttlasInsolvencyAuthLoginAPIView(APIView):
     def post(self, request):
 
@@ -86,6 +92,7 @@ class AttlasInsolvencyAuthLoginAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(tags=['Auth Attlas'])
 class TokenInfoAPIView(APIView):
     permission_classes = [AllowAny]
 
