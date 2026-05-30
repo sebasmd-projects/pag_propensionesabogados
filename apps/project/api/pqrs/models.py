@@ -111,9 +111,10 @@ class PQRSModel(TimeStampedModel):
         max_length=255
     )
 
-    addres = models.CharField(
-        _('addres'),
-        max_length=255
+    address = models.CharField(
+        _('address'),
+        max_length=255,
+        default=''
     )
 
     email = models.EmailField(
