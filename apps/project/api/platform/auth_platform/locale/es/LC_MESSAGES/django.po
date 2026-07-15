@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-06 07:10-0500\n"
+"POT-Creation-Date: 2026-07-14 21:52-0500\n"
 "PO-Revision-Date: 2025-06-06 07:09-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,14 +19,17 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.10.0\n"
 
-#: .\apps\project\api\platform\auth_platform\api\serializers.py:33
-#: .\apps\project\api\platform\auth_platform\api\serializers.py:39
-msgid "Invalid code"
-msgstr "Código invalido"
+#: .\apps\project\api\platform\auth_platform\api\serializers.py:113
+msgid "Cédula no encontrada con esa fecha de nacimiento."
+msgstr ""
 
-#: .\apps\project\api\platform\auth_platform\api\serializers.py:37
-msgid "Invalid credentials"
-msgstr "Credenciales invalidas"
+#: .\apps\project\api\platform\auth_platform\api\serializers.py:122
+msgid "Asesor inválido. No existe un asesor con las iniciales proporcionadas."
+msgstr ""
+
+#: .\apps\project\api\platform\auth_platform\api\serializers.py:128
+msgid "Contraseña incorrecta para el asesor indicado."
+msgstr ""
 
 #: .\apps\project\api\platform\auth_platform\models.py:26
 msgid "first name"
@@ -56,3 +59,9 @@ msgstr "ATTLAS Insolvencia | Sesión"
 #: .\apps\project\api\platform\auth_platform\models.py:113
 msgid "Attlas Insolvency Auths"
 msgstr "ATTLAS Insolvencia | Sesión"
+
+#~ msgid "Invalid code"
+#~ msgstr "Código invalido"
+
+#~ msgid "Invalid credentials"
+#~ msgstr "Credenciales invalidas"

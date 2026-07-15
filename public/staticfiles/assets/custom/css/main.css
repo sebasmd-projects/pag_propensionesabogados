@@ -1688,14 +1688,51 @@ section,
 }
 
 
-/*--------------------------------------------------------------
-# Social Proyects Section
---------------------------------------------------------------*/
+.practice-grid {
+    columns: 3;
+    column-gap: 1.5rem;
+}
 
-.highlight-bg {
-  background-color: rgba(0, 0, 0, 0.6); /* Fondo negro con transparencia */
-  color: white; /* Texto blanco para contraste */
-  padding: 15px; /* Espaciado interno */
-  border-radius: 10px; /* Bordes redondeados para un diseño más atractivo */
-  display: inline-block; /* Ajusta al contenido */
+.practice-card {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.practice-area-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+@media (max-width:992px){
+    .practice-grid{
+        columns:2;
+    }
+}
+
+@media (max-width:576px){
+    .practice-grid{
+        columns:1;
+    }
+}
+
+.practice-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: end;
+    padding: 1.25rem;
+    background: linear-gradient(
+        to top,
+        rgba(0,0,0,.75),
+        rgba(0,0,0,.15),
+        transparent
+    );
+}
+
+.practice-overlay span {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
 }

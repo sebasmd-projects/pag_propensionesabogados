@@ -51,6 +51,16 @@
     link.addEventListener("click", setSubject);
   });
 
+  document.querySelectorAll(".practice-card").forEach((card) => {
+    card.addEventListener("click", function () {
+      const subjectField = document.getElementById("contact_subject");
+
+      if (subjectField) {
+        subjectField.value = this.dataset.subject;
+      }
+    });
+  });
+
   /**
    * Apply .scrolled class to the body as the page is scrolled down
    */

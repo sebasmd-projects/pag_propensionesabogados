@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-11 15:04-0500\n"
+"POT-Creation-Date: 2026-07-14 22:13-0500\n"
 "PO-Revision-Date: 2025-04-05 21:21-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,6 +43,71 @@ msgstr "Veces"
 #: .\apps\common\utils\admin.py:74
 msgid "Other"
 msgstr "Otro"
+
+#: .\apps\common\utils\context_processors\__init__.py:10
+#: .\apps\common\utils\context_processors\__init__.py:11
+msgid "Risk Analysis"
+msgstr "Análisis de Riesgos"
+
+#: .\apps\common\utils\context_processors\__init__.py:15
+#: .\apps\common\utils\context_processors\__init__.py:16
+msgid "Business Training"
+msgstr "Capacitación Empresarial"
+
+#: .\apps\common\utils\context_processors\__init__.py:20
+#: .\apps\common\utils\context_processors\__init__.py:21
+msgid "Emergency Conciliation"
+msgstr "Conciliaciones de Emergencia"
+
+#: .\apps\common\utils\context_processors\__init__.py:25
+#: .\apps\common\utils\context_processors\__init__.py:26
+msgid "Business Consulting"
+msgstr "Consultorías Empresariales"
+
+#: .\apps\common\utils\context_processors\__init__.py:30
+#: .\apps\common\utils\context_processors\__init__.py:31
+msgid "Legal Department"
+msgstr "Departamento Legal"
+
+#: .\apps\common\utils\context_processors\__init__.py:35
+#: .\apps\common\utils\context_processors\__init__.py:36
+msgid "Civil Law"
+msgstr "Derecho Civil"
+
+#: .\apps\common\utils\context_processors\__init__.py:40
+#: .\apps\common\utils\context_processors\__init__.py:41
+msgid "Family Law"
+msgstr "Derecho Familiar"
+
+#: .\apps\common\utils\context_processors\__init__.py:45
+#: .\apps\common\utils\context_processors\__init__.py:46
+msgid "International Law"
+msgstr "Derecho Internacional"
+
+#: .\apps\common\utils\context_processors\__init__.py:50
+#: .\apps\common\utils\context_processors\__init__.py:51
+msgid "Labor Law"
+msgstr "Derecho Laboral"
+
+#: .\apps\common\utils\context_processors\__init__.py:55
+#: .\apps\common\utils\context_processors\__init__.py:56
+msgid "Criminal Law"
+msgstr "Derecho Penal"
+
+#: .\apps\common\utils\context_processors\__init__.py:60
+#: .\apps\common\utils\context_processors\__init__.py:61
+msgid "Economic Insolvency"
+msgstr "Insolvencia Económica"
+
+#: .\apps\common\utils\context_processors\__init__.py:65
+#: .\apps\common\utils\context_processors\__init__.py:66
+msgid "Field Investigation"
+msgstr "Investigación de Campo"
+
+#: .\apps\common\utils\context_processors\__init__.py:70
+#: .\apps\common\utils\context_processors\__init__.py:71
+msgid "Denied Pensions"
+msgstr "Pensiones Negadas"
 
 #: .\apps\common\utils\contrib\auth\mixins.py:17
 msgid "group_required attribute not set"
