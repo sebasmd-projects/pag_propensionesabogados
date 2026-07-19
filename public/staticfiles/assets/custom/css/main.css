@@ -1689,14 +1689,17 @@ section,
 
 
 .practice-grid {
-    columns: 3;
-    column-gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.5rem;
+    align-items: start;
 }
 
 .practice-card {
-    display: inline-block;
+    position: relative;
+    display: block;
     width: 100%;
-    margin-bottom: 1.5rem;
+    overflow: hidden;
 }
 
 .practice-area-img {
@@ -1705,28 +1708,17 @@ section,
     display: block;
 }
 
-@media (max-width:992px){
-    .practice-grid{
-        columns:2;
-    }
-}
-
-@media (max-width:576px){
-    .practice-grid{
-        columns:1;
-    }
-}
-
 .practice-overlay {
     position: absolute;
     inset: 0;
     display: flex;
-    align-items: end;
+    align-items: flex-end;
     padding: 1.25rem;
+
     background: linear-gradient(
         to top,
-        rgba(0,0,0,.75),
-        rgba(0,0,0,.15),
+        rgba(0, 0, 0, .75),
+        rgba(0, 0, 0, .15),
         transparent
     );
 }
@@ -1735,4 +1727,18 @@ section,
     color: #fff;
     font-size: 1.1rem;
     font-weight: 600;
+}
+
+/* Tablets */
+@media (max-width: 992px) {
+    .practice-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Móviles */
+@media (max-width: 576px) {
+    .practice-grid {
+        grid-template-columns: 1fr;
+    }
 }

@@ -277,7 +277,7 @@
     <div class="practice-grid">
       {% for area in PRACTICE_AREAS %}
         <a href="#contact" class="practice-card" data-subject="{{ area.subject }}" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:1 }}0">
-          <img src="{% static 'assets/imgs/practice_areas/' %}{{ area.image }}" alt="{{ area.alt }}" class="practice-area-img" loading="lazy" />
+          <img src="{% static 'assets/imgs/practice_areas/' %}{{ area.image }}" alt="{{ area.alt }}" class="practice-area-img" />
 
           <div class="practice-overlay">
             <span>{% trans area.alt %}</span>
@@ -285,5 +285,6 @@
         </a>
       {% endfor %}
     </div>
+    
   </div>
 </section>
