@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.generic.base import TemplateView
+from django.views.generic.base import TemplateView, RedirectView
 from django.views.generic.edit import FormView
 from django.views.generic.detail import DetailView
 from honeypot.decorators import check_honeypot
@@ -35,19 +35,27 @@ class IndexTemplateView(FormView):
 
         if honeypot_field:
             form.save()
-            return render(self.request, self.template_name, {'form': None, 'success_message': True})
+            return render(
+                self.request,
+                self.template_name,
+                {'form': None, 'success_message': True}
+            )
 
         contact = form.save()
         user_language = self.request.LANGUAGE_CODE
 
-        html_message = render_to_string('email/contact_email_template.html', {
-            'names': contact.name,
-            'LANGUAGE_CODE': user_language,
-        })
+        html_message = render_to_string(
+            'email/contact_email_template.html',
+            {
+                'names': contact.name,
+                'LANGUAGE_CODE': user_language,
+            }
+        )
 
         subject = _('Message Received! | PROPENSIONES ABOGADOS')
         plain_message = _('Thank you %(name)s for contacting us.') % {
-            'name': contact.name}
+            'name': contact.name
+        }
 
         try:
             send_mail(
@@ -60,16 +68,20 @@ class IndexTemplateView(FormView):
             )
         except Exception as e:
             logger.error(f"An unexpected error occurred sending mail: {e}")
-            return render(self.request, self.template_name, {'form': None, 'success_message': True})
 
-        return render(self.request, self.template_name, {'form': None, 'success_message': True})
+        return render(
+            self.request,
+            self.template_name,
+            {'form': None, 'success_message': True}
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         banner = ModalBannerModel.objects.filter(is_active=True).first()
         team_members = TeamMemberModel.objects.filter(
-            is_active=True).order_by("display_order", "full_name")
+            is_active=True
+        ).order_by("display_order", "full_name")
 
         context['modal_banner'] = banner
         context['team_members'] = team_members
@@ -98,6 +110,11 @@ class PrivacyPolicyView(TemplateView):
 
 class DocumentsView(TemplateView):
     template_name = "pages/documents.html"
+
+
+class CalendarView(RedirectView):
+    url = "https://calendly.com/enlace-juvl/centro-de-conciliacion"
+    permanent = False
 
 
 def security_txt_view(request):
