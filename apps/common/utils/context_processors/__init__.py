@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 def custom_processors(request: Any) -> dict[str, Any]:
-    PRACTICE_AREAS: list[dict[str, str]] = [
+    PRACTICE_AREAS: Any = [
         {
             "image": "pensiones_negadas.webp",
             "subject": _("Denied Pensions"),

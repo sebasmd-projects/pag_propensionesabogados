@@ -13,24 +13,36 @@
 
 /* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
 :root {
-  --background-color: #ffffff; /* Background color for the entire website, including individual sections */
-  --default-color: #212529; /* Default color used for the majority of the text content across the entire website */
-  --heading-color: #95D0C8; /* Color for headings, subheadings and title throughout the website */
-  --accent-color: #2957A4; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
-  --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
-  --contrast-color: #FED100; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
+  --background-color: #ffffff;
+  /* Background color for the entire website, including individual sections */
+  --default-color: #212529;
+  /* Default color used for the majority of the text content across the entire website */
+  --heading-color: #95D0C8;
+  /* Color for headings, subheadings and title throughout the website */
+  --accent-color: #2957A4;
+  /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
+  --surface-color: #ffffff;
+  /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
+  --contrast-color: #FED100;
+  /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
 }
 
 /* #95D0C8 */
 
 /* Nav Menu Colors - The following color variables are used specifically for the navigation menu. They are separate from the global colors to allow for more customization options */
 :root {
-  --nav-color: #3a3939; /* The default color of the main navmenu links */
-  --nav-hover-color: #2957A4; /* Applied to main navmenu links when they are hovered over or active */
-  --nav-mobile-background-color: #dbdbdbeb; /* Used as the background color for mobile navigation menu */
-  --nav-dropdown-background-color: #dbdbdbeb; /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
-  --nav-dropdown-color: #3a3939; /* Used for navigation links of the dropdown items in the navigation menu. */
-  --nav-dropdown-hover-color: #e84545; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
+  --nav-color: #3a3939;
+  /* The default color of the main navmenu links */
+  --nav-hover-color: #2957A4;
+  /* Applied to main navmenu links when they are hovered over or active */
+  --nav-mobile-background-color: #dbdbdbeb;
+  /* Used as the background color for mobile navigation menu */
+  --nav-dropdown-background-color: #dbdbdbeb;
+  /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
+  --nav-dropdown-color: #3a3939;
+  /* Used for navigation links of the dropdown items in the navigation menu. */
+  --nav-dropdown-hover-color: #e84545;
+  /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
 }
 
 /* Color Presets - These classes override global colors when applied to any section or element, providing reuse of the sam color scheme. */
@@ -271,7 +283,7 @@ h6 {
     padding-right: 0;
   }
 
-  .navmenu li:hover > a,
+  .navmenu li:hover>a,
   .navmenu .active,
   .navmenu .active:focus {
     color: var(--nav-hover-color);
@@ -310,11 +322,11 @@ h6 {
 
   .navmenu .dropdown ul a:hover,
   .navmenu .dropdown ul .active:hover,
-  .navmenu .dropdown ul li:hover > a {
+  .navmenu .dropdown ul li:hover>a {
     color: var(--nav-dropdown-hover-color);
   }
 
-  .navmenu .dropdown:hover > ul {
+  .navmenu .dropdown:hover>ul {
     opacity: 1;
     top: 100%;
     visibility: visible;
@@ -326,7 +338,7 @@ h6 {
     visibility: hidden;
   }
 
-  .navmenu .dropdown .dropdown:hover > ul {
+  .navmenu .dropdown .dropdown:hover>ul {
     opacity: 1;
     top: 0;
     left: -100%;
@@ -429,7 +441,7 @@ h6 {
     background-color: rgba(33, 37, 41, 0.1);
   }
 
-  .navmenu .dropdown > .dropdown-active {
+  .navmenu .dropdown>.dropdown-active {
     display: block;
     background-color: rgba(33, 37, 41, 0.03);
   }
@@ -456,7 +468,7 @@ h6 {
     transition: 0.3s;
   }
 
-  .mobile-nav-active .navmenu > ul {
+  .mobile-nav-active .navmenu>ul {
     display: block;
   }
 }
@@ -692,7 +704,8 @@ h6 {
 
 /* Modal de Bootstrap estilo WhatsApp */
 .modal-whatsapp .modal-content {
-  background-color: #e9edef; /* Fondo claro como WhatsApp */
+  background-color: #e9edef;
+  /* Fondo claro como WhatsApp */
   border-radius: 10px;
   overflow: hidden;
   border: none;
@@ -701,7 +714,8 @@ h6 {
 }
 
 .modal-whatsapp .chat-header {
-  background-color: #25d366; /* Cabecera verde */
+  background-color: #25d366;
+  /* Cabecera verde */
   color: white;
   padding: 15px;
   font-size: 16px;
@@ -802,8 +816,7 @@ h6 {
 
 .page-title .heading {
   padding: 80px 0;
-  border-top: 1px solid
-    color-mix(in srgb, var(--default-color), transparent 90%);
+  border-top: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
 }
 
 .page-title .heading h1 {
@@ -825,11 +838,11 @@ h6 {
   font-weight: 600;
 }
 
-.page-title nav ol li + li {
+.page-title nav ol li+li {
   padding-left: 10px;
 }
 
-.page-title nav ol li + li::before {
+.page-title nav ol li+li::before {
   content: "/";
   display: inline-block;
   padding-right: 10px;
@@ -849,6 +862,7 @@ section,
 }
 
 @media (max-width: 1199px) {
+
   section,
   .section {
     scroll-margin-top: 64px;
@@ -906,7 +920,8 @@ section,
 
 .hero-video {
   position: absolute;
-  inset: 0;   /* top, right, bottom, left = 0 */
+  inset: 0;
+  /* top, right, bottom, left = 0 */
   width: 100%;
   height: 100vh;
   overflow: hidden;
@@ -916,7 +931,8 @@ section,
 .hero-video img {
   width: 100%;
   height: 100%;
-  object-fit: cover;  /* asegura que la imagen cubra sin deformarse */
+  object-fit: cover;
+  /* asegura que la imagen cubra sin deformarse */
 }
 
 .hero:before {
@@ -1084,6 +1100,7 @@ section,
 }
 
 @media (max-width: 768px) {
+
   .about .icon-boxes .col-md-6:nth-child(2) .icon-box,
   .about .icon-boxes .col-md-6:nth-child(4) .icon-box {
     margin-top: 0;
@@ -1603,6 +1620,7 @@ section,
 }
 
 @media (max-width: 767px) {
+
   .testimonials .testimonials-carousel,
   .testimonials .testimonials-slider {
     overflow: hidden;
@@ -1654,11 +1672,9 @@ section,
   box-shadow: none;
   border-radius: 0;
   color: var(--default-color);
-  background-color: color-mix(
-    in srgb,
-    var(--background-color),
-    transparent 50%
-  );
+  background-color: color-mix(in srgb,
+      var(--background-color),
+      transparent 50%);
   border-color: color-mix(in srgb, var(--default-color), transparent 80%);
 }
 
@@ -1689,56 +1705,64 @@ section,
 
 
 .practice-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.5rem;
-    align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .practice-card {
-    position: relative;
-    display: block;
-    width: 100%;
-    overflow: hidden;
+  flex: 0 0 calc((100% - 3 * 1rem) / 4);
+  max-width: calc((100% - 3 * 1rem) / 4);
 }
 
 .practice-area-img {
-    width: 100%;
-    height: auto;
-    display: block;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  object-position: center;
 }
 
 .practice-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: flex-end;
-    padding: 1.25rem;
-
-    background: linear-gradient(
-        to top,
-        rgba(0, 0, 0, .75),
-        rgba(0, 0, 0, .15),
-        transparent
-    );
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: clamp(0.6rem, 1.2vw, 1.25rem);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.01) 40%, transparent 75%);
 }
 
 .practice-overlay span {
-    color: #fff;
-    font-size: 1.1rem;
-    font-weight: 600;
+  color: #fff;
+  font-weight: 600;
+  font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.027);
 }
 
-/* Tablets */
 @media (max-width: 992px) {
-    .practice-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+  .practice-card {
+    flex-basis: calc((100% - 2 * 1rem) / 3);
+    max-width: calc((100% - 2 * 1rem) / 3);
+  }
 }
 
-/* Móviles */
-@media (max-width: 576px) {
-    .practice-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+@media (max-width: 768px) {
+  .practice-card {
+    flex-basis: calc((100% - 1rem) / 2);
+    max-width: calc((100% - 1rem) / 2);
+  }
+}
+
+@media (max-width: 480px) {
+  .practice-card {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
 }
