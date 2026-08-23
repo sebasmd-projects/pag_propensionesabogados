@@ -20,16 +20,16 @@ msgstr ""
 "X-Translated-Using: django-rosetta 0.10.0\n"
 
 #: .\apps\project\api\platform\auth_platform\api\serializers.py:113
-msgid "Cédula no encontrada con esa fecha de nacimiento."
-msgstr ""
+msgid "ID card not found with that date of birth."
+msgstr "Cédula no encontrada con esa fecha de nacimiento."
 
 #: .\apps\project\api\platform\auth_platform\api\serializers.py:122
-msgid "Asesor inválido. No existe un asesor con las iniciales proporcionadas."
-msgstr ""
+msgid "Invalid advisor. No advisor exists with the provided initials."
+msgstr "Asesor inválido. No existe un asesor con las iniciales proporcionadas."
 
 #: .\apps\project\api\platform\auth_platform\api\serializers.py:128
-msgid "Contraseña incorrecta para el asesor indicado."
-msgstr ""
+msgid "Incorrect password for the specified advisor."
+msgstr "Contraseña incorrecta para el asesor indicado."
 
 #: .\apps\project\api\platform\auth_platform\models.py:26
 msgid "first name"

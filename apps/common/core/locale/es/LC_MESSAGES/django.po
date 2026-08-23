@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-14 22:13-0500\n"
-"PO-Revision-Date: 2026-04-09 17:55-0500\n"
+"POT-Creation-Date: 2026-08-23 17:40-0500\n"
+"PO-Revision-Date: 2026-08-23 17:40-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -137,7 +137,7 @@ msgstr "desde"
 
 #: .\apps\common\core\models.py:125
 #: .\apps\common\core\templates\pages\sections\12_contact_section.html:6
-#: .\apps\common\core\templates\partials\header.html:97
+#: .\apps\common\core\templates\partials\header.html:45
 msgid "Contact"
 msgstr "Contáctanos"
 
@@ -382,7 +382,7 @@ msgid "Monday - Friday"
 msgstr "Lunes - Viernes"
 
 #: .\apps\common\core\templates\pages\sections\13_team_section.html:5
-#: .\apps\common\core\templates\partials\header.html:85
+#: .\apps\common\core\templates\partials\header.html:36
 msgid "Team"
 msgstr "Equipo"
 
@@ -403,7 +403,7 @@ msgstr ""
 "Profesionales en Derecho y Ciencias Sociales a Nivel Nacional e Internacional"
 
 #: .\apps\common\core\templates\pages\sections\2_principles_section.html:6
-#: .\apps\common\core\templates\partials\header.html:49
+#: .\apps\common\core\templates\partials\header.html:18
 msgid "Principles"
 msgstr "Principios"
 
@@ -585,59 +585,33 @@ msgstr "Grupo Ejecutivo "
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:7
 #: .\apps\common\core\templates\partials\footer.html:50
-#: .\apps\common\core\templates\partials\header.html:93
+#: .\apps\common\core\templates\partials\header.html:42
 msgid "Services"
 msgstr "Servicios"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:10
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "      Propensiones Internacional acts as advisory agent and accredited "
-#| "representative in Colombia for a group of foreign\n"
-#| "      investors.\n"
-#| "      "
 msgid ""
 "Propensiones Internacional acts as advisory agent and accredited "
 "representative in Colombia for a group of foreign investors."
 msgstr ""
-"\n"
 "Propensiones Internacional actúa como agente asesor y representante "
 "acreditado en Colombia para un grupo de inversionistas extranjeros."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:14
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "      Legal services nationwide in Armenia, Bogota, Buenaventura, Buga, "
-#| "Cali, Cartago, Cucuta, Ibague, Medellin,\n"
-#| "      Quimbaya y Tulua.\n"
-#| "      "
 msgid ""
 "Legal services nationwide in Armenia, Bogota, Buenaventura, Buga, Cali, "
 "Cartago, Cucuta, Ibague, Medellin, Quimbaya y Tulua."
 msgstr ""
-"\n"
 "Servicios legales a nivel nacional en Armenia, Bogotá, Buenaventura, Buga, "
 "Cali, Cartago, Cúcuta, Ibagué, Medellín, Quimbaya y Tuluá."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:18
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "      Our firm provides a comprehensive range of specialized legal and "
-#| "financial services to address challenges\n"
-#| "      effectively and deliver lasting solutions. We offer expert support "
-#| "at both national and international levels,\n"
-#| "      ensuring your interests are protected and optimized.\n"
-#| "      "
 msgid ""
 "Our firm provides a comprehensive range of specialized legal and financial "
 "services to address challenges effectively and deliver lasting solutions. We "
 "offer expert support at both national and international levels, ensuring "
 "your interests are protected and optimized."
 msgstr ""
-"\n"
 "Nuestra firma ofrece una gama integral de servicios legales y financieros "
 "especializados para abordar desafíos de manera efectiva y brindar soluciones "
 "duraderas. Brindamos apoyo experto tanto a nivel nacional como "
@@ -648,22 +622,12 @@ msgid "National Services:"
 msgstr "Servicios Nacionales:"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:25
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "          Solutions tailored to individuals and businesses in Colombia, "
-#| "including pensions, economic insolvency, civil\n"
-#| "          and criminal law, family matters, labor disputes, and urgent "
-#| "conciliations. We focus on delivering justice,\n"
-#| "          financial stability, and peace of mind.\n"
-#| "          "
 msgid ""
 "Solutions tailored to individuals and businesses in Colombia, including "
 "pensions, economic insolvency, civil and criminal law, family matters, labor "
 "disputes, and urgent conciliations. We focus on delivering justice, "
 "financial stability, and peace of mind."
 msgstr ""
-"\n"
 "Soluciones adaptadas a individuos y empresas en Colombia, que incluyen "
 "pensiones, insolvencia económica, derecho civil y penal, asuntos familiares, "
 "disputas laborales y conciliaciones urgentes. Nos enfocamos en brindar "
@@ -674,22 +638,12 @@ msgid "International Services:"
 msgstr "Servicios Internacionales:"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:31
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "          Specialized support for global operations, including asset "
-#| "management, risk analysis, paymaster services,\n"
-#| "          commercial law, and emergency conciliations. We provide secure, "
-#| "transparent, and effective solutions for\n"
-#| "          cross-border challenges.\n"
-#| "          "
 msgid ""
 "Specialized support for global operations, including asset management, risk "
 "analysis, paymaster services, commercial law, and emergency conciliations. "
 "We provide secure, transparent, and effective solutions for cross-border "
 "challenges."
 msgstr ""
-"\n"
 "Soporte especializado para operaciones globales, que incluye gestión de "
 "activos, análisis de riesgos, servicios de pago, derecho comercial y "
 "conciliaciones urgentes. Ofrecemos soluciones seguras, transparentes y "
@@ -700,58 +654,33 @@ msgid "Purchase, Sale and Export of Gold and Precious Metals:"
 msgstr "Compra, Venta y Exportación de Oro y Metales Preciosos:"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:37
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "          We are a company legally registered in the Single Registry of "
-#| "Mineral Traders (RUCOM) administered by the National Mining Agency, which "
-#| "enables us to buy, sell, broker and export minerals.\n"
-#| "          "
 msgid ""
 "We are a company legally registered in the Single Registry of Mineral "
 "Traders (RUCOM) administered by the National Mining Agency, which enables us "
 "to buy, sell, broker and export minerals."
 msgstr ""
-"\n"
 "Somos una compañía legalmente inscrita en el Registro Único de "
 "Comercializadores de Minerales (RUCOM) administrado por la Agencia Nacional "
 "de Minería, lo que nos habilita para la compra, venta, intermediación y "
 "exportación de minerales."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:40
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "          We participate in the marketing of gold, silver, diamonds and "
-#| "emeralds, under standards of legality, traceability and regulatory "
-#| "compliance, orienting our operations towards international markets, "
-#| "especially the United States and Europe.\n"
-#| "          "
 msgid ""
 "We participate in the marketing of gold, silver, diamonds and emeralds, "
 "under standards of legality, traceability and regulatory compliance, "
 "orienting our operations towards international markets, especially the "
 "United States and Europe."
 msgstr ""
-"\n"
 "Participamos en la comercialización de oro, plata, diamantes y esmeraldas, "
 "bajo estándares de legalidad, trazabilidad y cumplimiento regulatorio, "
 "orientando nuestras operaciones hacia mercados internacionales, "
 "especialmente Estados Unidos y Europa."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:46
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "      Each service can be contracted individually, specifically adapted "
-#| "to meet your needs and objectives with precision\n"
-#| "      and excellence.\n"
-#| "      "
 msgid ""
 "Each service can be contracted individually, specifically adapted to meet "
 "your needs and objectives with precision and excellence."
 msgstr ""
-"\n"
 "Cada servicio puede contratarse de forma individual, adaptado "
 "específicamente para satisfacer sus necesidades y objetivos con precisión y "
 "excelencia."
@@ -762,16 +691,6 @@ msgid "Economic Insolvency"
 msgstr "Insolvencia Económica"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:65
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "                Our firm offers specialized services for handling cases "
-#| "of economic insolvency for both non-commercial\n"
-#| "                individuals and commercial entities. We guide clients "
-#| "through restructuring their debts, negotiating\n"
-#| "                with creditors, and ensuring compliance with legal "
-#| "requirements to achieve financial stability.\n"
-#| "                "
 msgid ""
 "Our firm offers specialized services for handling cases of economic "
 "insolvency for both non-commercial individuals and commercial entities. We "
@@ -779,7 +698,6 @@ msgid ""
 "and ensuring compliance with legal requirements to achieve financial "
 "stability."
 msgstr ""
-"\n"
 "Nuestra firma ofrece servicios especializados para el manejo de casos de "
 "insolvencia económica tanto para personas no comerciantes como para "
 "entidades comerciales. Guiamos a los clientes en la reestructuración de sus "
@@ -792,12 +710,6 @@ msgid "Denied Pensions"
 msgstr "Pensiones negadas"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:79
-#, fuzzy
-#| msgid ""
-#| "We specialize in representing clients in cases\n"
-#| "                of denied pensions, ensuring they receive the benefits "
-#| "they\n"
-#| "                are entitled to. "
 msgid ""
 "We specialize in representing clients in cases of denied pensions, ensuring "
 "they receive the benefits they are entitled to."
@@ -810,12 +722,6 @@ msgid "Extracontractual Liability"
 msgstr "Responsabilidad Extracontractual"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:93
-#, fuzzy
-#| msgid ""
-#| "We offer expertise in cases of\n"
-#| "                extracontractual liability, protecting clients from "
-#| "unjust\n"
-#| "                claims and ensuring justice. "
 msgid ""
 "We offer expertise in cases of extracontractual liability, protecting "
 "clients from unjust claims and ensuring justice."
@@ -830,12 +736,6 @@ msgid "Emergency Conciliations"
 msgstr "Conciliaciones de Emergencia"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:107
-#, fuzzy
-#| msgid ""
-#| "Specialized services to handle urgent\n"
-#| "                conciliations in national disputes, ensuring quick and "
-#| "effective\n"
-#| "                resolutions. "
 msgid ""
 "Specialized services to handle urgent conciliations in national disputes, "
 "ensuring quick and effective resolutions."
@@ -848,11 +748,6 @@ msgid "Business Consultancy"
 msgstr "Consultoría Empresarial"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:121
-#, fuzzy
-#| msgid ""
-#| "We provide expert business consultancy,\n"
-#| "                helping businesses streamline operations and maximize\n"
-#| "                efficiency. "
 msgid ""
 "We provide expert business consultancy, helping businesses streamline "
 "operations and maximize efficiency."
@@ -865,12 +760,6 @@ msgid "Field Research"
 msgstr "Investigación de Campo"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:135
-#, fuzzy
-#| msgid ""
-#| "In-depth field research services to gather\n"
-#| "                critical data and insights for legal and business "
-#| "purposes.\n"
-#| "                "
 msgid ""
 "In-depth field research services to gather critical data and insights for "
 "legal and business purposes."
@@ -883,12 +772,6 @@ msgid "Civil Law"
 msgstr "Derecho Civil"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:149
-#, fuzzy
-#| msgid ""
-#| "Our experts specialize in civil law, offering\n"
-#| "                assistance with contracts, property disputes, and "
-#| "personal\n"
-#| "                injury cases. "
 msgid ""
 "Our experts specialize in civil law, offering assistance with contracts, "
 "property disputes, and personal injury cases."
@@ -902,10 +785,6 @@ msgid "Criminal Law"
 msgstr "Derecho Penal"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:163
-#, fuzzy
-#| msgid ""
-#| "We handle criminal law cases, ensuring\n"
-#| "                effective defense strategies for our clients. "
 msgid ""
 "We handle criminal law cases, ensuring effective defense strategies for our "
 "clients."
@@ -918,10 +797,6 @@ msgid "Family Law"
 msgstr "Derecho de Familia"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:177
-#, fuzzy
-#| msgid ""
-#| "Our firm provides family law services\n"
-#| "                including divorce, custody, and alimony. "
 msgid ""
 "Our firm provides family law services including divorce, custody, and "
 "alimony."
@@ -935,12 +810,6 @@ msgid "Labor Law"
 msgstr "Derecho Laboral"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:191
-#, fuzzy
-#| msgid ""
-#| "We assist in labor law matters including\n"
-#| "                employment contracts, workplace disputes, and labor "
-#| "rights.\n"
-#| "                "
 msgid ""
 "We assist in labor law matters including employment contracts, workplace "
 "disputes, and labor rights."
@@ -958,12 +827,6 @@ msgid "Paymaster Services"
 msgstr "Paymaster Internacional"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:209
-#, fuzzy
-#| msgid ""
-#| "Specialized services to ensure smooth\n"
-#| "                international financial transactions, with full "
-#| "transparency\n"
-#| "                and security. "
 msgid ""
 "Specialized services to ensure smooth international financial transactions, "
 "with full transparency and security."
@@ -972,12 +835,6 @@ msgstr ""
 "internacionales de alto valor, garantizando la seguridad y la transparencia."
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:223
-#, fuzzy
-#| msgid ""
-#| "We provide services for emergency conciliations\n"
-#| "                in international disputes, ensuring swift conflict "
-#| "resolution.\n"
-#| "                "
 msgid ""
 "We provide services for emergency conciliations in international disputes, "
 "ensuring swift conflict resolution."
@@ -990,11 +847,6 @@ msgid "Risk Analysis"
 msgstr "Análisis de riesgos"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:237
-#, fuzzy
-#| msgid ""
-#| "We provide detailed risk assessments to\n"
-#| "                identify and mitigate potential threats in international\n"
-#| "                operations. "
 msgid ""
 "We provide detailed risk assessments to identify and mitigate potential "
 "threats in international operations."
@@ -1007,12 +859,6 @@ msgid "Commercial Law"
 msgstr "Derecho Comercial"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:251
-#, fuzzy
-#| msgid ""
-#| "We provide legal services in international\n"
-#| "                commercial law, including contract negotiation and "
-#| "dispute\n"
-#| "                resolution. "
 msgid ""
 "We provide legal services in international commercial law, including "
 "contract negotiation and dispute resolution."
@@ -1025,12 +871,6 @@ msgid "Asset Management"
 msgstr "Gestión de Activos"
 
 #: .\apps\common\core\templates\pages\sections\8_services_section.html:265
-#, fuzzy
-#| msgid ""
-#| "We offer services in managing and optimizing\n"
-#| "                international assets, ensuring security and "
-#| "profitability.\n"
-#| "                "
 msgid ""
 "We offer services in managing and optimizing international assets, ensuring "
 "security and profitability."
@@ -1067,7 +907,7 @@ msgstr ""
 "cadena de valor."
 
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:8
-msgid "International Private Consortium with a global purpose."
+msgid "International Private Consortium with a global purpose"
 msgstr "Consorcio Privado Internacional con propósito global."
 
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:9
@@ -1077,7 +917,7 @@ msgstr "Un Mismo Propósito Global"
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:10
 msgid ""
 "We are proud to announce that we have consolidated our direct and active "
-"presence in the North American market."
+"presence in the North American market"
 msgstr ""
 "Nos enorgullece anunciar que hemos consolidado nuestra presencia directa y "
 "activa en el mercado norteamericano."
@@ -1102,6 +942,11 @@ msgstr ""
 #: .\apps\common\core\templates\pages\sections\alliance_section.html:35
 msgid "Propensiones Group Alliance"
 msgstr "Alianza del Grupo Propensiones"
+
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:43
+#: .\apps\common\core\templates\pages\sections\alliance_section.html:49
+msgid "Covenant of Hope"
+msgstr "Convenio de la Esperanza"
 
 #: .\apps\common\core\templates\pages\sections\onu_section.html:14
 msgid ""
@@ -1181,7 +1026,7 @@ msgid "Useful Links"
 msgstr "Enlaces útiles"
 
 #: .\apps\common\core\templates\partials\footer.html:48
-#: .\apps\common\core\templates\partials\header.html:40
+#: .\apps\common\core\templates\partials\header.html:11
 msgid "Home"
 msgstr "Inicio"
 
@@ -1218,31 +1063,38 @@ msgstr "Todos los derechos reservados"
 msgid "Designed by"
 msgstr "Diseñado por"
 
-#: .\apps\common\core\templates\partials\header.html:43
-#: .\apps\common\core\templates\partials\header.html:67
+#: .\apps\common\core\templates\partials\header.html:15
+#: .\apps\common\core\templates\partials\header.html:27
 msgid "About"
 msgstr "Conócenos"
 
-#: .\apps\common\core\templates\partials\header.html:55
+#: .\apps\common\core\templates\partials\header.html:21
 msgid "Our C.E.O"
 msgstr "Nuestro C.E.O"
 
-#: .\apps\common\core\templates\partials\header.html:61
+#: .\apps\common\core\templates\partials\header.html:24
 msgid "Born with a social sense"
 msgstr "Nacimos con Sentido Social"
 
-#: .\apps\common\core\templates\partials\header.html:73
+#: .\apps\common\core\templates\partials\header.html:30
 msgid "Expertise in each area"
 msgstr "Experticia en cada área"
 
-#: .\apps\common\core\templates\partials\header.html:79
+#: .\apps\common\core\templates\partials\header.html:33
 msgid "Social Responsibility"
 msgstr "Responsabilidad Social"
 
-#: .\apps\common\core\templates\partials\header.html:102
-#: .\apps\common\core\templates\partials\header.html:103
-msgid "Certificates"
-msgstr "Certificados"
+#: .\apps\common\core\templates\partials\header.html:50
+msgid "Platforms"
+msgstr "Plataformas"
+
+#: .\apps\common\core\templates\partials\header.html:65
+msgid "Certification"
+msgstr "Certificación"
+
+#: .\apps\common\core\templates\partials\header.html:72
+msgid "Language"
+msgstr "Idioma"
 
 #: .\apps\common\core\templates\partials\whatsapp.html:4
 msgid "Contact Us Now"
@@ -1264,11 +1116,11 @@ msgstr "Escribe tu mensaje..."
 msgid "This form has already been sent."
 msgstr "Este formulario ya ha sido enviado."
 
-#: .\apps\common\core\views.py:48
+#: .\apps\common\core\views.py:55
 msgid "Message Received! | PROPENSIONES ABOGADOS"
 msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 
-#: .\apps\common\core\views.py:49
+#: .\apps\common\core\views.py:56
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."

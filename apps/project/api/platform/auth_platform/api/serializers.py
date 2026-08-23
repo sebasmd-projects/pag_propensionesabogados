@@ -110,7 +110,7 @@ class AttlasInsolvencyAuthSerializer(serializers.Serializer):
             )
         except AttlasInsolvencyAuthModel.DoesNotExist:
             raise serializers.ValidationError({
-                'document_number': _('Cédula no encontrada con esa fecha de nacimiento.')
+                'document_number': _('ID card not found with that date of birth.')
             })
 
         # 2. Verificar existencia del asesor con las iniciales
@@ -119,13 +119,13 @@ class AttlasInsolvencyAuthSerializer(serializers.Serializer):
                 user=user)
         except AttlasInsolvencyAuthConsultantsModel.DoesNotExist:
             raise serializers.ValidationError({
-                'user': _('Asesor inválido. No existe un asesor con las iniciales proporcionadas.')
+                'user': _('Invalid advisor. No advisor exists with the provided initials.')
             })
 
         # 3. Verificar contraseña del asesor
         if not consultant.check_password(password):
             raise serializers.ValidationError({
-                'password': _('Contraseña incorrecta para el asesor indicado.')
+                'password': _('Incorrect password for the specified advisor.')
             })
 
         return {
