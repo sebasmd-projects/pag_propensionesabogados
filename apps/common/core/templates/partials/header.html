@@ -2,125 +2,84 @@
 
 <header id="header" class="header d-flex align-items-center fixed-top">
   <div class="container-fluid position-relative d-flex align-items-center justify-content-between">
-
     <!-- Logo -->
-    <a href="{% url 'core:index' %}" class="logo d-flex align-items-center me-auto me-xl-0">
-      <img src="{% static 'assets/imgs/favicon/favicon-horizontal.webp' %}" alt="" />
-    </a>
-
-    <!-- Botones en pantallas grandes (fuera del nav y al inicio) -->
-    <div class="d-none d-xl-flex order-1">
-      <a class="btn mx-2" href="https://geausa.propensionesabogados.com/" target="_blank">
-        <img src="{% static 'assets/imgs/hero/gea-horizontal-logo.webp' %}" alt="" class="img-fluid rounded"
-          style="max-height:50px; width:auto; min-height:50px;" />
-      </a>
-
-      <a class="btn mx-2" href="https://fundacionattlas.org/" target="_blank" style="background-color: #fff;">
-        <img src="{% static 'assets/imgs/hero/attlas-horizontal-logo.webp' %}" alt="" class="img-fluid"
-          style="max-height:40px; width:auto; min-height:40px; min-width:90px;" />
-      </a>
-    </div>
+    <a href="{% url 'core:index' %}" class="logo d-flex align-items-center me-auto me-xl-0"><img src="{% static 'assets/imgs/favicon/favicon-horizontal.webp' %}" alt="Propensiones Abogados" /></a>
 
     <nav id="navmenu" class="navmenu">
       <ul>
-        <li class="dropdown">
-          <a href="#"><span><i class="bi bi-translate mx-1"></i></span>
-            <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-          <ul>
-            {% for lang in LANGUAGES %}
-            <li>
-              <a class="dropdown-item text-capitalize" href="{% url 'set_language' %}?lang={{ lang.0 }}">
-                {{ lang.1 }}
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
-        </li>
         <li>
           <a href="{% url 'core:index' %}#hero" aria-label="Go to hero section">{% trans 'Home' %}</a>
         </li>
+
         <li class="dropdown">
-          <a href="#"><span>{% trans 'About' %}</span>
-            <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+          <a href="#"><span>{% trans 'About' %}</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
           <ul>
-
             <li>
-              <a href="{% url 'core:index' %}#principles" aria-label="Go to about principles section">
-                {% trans 'Principles' %}
-              </a>
+              <a href="{% url 'core:index' %}#principles">{% trans 'Principles' %}</a>
             </li>
-
             <li>
-              <a href="{% url 'core:index' %}#ceo" aria-label="Go to about C.E.O section">
-                {% trans 'Our C.E.O' %}
-              </a>
+              <a href="{% url 'core:index' %}#ceo">{% trans 'Our C.E.O' %}</a>
             </li>
-
             <li>
-              <a href="{% url 'core:index' %}#social_sense" aria-label="Go to about social sense section">
-                {% trans 'Born with a social sense' %}
-              </a>
+              <a href="{% url 'core:index' %}#social_sense">{% trans 'Born with a social sense' %}</a>
             </li>
-
             <li>
-              <a href="{% url 'core:index' %}#about" aria-label="Go to about section">
-                {% trans 'About' %}
-              </a>
+              <a href="{% url 'core:index' %}#about">{% trans 'About' %}</a>
             </li>
-
             <li>
-              <a href="{% url 'core:index' %}#all_team" aria-label="Go to all team section">
-                {% trans 'Expertise in each area' %}
-              </a>
+              <a href="{% url 'core:index' %}#all_team">{% trans 'Expertise in each area' %}</a>
             </li>
-
             <li>
-              <a href="{% url 'core:index' %}#social_responsibility" aria-label="Social Responsibility">
-                {% trans 'Social Responsibility' %}
-              </a>
+              <a href="{% url 'core:index' %}#social_responsibility">{% trans 'Social Responsibility' %}</a>
             </li>
-
             <li>
-              <a href="{% url 'core:index' %}#team" aria-label="Go to team section">
-                {% trans 'Team' %}
-              </a>
+              <a href="{% url 'core:index' %}#team">{% trans 'Team' %}</a>
             </li>
-
           </ul>
         </li>
 
         <li>
-          <a href="{% url 'core:index' %}#services" aria-label="Go to services section">{% trans 'Services' %}</a>
+          <a href="{% url 'core:index' %}#services">{% trans 'Services' %}</a>
+        </li>
+        <li>
+          <a href="{% url 'core:index' %}#contact">{% trans 'Contact' %}</a>
         </li>
 
-        <li>
-          <a href="{% url 'core:index' %}#contact" aria-label="Go to contact section">{% trans 'Contact' %}</a>
+        <!-- Plataformas aliadas -->
+        <li class="dropdown dropdown-end">
+          <a href="#"><span>{% trans 'Platforms' %}</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+          <ul class="platforms-dropdown">
+            <li>
+              <a href="https://tracecertificates.com/" target="_blank" rel="noopener">
+                <img src="https://tracecertificates.com/icono_trace_principal.png" alt="TRACE" class="platform-icon" />
+                <span>TraceCertificates</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://geausa.propensionesabogados.com/" target="_blank" rel="noopener"><img src="{% static 'assets/imgs/hero/gea-horizontal-logo.webp' %}" alt="GEA" class="platform-logo" /></a>
+            </li>
+            <li>
+              <a href="https://fundacionattlas.org/" target="_blank" rel="noopener"><img src="{% static 'assets/imgs/hero/attlas-horizontal-logo.webp' %}" alt="ATTLAS" class="platform-logo" /></a>
+            </li>
+            <li class="platforms-divider">
+              <a href="https://geausa.propensionesabogados.com/certificates/" target="_blank" rel="noopener"><i class="bi bi-patch-check"></i> <span>{% trans 'Certification' %}</span></a>
+            </li>
+          </ul>
         </li>
 
-        <li>
-          <a href=" https://geausa.propensionesabogados.com/certificates/" target="_blank" class="btn btn-outline-success">
-            {% comment %} <img src="https://tracecertificates.com/icono_trace_principal.png" alt="{% trans 'Certificates' %}" style="max-width: 40px;" class="mx-1"> {% endcomment %}
-            {% trans "Certificates" %}
+        <!-- Idioma -->
+        <li class="dropdown dropdown-end">
+          <a href="#" aria-label="{% trans 'Language' %}">
+            <span><i class="bi bi-translate"></i></span>
+            <i class="bi bi-chevron-down toggle-dropdown"></i>
           </a>
-        </li>
-
-        <!-- Botones en pantallas pequeñas (dentro del nav y centrados) -->
-        <li class="d-xl-none">
-          <div class="d-flex justify-content-center w-100">
-            
-            <a class="btn mx-2 my-2" href="https://geausa.propensionesabogados.com/" target="_blank"
-              style="background-color: #fff;">
-              <img src="{% static 'assets/imgs/hero/gea-horizontal-logo.webp' %}" alt="" class="img-fluid"
-                style="max-height:40px; width:auto; min-height:40px;" />
-            </a>
-
-            <a class="btn mx-2 my-2" href="https://fundacionattlas.org/" target="_blank"
-              style="background-color: #fff;">
-              <img src="{% static 'assets/imgs/hero/attlas-horizontal-logo.webp' %}" alt="" class="img-fluid"
-                style="max-height:40px; width:auto; min-height:40px; min-width:90px;" />
-            </a>
-
-          </div>
+          <ul>
+            {% for lang in LANGUAGES %}
+              <li>
+                <a class="text-capitalize" href="{% url 'set_language' %}?lang={{ lang.0 }}">{{ lang.1 }}</a>
+              </li>
+            {% endfor %}
+          </ul>
         </li>
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>

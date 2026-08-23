@@ -1766,3 +1766,48 @@ section,
     max-width: 100%;
   }
 }
+
+/* Dropdown de plataformas */
+.navmenu .platforms-dropdown li {
+  min-width: 240px;
+}
+
+.navmenu .platforms-dropdown a {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 20px;
+}
+
+.navmenu .platforms-dropdown .platform-logo {
+  max-height: 30px;
+  width: auto;
+  object-fit: contain;
+}
+
+.navmenu .platforms-dropdown .platform-icon {
+  max-width: 24px;
+  height: auto;
+}
+
+.navmenu .platforms-dropdown .platforms-divider {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+/* Evita que los últimos dropdowns se salgan por la derecha */
+@media (min-width: 1200px) {
+  .navmenu .dropdown-end>ul {
+    left: auto;
+    right: 0;
+  }
+}
+
+/* En móvil los logos no deben desbordar */
+@media (max-width: 1199px) {
+  .navmenu .platforms-dropdown .platform-logo {
+    max-height: 26px;
+  }
+}
