@@ -56,11 +56,6 @@ def custom_processors(request: Any) -> dict[str, Any]:
             "alt": _("Business Consulting"),
         },
         {
-            "image": "departamento_juridico.webp",
-            "subject": _("Legal Department"),
-            "alt": _("Legal Department"),
-        },
-        {
             "image": "derecho_de_familia.webp",
             "subject": _("Family Law"),
             "alt": _("Family Law"),
