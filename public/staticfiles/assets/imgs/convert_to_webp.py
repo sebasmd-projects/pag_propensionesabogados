@@ -6,7 +6,7 @@ from PIL import Image
 ROOT_DIR = Path(".")
 
 # Extensiones de imágenes soportadas (sin incluir webp porque ese es el destino)
-SUPPORTED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".mp4"]
+SUPPORTED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".mp4", ".jfif"]
 
 def convert_to_webp(root_dir):
     for path in root_dir.rglob("*"):
