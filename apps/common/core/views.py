@@ -19,6 +19,10 @@ from .models import ContactModel, ModalBannerModel, TeamMemberModel
 logger = logging.getLogger(__name__)
 
 
+class CheckProcessStatusTemplateView(TemplateView):
+    template_name = "pages/consultar_proceso.html"
+
+
 @method_decorator(check_honeypot, name='post')
 class IndexTemplateView(FormView):
     template_name = "pages/index.html"

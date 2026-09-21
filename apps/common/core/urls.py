@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.common.core.views import (DocumentsView, IndexTemplateView, CalendarView,
+from apps.common.core.views import (DocumentsView, IndexTemplateView, CalendarView, CheckProcessStatusTemplateView,
                                     PrivacyPolicyView, TermsAndConditionsView, TeamMemberDetailView,
                                     security_txt_view)
 
@@ -16,6 +16,11 @@ urlpatterns = [
         'calendario/',
         CalendarView.as_view(),
         name='calendar'
+    ),
+    path(
+        'consultar/proceso',
+        CheckProcessStatusTemplateView.as_view(),
+        name='check-process-status'
     ),
     path(
         'terms-and-conditions/',
