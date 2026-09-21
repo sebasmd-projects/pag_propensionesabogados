@@ -1,8 +1,9 @@
+from apps.common.core.views import (CalendarView,
+                                    CheckProcessStatusTemplateView,
+                                    DocumentsView, IndexTemplateView,
+                                    PrivacyPolicyView, TeamMemberDetailView,
+                                    TermsAndConditionsView, security_txt_view)
 from django.urls import path
-
-from apps.common.core.views import (DocumentsView, IndexTemplateView, CalendarView, CheckProcessStatusTemplateView,
-                                    PrivacyPolicyView, TermsAndConditionsView, TeamMemberDetailView,
-                                    security_txt_view)
 
 app_name = 'core'
 
@@ -18,7 +19,7 @@ urlpatterns = [
         name='calendar'
     ),
     path(
-        'consultar/proceso',
+        'consultar/proceso/',
         CheckProcessStatusTemplateView.as_view(),
         name='check-process-status'
     ),
