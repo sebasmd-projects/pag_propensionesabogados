@@ -145,6 +145,10 @@ msgstr "Contáctanos"
 msgid "Contacts"
 msgstr "Contáctanos"
 
+#: .\apps\common\core\templates\partials\header.html:48
+msgid "My processes"
+msgstr "Mis procesos"
+
 #: .\apps\common\core\models.py:135
 msgid "title"
 msgstr "título"
