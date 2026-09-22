@@ -38,7 +38,17 @@ class CaseManagerAdminMixin:
     def has_view_permission(self, request, obj=None):
         return can_use_case_manager(request.user)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None):
+        """
+        `obj` lleva valor por defecto porque este mixin lo comparten un
+        `ModelAdmin` y un `InlineModelAdmin`, y Django los llama distinto:
+
+            ModelAdmin.has_add_permission(self, request)
+            InlineModelAdmin.has_add_permission(self, request, obj)
+
+        Con la firma del `ModelAdmin` a secas, abrir la ficha de un asunto
+        --que lleva el inline del dinero-- reventaba con un `TypeError`.
+        """
         return can_use_case_manager(request.user)
 
     def has_change_permission(self, request, obj=None):

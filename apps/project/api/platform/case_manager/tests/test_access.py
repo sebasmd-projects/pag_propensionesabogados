@@ -145,3 +145,92 @@ class PasswordStorageTests(TestCase):
         self.assertNotIn('una-contrasena-larga-de-verdad', user.password)
         self.assertTrue(user.password.startswith('argon2$'))
         self.assertTrue(user.check_password('una-contrasena-larga-de-verdad'))
+
+
+class AdminPagesRenderTests(TestCase):
+    """
+    Que las paginas del gestor en el admin **abran de verdad**.
+
+    Las pruebas de arriba llaman a los metodos de permiso a mano, y eso se les
+    escapo: `ModelAdmin.has_add_permission(request)` toma dos argumentos y
+    `InlineModelAdmin.has_add_permission(request, obj)` toma tres. Como el
+    mixin lo comparten los dos, la firma del `ModelAdmin` rompia el inline del
+    dinero en cuanto alguien abria la ficha de un asunto:
+
+        TypeError: CaseManagerAdminMixin.has_add_permission() takes 2
+        positional arguments but 3 were given
+
+    Comprobar los metodos sueltos no lo veia; pedir la pagina, si. De ahi que
+    estas prueben lo que hace el navegador.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+
+        from ..choices import Mandate, Service, Stage
+        from ..models import CaseFinanceModel, CaseModel, ClientModel
+
+        cls.client_record = ClientModel.objects.create(
+            identification='16484186', full_name='Carlos Giraldo'
+        )
+        cls.case = CaseModel.objects.create(
+            client=cls.client_record,
+            service=Service.JUDICIAL,
+            stage=Stage.IN_PROGRESS,
+        )
+        CaseFinanceModel.objects.create(
+            case=cls.case,
+            mandate=Mandate.PAYMENT,
+            agreed_fee=6_000_000,
+            paid_amount=2_000_000,
+        )
+
+    def setUp(self):
+        make_user('abogada', staff=True, gestor=True)
+        self.client.login(
+            username='abogada', password='una-contrasena-larga-de-verdad'
+        )
+
+    def test_el_listado_de_clientes_abre(self):
+        url = reverse('admin:case_manager_clientmodel_changelist')
+
+        self.assertEqual(self.client.get(url).status_code, 200)
+
+    def test_la_ficha_de_un_cliente_abre(self):
+        url = reverse(
+            'admin:case_manager_clientmodel_change', args=[self.client_record.pk]
+        )
+
+        self.assertEqual(self.client.get(url).status_code, 200)
+
+    def test_el_listado_de_asuntos_abre(self):
+        url = reverse('admin:case_manager_casemodel_changelist')
+
+        self.assertEqual(self.client.get(url).status_code, 200)
+
+    def test_anadir_un_asunto_abre(self):
+        """Es la pagina que llevaba el inline del dinero y reventaba."""
+        url = reverse('admin:case_manager_casemodel_add')
+
+        self.assertEqual(self.client.get(url).status_code, 200)
+
+    def test_la_ficha_de_un_asunto_abre_con_su_inline(self):
+        url = reverse('admin:case_manager_casemodel_change', args=[self.case.pk])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        # El inline esta de verdad en la pagina, no solo «no revento».
+        self.assertContains(response, 'finance')
+
+    def test_un_superusuario_tambien(self):
+        self.client.logout()
+        make_user('jefe', superuser=True)
+        self.client.login(
+            username='jefe', password='una-contrasena-larga-de-verdad'
+        )
+
+        url = reverse('admin:case_manager_casemodel_change', args=[self.case.pk])
+
+        self.assertEqual(self.client.get(url).status_code, 200)
