@@ -192,6 +192,8 @@
                     {% endfor %}
                   </div>
 
+                  {% include 'case_manager/partials/client_notes.html' %}
+
                   <div class="card-body border-top text-center p-4">
                     <p class="text-uppercase small text-muted mb-1">{% trans "Current status" %}</p>
                     <p class="h4 mb-2">{{ case.get_stage_display }}</p>

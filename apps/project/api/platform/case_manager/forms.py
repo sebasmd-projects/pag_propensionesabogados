@@ -17,7 +17,8 @@ from django import forms
 from django.forms import inlineformset_factory
 from django.utils.translation import gettext_lazy as _
 
-from .models import CaseFinanceModel, CaseModel, ClientModel
+from .models import (CaseFinanceModel, CaseModel, CaseNoteModel,
+                     ClientModel)
 
 #: Una sola respuesta para los tres noes: no existe esa identificacion, la
 #: clave no es, o el servicio no esta vigente.
@@ -186,6 +187,15 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
     sigue pudiendo mandar.
     """
 
+    notify_stage_change = forms.BooleanField(
+        label=_('Email the client if the stage changes'),
+        required=False,
+        help_text=_(
+            'Only if the stage actually changes in this save, and only if the '
+            'client has an email address on file.'
+        ),
+    )
+
     class Meta:
         model = CaseModel
         fields = (
@@ -197,6 +207,43 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
             'police_instance', 'police_office', 'police_case_number',
             'police_city',
             'paz_y_salvo_authorized',
+        )
+
+
+class CaseNoteForm(BootstrapFormMixin, forms.ModelForm):
+    """
+    Una novedad del expediente, y si se le avisa al cliente.
+
+    La casilla de aviso **no se guarda en la nota**: es una decision de este
+    envio, no una propiedad de la novedad. Lo que si queda guardado es
+    `notified_at`, que dice cuando se le aviso de verdad --y solo se rellena
+    si el correo salio--.
+    """
+
+    notify_client = forms.BooleanField(
+        label=_('Email this note to the client'),
+        required=False,
+        initial=True,
+        help_text=_(
+            'It goes out with the firm letterhead. Nothing is sent if the '
+            'client has no email address on file.'
+        ),
+    )
+
+    class Meta:
+        model = CaseNoteModel
+        fields = ('kind', 'title', 'body', 'visible_to_client')
+        widgets = {
+            'body': forms.Textarea(attrs={'rows': 4}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Una nota que el cliente no ve tampoco se le manda por correo. Lo
+        # decide `emails.send_case_note()`, pero decirlo aqui evita que
+        # alguien marque las dos casillas y espere un envio que no llega.
+        self.fields['visible_to_client'].help_text = _(
+            'If this is off, the note stays in the file and no email is sent.'
         )
 
 

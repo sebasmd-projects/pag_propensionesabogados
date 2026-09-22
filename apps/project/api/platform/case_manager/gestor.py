@@ -25,8 +25,13 @@ superusuario. A quien ha entrado pero no tiene el grupo se le responde 404, no
 403: un 403 confirma que en esa direccion hay algo.
 """
 
+import uuid
+
 from django.contrib import messages
 from django.db import transaction
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -34,12 +39,38 @@ from django.views.generic import ListView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView
 
 from .access import GestorRequiredMixin
-from .forms import CaseFinanceFormSet, CaseForm, ClientForm
-from .models import CaseFinanceModel, CaseModel, ClientModel
+from .choices import NoteKind
+from .emails import send_case_note
+from .forms import CaseFinanceFormSet, CaseForm, CaseNoteForm, ClientForm
+from .models import (CaseFinanceModel, CaseModel, CaseNoteModel, ClientModel)
 
 #: Filas por pagina. La paginacion con filtros y ordenamiento propios esta
 #: fuera del alcance contratado; esto es solo no servir mil filas de una vez.
 PER_PAGE = 25
+
+
+def _client_or_none(pedido):
+    """
+    El cliente de un `?cliente=<uuid>` de la URL, o `None`.
+
+    Lo que llega en la URL lo escribe quien quiera, asi que hay dos maneras de
+    que no sirva: que no exista ese cliente, o que el valor ni siquiera sea un
+    UUID. La segunda **no** la absorbe `filter(pk=...)`: lanza
+    `ValidationError` antes de tocar la base, y eso sale como un 500 por un
+    enlace mal copiado.
+
+    Las dos se tratan igual, ignorando el filtro: ensenar la lista entera es
+    raro pero inofensivo, y una pagina de error por un enlace viejo no lo es.
+    """
+    if not pedido:
+        return None
+
+    try:
+        uuid.UUID(str(pedido))
+    except (ValueError, AttributeError, TypeError):
+        return None
+
+    return ClientModel.objects.filter(pk=pedido).first()
 
 
 class GestorDashboardView(GestorRequiredMixin, TemplateView):
@@ -153,6 +184,16 @@ class ClientUpdateView(GestorRequiredMixin, UpdateView):
 # ---------------------------------------------------------------------------
 
 class CaseListView(GestorRequiredMixin, ListView):
+    """
+    Los asuntos del despacho, todos o los de un cliente.
+
+    `?cliente=<uuid>` acota la lista a uno solo. Es lo que usa el boton del
+    listado de clientes, y va por clave primaria y no por la busqueda de
+    texto: buscar por la cedula traeria tambien a quien la tenga dentro de un
+    numero de radicado, y «los asuntos de Fulano» tiene que ser exactamente
+    eso.
+    """
+
     model = CaseModel
     template_name = 'case_manager/gestor/case_list.html'
     context_object_name = 'cases'
@@ -160,6 +201,15 @@ class CaseListView(GestorRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = CaseModel.objects.select_related('client', 'finance')
+
+        # Un identificador que no existe --o que ni siquiera es un UUID-- se
+        # ignora y se ensena la lista entera, en vez de reventar con un 500
+        # por un enlace viejo o mal copiado. `filter(pk=...)` **no** devuelve
+        # vacio con un UUID mal formado: lanza `ValidationError`, asi que hay
+        # que comprobarlo antes de preguntarle a la base.
+        self.cliente = _client_or_none(self.request.GET.get('cliente'))
+        if self.cliente is not None:
+            queryset = queryset.filter(client=self.cliente)
 
         buscado = self.request.GET.get('q', '').strip()
         if buscado:
@@ -175,6 +225,7 @@ class CaseListView(GestorRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['q'] = self.request.GET.get('q', '')
+        context['cliente'] = self.cliente
         return context
 
 
@@ -199,6 +250,10 @@ class CaseFormMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        if self.object and self.object.pk:
+            context['notes'] = self.object.notes.select_related('created_by')
+            context.setdefault('note_form', CaseNoteForm())
+
         if 'finance_formset' not in context:
             instancia = self.object if self.object and self.object.pk else None
             context['finance_formset'] = (
@@ -220,17 +275,91 @@ class CaseFormMixin:
                 self.get_context_data(form=form, finance_formset=formset)
             )
 
+        # La etapa **de antes**, leida de la base antes de guardar. Hay que
+        # cogerla aqui: despues de `form.save()` ya no existe en ningun sitio.
+        etapa_anterior = (
+            CaseModel.objects.filter(pk=form.instance.pk)
+            .values_list('stage', flat=True)
+            .first()
+            if form.instance.pk
+            else None
+        )
+
         with transaction.atomic():
             self.object = form.save()
             formset.instance = self.object
             formset.save()
 
         messages.success(self.request, _('Case saved.'))
+        self._notify_stage_change(form, etapa_anterior)
         return super(CaseFormMixin, self).form_valid(form)
+
+    def _notify_stage_change(self, form, etapa_anterior) -> None:
+        """
+        Avisa al cliente de que su asunto avanzo, si procede.
+
+        Tres condiciones, y las tres tienen que darse:
+
+        1. que se marcara la casilla --el despacho decide cuando avisar, no
+           el sistema: hay correcciones de etapa que no son novedades--;
+        2. que la etapa **haya cambiado de verdad**. Guardar sin tocarla no
+           es un avance, y un correo diciendo que el asunto avanzo cuando no
+           ha avanzado gasta la confianza del siguiente;
+        3. que sea un alta o un cambio, no un asunto recien creado sin etapa
+           previa con la que comparar.
+
+        La nota queda escrita aunque el correo no salga: es lo que pasa, y el
+        expediente tiene que contarlo.
+        """
+        if not form.cleaned_data.get('notify_stage_change'):
+            return
+
+        if etapa_anterior is None or etapa_anterior == self.object.stage:
+            return
+
+        nota = CaseNoteModel.objects.create(
+            case=self.object,
+            kind=NoteKind.STAGE,
+            title=_('Your procedure has moved forward'),
+            body=_(
+                'Your case is now at the stage «%(stage)s». We will keep you '
+                'posted on any news.'
+            ) % {'stage': self.object.get_stage_display()},
+            visible_to_client=True,
+            created_by=self.request.user,
+        )
+
+        if send_case_note(nota, request=self.request):
+            messages.info(
+                self.request,
+                _('The client was emailed about the new stage.'),
+            )
+        else:
+            messages.warning(
+                self.request,
+                _(
+                    'The note was saved, but no email was sent: check that '
+                    'the client has an email address on file.'
+                ),
+            )
 
 
 class CaseCreateView(CaseFormMixin, GestorRequiredMixin, CreateView):
-    pass
+    """
+    Alta de un asunto, con el cliente ya puesto si se vino desde su ficha.
+
+    `?cliente=<uuid>` lo deja elegido en el desplegable. Es comodidad, no una
+    restriccion: el campo sigue siendo editable, porque el desplegable es la
+    unica manera de corregirse si se pulso el boton equivocado.
+    """
+
+    def get_initial(self):
+        initial = super().get_initial()
+
+        cliente = _client_or_none(self.request.GET.get('cliente'))
+        if cliente is not None:
+            initial['client'] = str(cliente.pk)
+        return initial
 
 
 class CaseUpdateView(CaseFormMixin, GestorRequiredMixin, UpdateView):
@@ -267,3 +396,79 @@ class CaseToggleSettlementView(GestorRequiredMixin, UpdateView):
             self.request, plantilla % {'name': self.object.client.full_name}
         )
         return super().form_valid(form)
+
+
+class CaseNoteCreateView(GestorRequiredMixin, CreateView):
+    """
+    Anade una novedad a un asunto, y la manda al cliente si se marco.
+
+    Es lo que el portal no tenia y por eso el cliente llamaba: la pantalla
+    ensenaba la etapa y nada mas, asi que un asunto parado porque un juzgado
+    no responde y otro parado porque falta su cedula se veian igual.
+
+    Cuelga de la ficha del asunto --no tiene pagina propia-- porque una nota
+    sin su expediente delante no se escribe bien.
+    """
+
+    model = CaseNoteModel
+    form_class = CaseNoteForm
+    http_method_names = ['post']
+
+    def dispatch(self, request, *args, **kwargs):
+        self.case = get_object_or_404(CaseModel, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('case_manager:gestor_case_update', args=[self.case.pk])
+
+    def form_valid(self, form):
+        form.instance.case = self.case
+        form.instance.created_by = self.request.user
+        self.object = form.save()
+
+        messages.success(self.request, _('Note added.'))
+
+        if form.cleaned_data.get('notify_client'):
+            if send_case_note(self.object, request=self.request):
+                messages.info(
+                    self.request,
+                    _('Emailed to %(email)s.') % {
+                        'email': self.case.client.email
+                    },
+                )
+            elif not self.object.visible_to_client:
+                messages.info(
+                    self.request,
+                    _('Internal note: nothing was emailed to the client.'),
+                )
+            else:
+                messages.warning(
+                    self.request,
+                    _(
+                        'The note was saved, but no email was sent: check '
+                        'that the client has an email address on file.'
+                    ),
+                )
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        """
+        La nota no vale: se vuelve a la ficha con el formulario y sus errores,
+        que es donde se estaba escribiendo.
+        """
+        from .forms import CaseFinanceFormSet as _Formset
+
+        return render(
+            self.request,
+            'case_manager/gestor/case_form.html',
+            {
+                'form': CaseForm(instance=self.case),
+                'finance_formset': _Formset(instance=self.case),
+                'object': self.case,
+                'notes': self.case.notes.select_related('created_by'),
+                'note_form': form,
+                'gestor_title': _('Edit case'),
+                'gestor_section': 'cases',
+            },
+        )

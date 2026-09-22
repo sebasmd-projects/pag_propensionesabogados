@@ -727,6 +727,143 @@ class CaseFinanceModel(TimeStampedModel):
         ordering = ['-updated']
 
 
+class CaseNoteQuerySet(models.QuerySet):
+    def for_client(self):
+        """
+        Las que el cliente puede ver en el portal, con las suyas primero.
+
+        El filtro va en el queryset y no en la plantilla: una plantilla que no
+        pinta algo lo ha recibido igualmente, y una nota interna puede decir
+        cosas que no se le cuentan al cliente.
+
+        El orden no es por fecha a secas: **las que le piden algo van
+        arriba**, por recientes que sean las demas. Una peticion de documento
+        por debajo de tres avisos informativos es una peticion que no se
+        atiende, y ese es justo el caso en el que el asunto se queda parado
+        esperando al cliente.
+        """
+        return self.filter(visible_to_client=True).annotate(
+            pide_accion=models.Case(
+                models.When(kind=choices.NoteKind.DOCUMENT, then=0),
+                default=1,
+                output_field=models.PositiveSmallIntegerField(),
+            )
+        ).order_by('pide_accion', '-created')
+
+
+class CaseNoteModel(TimeStampedModel):
+    """
+    Una novedad del asunto, escrita para el cliente o para el despacho.
+
+    Es lo que el portal no tenia y por eso el cliente llamaba: la pantalla
+    ensenaba la etapa y nada mas, asi que un asunto parado tres meses porque
+    un juzgado no responde y otro parado porque falta su cedula se veian
+    exactamente igual.
+
+    Dos campos deciden todo lo demas:
+
+    - `visible_to_client` --- si sale en el portal. Hay notas que son para el
+      expediente y no para el cliente.
+    - `notified_at` --- cuando se le mando el correo, si se mando. Es una
+      **fecha y no un booleano** porque interesa saber cuando se le dijo:
+      «le avisamos» y «le avisamos el 3 de marzo» no valen lo mismo en una
+      reclamacion.
+    """
+
+    id = models.UUIDField(
+        'ID',
+        default=uuid.uuid4,
+        unique=True,
+        primary_key=True,
+        serialize=False,
+        editable=False
+    )
+
+    case = models.ForeignKey(
+        CaseModel,
+        on_delete=models.CASCADE,
+        related_name='notes',
+        verbose_name=_('case')
+    )
+
+    kind = models.CharField(
+        _('kind'),
+        max_length=20,
+        choices=choices.NoteKind.choices,
+        default=choices.NoteKind.INFO
+    )
+
+    title = models.CharField(
+        _('title'),
+        max_length=200
+    )
+
+    body = models.TextField(
+        _('body'),
+        help_text=_(
+            'The client reads this as written. Keep it plain and say what, '
+            'if anything, they have to do.'
+        )
+    )
+
+    visible_to_client = models.BooleanField(
+        _('visible to the client'),
+        default=True,
+        help_text=_('Uncheck for notes that belong to the file, not to them.')
+    )
+
+    notified_at = models.DateTimeField(
+        _('notified at'),
+        blank=True,
+        null=True,
+        editable=False,
+        help_text=_('When the client was emailed about this note, if ever.')
+    )
+
+    created_by = models.ForeignKey(
+        'users.UserModel',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='case_notes',
+        verbose_name=_('written by'),
+        editable=False
+    )
+
+    objects = CaseNoteQuerySet.as_manager()
+
+    @property
+    def style(self) -> dict:
+        """El color y el icono con que se pinta, segun el tipo."""
+        return choices.NOTE_STYLES.get(
+            self.kind, choices.NOTE_STYLES[choices.NoteKind.INFO]
+        )
+
+    @property
+    def needs_client_action(self) -> bool:
+        """
+        Si la nota le pide algo al cliente.
+
+        Solo `DOCUMENT`. Sirve para que el portal la destaque por encima de
+        las demas: una peticion perdida entre avisos es una peticion que no se
+        atiende.
+        """
+        return self.kind == choices.NoteKind.DOCUMENT
+
+    def __str__(self) -> str:
+        return f'{self.get_kind_display()} - {self.title}'
+
+    class Meta:
+        db_table = 'apps_project_case_manager_case_note'
+        verbose_name = _('Case note')
+        verbose_name_plural = _('Case notes')
+        ordering = ['-created']
+        indexes = [
+            models.Index(fields=['case', '-created']),
+        ]
+
+
 auditlog.register(ClientModel, serialize_data=True)
 auditlog.register(CaseModel, serialize_data=True)
 auditlog.register(CaseFinanceModel, serialize_data=True)
+auditlog.register(CaseNoteModel, serialize_data=True)

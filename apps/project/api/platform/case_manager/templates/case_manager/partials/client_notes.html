@@ -1,0 +1,42 @@
+{% load i18n %}
+{% comment %}
+  Las novedades que el cliente ve de su asunto, en el portal.
+
+  Es lo que faltaba y por lo que llamaba: la pantalla ensenaba la etapa y
+  nada mas, asi que un asunto parado tres meses porque un juzgado no responde
+  y otro parado porque falta su cedula se veian exactamente igual.
+
+  La que le pide algo --«falta un documento»-- va primero y destacada, porque
+  una peticion perdida entre avisos es una peticion que no se atiende.
+
+  Espera `case`.
+{% endcomment %}
+
+{% with notas=case.notes.for_client %}
+  {% if notas %}
+    <div class="card-body border-top p-4">
+      <p class="text-uppercase small text-muted mb-3">
+        <i class="bi bi-chat-left-text me-1"></i>{% trans "Updates on your case" %}
+      </p>
+
+      {% for note in notas %}
+        <div class="alert alert-{{ note.style.tone }} d-flex gap-3 {% if forloop.last %}mb-0{% endif %}"
+             role="{% if note.needs_client_action %}alert{% else %}note{% endif %}">
+          <i class="bi bi-{{ note.style.icon }} flex-shrink-0 mt-1"></i>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+              <strong>{{ note.title }}</strong>
+              <span class="small opacity-75">{{ note.created|date:"d/m/Y" }}</span>
+            </div>
+            <div class="small mt-1">{{ note.body|linebreaks }}</div>
+            {% if note.needs_client_action %}
+              <p class="small fw-semibold mb-0 mt-2">
+                {% blocktrans %}Please send what is requested to notificaciones@propensionesabogados.com or by WhatsApp.{% endblocktrans %}
+              </p>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

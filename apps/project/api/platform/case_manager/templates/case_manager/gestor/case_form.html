@@ -141,6 +141,14 @@
       </div>
     </div>
 
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          {% include 'case_manager/gestor/partials/field.html' with field=form.notify_stage_change cols="col-12" %}
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex justify-content-end gap-2">
       <a href="{% url 'case_manager:gestor_case_list' %}" class="btn btn-outline-secondary">
         {% trans "Cancel" %}
@@ -150,4 +158,14 @@
       </button>
     </div>
   </form>
+
+  {% comment %}
+    Las notas van **fuera** del formulario de arriba: tienen el suyo, y
+    anidar formularios no es HTML valido --el navegador se come el de
+    dentro--. Solo al editar: una nota necesita un asunto ya guardado al que
+    colgarse.
+  {% endcomment %}
+  {% if object %}
+    {% include 'case_manager/gestor/partials/notes.html' %}
+  {% endif %}
 {% endblock gestor_content %}

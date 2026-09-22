@@ -14,9 +14,10 @@ no penso.
 from django.urls import path
 from django.utils.translation import gettext_lazy as _
 
-from .gestor import (CaseCreateView, CaseListView, CaseToggleSettlementView,
-                     CaseUpdateView, ClientCreateView, ClientListView,
-                     ClientUpdateView, GestorDashboardView)
+from .gestor import (CaseCreateView, CaseListView, CaseNoteCreateView,
+                     CaseToggleSettlementView, CaseUpdateView,
+                     ClientCreateView, ClientListView, ClientUpdateView,
+                     GestorDashboardView)
 from .views import PazYSalvoView, PublicCaseQueryView
 
 app_name = 'case_manager'
@@ -110,6 +111,11 @@ gestor_urls = [
             }
         ),
         name='gestor_case_update'
+    ),
+    path(
+        'gestor/asuntos/<uuid:pk>/notas/',
+        CaseNoteCreateView.as_view(),
+        name='gestor_case_note_create'
     ),
     path(
         'gestor/asuntos/<uuid:pk>/paz-y-salvo/',

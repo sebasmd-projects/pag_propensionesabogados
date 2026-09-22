@@ -107,6 +107,44 @@ class Mandate(models.TextChoices):
     GUARDIANSHIP = 'Curaduría', _('Curaduría')
 
 
+class NoteKind(models.TextChoices):
+    """
+    De que va una nota del expediente.
+
+    No es decoracion: decide el color y el icono con que la ve el cliente en
+    el portal, y el asunto del correo si se le avisa. Un «falta un documento»
+    pintado igual que un «seguimos trabajando» se lee igual, y el cliente no
+    manda el documento.
+    """
+
+    #: Novedad sin mas. La que no pide nada al cliente.
+    INFO = 'INFO', _('Update')
+
+    #: El asunto no avanza y la razon no depende del cliente --un juzgado que
+    #: no responde, una entidad que no resuelve--. Se le cuenta para que no
+    #: interprete el silencio.
+    BLOCKED = 'BLOCKED', _('On hold')
+
+    #: Hace falta algo suyo. Es la unica que le pide una accion, y por eso se
+    #: distingue de las demas a simple vista.
+    DOCUMENT = 'DOCUMENT', _('Document required')
+
+    #: La escribe el sistema cuando cambia la etapa, no una persona.
+    STAGE = 'STAGE', _('Stage change')
+
+
+#: Como se pinta cada tipo de nota. La clase de Bootstrap y el icono van
+#: juntos a proposito: el color solo no distingue --el ambar de «en espera» y
+#: el rojo de «falta un documento» se parecen con una deficiencia de vision
+#: del color-- y el icono tampoco basta. Van los dos, mas el texto del tipo.
+NOTE_STYLES: dict[str, dict[str, str]] = {
+    'INFO': {'tone': 'info', 'icon': 'info-circle'},
+    'BLOCKED': {'tone': 'warning', 'icon': 'pause-circle'},
+    'DOCUMENT': {'tone': 'danger', 'icon': 'file-earmark-arrow-up'},
+    'STAGE': {'tone': 'success', 'icon': 'arrow-right-circle'},
+}
+
+
 class Stage(models.IntegerChoices):
     """
     El avance publico del caso: la barra de progreso de la pantalla aprobada.

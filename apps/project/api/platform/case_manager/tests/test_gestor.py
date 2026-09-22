@@ -450,3 +450,93 @@ class SettlementToggleTests(TestCase):
             respuesta,
             reverse('case_manager:paz_y_salvo', args=[self.case.pk]),
         )
+
+
+class ClientToCasesTests(TestCase):
+    """
+    Ir de un cliente a sus asuntos.
+
+    Sin esto hay que salir al otro listado y buscarlo a mano, que es lo que
+    se hace veinte veces al dia.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+
+        cls.ana = ClientModel.objects.create(
+            identification='1001', full_name='Ana Perez'
+        )
+        cls.luis = ClientModel.objects.create(
+            identification='1002', full_name='Luis Gomez'
+        )
+        cls.de_ana = CaseModel.objects.create(
+            client=cls.ana, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS
+        )
+        CaseModel.objects.create(
+            client=cls.luis, service=Service.CONCILIATION,
+            stage=Stage.UNDER_REVIEW,
+        )
+        cls.url = reverse('case_manager:gestor_case_list')
+
+    def setUp(self):
+        make_user('abogada', gestor=True)
+        self.client.login(username='abogada', password=CLAVE)
+
+    def test_el_listado_de_clientes_enlaza_a_sus_asuntos(self):
+        respuesta = self.client.get(
+            reverse('case_manager:gestor_client_list')
+        )
+
+        self.assertContains(respuesta, f'{self.url}?cliente={self.ana.pk}')
+
+    def test_acotar_por_cliente_deja_solo_los_suyos(self):
+        respuesta = self.client.get(self.url, {'cliente': str(self.ana.pk)})
+
+        self.assertEqual(list(respuesta.context['cases']), [self.de_ana])
+        self.assertEqual(respuesta.context['cliente'], self.ana)
+
+    def test_un_cliente_que_no_existe_no_revienta(self):
+        """
+        Un enlace viejo o mal copiado ensena la lista entera, no un 500.
+        """
+        import uuid
+
+        respuesta = self.client.get(self.url, {'cliente': str(uuid.uuid4())})
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIsNone(respuesta.context['cliente'])
+        self.assertEqual(len(respuesta.context['cases']), 2)
+
+    def test_un_cliente_que_ni_siquiera_es_un_uuid_tampoco(self):
+        respuesta = self.client.get(self.url, {'cliente': 'esto-no-es-un-uuid'})
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIsNone(respuesta.context['cliente'])
+
+    def test_buscar_dentro_de_un_cliente_no_saca_los_de_otro(self):
+        """
+        El filtro sobrevive a la busqueda. Sin esto, buscar dentro de los
+        asuntos de alguien devuelve los de todo el mundo.
+        """
+        respuesta = self.client.get(
+            self.url, {'cliente': str(self.ana.pk), 'q': 'o'}
+        )
+
+        for caso in respuesta.context['cases']:
+            self.assertEqual(caso.client, self.ana)
+
+    def test_el_alta_llega_con_el_cliente_puesto(self):
+        respuesta = self.client.get(
+            reverse('case_manager:gestor_case_create'),
+            {'cliente': str(self.ana.pk)},
+        )
+
+        self.assertEqual(
+            respuesta.context['form'].initial.get('client'), str(self.ana.pk)
+        )
+
+    def test_el_alta_sin_cliente_no_preselecciona_nada(self):
+        respuesta = self.client.get(reverse('case_manager:gestor_case_create'))
+
+        self.assertIsNone(respuesta.context['form'].initial.get('client'))

@@ -54,7 +54,22 @@
                 {% endcomment %}
                 <span class="badge text-bg-light font-monospace">{{ client.access_key }}</span>
               </td>
-              <td class="text-center">{{ client.case_count }}</td>
+              <td class="text-center">
+                {% comment %}
+                  El contador es el enlace: es el sitio donde uno mira cuando
+                  quiere ver los asuntos de alguien, y un numero que no lleva
+                  a ningun sitio obliga a ir al otro listado y buscarlo a mano.
+                {% endcomment %}
+                {% if client.case_count %}
+                  <a class="btn btn-sm btn-outline-primary"
+                     href="{% url 'case_manager:gestor_case_list' %}?cliente={{ client.pk }}"
+                     title="{% blocktrans with name=client.full_name %}See the cases of {{ name }}{% endblocktrans %}">
+                    <i class="bi bi-folder2-open me-1"></i>{{ client.case_count }}
+                  </a>
+                {% else %}
+                  <span class="text-muted">0</span>
+                {% endif %}
+              </td>
               <td>
                 {% if client.is_active %}
                   <span class="badge text-bg-success">{% trans "In force" %}</span>
@@ -63,10 +78,17 @@
                 {% endif %}
               </td>
               <td class="text-end">
-                <a href="{% url 'case_manager:gestor_client_update' client.pk %}"
-                   class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-pencil me-1"></i>{% trans "Edit" %}
-                </a>
+                <div class="btn-group">
+                  <a href="{% url 'case_manager:gestor_case_create' %}?cliente={{ client.pk }}"
+                     class="btn btn-sm btn-outline-secondary"
+                     title="{% trans 'New case for this client' %}">
+                    <i class="bi bi-plus-lg"></i>
+                  </a>
+                  <a href="{% url 'case_manager:gestor_client_update' client.pk %}"
+                     class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil me-1"></i>{% trans "Edit" %}
+                  </a>
+                </div>
               </td>
             </tr>
           {% empty %}
