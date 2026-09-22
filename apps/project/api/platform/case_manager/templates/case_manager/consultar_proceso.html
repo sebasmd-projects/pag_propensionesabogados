@@ -112,101 +112,112 @@
               </div>
             {% endif %}
 
-            {# --- Expediente ------------------------------------------ #}
-            {% if case %}
-              <div class="card border-0 shadow-sm mb-4" id="cliente">
-                <div class="card-body p-4">
-
-                  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
-                    <div>
-                      <h2 class="h4 mb-1">{{ case.client.full_name }}</h2>
-                      <p class="text-muted small mb-0">
-                        {% trans "Identification" %}: {{ case.client.identification|grouped_identification }}
-                      </p>
-                    </div>
-                    <span class="badge text-bg-success align-self-center">
+            {# --- Expedientes ----------------------------------------- #}
+            {% if cases %}
+              {% comment %}
+                El cliente arriba una vez, y debajo **cada uno de sus
+                asuntos**. Antes se ensenaba solo el ultimo, porque la vista
+                hacia `.first()`: quien tenia una pension y una conciliacion
+                preguntaba por una y veia la otra, sin entender por que.
+              {% endcomment %}
+              <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 d-flex justify-content-between align-items-start flex-wrap gap-2">
+                  <div>
+                    <h2 class="h4 mb-1">{{ client.full_name }}</h2>
+                    <p class="text-muted small mb-0">
+                      {% trans "Identification" %}: {{ client.identification|grouped_identification }}
+                    </p>
+                  </div>
+                  <div class="text-md-end">
+                    <span class="badge text-bg-success">
                       <i class="bi bi-circle-fill me-1 small"></i>{% trans "ACTIVE" %}
                     </span>
+                    <p class="text-muted small mb-0 mt-1">
+                      {% blocktrans count total=cases|length %}{{ total }} case in force{% plural %}{{ total }} cases in force{% endblocktrans %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {% for case in cases %}
+                <div class="card border-0 shadow-sm mb-4" id="asunto-{{ forloop.counter }}">
+                  <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+                      <h3 class="h5 mb-0">{{ case.get_service_display }}</h3>
+                      {% if cases|length > 1 %}
+                        <span class="badge text-bg-light">
+                          {% blocktrans with number=forloop.counter total=cases|length %}Case {{ number }} of {{ total }}{% endblocktrans %}
+                        </span>
+                      {% endif %}
+                    </div>
+
+                    <dl class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-0">
+                      {% if case.area %}
+                        {% include 'case_manager/partials/field.html' with label=_("Area / case type") value=case.get_area_display %}
+                      {% endif %}
+                      {% if case.subtype %}
+                        {% include 'case_manager/partials/field.html' with label=_("Subtype / speciality") value=case.subtype %}
+                      {% endif %}
+                      {% include 'case_manager/partials/field.html' with label=_("Last update") value=case.updated|date:"d/m/Y" %}
+                    </dl>
+
+                    {% if case.detail_rows %}
+                      <hr class="my-4">
+                      <dl class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-0">
+                        {% comment %}
+                          Son pares que pinta la plantilla, no HTML concatenado
+                          con `innerHTML` como antes: asi el escapado de Django
+                          se aplica solo y el nombre de una entidad con un `<`
+                          deja de poder cerrar una etiqueta.
+                        {% endcomment %}
+                        {% for label, value in case.detail_rows %}
+                          {% include 'case_manager/partials/field.html' %}
+                        {% endfor %}
+                      </dl>
+                    {% endif %}
                   </div>
 
-                  {% comment %}
-                    Dos bloques, y cada uno con un trabajo.
+                  {# El unico trozo con CSS propio: Bootstrap no trae un stepper. #}
+                  <div class="cp-stepper" role="list"
+                       aria-label="{% trans 'Case progress' %}">
+                    {% for step in case.progress %}
+                      <div class="cp-step {{ step.state }}" role="listitem"
+                           {% if step.state == 'current' %}aria-current="step"{% endif %}>
+                        <span class="cp-dot">
+                          {% if step.done %}<i class="bi bi-check-lg"></i>{% else %}{{ step.number }}{% endif %}
+                        </span>
+                        <span class="cp-label">{{ step.label }}</span>
+                      </div>
+                    {% endfor %}
+                  </div>
 
-                    Arriba, lo que define el encargo y es igual en todos los
-                    asuntos. Abajo, lo que depende del tipo de tramite --el
-                    juzgado, el radicado, la entidad, la inspeccion-- y que
-                    `CaseModel.detail_rows` decide.
+                  <div class="card-body border-top text-center p-4">
+                    <p class="text-uppercase small text-muted mb-1">{% trans "Current status" %}</p>
+                    <p class="h4 mb-2">{{ case.get_stage_display }}</p>
+                    <p class="text-muted mb-0">
+                      {% trans "Your service is advancing according to the stage shown." %}
+                    </p>
+                  </div>
 
-                    La pantalla aprobada ensenaba la instancia y el radicado
-                    en los dos sitios, porque el bloque de abajo lo armaba
-                    `pintarDetalles()` sin saber que habia pintado el de
-                    arriba. Se veian repetidos.
-                  {% endcomment %}
-                  <dl class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-0">
-                    {% include 'case_manager/partials/field.html' with label=_("Contracted service") value=case.get_service_display %}
-                    {% if case.area %}
-                      {% include 'case_manager/partials/field.html' with label=_("Area / case type") value=case.get_area_display %}
-                    {% endif %}
-                    {% if case.subtype %}
-                      {% include 'case_manager/partials/field.html' with label=_("Subtype / speciality") value=case.subtype %}
-                    {% endif %}
-                    {% include 'case_manager/partials/field.html' with label=_("Last update") value=case.updated|date:"d/m/Y" %}
-                  </dl>
-
-                  {% if case.detail_rows %}
-                    <hr class="my-4">
-                    <dl class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-0">
-                      {% comment %}
-                        Son pares que pinta la plantilla, no HTML concatenado
-                        con `innerHTML` como antes: asi el escapado de Django
-                        se aplica solo y el nombre de una entidad con un `<`
-                        deja de poder cerrar una etiqueta.
-                      {% endcomment %}
-                      {% for label, value in case.detail_rows %}
-                        {% include 'case_manager/partials/field.html' %}
-                      {% endfor %}
-                    </dl>
+                  {% if case.paz_y_salvo_authorized %}
+                    <div class="card-body border-top p-4">
+                      <div class="alert alert-success mb-0">
+                        <h4 class="h6 fw-bold">
+                          <i class="bi bi-patch-check me-1"></i>{% trans "Settlement letter available" %}
+                        </h4>
+                        <p class="small">
+                          {% blocktrans %}This document is available because <b>Propensiones®</b> expressly authorized its issuance.{% endblocktrans %}
+                        </p>
+                        <a class="btn btn-success" target="_blank" rel="noopener"
+                           href="{% url 'case_manager:paz_y_salvo' case.pk %}">
+                          <i class="bi bi-printer me-1"></i>{% trans "Print settlement letter" %}
+                        </a>
+                      </div>
+                    </div>
                   {% endif %}
                 </div>
-
-                {# El unico trozo con CSS propio: Bootstrap no trae un stepper. #}
-                <div class="cp-stepper" role="list" aria-label="{% trans 'Case progress' %}">
-                  {% for step in case.progress %}
-                    <div class="cp-step {{ step.state }}" role="listitem"
-                         {% if step.state == 'current' %}aria-current="step"{% endif %}>
-                      <span class="cp-dot">
-                        {% if step.done %}<i class="bi bi-check-lg"></i>{% else %}{{ step.number }}{% endif %}
-                      </span>
-                      <span class="cp-label">{{ step.label }}</span>
-                    </div>
-                  {% endfor %}
-                </div>
-
-                <div class="card-body border-top text-center p-4">
-                  <p class="text-uppercase small text-muted mb-1">{% trans "Current status" %}</p>
-                  <p class="h4 mb-2">{{ case.get_stage_display }}</p>
-                  <p class="text-muted mb-0">
-                    {% trans "Your service is advancing according to the stage shown." %}
-                  </p>
-                </div>
-
-                {% if case.paz_y_salvo_authorized %}
-                  <div class="card-body border-top p-4">
-                    <div class="alert alert-success mb-0">
-                      <h3 class="h6 fw-bold">
-                        <i class="bi bi-patch-check me-1"></i>{% trans "Settlement letter available" %}
-                      </h3>
-                      <p class="small">
-                        {% blocktrans %}This document is available because <b>Propensiones®</b> expressly authorized its issuance.{% endblocktrans %}
-                      </p>
-                      <a class="btn btn-success" target="_blank" rel="noopener"
-                         href="{% url 'case_manager:paz_y_salvo' case.pk %}">
-                        <i class="bi bi-printer me-1"></i>{% trans "Print settlement letter" %}
-                      </a>
-                    </div>
-                  </div>
-                {% endif %}
-              </div>
+              {% endfor %}
             {% endif %}
 
             {% include 'case_manager/partials/legal_notice.html' %}

@@ -1,0 +1,32 @@
+{% load i18n %}
+{% comment %}
+  Un campo del formulario, con su etiqueta, su ayuda y sus errores.
+
+  Las casillas van al reves que el resto --primero la casilla, luego la
+  etiqueta-- y con `form-check`, que es como las pinta Bootstrap. Sin eso
+  salen con la etiqueta encima y desalineadas.
+
+  Espera `field`, y opcionalmente `cols` (las columnas de la rejilla).
+{% endcomment %}
+<div class="{{ cols|default:'col-12 col-md-6' }}">
+  {% if field.field.widget.input_type == 'checkbox' %}
+    <div class="form-check mt-md-4">
+      {{ field }}
+      <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    </div>
+  {% else %}
+    <label class="form-label small fw-semibold" for="{{ field.id_for_label }}">
+      {{ field.label }}
+      {% if field.field.required %}<span class="text-danger" aria-hidden="true">*</span>{% endif %}
+    </label>
+    {{ field }}
+  {% endif %}
+
+  {% if field.help_text %}
+    <div class="form-text">{{ field.help_text }}</div>
+  {% endif %}
+  {% for error in field.errors %}
+    {# `invalid-feedback` solo se ve si el campo lleva `is-invalid`, que se lo pone `BootstrapFormMixin`. #}
+    <div class="invalid-feedback d-block">{{ error }}</div>
+  {% endfor %}
+</div>

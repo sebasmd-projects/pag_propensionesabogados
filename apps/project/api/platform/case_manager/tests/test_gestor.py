@@ -1,0 +1,452 @@
+"""
+El gestor interno como pantallas del sitio.
+
+Se prueban **pidiendo las paginas y enviando los formularios**, no llamando a
+los metodos por dentro. Es la leccion del `TypeError` del inline del admin:
+comprobar las piezas sueltas dejaba pasar un fallo que reventaba en cuanto
+alguien abria la pagina.
+
+Lo que mas se cuida aqui son dos cosas:
+
+1. **La puerta.** Cada pantalla ensena el dinero del despacho, asi que el que
+   entra sin grupo tiene que rebotar en todas, no en la primera.
+2. **Que el asunto y su dinero se guarden juntos.** Son dos formularios y un
+   boton; si uno pasara sin el otro quedaria un expediente a medias que no
+   suma en ningun panel y que nadie sabria que esta roto.
+"""
+
+from io import StringIO
+
+from django.core.management import call_command
+from django.test import TestCase
+from django.urls import reverse
+
+from ..choices import Court, Mandate, Procedure, Service, Stage
+from ..models import CaseFinanceModel, CaseModel, ClientModel
+from .test_access import make_user
+
+CLAVE = 'una-contrasena-larga-de-verdad'
+
+
+class GestorAccessTests(TestCase):
+    """
+    Quien puede abrir cada pantalla.
+
+    Se recorren **todas** las rutas del gestor en cada caso. Proteger la
+    primera y olvidarse de la cuarta es como se filtra el panel economico.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+
+        cls.client_record = ClientModel.objects.create(
+            identification='16484186', full_name='Carlos Giraldo'
+        )
+        cls.case = CaseModel.objects.create(
+            client=cls.client_record,
+            service=Service.JUDICIAL,
+            stage=Stage.IN_PROGRESS,
+        )
+
+        cls.rutas = [
+            reverse('case_manager:gestor_dashboard'),
+            reverse('case_manager:gestor_client_list'),
+            reverse('case_manager:gestor_client_create'),
+            reverse('case_manager:gestor_client_update',
+                    args=[cls.client_record.pk]),
+            reverse('case_manager:gestor_case_list'),
+            reverse('case_manager:gestor_case_create'),
+            reverse('case_manager:gestor_case_update', args=[cls.case.pk]),
+        ]
+
+    def test_un_visitante_va_al_acceso(self):
+        """Sin sesion, al formulario de entrada: ahi se arregla entrando."""
+        for ruta in self.rutas:
+            with self.subTest(ruta=ruta):
+                respuesta = self.client.get(ruta)
+
+                self.assertEqual(respuesta.status_code, 302)
+                self.assertIn('login', respuesta['Location'])
+
+    def test_una_cuenta_sin_el_grupo_recibe_404(self):
+        """
+        404 y no 403.
+
+        Un 403 confirma que en esa direccion hay algo; un 404 no dice nada.
+        Registrarse en el sitio es publico, asi que cualquiera puede llegar
+        aqui con una sesion valida.
+        """
+        make_user('cliente')
+        self.client.login(username='cliente', password=CLAVE)
+
+        for ruta in self.rutas:
+            with self.subTest(ruta=ruta):
+                self.assertEqual(self.client.get(ruta).status_code, 404)
+
+    def test_el_grupo_del_gestor_entra_en_todas(self):
+        make_user('abogada', gestor=True)
+        self.client.login(username='abogada', password=CLAVE)
+
+        for ruta in self.rutas:
+            with self.subTest(ruta=ruta):
+                self.assertEqual(self.client.get(ruta).status_code, 200)
+
+    def test_un_superusuario_entra_en_todas(self):
+        make_user('jefe', superuser=True)
+        self.client.login(username='jefe', password=CLAVE)
+
+        for ruta in self.rutas:
+            with self.subTest(ruta=ruta):
+                self.assertEqual(self.client.get(ruta).status_code, 200)
+
+    def test_una_cuenta_desactivada_no_entra(self):
+        make_user('exempleado', gestor=True, active=False)
+        self.client.login(username='exempleado', password=CLAVE)
+
+        respuesta = self.client.get(self.rutas[0])
+
+        self.assertIn(respuesta.status_code, (302, 404))
+
+    def test_el_gestor_no_se_abre_sin_sesion_ni_para_el_dinero(self):
+        """Lo que sostiene todo lo demas: el panel no se sirve a nadie mas."""
+        respuesta = self.client.get(reverse('case_manager:gestor_dashboard'))
+
+        self.assertNotEqual(respuesta.status_code, 200)
+
+
+class GestorDashboardTests(TestCase):
+    """El panel economico, con las cifras que ya prueba `test_finance`."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+        cls.url = reverse('case_manager:gestor_dashboard')
+
+        deudor = ClientModel.objects.create(
+            identification='1001', full_name='Deudor Uno'
+        )
+        caso = CaseModel.objects.create(
+            client=deudor, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS
+        )
+        CaseFinanceModel.objects.create(
+            case=caso, mandate=Mandate.PAYMENT,
+            agreed_fee=5_000_000, paid_amount=1_000_000,
+        )
+
+        expectante = ClientModel.objects.create(
+            identification='1002', full_name='Expectativa Dos'
+        )
+        caso2 = CaseModel.objects.create(
+            client=expectante, service=Service.JUDICIAL, stage=Stage.FINAL_STAGE
+        )
+        CaseFinanceModel.objects.create(
+            case=caso2, mandate=Mandate.CONTINGENCY,
+            contingency_percentage=30, contingency_value=9_000_000,
+        )
+
+    def setUp(self):
+        make_user('abogada', gestor=True)
+        self.client.login(username='abogada', password=CLAVE)
+
+    def test_las_cifras_son_las_del_modelo(self):
+        respuesta = self.client.get(self.url)
+
+        totals = respuesta.context['totals']
+        self.assertEqual(totals['agreed'], 5_000_000)
+        self.assertEqual(totals['paid'], 1_000_000)
+        self.assertEqual(totals['balance'], 4_000_000)
+        self.assertEqual(totals['expectation'], 9_000_000)
+        self.assertEqual(totals['potential_pending'], 13_000_000)
+
+    def test_el_deudor_sale_en_su_lista_y_no_en_la_otra(self):
+        respuesta = self.client.get(self.url)
+
+        deudores = [f.case.client.full_name for f in respuesta.context['debtors']]
+        expectativas = [
+            f.case.client.full_name for f in respuesta.context['expectations']
+        ]
+
+        self.assertIn('Deudor Uno', deudores)
+        self.assertNotIn('Deudor Uno', expectativas)
+
+    def test_la_expectativa_sale_en_su_lista_y_no_en_la_otra(self):
+        """
+        Es la confusion que mas caro sale: una expectativa no se puede cobrar.
+        """
+        respuesta = self.client.get(self.url)
+
+        deudores = [f.case.client.full_name for f in respuesta.context['debtors']]
+        expectativas = [
+            f.case.client.full_name for f in respuesta.context['expectations']
+        ]
+
+        self.assertIn('Expectativa Dos', expectativas)
+        self.assertNotIn('Expectativa Dos', deudores)
+
+
+class ClientCrudTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+
+    def setUp(self):
+        make_user('abogada', gestor=True)
+        self.client.login(username='abogada', password=CLAVE)
+
+    def test_se_puede_dar_de_alta_un_cliente(self):
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_client_create'),
+            {
+                'identification': '16.484.186',
+                'full_name': 'Carlos Emiro Giraldo',
+                'email': '',
+                'phone': '',
+                'is_active': 'on',
+            },
+        )
+
+        self.assertEqual(respuesta.status_code, 302)
+        creado = ClientModel.objects.get()
+        # La cedula se guarda normalizada, porque es por donde pregunta el
+        # portal.
+        self.assertEqual(creado.identification, '16484186')
+
+    def test_el_aviso_dice_la_clave_del_portal(self):
+        """
+        Hay que poder decirsela al cliente al colgar el telefono. Es derivada,
+        no un secreto que el despacho custodie.
+        """
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_client_create'),
+            {'identification': '16484186', 'full_name': 'Carlos Giraldo',
+             'email': '', 'phone': '', 'is_active': 'on'},
+            follow=True,
+        )
+
+        self.assertContains(respuesta, 'C4186')
+
+    def test_una_cedula_sin_digitos_no_pasa(self):
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_client_create'),
+            {'identification': 'abc', 'full_name': 'Nadie',
+             'email': '', 'phone': '', 'is_active': 'on'},
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(ClientModel.objects.exists())
+
+    def test_se_puede_editar_un_cliente(self):
+        cliente = ClientModel.objects.create(
+            identification='16484186', full_name='Nombre Viejo'
+        )
+
+        self.client.post(
+            reverse('case_manager:gestor_client_update', args=[cliente.pk]),
+            {'identification': '16484186', 'full_name': 'Nombre Nuevo',
+             'email': '', 'phone': '', 'is_active': 'on'},
+        )
+
+        cliente.refresh_from_db()
+        self.assertEqual(cliente.full_name, 'Nombre Nuevo')
+
+    def test_el_listado_busca_por_nombre_y_por_cedula(self):
+        ClientModel.objects.create(identification='111', full_name='Ana Perez')
+        ClientModel.objects.create(identification='222', full_name='Luis Gomez')
+
+        url = reverse('case_manager:gestor_client_list')
+
+        por_nombre = self.client.get(url, {'q': 'Ana'})
+        self.assertEqual(len(por_nombre.context['clients']), 1)
+
+        por_cedula = self.client.get(url, {'q': '222'})
+        self.assertEqual(len(por_cedula.context['clients']), 1)
+        self.assertEqual(
+            por_cedula.context['clients'][0].full_name, 'Luis Gomez'
+        )
+
+
+class CaseCrudTests(TestCase):
+    """
+    El asunto y su dinero, que se guardan juntos o no se guardan.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+        cls.cliente = ClientModel.objects.create(
+            identification='16484186', full_name='Carlos Giraldo'
+        )
+
+    def setUp(self):
+        make_user('abogada', gestor=True)
+        self.client.login(username='abogada', password=CLAVE)
+
+    def datos(self, **cambios):
+        datos = {
+            'client': str(self.cliente.pk),
+            'service': Service.JUDICIAL,
+            'procedure': Procedure.ORDINARY,
+            'area': '',
+            'subtype': '',
+            'second_subtype': '',
+            'stage': str(Stage.IN_PROGRESS),
+            'instance': 'Primera instancia',
+            'is_active': 'on',
+            'case_number': '2026-00145-00',
+            'court': Court.CIRCUIT,
+            'city': 'Armenia',
+            'sector': '',
+            'entity': '',
+            'administrative_case_number': '',
+            'administrative_city': '',
+            'police_instance': '',
+            'police_office': '',
+            'police_case_number': '',
+            'police_city': '',
+            'paz_y_salvo_authorized': '',
+            # El formset del dinero.
+            'finance-TOTAL_FORMS': '1',
+            'finance-INITIAL_FORMS': '0',
+            'finance-MIN_NUM_FORMS': '0',
+            'finance-MAX_NUM_FORMS': '1',
+            'finance-0-start_date': '',
+            'finance-0-mandate': Mandate.PAYMENT,
+            'finance-0-contingency_percentage': '0',
+            'finance-0-contingency_value': '0',
+            'finance-0-agreed_fee': '6000000',
+            'finance-0-paid_amount': '2000000',
+            'finance-0-show_in_dashboard': 'on',
+        }
+        datos.update(cambios)
+        return datos
+
+    def test_se_guardan_el_asunto_y_su_dinero_de_una_vez(self):
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_case_create'), self.datos()
+        )
+
+        self.assertEqual(respuesta.status_code, 302)
+        caso = CaseModel.objects.get()
+        self.assertEqual(caso.case_number, '2026-00145-00')
+        self.assertEqual(caso.finance.balance, 4_000_000)
+
+    def test_si_el_dinero_no_vale_no_se_guarda_nada(self):
+        """
+        La regla del modelo: una cuota litis no lleva honorario pactado. Si el
+        asunto se guardara igual, quedaria sin modalidad y sin sumar en ningun
+        panel, y nadie sabria que esta a medias.
+        """
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_case_create'),
+            self.datos(**{
+                'finance-0-mandate': Mandate.CONTINGENCY,
+                'finance-0-agreed_fee': '6000000',
+            }),
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(CaseModel.objects.exists())
+        self.assertFalse(CaseFinanceModel.objects.exists())
+
+    def test_si_el_asunto_no_vale_no_se_guarda_el_dinero(self):
+        """Una etapa que no es de ese servicio la rechaza `CaseModel.clean()`."""
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_case_create'),
+            self.datos(instance='Una instancia inventada'),
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(CaseModel.objects.exists())
+        self.assertFalse(CaseFinanceModel.objects.exists())
+
+    def test_se_puede_editar_un_asunto_y_su_dinero(self):
+        self.client.post(
+            reverse('case_manager:gestor_case_create'), self.datos()
+        )
+        caso = CaseModel.objects.get()
+
+        self.client.post(
+            reverse('case_manager:gestor_case_update', args=[caso.pk]),
+            self.datos(**{
+                'finance-INITIAL_FORMS': '1',
+                'finance-0-id': str(caso.finance.pk),
+                'finance-0-case': str(caso.pk),
+                'finance-0-paid_amount': '6000000',
+            }),
+        )
+
+        caso.refresh_from_db()
+        self.assertEqual(caso.finance.balance, 0)
+        # Y no se ha duplicado la fila del dinero.
+        self.assertEqual(CaseFinanceModel.objects.count(), 1)
+
+
+class SettlementToggleTests(TestCase):
+    """El interruptor del paz y salvo, desde el listado."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+        cliente = ClientModel.objects.create(
+            identification='16484186', full_name='Carlos Giraldo'
+        )
+        cls.case = CaseModel.objects.create(
+            client=cliente, service=Service.JUDICIAL, stage=Stage.FINISHED
+        )
+        cls.url = reverse(
+            'case_manager:gestor_case_toggle_settlement', args=[cls.case.pk]
+        )
+
+    def setUp(self):
+        make_user('abogada', gestor=True)
+        self.client.login(username='abogada', password=CLAVE)
+
+    def test_autoriza_y_retira(self):
+        self.client.post(self.url)
+        self.case.refresh_from_db()
+        self.assertTrue(self.case.paz_y_salvo_authorized)
+
+        self.client.post(self.url)
+        self.case.refresh_from_db()
+        self.assertFalse(self.case.paz_y_salvo_authorized)
+
+    def test_un_get_no_cambia_nada(self):
+        """
+        Cambia un dato, asi que es `POST`. Un `GET` que cambia datos lo
+        dispara cualquier cosa que siga enlaces: un prefetch, un antivirus,
+        un rastreador.
+        """
+        respuesta = self.client.get(self.url)
+
+        self.assertEqual(respuesta.status_code, 405)
+        self.case.refresh_from_db()
+        self.assertFalse(self.case.paz_y_salvo_authorized)
+
+    def test_sin_el_grupo_no_se_puede(self):
+        self.client.logout()
+        make_user('cliente')
+        self.client.login(username='cliente', password=CLAVE)
+
+        self.client.post(self.url)
+
+        self.case.refresh_from_db()
+        self.assertFalse(self.case.paz_y_salvo_authorized)
+
+    def test_autorizar_aqui_lo_ensena_en_el_portal(self):
+        """
+        Las dos mitades hablan del mismo dato: lo que el despacho enciende
+        aqui es lo que el cliente ve alli.
+        """
+        self.client.post(self.url)
+        self.client.logout()
+
+        respuesta = self.client.post(
+            reverse('case_manager:public_query'),
+            {'identification': '16484186', 'access_key': 'C4186'},
+        )
+
+        self.assertContains(
+            respuesta,
+            reverse('case_manager:paz_y_salvo', args=[self.case.pk]),
+        )

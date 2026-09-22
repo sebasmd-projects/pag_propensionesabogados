@@ -8,75 +8,75 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 10:41-0500\n"
+"POT-Creation-Date: 2026-09-22 15:27-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language-Team: Propensiones Abogados\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? "
 "1 : 2;\n"
 
-#: admin.py:73
+#: admin.py:83
 msgid "Contingency"
 msgstr "Cuota litis"
 
-#: admin.py:76
-#, python-format
+#: admin.py:86
 msgid ""
 "A 0 % contingency is not a contingency: it is a closed fixed value, and it "
 "counts as debt, not as an expectation."
 msgstr "Una cuota litis al 0 % no es cuota litis: es un valor fijo cerrado, y cuenta como deuda, no como expectativa."
 
-#: admin.py:80
+#: admin.py:90
 msgid "Payment modality"
 msgstr "Modalidad de pago"
 
-#: admin.py:83
+#: admin.py:93
 msgid "Calculated"
 msgstr "Calculado"
 
-#: admin.py:86
+#: admin.py:96
 msgid "These are not stored: they are derived from the fields above."
 msgstr "Esto no se guarda: se deriva de los campos de arriba."
 
-#: admin.py:91
+#: admin.py:101
 msgid "balance"
 msgstr "saldo"
 
-#: admin.py:95
+#: admin.py:105 templates/case_manager/gestor/case_list.html:67
 msgid "expectation"
 msgstr "expectativa"
 
-#: admin.py:121
+#: admin.py:131 templates/case_manager/gestor/case_form.html:49
 msgid "Ordinary process"
 msgstr "Proceso ordinario"
 
-#: admin.py:125
+#: admin.py:135 templates/case_manager/gestor/case_form.html:67
 msgid "Administrative procedure"
 msgstr "Trámite administrativo"
 
-#: admin.py:132
+#: admin.py:142 templates/case_manager/gestor/case_form.html:86
 msgid "Police complaint"
 msgstr "Querella policiva"
 
-#: admin.py:139 templates/case_manager/paz_y_salvo.html:22
+#: admin.py:149 templates/case_manager/gestor/case_list.html:36
+#: templates/case_manager/paz_y_salvo.html:22
 msgid "Settlement letter"
 msgstr "Paz y salvo"
 
-#: admin.py:142
+#: admin.py:152
 msgid ""
 "While this is off the client cannot print the settlement letter, and the "
 "link does not even appear on the portal."
 msgstr "Mientras esto esté apagado el cliente no puede imprimir el paz y salvo, y el enlace ni siquiera aparece en el portal."
 
-#: admin.py:146
+#: admin.py:156
 msgid "Dates"
 msgstr "Fechas"
 
-#: admin.py:164 forms.py:42
+#: admin.py:174 forms.py:43
 msgid "access key"
 msgstr "clave de acceso"
 
@@ -252,17 +252,40 @@ msgstr "Etapa final"
 msgid "Finalizado"
 msgstr "Finalizado"
 
-#: forms.py:29
+#: forms.py:30
 msgid "We could not find a service with that identification and access key."
 msgstr "No encontramos un servicio con esa identificación y clave de acceso."
 
-#: forms.py:37
+#: forms.py:38
 msgid "identification number"
 msgstr "número de identificación"
 
-#: models.py:47
+#: forms.py:173 models.py:47
 msgid "The identification must contain digits only."
 msgstr "La identificación solo puede contener dígitos."
+
+#: gestor.py:131
+#, python-format
+msgid "Client %(name)s created. Their access key is %(key)s."
+msgstr "Cliente %(name)s creado. Su clave de acceso es %(key)s."
+
+#: gestor.py:147
+msgid "Client updated."
+msgstr "Cliente actualizado."
+
+#: gestor.py:228
+msgid "Case saved."
+msgstr "Asunto guardado."
+
+#: gestor.py:262
+#, python-format
+msgid "Settlement letter enabled for %(name)s."
+msgstr "Paz y salvo habilitado para %(name)s."
+
+#: gestor.py:264
+#, python-format
+msgid "Settlement letter disabled for %(name)s."
+msgstr "Paz y salvo retirado a %(name)s."
 
 #: models.py:70
 msgid "identification"
@@ -292,11 +315,15 @@ msgstr "servicio vigente"
 msgid "An inactive client identifies correctly but cannot see the case."
 msgstr "Un cliente inactivo se identifica bien, pero no puede ver su expediente."
 
-#: models.py:148
+#: models.py:148 templates/case_manager/gestor/case_list.html:32
+#: templates/case_manager/gestor/client_list.html:33
+#: templates/case_manager/gestor/dashboard.html:71
+#: templates/case_manager/gestor/dashboard.html:115
 msgid "Client"
 msgstr "Cliente"
 
-#: models.py:149
+#: models.py:149 templates/case_manager/gestor/base.html:51
+#: templates/case_manager/gestor/dashboard.html:36 urls.py:57
 msgid "Clients"
 msgstr "Clientes"
 
@@ -446,7 +473,8 @@ msgstr "Esta etapa no corresponde al servicio seleccionado."
 msgid "Case"
 msgstr "Asunto"
 
-#: models.py:464
+#: models.py:464 templates/case_manager/gestor/base.html:57
+#: templates/case_manager/gestor/client_list.html:35 urls.py:88
 msgid "Cases"
 msgstr "Asuntos"
 
@@ -520,81 +548,326 @@ msgid ""
 "Internacional."
 msgstr "Consulte el estado y avance de su trámite con Propensiones® Abogados Internacional."
 
-#: templates/case_manager/consultar_proceso.html:46
+#: templates/case_manager/consultar_proceso.html:59
 msgid "Tracking of my case"
 msgstr "Seguimiento de mi proceso"
 
-#: templates/case_manager/consultar_proceso.html:48
+#: templates/case_manager/consultar_proceso.html:61
 msgid ""
 "Check here the status and progress of your procedure with Propensiones® "
 "Abogados Internacional."
 msgstr "Consulte aquí el estado y avance de su trámite con Propensiones® Abogados Internacional."
 
-#: templates/case_manager/consultar_proceso.html:69
+#: templates/case_manager/consultar_proceso.html:82
 msgid "Identification number"
 msgstr "Número de identificación"
 
-#: templates/case_manager/consultar_proceso.html:76
+#: templates/case_manager/consultar_proceso.html:89
+#: templates/case_manager/gestor/client_list.html:34
 msgid "Access key"
 msgstr "Clave de acceso"
 
-#: templates/case_manager/consultar_proceso.html:82
+#: templates/case_manager/consultar_proceso.html:95
 msgid "Show access key"
 msgstr "Ver la clave de acceso"
 
-#: templates/case_manager/consultar_proceso.html:89
+#: templates/case_manager/consultar_proceso.html:102
 msgid "Check my case"
 msgstr "Consultar mi proceso"
 
-#: templates/case_manager/consultar_proceso.html:113
+#: templates/case_manager/consultar_proceso.html:131
+#: templates/case_manager/gestor/client_list.html:32
 msgid "Identification"
 msgstr "Identificación"
 
-#: templates/case_manager/consultar_proceso.html:117
+#: templates/case_manager/consultar_proceso.html:136
 msgid "ACTIVE"
 msgstr "ACTIVO"
 
-#: templates/case_manager/consultar_proceso.html:136
-msgid "Contracted service"
-msgstr "Servicio contratado"
+#: templates/case_manager/consultar_proceso.html:139
+#, python-format
+msgid "%(total)s case in force"
+msgid_plural "%(total)s cases in force"
+msgstr[0] "%(total)s asunto vigente"
+msgstr[1] "%(total)s asuntos vigentes"
+msgstr[2] "%(total)s asuntos vigentes"
 
-#: templates/case_manager/consultar_proceso.html:138
+#: templates/case_manager/consultar_proceso.html:153
+#, python-format
+msgid "Case %(number)s of %(total)s"
+msgstr "Asunto %(number)s de %(total)s"
+
+#: templates/case_manager/consultar_proceso.html:160
 msgid "Area / case type"
 msgstr "Área / tipo de caso"
 
-#: templates/case_manager/consultar_proceso.html:141
+#: templates/case_manager/consultar_proceso.html:163
 msgid "Subtype / speciality"
 msgstr "Subtipo / especialidad"
 
-#: templates/case_manager/consultar_proceso.html:143
+#: templates/case_manager/consultar_proceso.html:165
 msgid "Last update"
 msgstr "Actualización"
 
-#: templates/case_manager/consultar_proceso.html:164
+#: templates/case_manager/consultar_proceso.html:187
 msgid "Case progress"
 msgstr "Avance del proceso"
 
-#: templates/case_manager/consultar_proceso.html:177
+#: templates/case_manager/consultar_proceso.html:200
 msgid "Current status"
 msgstr "Estado actual"
 
-#: templates/case_manager/consultar_proceso.html:180
+#: templates/case_manager/consultar_proceso.html:203
 msgid "Your service is advancing according to the stage shown."
 msgstr "Su servicio avanza conforme a la etapa indicada."
 
-#: templates/case_manager/consultar_proceso.html:188
+#: templates/case_manager/consultar_proceso.html:211
 msgid "Settlement letter available"
 msgstr "Paz y salvo disponible"
 
-#: templates/case_manager/consultar_proceso.html:191
+#: templates/case_manager/consultar_proceso.html:214
 msgid ""
 "This document is available because <b>Propensiones®</b> expressly authorized "
 "its issuance."
 msgstr "Este documento está disponible porque <b>Propensiones®</b> autorizó expresamente su expedición."
 
-#: templates/case_manager/consultar_proceso.html:195
+#: templates/case_manager/consultar_proceso.html:218
 msgid "Print settlement letter"
 msgstr "Imprimir paz y salvo"
+
+#: templates/case_manager/gestor/base.html:16 urls.py:45
+msgid "Case manager"
+msgstr "Gestor de procesos"
+
+#: templates/case_manager/gestor/base.html:45
+msgid "Dashboard"
+msgstr "Panel"
+
+#: templates/case_manager/gestor/base.html:67
+msgid "Close"
+msgstr "Cerrar"
+
+#: templates/case_manager/gestor/case_form.html:27
+msgid "The matter"
+msgstr "El asunto"
+
+#: templates/case_manager/gestor/case_form.html:104
+msgid "Money"
+msgstr "Dinero"
+
+#: templates/case_manager/gestor/case_form.html:106
+#, python-format
+msgid ""
+"A contingency at 0 %% is not a contingency: it is a closed fixed value, and "
+"it counts as debt, not as an expectation."
+msgstr "Una cuota litis al 0 %% no es cuota litis: es un valor fijo cerrado, y cuenta como deuda, no como expectativa."
+
+#: templates/case_manager/gestor/case_form.html:127
+#: templates/case_manager/gestor/case_list.html:35
+msgid "Balance"
+msgstr "Saldo"
+
+#: templates/case_manager/gestor/case_form.html:128
+msgid "Expectation"
+msgstr "Expectativa"
+
+#: templates/case_manager/gestor/case_form.html:129
+msgid "Calculated, not stored."
+msgstr "Calculado, no guardado."
+
+#: templates/case_manager/gestor/case_form.html:146
+#: templates/case_manager/gestor/client_form.html:36
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: templates/case_manager/gestor/case_form.html:149
+#: templates/case_manager/gestor/client_form.html:39
+msgid "Save"
+msgstr "Guardar"
+
+#: templates/case_manager/gestor/case_list.html:6 urls.py:98
+msgid "New case"
+msgstr "Nuevo asunto"
+
+#: templates/case_manager/gestor/case_list.html:16
+#: templates/case_manager/gestor/case_list.html:17
+msgid "Search by client or case number"
+msgstr "Buscar por cliente o número de radicado"
+
+#: templates/case_manager/gestor/case_list.html:18
+#: templates/case_manager/gestor/client_list.html:18
+msgid "Search"
+msgstr "Buscar"
+
+#: templates/case_manager/gestor/case_list.html:21
+#: templates/case_manager/gestor/client_list.html:21
+msgid "Clear"
+msgstr "Limpiar"
+
+#: templates/case_manager/gestor/case_list.html:33
+#: templates/case_manager/gestor/client_list.html:36
+msgid "Service"
+msgstr "Servicio"
+
+#: templates/case_manager/gestor/case_list.html:34
+msgid "Stage"
+msgstr "Etapa"
+
+#: templates/case_manager/gestor/case_list.html:37
+#: templates/case_manager/gestor/client_list.html:37
+msgid "Actions"
+msgstr "Acciones"
+
+#: templates/case_manager/gestor/case_list.html:58
+#: templates/case_manager/gestor/client_list.html:63
+msgid "Inactive"
+msgstr "Inactivo"
+
+#: templates/case_manager/gestor/case_list.html:87
+msgid "Authorized. Click to withdraw."
+msgstr "Autorizado. Pulse para retirarlo."
+
+#: templates/case_manager/gestor/case_list.html:88
+msgid "Authorized"
+msgstr "Autorizado"
+
+#: templates/case_manager/gestor/case_list.html:92
+msgid "Not authorized. Click to enable."
+msgstr "Sin autorizar. Pulse para habilitarlo."
+
+#: templates/case_manager/gestor/case_list.html:93
+msgid "Withheld"
+msgstr "Sin autorizar"
+
+#: templates/case_manager/gestor/case_list.html:101
+#: templates/case_manager/gestor/client_list.html:69
+msgid "Edit"
+msgstr "Editar"
+
+#: templates/case_manager/gestor/case_list.html:109
+msgid "No case matches that search."
+msgstr "Ningún asunto coincide con esa búsqueda."
+
+#: templates/case_manager/gestor/case_list.html:111
+msgid "There are no cases yet."
+msgstr "Todavía no hay asuntos."
+
+#: templates/case_manager/gestor/client_form.html:29
+#, python-format
+msgid ""
+"Access key for the portal: <strong class=\"font-monospace\">%(key)s</"
+"strong>. It is derived from the name and the identification, so it changes "
+"if either does."
+msgstr "Clave de acceso al portal: <strong class=\"font-monospace\">%(key)s</strong>. Es derivada del nombre y la identificación, así que cambia si cambia cualquiera de los dos."
+
+#: templates/case_manager/gestor/client_list.html:6 urls.py:67
+msgid "New client"
+msgstr "Nuevo cliente"
+
+#: templates/case_manager/gestor/client_list.html:16
+#: templates/case_manager/gestor/client_list.html:17
+msgid "Search by name or identification"
+msgstr "Buscar por nombre o identificación"
+
+#: templates/case_manager/gestor/client_list.html:61
+msgid "In force"
+msgstr "Vigente"
+
+#: templates/case_manager/gestor/client_list.html:77
+msgid "No client matches that search."
+msgstr "Ningún cliente coincide con esa búsqueda."
+
+#: templates/case_manager/gestor/client_list.html:79
+msgid "There are no clients yet."
+msgstr "Todavía no hay clientes."
+
+#: templates/case_manager/gestor/dashboard.html:17
+#: templates/case_manager/gestor/dashboard.html:72
+msgid "Agreed"
+msgstr "Pactado"
+
+#: templates/case_manager/gestor/dashboard.html:18
+msgid "Collected"
+msgstr "Cobrado"
+
+#: templates/case_manager/gestor/dashboard.html:19
+msgid "Outstanding balance"
+msgstr "Saldo pendiente"
+
+#: templates/case_manager/gestor/dashboard.html:20
+msgid "Contingency expectation"
+msgstr "Expectativa de cuota litis"
+
+#: templates/case_manager/gestor/dashboard.html:21
+msgid "Potential pending"
+msgstr "Pendiente potencial"
+
+#: templates/case_manager/gestor/dashboard.html:22
+msgid "Projected total"
+msgstr "Total proyectado"
+
+#: templates/case_manager/gestor/dashboard.html:28
+#, python-format
+msgid ""
+"<strong>Contingency expectation</strong> is not money owed: it is what the "
+"firm expects to earn if the cases succeed. It is shown separately and added "
+"into the potential pending figure. A contingency at 0 %% is not a "
+"contingency — it is a closed fixed value, and it counts as debt."
+msgstr "La <strong>expectativa de cuota litis</strong> no es dinero debido: es lo que el despacho espera ganar si los pleitos salen. Se muestra aparte y además se suma al pendiente potencial. Una cuota litis al 0 %% no es cuota litis: es un valor fijo cerrado, y cuenta como deuda."
+
+#: templates/case_manager/gestor/dashboard.html:39
+#: templates/case_manager/gestor/dashboard.html:50
+msgid "in total"
+msgstr "en total"
+
+#: templates/case_manager/gestor/dashboard.html:47
+msgid "Cases in force"
+msgstr "Asuntos vigentes"
+
+#: templates/case_manager/gestor/dashboard.html:63
+msgid "Clients with an outstanding balance"
+msgstr "Clientes con saldo pendiente"
+
+#: templates/case_manager/gestor/dashboard.html:73
+msgid "Paid"
+msgstr "Pagado"
+
+#: templates/case_manager/gestor/dashboard.html:74
+msgid "Owes"
+msgstr "Debe"
+
+#: templates/case_manager/gestor/dashboard.html:92
+msgid "No outstanding balances recorded."
+msgstr "No hay saldos pendientes registrados."
+
+#: templates/case_manager/gestor/dashboard.html:107
+msgid "Contingency expectations"
+msgstr "Expectativas de cuota litis"
+
+#: templates/case_manager/gestor/dashboard.html:117
+msgid "Expected"
+msgstr "Esperado"
+
+#: templates/case_manager/gestor/dashboard.html:134
+msgid "No contingency expectations recorded."
+msgstr "No hay expectativas de cuota litis registradas."
+
+#: templates/case_manager/gestor/partials/pagination.html:11
+msgid "Pagination"
+msgstr "Paginación"
+
+#: templates/case_manager/gestor/partials/pagination.html:16
+msgid "Previous"
+msgstr "Anterior"
+
+#: templates/case_manager/gestor/partials/pagination.html:21
+#, python-format
+msgid "Page %(current)s of %(total)s"
+msgstr "Página %(current)s de %(total)s"
+
+#: templates/case_manager/gestor/partials/pagination.html:27
+msgid "Next"
+msgstr "Siguiente"
 
 #: templates/case_manager/partials/legal_notice.html:24
 msgid "Important information for the client"
@@ -604,10 +877,22 @@ msgstr "Información importante para el cliente"
 msgid "Your unconditional ally"
 msgstr "Su aliado incondicional"
 
+#: urls.py:46
+msgid "Cases, clients and their money."
+msgstr "Asuntos, clientes y su dinero."
+
+#: urls.py:77
+msgid "Edit client"
+msgstr "Editar cliente"
+
+#: urls.py:108
+msgid "Edit case"
+msgstr "Editar asunto"
+
 #: views.py:47
 msgid "Too many failed attempts from this connection. Try again later."
 msgstr "Demasiados intentos fallidos desde esta conexión. Inténtelo más tarde."
 
-#: views.py:123
+#: views.py:129
 msgid "There is no case in force for this client."
 msgstr "No hay ningún asunto vigente para este cliente."

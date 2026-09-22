@@ -1,0 +1,153 @@
+{% extends 'case_manager/gestor/base.html' %}
+{% load i18n %}
+
+{% comment %}
+  Alta y edicion de un asunto, con su dinero en el mismo envio.
+
+  Los tres bloques por tipo de tramite --judicial, administrativo y policivo--
+  se pintan todos, plegados. **No se esconden segun el tipo con JavaScript**:
+  la pantalla anterior lo hacia y ahi estaba el problema, porque lo que se
+  esconde se sigue pudiendo mandar. Quien decide cual vale es
+  `CaseModel.clean()`, en el servidor.
+{% endcomment %}
+
+{% block gestor_content %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors or finance_formset.non_form_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+        {{ finance_formset.non_form_errors }}
+      </div>
+    {% endif %}
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent border-0 pt-3">
+        <h2 class="h6 fw-bold mb-0">{% trans "The matter" %}</h2>
+      </div>
+      <div class="card-body pt-2">
+        <div class="row g-3">
+          {% include 'case_manager/gestor/partials/field.html' with field=form.client %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.service %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.procedure %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.area %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.subtype %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.second_subtype %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.stage %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.instance %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.is_active %}
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion mb-4" id="bloquesDelTramite">
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#bloqueJudicial">
+            <i class="bi bi-bank me-2"></i>{% trans "Ordinary process" %}
+          </button>
+        </h2>
+        <div id="bloqueJudicial" class="accordion-collapse collapse" data-bs-parent="#bloquesDelTramite">
+          <div class="accordion-body">
+            <div class="row g-3">
+              {% include 'case_manager/gestor/partials/field.html' with field=form.case_number %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.court %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.city %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#bloqueAdministrativo">
+            <i class="bi bi-building me-2"></i>{% trans "Administrative procedure" %}
+          </button>
+        </h2>
+        <div id="bloqueAdministrativo" class="accordion-collapse collapse" data-bs-parent="#bloquesDelTramite">
+          <div class="accordion-body">
+            <div class="row g-3">
+              {% include 'case_manager/gestor/partials/field.html' with field=form.sector %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.entity %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.administrative_case_number %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.administrative_city %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#bloquePolicivo">
+            <i class="bi bi-shield-exclamation me-2"></i>{% trans "Police complaint" %}
+          </button>
+        </h2>
+        <div id="bloquePolicivo" class="accordion-collapse collapse" data-bs-parent="#bloquesDelTramite">
+          <div class="accordion-body">
+            <div class="row g-3">
+              {% include 'case_manager/gestor/partials/field.html' with field=form.police_instance %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.police_office %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.police_case_number %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.police_city %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent border-0 pt-3">
+        <h2 class="h6 fw-bold mb-0">{% trans "Money" %}</h2>
+        <p class="text-muted small mb-0">
+          {% blocktrans %}A contingency at 0 % is not a contingency: it is a closed fixed value, and it counts as debt, not as an expectation.{% endblocktrans %}
+        </p>
+      </div>
+      <div class="card-body pt-2">
+        {{ finance_formset.management_form }}
+        {% for finance in finance_formset %}
+          {% for hidden in finance.hidden_fields %}{{ hidden }}{% endfor %}
+          {% if finance.non_field_errors %}
+            <div class="alert alert-danger">{{ finance.non_field_errors }}</div>
+          {% endif %}
+          <div class="row g-3">
+            {% include 'case_manager/gestor/partials/field.html' with field=finance.start_date cols="col-12 col-md-4" %}
+            {% include 'case_manager/gestor/partials/field.html' with field=finance.mandate cols="col-12 col-md-4" %}
+            {% include 'case_manager/gestor/partials/field.html' with field=finance.show_in_dashboard cols="col-12 col-md-4" %}
+            {% include 'case_manager/gestor/partials/field.html' with field=finance.contingency_percentage cols="col-12 col-md-3" %}
+            {% include 'case_manager/gestor/partials/field.html' with field=finance.contingency_value cols="col-12 col-md-3" %}
+            {% include 'case_manager/gestor/partials/field.html' with field=finance.agreed_fee cols="col-12 col-md-3" %}
+            {% include 'case_manager/gestor/partials/field.html' with field=finance.paid_amount cols="col-12 col-md-3" %}
+          </div>
+          {% if finance.instance.pk %}
+            <div class="alert alert-light border small mt-3 mb-0">
+              {% trans "Balance" %}: <strong>${{ finance.instance.balance }}</strong> &middot;
+              {% trans "Expectation" %}: <strong>${{ finance.instance.expectation }}</strong>
+              <div class="text-muted">{% trans "Calculated, not stored." %}</div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          {% include 'case_manager/gestor/partials/field.html' with field=form.paz_y_salvo_authorized cols="col-12" %}
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+      <a href="{% url 'case_manager:gestor_case_list' %}" class="btn btn-outline-secondary">
+        {% trans "Cancel" %}
+      </a>
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg me-1"></i>{% trans "Save" %}
+      </button>
+    </div>
+  </form>
+{% endblock gestor_content %}

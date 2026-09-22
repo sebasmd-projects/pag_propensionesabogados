@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import Path
 
+from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
 from import_export.formats.base_formats import CSV, HTML, JSON, TSV, XLS, XLSX
@@ -228,6 +229,18 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 7200
 
 ATTLAS_TOKEN_TIMEOUT = int(os.getenv('ATTLAS_TOKEN_TIMEOUT'))*60*60
+
+# Bootstrap llama `danger` a lo que Django llama `error`, y sin esto un
+# mensaje de error se pinta con la clase `alert-error`, que no existe: el
+# aviso sale sin color, o sea que el unico mensaje que importa es el que no se
+# ve.
+MESSAGE_TAGS = {
+    messages.DEBUG: 'secondary',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}
 
 ROSETTA_SHOW_AT_ADMIN_PANEL = True
 

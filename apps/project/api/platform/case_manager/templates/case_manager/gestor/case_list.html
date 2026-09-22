@@ -1,0 +1,121 @@
+{% extends 'case_manager/gestor/base.html' %}
+{% load i18n humanize case_manager_extras %}
+
+{% block gestor_actions %}
+  <a href="{% url 'case_manager:gestor_case_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-lg me-1"></i>{% trans "New case" %}
+  </a>
+{% endblock gestor_actions %}
+
+{% block gestor_content %}
+
+  <form method="get" class="mb-3" role="search">
+    <div class="input-group">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="search" name="q" value="{{ q }}" class="form-control"
+             placeholder="{% trans 'Search by client or case number' %}"
+             aria-label="{% trans 'Search by client or case number' %}">
+      <button class="btn btn-outline-secondary" type="submit">{% trans "Search" %}</button>
+      {% if q %}
+        <a class="btn btn-outline-secondary" href="{% url 'case_manager:gestor_case_list' %}">
+          {% trans "Clear" %}
+        </a>
+      {% endif %}
+    </div>
+  </form>
+
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr class="text-uppercase small text-muted">
+            <th scope="col">{% trans "Client" %}</th>
+            <th scope="col">{% trans "Service" %}</th>
+            <th scope="col">{% trans "Stage" %}</th>
+            <th scope="col" class="text-end">{% trans "Balance" %}</th>
+            <th scope="col" class="text-center">{% trans "Settlement letter" %}</th>
+            <th scope="col" class="text-end">{% trans "Actions" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for case in cases %}
+            <tr>
+              <td>
+                {{ case.client.full_name }}
+                <div class="text-muted small font-monospace">
+                  {{ case.client.identification|grouped_identification }}
+                </div>
+              </td>
+              <td>
+                {{ case.get_service_display }}
+                {% if case.public_reference != "—" %}
+                  <div class="text-muted small">{{ case.public_reference }}</div>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge text-bg-light">{{ case.get_stage_display }}</span>
+                {% if not case.is_active %}
+                  <span class="badge text-bg-secondary">{% trans "Inactive" %}</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                {% if case.finance %}
+                  {% if case.finance.balance %}
+                    <span class="fw-semibold">${{ case.finance.balance|intcomma }}</span>
+                  {% elif case.finance.expectation %}
+                    <span class="text-info">${{ case.finance.expectation|intcomma }}</span>
+                    <div class="text-muted small">{% trans "expectation" %}</div>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% comment %}
+                  Un `POST`, no un enlace: cambia un dato, y un `GET` que
+                  cambia datos lo dispara cualquier cosa que siga enlaces.
+                {% endcomment %}
+                <form method="post"
+                      action="{% url 'case_manager:gestor_case_toggle_settlement' case.pk %}"
+                      class="d-inline">
+                  {% csrf_token %}
+                  {% if case.paz_y_salvo_authorized %}
+                    <button type="submit" class="btn btn-sm btn-success"
+                            title="{% trans 'Authorized. Click to withdraw.' %}">
+                      <i class="bi bi-patch-check-fill me-1"></i>{% trans "Authorized" %}
+                    </button>
+                  {% else %}
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"
+                            title="{% trans 'Not authorized. Click to enable.' %}">
+                      <i class="bi bi-dash-circle me-1"></i>{% trans "Withheld" %}
+                    </button>
+                  {% endif %}
+                </form>
+              </td>
+              <td class="text-end">
+                <a href="{% url 'case_manager:gestor_case_update' case.pk %}"
+                   class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-pencil me-1"></i>{% trans "Edit" %}
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-muted text-center py-4">
+                {% if q %}
+                  {% trans "No case matches that search." %}
+                {% else %}
+                  {% trans "There are no cases yet." %}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% include 'case_manager/gestor/partials/pagination.html' %}
+{% endblock gestor_content %}

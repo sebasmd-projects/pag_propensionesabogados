@@ -1,0 +1,22 @@
+{% load humanize %}
+{% comment %}
+  Una cifra del panel.
+
+  El icono acompana, no informa: el dato es el numero y su etiqueta. Un color
+  solo tampoco distingue --el ambar de «pendiente» y el azul de «expectativa»
+  se parecen con una deficiencia de vision del color--, por eso cada uno lleva
+  su texto escrito.
+
+  Espera `label`, `value`, `icon` y `tone`.
+{% endcomment %}
+<div class="col">
+  <div class="card border-0 shadow-sm h-100">
+    <div class="card-body">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <i class="bi bi-{{ icon }} text-{{ tone }}"></i>
+        <span class="text-uppercase small text-muted">{{ label }}</span>
+      </div>
+      <p class="h4 mb-0">${{ value|intcomma }}</p>
+    </div>
+  </div>
+</div>

@@ -75,7 +75,7 @@ class PublicQueryTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['case'], self.case)
+        self.assertIn(self.case, response.context['cases'])
 
     def test_la_cedula_con_puntos_es_la_misma_cedula(self):
         response = self.client.post(
@@ -83,7 +83,7 @@ class PublicQueryTests(TestCase):
             {'identification': '16.484.186', 'access_key': 'C4186'},
         )
 
-        self.assertEqual(response.context['case'], self.case)
+        self.assertIn(self.case, response.context['cases'])
 
     def test_con_la_clave_equivocada_no_se_ve_nada(self):
         response = self.client.post(
@@ -92,7 +92,7 @@ class PublicQueryTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
-        self.assertIsNone(response.context.get('case'))
+        self.assertFalse(response.context.get('cases'))
 
     def test_la_clave_distingue_mayusculas(self):
         """`c4186` no es `C4186`: la inicial va en mayuscula."""
@@ -101,7 +101,7 @@ class PublicQueryTests(TestCase):
             {'identification': '16484186', 'access_key': 'c4186'},
         )
 
-        self.assertIsNone(response.context.get('case'))
+        self.assertFalse(response.context.get('cases'))
 
     # --- lo que no se puede averiguar ------------------------------------
     def test_una_cedula_que_no_existe_responde_lo_mismo_que_una_clave_mala(self):
@@ -132,7 +132,7 @@ class PublicQueryTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
-        self.assertIsNone(response.context.get('case'))
+        self.assertFalse(response.context.get('cases'))
 
     # --- lo que viaja al navegador ---------------------------------------
     def test_la_pagina_vacia_no_trae_ningun_expediente(self):
@@ -145,7 +145,7 @@ class PublicQueryTests(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIsNone(response.context.get('case'))
+        self.assertFalse(response.context.get('cases'))
         self.assertNotContains(response, 'Carlos Emiro Giraldo Lozada')
         self.assertNotContains(response, '16484186')
 
@@ -250,7 +250,7 @@ class AttemptLimitTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 429)
-        self.assertIsNone(response.context.get('case'))
+        self.assertFalse(response.context.get('cases'))
 
 
 class ForwardedHeaderTests(TestCase):
@@ -281,3 +281,98 @@ class ForwardedHeaderTests(TestCase):
         )
 
         self.assertEqual(attempts.client_ip(peticion), '1.2.3.4')
+
+
+class VariosAsuntosTests(TestCase):
+    """
+    Un cliente con mas de un asunto los ve **todos**.
+
+    Antes la vista hacia `.first()` y ensenaba uno solo. El modelo siempre fue
+    uno a muchos --un cliente puede llevar a la vez una pension y una
+    conciliacion--, asi que quien preguntaba por uno veia el otro y no
+    entendia por que.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse('case_manager:public_query')
+        cls.client_record = ClientModel.objects.create(
+            identification='16484186', full_name='Carlos Giraldo'
+        )
+        cls.pension = CaseModel.objects.create(
+            client=cls.client_record,
+            service=Service.JUDICIAL,
+            subtype='Pensión de invalidez',
+            stage=Stage.IN_PROGRESS,
+        )
+        cls.conciliacion = CaseModel.objects.create(
+            client=cls.client_record,
+            service=Service.CONCILIATION,
+            subtype='Alimentos',
+            stage=Stage.FINAL_STAGE,
+        )
+
+    def setUp(self):
+        cache.clear()
+
+    def _consultar(self):
+        return self.client.post(
+            self.url, {'identification': '16484186', 'access_key': 'C4186'}
+        )
+
+    def test_salen_los_dos(self):
+        response = self._consultar()
+
+        devueltos = list(response.context['cases'])
+        self.assertIn(self.pension, devueltos)
+        self.assertIn(self.conciliacion, devueltos)
+
+    def test_cada_uno_con_su_etapa(self):
+        """
+        Lo que hace util verlos juntos: van por sitios distintos.
+        """
+        response = self._consultar()
+
+        self.assertContains(response, 'Pensión de invalidez')
+        self.assertContains(response, 'Alimentos')
+        self.assertContains(response, 'En trámite')
+        self.assertContains(response, 'Etapa final')
+
+    def test_un_asunto_sin_vigencia_no_sale(self):
+        CaseModel.objects.filter(pk=self.conciliacion.pk).update(is_active=False)
+
+        devueltos = list(self._consultar().context['cases'])
+
+        self.assertEqual(devueltos, [self.pension])
+
+    def test_solo_el_autorizado_ensena_su_paz_y_salvo(self):
+        """
+        El permiso es **por asunto**, no por cliente: se puede estar a paz y
+        salvo de una cosa y deber otra.
+        """
+        CaseModel.objects.filter(pk=self.pension.pk).update(
+            paz_y_salvo_authorized=True
+        )
+
+        response = self._consultar()
+
+        self.assertContains(
+            response, reverse('case_manager:paz_y_salvo', args=[self.pension.pk])
+        )
+        self.assertNotContains(
+            response,
+            reverse('case_manager:paz_y_salvo', args=[self.conciliacion.pk]),
+        )
+
+    def test_siguen_sin_salir_los_de_otros_clientes(self):
+        otro = ClientModel.objects.create(
+            identification='77777777', full_name='Otra Persona'
+        )
+        CaseModel.objects.create(
+            client=otro, service=Service.JUDICIAL, stage=Stage.UNDER_REVIEW
+        )
+
+        response = self._consultar()
+
+        self.assertNotContains(response, 'Otra Persona')
+        self.assertNotContains(response, '77777777')

@@ -1,0 +1,77 @@
+{% extends 'pages/index.html' %}
+{% load i18n static %}
+
+{% comment %}
+  Base de las pantallas del gestor interno.
+
+  Cuelga de `pages/index.html` como el resto de paginas interiores, asi que
+  el despacho ve el mismo sitio que sus clientes: misma cabecera, mismo pie,
+  mismo Bootstrap. Antes esto vivia en el admin de Django, que es otra
+  aplicacion con otro aspecto y otro vocabulario.
+
+  Lo unico propio es la barra de pestanas de aqui abajo y el bloque
+  `gestor_content` que cada pantalla rellena.
+{% endcomment %}
+
+{% block title %}{{ gestor_title }} | {% trans "Case manager" %}{% endblock title %}
+
+{% block meta_seo %}
+  {# De puertas adentro: no se indexa. #}
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+{% endblock meta_seo %}
+
+{% block body_css %}class="scrolled"{% endblock body_css %}
+
+{% block main %}
+  <main class="main page-offset-header">
+    <section class="section">
+      <div class="container">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+          <div>
+            <h1 class="h3 fw-bold mb-1">{{ gestor_title }}</h1>
+            {% if gestor_subtitle %}
+              <p class="text-muted mb-0">{{ gestor_subtitle }}</p>
+            {% endif %}
+          </div>
+          {% block gestor_actions %}{% endblock gestor_actions %}
+        </div>
+
+        <ul class="nav nav-pills mb-4 gap-2">
+          <li class="nav-item">
+            <a class="nav-link {% if gestor_section == 'dashboard' %}active{% endif %}"
+               href="{% url 'case_manager:gestor_dashboard' %}">
+              <i class="bi bi-speedometer2 me-1"></i>{% trans "Dashboard" %}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if gestor_section == 'clients' %}active{% endif %}"
+               href="{% url 'case_manager:gestor_client_list' %}">
+              <i class="bi bi-people me-1"></i>{% trans "Clients" %}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if gestor_section == 'cases' %}active{% endif %}"
+               href="{% url 'case_manager:gestor_case_list' %}">
+              <i class="bi bi-folder2-open me-1"></i>{% trans "Cases" %}
+            </a>
+          </li>
+        </ul>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"
+                      aria-label="{% trans 'Close' %}"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        {% block gestor_content %}{% endblock gestor_content %}
+
+      </div>
+    </section>
+  </main>
+{% endblock main %}

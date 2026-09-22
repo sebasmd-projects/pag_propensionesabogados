@@ -1,0 +1,146 @@
+{% extends 'case_manager/gestor/base.html' %}
+{% load i18n humanize %}
+
+{% comment %}
+  Panel economico y gerencial.
+
+  Las seis cifras de cabecera salen de `CaseFinanceQuerySet.totals()`, en una
+  sola consulta. Las dos tablas son las dos preguntas que el despacho hace
+  sobre el dinero, y son distintas: quien debe hoy, y cuanto se espera ganar
+  si los pleitos salen. La pantalla las separa porque sumarlas seria contar
+  dos veces lo mismo.
+{% endcomment %}
+
+{% block gestor_content %}
+
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-4">
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Agreed") value=totals.agreed icon="file-earmark-check" tone="secondary" %}
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Collected") value=totals.paid icon="cash-stack" tone="success" %}
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Outstanding balance") value=totals.balance icon="hourglass-split" tone="warning" %}
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Contingency expectation") value=totals.expectation icon="graph-up-arrow" tone="info" %}
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Potential pending") value=totals.potential_pending icon="calculator" tone="secondary" %}
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Projected total") value=totals.projected_total icon="bullseye" tone="secondary" %}
+  </div>
+
+  <div class="alert alert-light border small d-flex gap-2">
+    <i class="bi bi-info-circle flex-shrink-0 mt-1"></i>
+    <div>
+      {% blocktrans %}<strong>Contingency expectation</strong> is not money owed: it is what the firm expects to earn if the cases succeed. It is shown separately and added into the potential pending figure. A contingency at 0 % is not a contingency — it is a closed fixed value, and it counts as debt.{% endblocktrans %}
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-uppercase small text-muted mb-1">{% trans "Clients" %}</p>
+          <p class="h4 mb-0">
+            {{ counters.active_clients }}
+            <span class="text-muted fs-6">/ {{ counters.clients }} {% trans "in total" %}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-uppercase small text-muted mb-1">{% trans "Cases in force" %}</p>
+          <p class="h4 mb-0">
+            {{ cases.active }}
+            <span class="text-muted fs-6">/ {{ cases.total }} {% trans "in total" %}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <div class="col-12 col-xl-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0 pt-3">
+          <h2 class="h6 fw-bold mb-0">
+            <i class="bi bi-exclamation-circle me-1 text-warning"></i>{% trans "Clients with an outstanding balance" %}
+          </h2>
+        </div>
+        <div class="card-body pt-2">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr class="text-uppercase small text-muted">
+                  <th scope="col">{% trans "Client" %}</th>
+                  <th scope="col" class="text-end">{% trans "Agreed" %}</th>
+                  <th scope="col" class="text-end">{% trans "Paid" %}</th>
+                  <th scope="col" class="text-end">{% trans "Owes" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in debtors %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'case_manager:gestor_case_update' row.case.pk %}"
+                         class="text-decoration-none">{{ row.case.client.full_name }}</a>
+                      <div class="text-muted small">{{ row.case.get_service_display }}</div>
+                    </td>
+                    <td class="text-end">${{ row.agreed|intcomma }}</td>
+                    <td class="text-end">${{ row.paid|intcomma }}</td>
+                    <td class="text-end fw-semibold">${{ row.balance|intcomma }}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-muted text-center py-3">
+                      {% trans "No outstanding balances recorded." %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0 pt-3">
+          <h2 class="h6 fw-bold mb-0">
+            <i class="bi bi-graph-up-arrow me-1 text-info"></i>{% trans "Contingency expectations" %}
+          </h2>
+        </div>
+        <div class="card-body pt-2">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr class="text-uppercase small text-muted">
+                  <th scope="col">{% trans "Client" %}</th>
+                  <th scope="col" class="text-end">%</th>
+                  <th scope="col" class="text-end">{% trans "Expected" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in expectations %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'case_manager:gestor_case_update' row.case.pk %}"
+                         class="text-decoration-none">{{ row.case.client.full_name }}</a>
+                      <div class="text-muted small">{{ row.case.paz_y_salvo_subject }}</div>
+                    </td>
+                    <td class="text-end">{{ row.contingency_percentage }} %</td>
+                    <td class="text-end fw-semibold">${{ row.expectation|intcomma }}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="3" class="text-muted text-center py-3">
+                      {% trans "No contingency expectations recorded." %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+{% endblock gestor_content %}

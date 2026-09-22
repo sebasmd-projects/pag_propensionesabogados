@@ -106,14 +106,20 @@ class PublicCaseQueryView(TemplateView):
         request.session.cycle_key()
         request.session[SESSION_CLIENT_KEY] = str(client.pk)
 
-        case = (
+        # **Todos** sus asuntos, no el ultimo.
+        #
+        # Un cliente puede tener varios a la vez --una pension y una
+        # conciliacion, por ejemplo--, y con `.first()` los demas no existian
+        # para el: preguntaba por el que sabia que tenia y veia otro, sin
+        # entender por que. El modelo siempre fue uno a muchos; la vista era
+        # la que se quedaba con uno.
+        cases = (
             CaseModel.objects.visible_to_client()
             .filter(client=client)
             .select_related('client')
-            .first()
         )
 
-        if case is None:
+        if not cases:
             # El cliente existe y su clave es buena, pero no tiene ningun
             # asunto vigente que ensenar. No es un fallo de credenciales y no
             # cuenta como intento.
@@ -125,7 +131,9 @@ class PublicCaseQueryView(TemplateView):
             )
 
         return self.render_to_response(
-            self.get_context_data(form=PublicCaseQueryForm(), case=case)
+            self.get_context_data(
+                form=PublicCaseQueryForm(), client=client, cases=cases
+            )
         )
 
 
