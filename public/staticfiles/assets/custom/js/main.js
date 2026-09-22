@@ -99,7 +99,9 @@
     mobileNavToggleBtn.classList.toggle("bi-list");
     mobileNavToggleBtn.classList.toggle("bi-x");
   }
-  mobileNavToggleBtn.addEventListener("click", mobileNavToogle);
+  // Misma historia: si algun dia una plantilla no trae el boton, que no se
+  // caiga el resto del fichero.
+  mobileNavToggleBtn?.addEventListener("click", mobileNavToogle);
 
   /**
    * Hide mobile nav on same-page/hash links
@@ -158,7 +160,12 @@
         : scrollTop.classList.remove("active");
     }
   }
-  scrollTop.addEventListener("click", (e) => {
+  // `scrollTop` no esta en todas las paginas --`terms-and-conditions` y
+  // `privacy-policy` no lo traen--, y sin esta comprobacion la linea revienta
+  // y se lleva por delante **todo lo que viene despues en este fichero**: el
+  // menu movil, el scrollspy y la medida de la cabecera. La funcion de arriba
+  // ya comprobaba `if (scrollTop)`; aqui faltaba.
+  scrollTop?.addEventListener("click", (e) => {
     e.preventDefault();
     window.scrollTo({
       top: 0,
@@ -191,8 +198,9 @@
         alert("Por favor, escribe un mensaje antes de enviarlo.");
       }
     };
-    sendMessageButton.addEventListener("click", sendMessage);
-    messageInput.addEventListener("keydown", (event) => {
+    // El formulario de WhatsApp no esta en todas las paginas.
+    sendMessageButton?.addEventListener("click", sendMessage);
+    messageInput?.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
         sendMessage();
@@ -204,11 +212,12 @@
     const whatsappButton = document.getElementById("whatsapp-button");
 
     function toggleWhatsappText() {
-      if (window.scrollY > 100) {
-        whatsappButton.classList.add("scrolled");
-      } else {
-        whatsappButton.classList.remove("scrolled");
+      // El boton flotante no esta en todas las paginas, y esto corre en cada
+      // evento de scroll: sin la salida temprana era un error por cada pixel.
+      if (!whatsappButton) {
+        return;
       }
+      whatsappButton.classList.toggle("scrolled", window.scrollY > 100);
     }
 
     // Escuchar eventos de scroll
@@ -220,6 +229,11 @@
    * Animation on scroll function and init
    */
   function aosInit() {
+    // AOS se carga solo en las paginas que lo declaran (la portada). En las
+    // demas, `AOS` no existe y esto lanzaba un `ReferenceError`.
+    if (typeof AOS === "undefined") {
+      return;
+    }
     AOS.init({
       duration: 600,
       easing: "ease-in-out",
@@ -303,4 +317,59 @@
   }
   window.addEventListener("load", navmenuScrollspy);
   document.addEventListener("scroll", navmenuScrollspy);
+
+  /**
+   * Publicar la altura real de la cabecera en `--header-height`.
+   *
+   * La cabecera es `fixed-top`, o sea que no ocupa sitio en el flujo, y las
+   * paginas interiores se lo dejan con `.page-offset-header` (ver `main.css`).
+   * Ese hueco tiene que valer exactamente lo que mide la cabecera, y lo que
+   * mide depende de cosas que cambian solas: la tipografia --que viene de
+   * Google Fonts y puede tardar, o no llegar--, el logo, el zoom del navegador
+   * y si el menu se parte en dos lineas. Escribir el numero a mano acierta en
+   * un sitio y falla en otro, y falla tapando el titulo.
+   *
+   * Medirlo quita la adivinanza. El CSS lleva un valor de reserva para antes
+   * de que esto corra, asi que si el JavaScript falla la pagina se ve holgada,
+   * no rota.
+   */
+  function publicarAlturaCabecera() {
+    const cabecera = document.querySelector("#header");
+    if (!cabecera) {
+      return;
+    }
+
+    const aplicar = () => {
+      const alto = Math.round(cabecera.getBoundingClientRect().height);
+      if (alto > 0) {
+        document.documentElement.style.setProperty(
+          "--header-height",
+          alto + "px"
+        );
+      }
+    };
+
+    aplicar();
+
+    // Cuando la cabecera cambia de alto --la tipografia termina de cargar, se
+    // gira el movil, se hace zoom, el menu se parte--, se vuelve a medir.
+    //
+    // `box: "border-box"` no es opcional: por defecto `ResizeObserver` mira
+    // el `content-box`, y entonces un cambio en el relleno de la cabecera
+    // --que si cambia lo que ocupa-- no dispara nada. Se vio probandolo.
+    if (window.ResizeObserver) {
+      new ResizeObserver(aplicar).observe(cabecera, { box: "border-box" });
+    } else {
+      window.addEventListener("resize", aplicar);
+    }
+
+    // `ResizeObserver` no existe en todos los navegadores viejos, y la carga
+    // de una fuente no siempre dispara un cambio de tamano observable.
+    window.addEventListener("load", aplicar);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(aplicar);
+    }
+  }
+
+  publicarAlturaCabecera();
 })();

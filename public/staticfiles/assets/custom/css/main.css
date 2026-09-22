@@ -1815,20 +1815,31 @@ section,
 # Paginas interiores
 --------------------------------------------------------------*/
 /*
- * La cabecera es `fixed-top`, asi que el contenido de una pagina interior
- * empieza debajo de ella. El valor es el mismo `scroll-margin-top` que usan
- * los anclajes de la portada.
+ * La cabecera es `fixed-top`, o sea que esta fuera del flujo: sin esto, el
+ * contenido de una pagina interior empieza debajo de ella y queda tapado.
+ *
+ * `--header-height` la mide `main.js` sobre la cabecera de verdad y la
+ * publica en `:root`. No es un lujo: la altura depende de la tipografia
+ * --que llega de Google Fonts y puede tardar o no llegar--, del logo, del
+ * zoom y de si el menu se parte en dos lineas. Un numero escrito a mano
+ * acierta en el portatil de quien lo escribio y falla en el de al lado, sin
+ * avisar.
+ *
+ * Los valores de reserva son para antes de que el JavaScript mida, y van
+ * holgados a proposito: sobrar un poco de aire se ve raro, faltar tapa el
+ * titulo. El de movil estaba en 64px, menos que la cabecera real (80px), y
+ * solo no se notaba porque el relleno de `.section` lo disimulaba.
  *
  * Estaba escrito en un bloque `<style>` dentro de `team_detail.html`. Vive
  * aqui porque lo necesita toda pagina interior, y repetirlo en cada una es
  * como acaban desajustandose entre si.
  */
 .page-offset-header {
-  padding-top: 98px;
+  padding-top: var(--header-height, 110px);
 }
 
 @media (max-width: 1199px) {
   .page-offset-header {
-    padding-top: 64px;
+    padding-top: var(--header-height, 90px);
   }
 }

@@ -35,6 +35,19 @@
   <link href="{% static 'assets/custom/css/consultar_proceso.css' %}" rel="stylesheet">
 {% endblock custom_css %}
 
+{% comment %}
+  `index-page` --lo que `raw.html` pone por defecto-- es el modificador de la
+  portada: alli la cabecera es **transparente** y flota sobre la foto del
+  hero. En una pagina interior eso deja el menu translucido encima del texto,
+  y lo unico que lo tapaba era `main.js`, que anade `scrolled` al `load`:
+  hasta entonces el titulo se ve a traves de la cabecera.
+
+  Se pone `scrolled` directamente, que es lo que ya hace `documents.html`.
+  Asi la cabecera es opaca desde el primer pintado y no depende de cuando
+  llegue el JavaScript.
+{% endcomment %}
+{% block body_css %}class="scrolled"{% endblock body_css %}
+
 {% block main %}
   <main class="main page-offset-header">
 
