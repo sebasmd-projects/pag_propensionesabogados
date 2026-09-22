@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
 from import_export.formats.base_formats import CSV, HTML, JSON, TSV, XLS, XLSX
 
+from app_core.db import engine_for
+
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -169,9 +171,14 @@ WSGI_APPLICATION = 'app_core.wsgi.application'
 
 ASGI_APPLICATION = 'app_core.asgi.application'
 
-DB_ENGINE = os.getenv('DB_ENGINE')
+# El `.env` declara el motor de Django; con MySQL/MariaDB lo que se instala es
+# `app_core/db/mysql`, que es el mismo con una sola diferencia: los UUID se
+# siguen guardando como se guardaron. El porque esta en ese modulo.
+DECLARED_DB_ENGINE = os.getenv('DB_ENGINE')
 
-if DB_ENGINE != "django.db.backends.sqlite3":
+DB_ENGINE = engine_for(DECLARED_DB_ENGINE)
+
+if DECLARED_DB_ENGINE != "django.db.backends.sqlite3":
     DATABASES = {
         'default': {
             'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE')),
