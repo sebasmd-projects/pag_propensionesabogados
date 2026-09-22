@@ -1,0 +1,169 @@
+{% load i18n %}
+{% comment %}
+  Informacion legal para el cliente.
+
+  El texto es el aprobado, sin tocar una coma: son las clausulas de buena fe,
+  gestion documental, habeas data, paz y salvo y reserva, mas el fundamento
+  juridico. Lo unico que cambia es como se pinta.
+
+  Antes eran once clases propias --`notaPortalV77Top`, `notaPortalV77Bloque`,
+  `notaPortalV77Icono`, `notaPortalV77Fundamento`...-- con su CSS. Ahora es un
+  acordeon de Bootstrap: el bloque ocupaba media pagina de texto legal encima
+  del expediente, y plegado se lee quien quiere leerlo.
+
+  Los simbolos que hacian de icono (`▤`, `▱`, `◈`, `↔`, `ℹ`) eran caracteres
+  sueltos que cada sistema dibuja como puede. Ahora son iconos de
+  Bootstrap Icons, que ya carga el sitio.
+{% endcomment %}
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-4">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <h2 class="h6 fw-bold text-uppercase mb-0">
+        <i class="bi bi-bank me-1"></i>{% trans "Important information for the client" %}
+      </h2>
+      <span class="badge text-bg-light text-uppercase">{% trans "Your unconditional ally" %}</span>
+    </div>
+
+    <blockquote class="blockquote small fst-italic text-muted border-start border-3 ps-3 mb-4">
+      &ldquo;Que se haga justicia, aunque el cielo se caiga.&rdquo;
+    </blockquote>
+
+    <div class="accordion accordion-flush" id="avisoLegal">
+
+      <div class="accordion-item">
+        <h3 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#avisoLegal1" aria-expanded="false" aria-controls="avisoLegal1">
+            <i class="bi bi-file-earmark-text me-2"></i>
+            1. Buena fe e informaci&oacute;n suministrada por el cliente
+          </button>
+        </h3>
+        <div id="avisoLegal1" class="accordion-collapse collapse" data-bs-parent="#avisoLegal">
+          <div class="accordion-body small">
+            La gesti&oacute;n profesional de <strong>Propensiones&reg; Abogados Internacional</strong> se desarrolla
+            bajo el <strong>principio constitucional de buena fe (art. 83 de la Constituci&oacute;n Pol&iacute;tica de
+            Colombia)</strong> y con fundamento en la informaci&oacute;n, manifestaciones, documentos y soportes
+            suministrados por el cliente. Los hechos, antecedentes, relaciones, circunstancias y dem&aacute;s elementos
+            propios de cada asunto son, en su origen, <strong>ajenos al conocimiento directo de la firma</strong>. En
+            consecuencia, la estructuraci&oacute;n y desarrollo de la gesti&oacute;n jur&iacute;dica parte de la
+            informaci&oacute;n que el cliente declara y aporta como cierta, completa y veraz,
+            correspondi&eacute;ndole informar oportunamente cualquier hecho nuevo, modificaci&oacute;n, omisi&oacute;n
+            o circunstancia que pueda incidir en el tr&aacute;mite, proceso o estrategia jur&iacute;dica.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h3 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#avisoLegal2" aria-expanded="false" aria-controls="avisoLegal2">
+            <i class="bi bi-folder2-open me-2"></i>
+            2. Gesti&oacute;n documental y expediente digital
+          </button>
+        </h3>
+        <div id="avisoLegal2" class="accordion-collapse collapse" data-bs-parent="#avisoLegal">
+          <div class="accordion-body small">
+            La firma <strong>no recibe ni conserva documentos originales del cliente</strong>. La gesti&oacute;n
+            profesional se realiza mediante <strong>copias f&iacute;sicas o digitales</strong> y a trav&eacute;s de
+            <strong>expedientes digitales</strong>. Los documentos originales permanecen bajo custodia de su titular.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h3 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#avisoLegal3" aria-expanded="false" aria-controls="avisoLegal3">
+            <i class="bi bi-shield-lock me-2"></i>
+            3. Protecci&oacute;n de datos personales y h&aacute;beas data
+          </button>
+        </h3>
+        <div id="avisoLegal3" class="accordion-collapse collapse" data-bs-parent="#avisoLegal">
+          <div class="accordion-body small">
+            De conformidad con el <strong>art&iacute;culo 15 de la Constituci&oacute;n Pol&iacute;tica de
+            Colombia</strong>, la <strong>Ley Estatutaria 1581 de 2012</strong> y sus normas reglamentarias,
+            Propensiones&reg; Abogados Internacional realizar&aacute; el tratamiento de los datos personales
+            suministrados por el cliente exclusivamente para las finalidades relacionadas con la prestaci&oacute;n,
+            administraci&oacute;n, seguimiento y documentaci&oacute;n de los servicios jur&iacute;dicos contratados. El
+            titular podr&aacute; ejercer sus derechos de <strong>conocer, actualizar, rectificar</strong> y, cuando
+            legalmente proceda, solicitar la supresi&oacute;n de sus datos o revocar la autorizaci&oacute;n otorgada.
+            La informaci&oacute;n ser&aacute; tratada bajo criterios de legalidad, finalidad, veracidad,
+            transparencia, acceso y circulaci&oacute;n restringida, seguridad y confidencialidad.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h3 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#avisoLegal4" aria-expanded="false" aria-controls="avisoLegal4">
+            <i class="bi bi-patch-check me-2"></i>
+            4. Paz y salvo
+          </button>
+        </h3>
+        <div id="avisoLegal4" class="accordion-collapse collapse" data-bs-parent="#avisoLegal">
+          <div class="accordion-body small">
+            Una vez finalizado el proceso, o cuando exista desistimiento, terminaci&oacute;n o cierre del encargo
+            profesional, y se encuentren cumplidas las obligaciones econ&oacute;micas a cargo del cliente, la firma
+            podr&aacute; <strong>habilitar en este portal el PAZ Y SALVO para impresi&oacute;n directa</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h3 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#avisoLegal5" aria-expanded="false" aria-controls="avisoLegal5">
+            <i class="bi bi-info-circle me-2"></i>
+            5. Transparencia, deber de informaci&oacute;n y reserva
+          </button>
+        </h3>
+        <div id="avisoLegal5" class="accordion-collapse collapse" data-bs-parent="#avisoLegal">
+          <div class="accordion-body small">
+            En cumplimiento de la <strong>Ley 1123 de 2007 &ndash; C&oacute;digo Disciplinario del Abogado</strong>,
+            Propensiones&reg; facilita este portal para que sus clientes conozcan el estado general y la
+            evoluci&oacute;n de la gesti&oacute;n profesional encomendada. El tratamiento de datos personales se
+            realiza conforme a la <strong>Ley 1581 de 2012</strong> y sus normas reglamentarias. La informaci&oacute;n
+            consultada a trav&eacute;s de este portal es de <strong>car&aacute;cter reservado</strong> y est&aacute;
+            destinada exclusivamente al titular o a quien se encuentre debidamente autorizado.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h3 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#avisoLegal6" aria-expanded="false" aria-controls="avisoLegal6">
+            <i class="bi bi-journal-text me-2"></i>
+            Fundamento jur&iacute;dico y protocolo de notificaci&oacute;n
+          </button>
+        </h3>
+        <div id="avisoLegal6" class="accordion-collapse collapse" data-bs-parent="#avisoLegal">
+          <div class="accordion-body small">
+            <ul class="mb-3">
+              <li><strong>Constituci&oacute;n Pol&iacute;tica de Colombia:</strong> art&iacute;culos 15 (h&aacute;beas data) y 83 (buena fe).</li>
+              <li><strong>Ley 1123 de 2007:</strong> art&iacute;culo 28 (deberes profesionales del abogado).</li>
+              <li><strong>Ley 1581 de 2012:</strong> protecci&oacute;n de datos personales.</li>
+              <li><strong>Ley 527 de 1999:</strong> mensajes de datos y documentos electr&oacute;nicos.</li>
+            </ul>
+            <p class="fw-semibold mb-1">Protocolo de notificaci&oacute;n oficial:</p>
+            <ul class="mb-0">
+              <li>Correo oficial para notificaciones:
+                <strong>notificaciones@propensionesabogados.com</strong></li>
+              <li>Tel&eacute;fono institucional: <strong>+57 301 228 3818</strong></li>
+              <li>El n&uacute;mero de celular institucional es un canal de contacto importante para la atenci&oacute;n
+                y seguimiento del cliente.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="text-muted small text-center mt-4 mb-0">
+      Propensiones&reg; Abogados Internacional &middot; Gesti&oacute;n jur&iacute;dica con visi&oacute;n global
+    </p>
+  </div>
+</div>

@@ -1,54 +1,40 @@
-{% load i18n static case_manager_extras %}<!doctype html>
+{% extends 'raw.html' %}
+{% load i18n static case_manager_extras %}
+
 {% comment %}
   Paz y salvo por honorarios.
 
-  Antes lo armaba el navegador: "imprimirPazYSalvoPublico()" abria una ventana
-  y le escribia un documento entero concatenando cadenas con los datos del
-  cliente, que estaban en "localStorage". Eso quiere decir que el documento lo
-  emitia quien lo leia, con los datos que quisiera: bastaba con editar el
-  almacen del navegador para expedirse un paz y salvo a nombre de cualquiera.
+  Extiende `raw.html` --el esqueleto del proyecto-- y no `base.html`, porque
+  esto no es una pagina del sitio: es una hoja A4 que sale por la impresora.
+  No lleva cabecera, ni pie, ni Bootstrap; su hoja de estilo son veinticinco
+  lineas de maquetacion en milimetros, y el porque esta escrito en ella.
 
-  Ahora lo emite el servidor, solo si el despacho lo autorizo en ese caso
-  ("CaseModel.paz_y_salvo_authorized") y solo a quien acaba de identificarse
-  con su clave en esta sesion. La vista es "PazYSalvoView".
+  Antes lo armaba el navegador: `imprimirPazYSalvoPublico()` abria una ventana
+  y le escribia el documento entero concatenando cadenas con los datos que
+  tuviera `localStorage` delante. O sea que lo emitia quien lo leia, con el
+  nombre que quisiera, y con el membrete y la firma escaneada dentro.
+
+  Ahora lo emite el servidor, y hacen falta las tres cosas que comprueba
+  `PazYSalvoView`: que el despacho lo haya autorizado en ese caso, que el caso
+  este vigente, y que lo pida quien se identifico con su clave en esta sesion.
 {% endcomment %}
-<html lang="es">
 
-<head>
+{% block title %}{% trans "Settlement letter" %} | Propensiones&reg;{% endblock title %}
+
+{% block meta_basic %}
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>{% trans "Settlement letter" %} | Propensiones&reg;</title>
-  <style>
-    @page { size:A4; margin:0; }
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:#fff;color:#12263a}
-    body{font-family:Arial,Helvetica,sans-serif}
-    .paginaPS{width:210mm;min-height:297mm;margin:0 auto;padding:9mm 18mm 8mm;page-break-inside:avoid}
-    .encabezadoPS{text-align:center}
-    .logoPS{width:34mm;height:auto;display:block;margin:0 auto 7mm}
-    .dirPS{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:15pt;margin:0 0 1.5mm}
-    .empresaPS{font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:19pt;margin:0 0 1mm}
-    .nitPS{font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:14pt;margin:0}
-    .entidadPS{font-family:Georgia,'Times New Roman',serif;font-size:12.5pt;line-height:1.18;margin:6mm auto 0;max-width:160mm}
-    .tituloPS{font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:15pt;text-align:center;margin:12mm 0 10mm;text-transform:uppercase;line-height:1.15}
-    .textoPS{font-size:11pt;line-height:1.35;text-align:justify;margin:0 0 6mm}
-    .fechaPS{font-size:11pt;line-height:1.35;margin-top:8mm}
-    .cordialPS{font-style:italic;font-size:11pt;margin-top:8mm}
-    .firmaPS{width:58mm;max-width:100%;height:auto;display:block;margin-top:5mm;margin-left:-2mm;margin-bottom:-4mm;object-fit:contain;overflow:visible}
-    .nombrePS{font-weight:700;font-size:10.8pt;margin-top:0;line-height:1.15}
-    .cargoPS,.contactoPS{font-size:10.5pt;line-height:1.2;margin-top:0}
-    .constanciaPS{margin-top:4mm;padding-top:2.5mm;border-top:1px solid #bfc8d2;font-size:8.7pt;line-height:1.28;color:#4b5b6b}
-    .constanciaPS strong{color:#12263a}
-    @media print {
-      html,body{width:210mm;height:297mm;overflow:hidden}
-      .noPrint{display:none!important}
-      .paginaPS{margin:0;min-height:0;height:297mm;overflow:hidden;page-break-after:avoid;break-after:avoid}
-    }
-  </style>
-</head>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  {# Un documento nominativo no se indexa. #}
+  <meta name="robots" content="noindex, nofollow">
+{% endblock meta_basic %}
 
-<body>
+{% block custom_css %}
+  <link href="{% static 'assets/custom/css/paz_y_salvo.css' %}" rel="stylesheet">
+{% endblock custom_css %}
+
+{% block body_css %}class="paz-y-salvo"{% endblock body_css %}
+
+{% block content %}
   <div class="paginaPS">
     <div class="encabezadoPS">
       <img class="logoPS" src="{% static 'assets/imgs/consultar_proceso/membrete-paz-y-salvo.jpg' %}"
@@ -89,6 +75,4 @@
       <strong>Firmado por:</strong> Jorge Uriel Vega Londo&ntilde;o &ndash; Representante legal.
     </div>
   </div>
-</body>
-
-</html>
+{% endblock content %}

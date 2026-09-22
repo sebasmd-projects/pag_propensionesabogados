@@ -2,19 +2,7 @@
 {% load static i18n %}
 
 {% block main %}
-  <style>
-    /* --- Offset para páginas con header transparente (evita mt-5 repetido) --- */
-    .page-offset-header {
-      padding-top: 98px; /* igual a scroll-margin-top desktop */
-    }
-    
-    @media (max-width: 1199px) {
-      .page-offset-header {
-        padding-top: 64px; /* igual a scroll-margin-top mobile */
-      }
-    }
-  </style>
-
+  {# `.page-offset-header` vive en `main.css`: lo necesita toda pagina interior. #}
   <main class="main page-offset-header">
     <section class="section">
       <div class="container">

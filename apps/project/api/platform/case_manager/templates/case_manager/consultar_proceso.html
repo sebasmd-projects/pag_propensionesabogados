@@ -1,262 +1,211 @@
-{% load i18n static %}<!doctype html>
+{% extends 'pages/index.html' %}
+{% load i18n static case_manager_extras %}
+
 {% comment %}
   Portal publico de consulta de procesos.
 
-  El diseno es el aprobado y no ha cambiado. Lo que ha cambiado es de donde
-  salen los datos.
+  Extiende `pages/index.html` como las demas paginas interiores del sitio
+  (`team_detail.html`), asi que hereda la cabecera, el pie, Bootstrap,
+  `main.css` y los tipos de letra. Antes era un documento suelto con su propio
+  `<!doctype>`, su propia cabecera y 1.782 lineas de CSS: parecia otra web.
 
-  Antes, esta misma pagina traia dentro:
-
-    - `localStorage.propDemo`, o sea **el expediente de todos los clientes**,
-      servido a cualquier visitante;
-    - la contrasena administrativa en texto plano, con su valor por defecto
-      escrito en el HTML;
-    - la comprobacion de la clave del cliente, hecha en el navegador sobre
-      datos que el navegador ya tenia.
-
-  Ahora la pagina llega vacia, el visitante manda identificacion y clave por
-  `POST`, y el servidor devuelve **un solo expediente**: el suyo. El panel de
-  administracion ya no vive aqui; es una aplicacion con sesion de Django
-  (`access.py`).
-
-  Todo lo que se pinta pasa por el escapado de Django. Antes se concatenaba
-  con `innerHTML`, que ejecuta lo que le metan.
+  Lo que se pinta aqui sale del servidor y pasa por el escapado de Django.
+  Antes se concatenaba con `innerHTML` sobre datos de `localStorage` que el
+  navegador de cualquier visitante ya tenia.
 {% endcomment %}
-<html lang="es">
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>{% trans "Check your case" %} | Propensiones&reg;</title>
-  <link rel="stylesheet" href="{% static 'assets/custom/css/consultar_proceso.css' %}">
-</head>
+{% block title %}{% trans "Track my case" %} | Propensiones&reg;{% endblock title %}
 
-<body>
-  <header>
-    <div class="cabeceraMarcaV93">
-      <div class="logoWrap">
-        <img src="{% static 'assets/imgs/consultar_proceso/logo-portal.jpg' %}"
-             alt="Propensiones Abogados Internacional">
-      </div>
-      <div class="nombreProgramaV93">
-        <strong>{% trans "Check your case" %}</strong>
-        <span>{% now "Y" %}</span>
-      </div>
-    </div>
-  </header>
-  <div class="wrap">
-    <div class="hero">
-      <h1>{% trans "TRACKING OF MY CASE" %}</h1>
-      <p>{% trans "Check here the status and progress of your procedure with Propensiones® Abogados Internacional." %}</p>
-    </div>
+{% block canonical %}
+  <link href="https://propensionesabogados.com{% url 'case_manager:public_query' %}" rel="canonical" />
+{% endblock canonical %}
 
-    <div class="card">
-      {% comment %}
-        `method="post"` y `{% csrf_token %}`: el formulario de antes no mandaba
-        nada a ningun sitio, asi que no habia nada que proteger. Ahora si.
-      {% endcomment %}
-      <form method="post" action="{% url 'case_manager:public_query' %}" autocomplete="off">
-        {% csrf_token %}
-        <div class="lookup">
-          <input type="text" name="identification" id="consulta" inputmode="numeric"
-                 placeholder="{% trans 'Identification number' %}" autocomplete="off"
-                 maxlength="20" required value="">
-          <div class="claveClienteV69">
-            <input type="password" name="access_key" id="claveCliente"
-                   placeholder="{% trans 'Access key' %}" maxlength="40" required>
-            <button type="button" id="verClaveCliente">{% trans "SHOW" %}</button>
-          </div>
-          <button type="submit">{% trans "CHECK MY CASE" %}</button>
-        </div>
-      </form>
-    </div>
+{% block meta_seo %}
+  {% comment %}
+    Sin indexar: es una puerta a datos personales, no una pagina de captacion.
+    Que salga en un buscador solo invita a probar cedulas.
+  {% endcomment %}
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta name="description" content="{% trans 'Check the status and progress of your procedure with Propensiones® Abogados Internacional.' %}">
+{% endblock meta_seo %}
 
-    {% if error %}
-      <div class="card" role="alert">
-        <p class="avisoConsultaV99">{{ error }}</p>
-      </div>
-    {% endif %}
-    <div class="notaPortalV77" id="notaPortalV77">
-      <div class="notaPortalV77Top">
-        <div class="notaPortalV77Marca">Propensiones®<small>ABOGADOS INTERNACIONAL</small></div>
-        <div class="notaPortalV77Lema">“Que se haga justicia,<br>aunque el cielo se caiga.”</div>
-      </div>
-      <div class="notaPortalV77TituloFila">
-        <div class="notaPortalV77Titulo">⚖ INFORMACIÓN IMPORTANTE PARA EL CLIENTE</div>
-        <div class="notaPortalV77Aliado">SU ALIADO INCONDICIONAL</div>
-      </div>
-      <div class="notaPortalV77Bloque">
-        <div class="notaPortalV77Icono">▤</div>
-        <div>
-          <h4>1. BUENA FE E INFORMACIÓN SUMINISTRADA POR EL CLIENTE</h4>
-          <p>La gestión profesional de <strong>Propensiones® Abogados Internacional</strong> se desarrolla bajo el
-            <strong>principio constitucional de buena fe (art. 83 de la Constitución Política de Colombia)</strong> y
-            con fundamento en la información, manifestaciones, documentos y soportes suministrados por el cliente. Los
-            hechos, antecedentes, relaciones, circunstancias y demás elementos propios de cada asunto son, en su origen,
-            <strong>ajenos al conocimiento directo de la firma</strong>. En consecuencia, la estructuración y desarrollo
-            de la gestión jurídica parte de la información que el cliente declara y aporta como cierta, completa y
-            veraz, correspondiéndole informar oportunamente cualquier hecho nuevo, modificación, omisión o circunstancia
-            que pueda incidir en el trámite, proceso o estrategia jurídica.
+{% block custom_css %}
+  {{ block.super }}
+  <link href="{% static 'assets/custom/css/consultar_proceso.css' %}" rel="stylesheet">
+{% endblock custom_css %}
+
+{% block main %}
+  <main class="main page-offset-header">
+
+    <section class="section">
+      <div class="container">
+
+        <div class="text-center mb-4">
+          <h1 class="h2 fw-bold">{% trans "Tracking of my case" %}</h1>
+          <p class="text-muted mb-0">
+            {% trans "Check here the status and progress of your procedure with Propensiones® Abogados Internacional." %}
           </p>
         </div>
-      </div>
-      <div class="notaPortalV77Bloque">
-        <div class="notaPortalV77Icono">▱</div>
-        <div>
-          <h4>2. GESTIÓN DOCUMENTAL Y EXPEDIENTE DIGITAL</h4>
-          <p>La firma <strong>no recibe ni conserva documentos originales del cliente</strong>. La gestión profesional
-            se realiza mediante <strong>copias físicas o digitales</strong> y a través de <strong>expedientes
-              digitales</strong>. Los documentos originales permanecen bajo custodia de su titular.</p>
-        </div>
-      </div>
-      <div class="notaPortalV77Bloque">
-        <div class="notaPortalV77Icono">◈</div>
-        <div>
-          <h4>3. PROTECCIÓN DE DATOS PERSONALES Y HÁBEAS DATA</h4>
-          <p>De conformidad con el <strong>artículo 15 de la Constitución Política de Colombia</strong>, la <strong>Ley
-              Estatutaria 1581 de 2012</strong> y sus normas reglamentarias, Propensiones® Abogados Internacional
-            realizará el tratamiento de los datos personales suministrados por el cliente exclusivamente para las
-            finalidades relacionadas con la prestación, administración, seguimiento y documentación de los servicios
-            jurídicos contratados. El titular podrá ejercer sus derechos de <strong>conocer, actualizar,
-              rectificar</strong> y, cuando legalmente proceda, solicitar la supresión de sus datos o revocar la
-            autorización otorgada. La información será tratada bajo criterios de legalidad, finalidad, veracidad,
-            transparencia, acceso y circulación restringida, seguridad y confidencialidad.</p>
-        </div>
-      </div>
-      <div class="notaPortalV77Bloque">
-        <div class="notaPortalV77Icono">↔</div>
-        <div>
-          <h4>4. PAZ Y SALVO</h4>
-          <p>Una vez finalizado el proceso, o cuando exista desistimiento, terminación o cierre del encargo profesional,
-            y se encuentren cumplidas las obligaciones económicas a cargo del cliente, la firma podrá <strong>habilitar
-              en este portal el PAZ Y SALVO para impresión directa</strong>.</p>
-        </div>
-      </div>
-      <div class="notaPortalV77Bloque">
-        <div class="notaPortalV77Icono">ℹ</div>
-        <div>
-          <h4>5. TRANSPARENCIA, DEBER DE INFORMACIÓN Y RESERVA</h4>
-          <p>En cumplimiento de la <strong>Ley 1123 de 2007 – Código Disciplinario del Abogado</strong>, Propensiones®
-            facilita este portal para que sus clientes conozcan el estado general y la evolución de la gestión
-            profesional encomendada. El tratamiento de datos personales se realiza conforme a la <strong>Ley 1581 de
-              2012</strong> y sus normas reglamentarias. La información consultada a través de este portal es de
-            <strong>carácter reservado</strong> y está destinada exclusivamente al titular o a quien se encuentre
-            debidamente autorizado.
-          </p>
-        </div>
-      </div>
-      <div class="notaPortalV77Fundamento">
-        <div class="notaPortalV77FundamentoTitulo">▭ FUNDAMENTO JURÍDICO</div>
-        <ul>
-          <li><strong>Constitución Política de Colombia:</strong> artículos 15 (hábeas data) y 83 (buena fe).</li>
-          <li><strong>Ley 1123 de 2007:</strong> artículo 28 (deberes profesionales del abogado).</li>
-          <li><strong>Ley 1581 de 2012:</strong> protección de datos personales.</li>
-          <li><strong>Ley 527 de 1999:</strong> mensajes de datos y documentos electrónicos.</li>
-        </ul>
-        <div class="notaPortalV77Justicia">
-          <div class="aliadoV13">“Su aliado incondicional.”</div>
-          <div class="protocoloV13">
-            <strong>Protocolo de notificación oficial:</strong>
-            <ul>
-              <li>Correo oficial para notificaciones: <strong>notificaciones@propensionesabogados.com</strong></li>
-              <li>Teléfono institucional: <strong>+57 301 228 3818</strong></li>
-              <li>El número de celular institucional es un canal de contacto importante para la atención y seguimiento
-                del cliente.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div class="notaPortalV77Contacto">
-        <span>🌐 www.propensionesabogados.com</span>
-        <span>Propensiones® Abogados Internacional · Gestión jurídica con visión global</span>
-      </div>
-    </div>
 
-    {% comment %}
-      El aviso de servicio inactivo ya no se puede llegar a ver desde aqui: un
-      cliente sin vigencia recibe la misma respuesta que una clave equivocada,
-      para que probar cedulas no sirva para averiguar quien es cliente del
-      despacho. Se conserva el bloque porque el gestor interno lo usara cuando
-      exista una sesion de cliente de verdad.
-    {% endcomment %}
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-9">
 
-    {% if case %}
-      <div class="card" id="cliente">
-        <div class="meta">
-          <div class="item"><small>{% trans "CLIENT" %}</small><strong>{{ case.client.full_name }}</strong></div>
-          <div class="item"><small>{% trans "IDENTIFICATION" %}</small><strong>{{ case.client.identification }}</strong></div>
-          <div class="item"><small>{% trans "CONTRACTED SERVICE" %}</small><strong>{{ case.get_service_display }}</strong></div>
-          {% if case.instance %}
-            <div class="item" id="bloqueEtapaPublica">
-              <small>{% trans "CURRENT STAGE / INSTANCE" %}</small><strong>{{ case.instance }}</strong>
+            {# --- Consulta ------------------------------------------- #}
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                {% comment %}
+                  `method="post"` y `{% csrf_token %}`: el formulario anterior
+                  no mandaba nada a ningun sitio, asi que no habia nada que
+                  proteger. Ahora si.
+                {% endcomment %}
+                <form method="post" action="{% url 'case_manager:public_query' %}" autocomplete="off">
+                  {% csrf_token %}
+                  <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-4">
+                      <label for="consulta" class="form-label small fw-semibold text-uppercase">
+                        {% trans "Identification number" %}
+                      </label>
+                      <input type="text" name="identification" id="consulta" class="form-control form-control-lg"
+                             inputmode="numeric" maxlength="20" autocomplete="off" required>
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label for="claveCliente" class="form-label small fw-semibold text-uppercase">
+                        {% trans "Access key" %}
+                      </label>
+                      <div class="input-group input-group-lg">
+                        <input type="password" name="access_key" id="claveCliente" class="form-control"
+                               maxlength="40" required>
+                        <button class="btn btn-outline-secondary" type="button" id="verClaveCliente"
+                                aria-pressed="false" aria-label="{% trans 'Show access key' %}">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-4 d-grid">
+                      <button type="submit" class="btn btn-primary btn-lg">
+                        {% trans "Check my case" %}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
             </div>
-          {% endif %}
-          {% if case.area %}
-            <div class="item"><small>{% trans "AREA / CASE TYPE" %}</small><strong>{{ case.get_area_display }}</strong></div>
-          {% endif %}
-          {% if case.subtype %}
-            <div class="item"><small>{% trans "SUBTYPE / SPECIALITY" %}</small><strong>{{ case.subtype }}</strong></div>
-          {% endif %}
-          <div class="item"><small>{% trans "LAST UPDATE" %}</small><strong>{{ case.updated|date:"d/m/Y" }}</strong></div>
-          <div class="item"><small>{% trans "CASE NUMBER / REFERENCE" %}</small><strong>{{ case.public_reference }}</strong></div>
-          <div class="item">
-            <small>{% trans "SERVICE" %}</small>
-            <strong class="badge activo">&#9679; {% trans "ACTIVE" %}</strong>
+
+            {% if error %}
+              <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                <div>{{ error }}</div>
+              </div>
+            {% endif %}
+
+            {# --- Expediente ------------------------------------------ #}
+            {% if case %}
+              <div class="card border-0 shadow-sm mb-4" id="cliente">
+                <div class="card-body p-4">
+
+                  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+                    <div>
+                      <h2 class="h4 mb-1">{{ case.client.full_name }}</h2>
+                      <p class="text-muted small mb-0">
+                        {% trans "Identification" %}: {{ case.client.identification|grouped_identification }}
+                      </p>
+                    </div>
+                    <span class="badge text-bg-success align-self-center">
+                      <i class="bi bi-circle-fill me-1 small"></i>{% trans "ACTIVE" %}
+                    </span>
+                  </div>
+
+                  {% comment %}
+                    Dos bloques, y cada uno con un trabajo.
+
+                    Arriba, lo que define el encargo y es igual en todos los
+                    asuntos. Abajo, lo que depende del tipo de tramite --el
+                    juzgado, el radicado, la entidad, la inspeccion-- y que
+                    `CaseModel.detail_rows` decide.
+
+                    La pantalla aprobada ensenaba la instancia y el radicado
+                    en los dos sitios, porque el bloque de abajo lo armaba
+                    `pintarDetalles()` sin saber que habia pintado el de
+                    arriba. Se veian repetidos.
+                  {% endcomment %}
+                  <dl class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-0">
+                    {% include 'case_manager/partials/field.html' with label=_("Contracted service") value=case.get_service_display %}
+                    {% if case.area %}
+                      {% include 'case_manager/partials/field.html' with label=_("Area / case type") value=case.get_area_display %}
+                    {% endif %}
+                    {% if case.subtype %}
+                      {% include 'case_manager/partials/field.html' with label=_("Subtype / speciality") value=case.subtype %}
+                    {% endif %}
+                    {% include 'case_manager/partials/field.html' with label=_("Last update") value=case.updated|date:"d/m/Y" %}
+                  </dl>
+
+                  {% if case.detail_rows %}
+                    <hr class="my-4">
+                    <dl class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-0">
+                      {% comment %}
+                        Son pares que pinta la plantilla, no HTML concatenado
+                        con `innerHTML` como antes: asi el escapado de Django
+                        se aplica solo y el nombre de una entidad con un `<`
+                        deja de poder cerrar una etiqueta.
+                      {% endcomment %}
+                      {% for label, value in case.detail_rows %}
+                        {% include 'case_manager/partials/field.html' %}
+                      {% endfor %}
+                    </dl>
+                  {% endif %}
+                </div>
+
+                {# El unico trozo con CSS propio: Bootstrap no trae un stepper. #}
+                <div class="cp-stepper" role="list" aria-label="{% trans 'Case progress' %}">
+                  {% for step in case.progress %}
+                    <div class="cp-step {{ step.state }}" role="listitem"
+                         {% if step.state == 'current' %}aria-current="step"{% endif %}>
+                      <span class="cp-dot">
+                        {% if step.done %}<i class="bi bi-check-lg"></i>{% else %}{{ step.number }}{% endif %}
+                      </span>
+                      <span class="cp-label">{{ step.label }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <div class="card-body border-top text-center p-4">
+                  <p class="text-uppercase small text-muted mb-1">{% trans "Current status" %}</p>
+                  <p class="h4 mb-2">{{ case.get_stage_display }}</p>
+                  <p class="text-muted mb-0">
+                    {% trans "Your service is advancing according to the stage shown." %}
+                  </p>
+                </div>
+
+                {% if case.paz_y_salvo_authorized %}
+                  <div class="card-body border-top p-4">
+                    <div class="alert alert-success mb-0">
+                      <h3 class="h6 fw-bold">
+                        <i class="bi bi-patch-check me-1"></i>{% trans "Settlement letter available" %}
+                      </h3>
+                      <p class="small">
+                        {% blocktrans %}This document is available because <b>Propensiones®</b> expressly authorized its issuance.{% endblocktrans %}
+                      </p>
+                      <a class="btn btn-success" target="_blank" rel="noopener"
+                         href="{% url 'case_manager:paz_y_salvo' case.pk %}">
+                        <i class="bi bi-printer me-1"></i>{% trans "Print settlement letter" %}
+                      </a>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+
+            {% include 'case_manager/partials/legal_notice.html' %}
+
           </div>
         </div>
-
-        {% comment %}
-          `pintarDetalles()` armaba esto concatenando HTML. Ahora son pares que
-          pinta la plantilla, asi que el escapado se aplica solo.
-        {% endcomment %}
-        {% if case.detail_rows %}
-          <div id="detalleTramite" class="meta" style="margin-top:14px">
-            {% for label, value in case.detail_rows %}
-              <div class="item"><small>{{ label }}</small><strong>{{ value }}</strong></div>
-            {% endfor %}
-          </div>
-        {% endif %}
-
-        <div class="progress" id="progreso">
-          {% for step in case.progress %}
-            <div class="step {{ step.state }}">
-              <div class="dot">{% if step.done %}&#10003;{% else %}{{ step.number }}{% endif %}</div>
-              <span>{{ step.label|upper }}</span>
-            </div>
-          {% endfor %}
-        </div>
-
-        <div class="status">
-          <small>{% trans "CURRENT STATUS" %}</small>
-          <h2>{{ case.get_stage_display|upper }}</h2>
-          <p>{% trans "Your service is advancing according to the stage shown." %}</p>
-        </div>
-
-        {% if case.paz_y_salvo_authorized %}
-          <div id="bloquePazSalvoPublico" class="pazSalvoWrap">
-            <h3>{% trans "SETTLEMENT LETTER AVAILABLE" %}</h3>
-            <p>{% blocktrans %}This document is available because <b>Propensiones®</b> expressly authorized its issuance.{% endblocktrans %}</p>
-            <div class="acciones">
-              <a class="botonPazSalvoV99" href="{% url 'case_manager:paz_y_salvo' case.pk %}" target="_blank" rel="noopener">
-                {% trans "PRINT SETTLEMENT LETTER" %}
-              </a>
-            </div>
-          </div>
-        {% endif %}
       </div>
-    {% endif %}
-  </div>
+    </section>
+  </main>
+{% endblock main %}
 
-  <footer>
-    <div>
-      PROPENSIONES&reg; ABOGADOS INTERNACIONAL &middot; {% trans "Case tracking" %} &middot;
-      NIT: <span id="nitPropensiones">901.409.813-7</span> &middot;
-      <span id="fechaSistema">{% now "d/m/Y" %}</span>
-    </div>
-  </footer>
-
+{% block body_custom_js %}
+  {{ block.super }}
   <script src="{% static 'assets/custom/js/consultar_proceso.js' %}" defer></script>
-</body>
-
-</html>
+{% endblock body_custom_js %}

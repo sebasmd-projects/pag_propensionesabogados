@@ -1811,3 +1811,24 @@ section,
     max-height: 26px;
   }
 }
+/*--------------------------------------------------------------
+# Paginas interiores
+--------------------------------------------------------------*/
+/*
+ * La cabecera es `fixed-top`, asi que el contenido de una pagina interior
+ * empieza debajo de ella. El valor es el mismo `scroll-margin-top` que usan
+ * los anclajes de la portada.
+ *
+ * Estaba escrito en un bloque `<style>` dentro de `team_detail.html`. Vive
+ * aqui porque lo necesita toda pagina interior, y repetirlo en cada una es
+ * como acaban desajustandose entre si.
+ */
+.page-offset-header {
+  padding-top: 98px;
+}
+
+@media (max-width: 1199px) {
+  .page-offset-header {
+    padding-top: 64px;
+  }
+}

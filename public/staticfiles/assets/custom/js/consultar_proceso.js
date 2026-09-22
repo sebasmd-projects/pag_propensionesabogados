@@ -22,7 +22,8 @@
   'use strict';
 
   /* Ver la clave mientras se teclea. Es comodidad, no seguridad: el valor ya
-     esta en el campo, esto solo cambia como lo pinta el navegador. */
+     esta en el campo, esto solo cambia como lo pinta el navegador.
+     Bootstrap no trae este boton hecho; el resto del formulario si. */
   function conmutarClave() {
     var campo = document.getElementById('claveCliente');
     var boton = document.getElementById('verClaveCliente');
@@ -33,8 +34,14 @@
     boton.addEventListener('click', function () {
       var oculta = campo.type === 'password';
       campo.type = oculta ? 'text' : 'password';
-      boton.textContent = oculta ? 'OCULTAR' : 'VER';
       boton.setAttribute('aria-pressed', String(oculta));
+      /* El icono es de Bootstrap Icons, que ya carga el sitio: solo cambia
+         la clase. `aria-pressed` es lo que lo cuenta a un lector de
+         pantalla, porque un icono no tiene texto que leer. */
+      var icono = boton.querySelector('i');
+      if (icono) {
+        icono.className = oculta ? 'bi bi-eye-slash' : 'bi bi-eye';
+      }
       campo.focus();
     });
   }
@@ -52,7 +59,8 @@
       var boton = formulario.querySelector('button[type="submit"]');
       if (boton) {
         boton.disabled = true;
-        boton.textContent = 'CONSULTANDO…';
+        boton.innerHTML =
+          '<span class="spinner-border spinner-border-sm me-2"></span>Consultando…';
       }
     });
   }

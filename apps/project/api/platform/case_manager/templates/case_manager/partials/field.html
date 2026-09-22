@@ -1,0 +1,13 @@
+{% comment %}
+  Un dato del expediente: etiqueta arriba, valor debajo.
+
+  Es lo que antes eran los `<div class="item"><small>..</small><strong>..</strong></div>`
+  repetidos a mano diez veces en la plantilla. Al ser un `include`, el dia que
+  cambie como se ve un dato cambia en un sitio.
+
+  Se espera `label` y `value` en el contexto.
+{% endcomment %}
+<div class="col">
+  <dt class="small text-uppercase text-muted fw-semibold">{{ label }}</dt>
+  <dd class="mb-0 fw-semibold">{{ value }}</dd>
+</div>
