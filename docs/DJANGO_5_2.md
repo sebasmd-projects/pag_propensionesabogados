@@ -63,8 +63,8 @@ apoya en tres cosas distintas, ninguna de ellas «lo dicen las notas»:
    `/consultar/proceso/` 200, `/api/swagger/` 403 (el esperado: pide
    `IsAdminUser`). `collectstatic` reprocesa 434 ficheros sin error.
 
-Más las pruebas nuevas de `app_core/tests/`, que son las primeras del
-repositorio.
+Más las pruebas nuevas de `app_core/tests/` y
+`apps/common/utils/tests/`, que son las primeras del repositorio.
 
 ---
 
@@ -121,25 +121,43 @@ La decisión vive en `app_core/db/engine_for()` para poder probarla, y la fija
 
 ## 4. Lo demás que hubo que cambiar
 
-### 4.1 `django-honeypot` se queda en 1.2.1, con un override
+### 4.1 `django-honeypot` sale del proyecto
 
-La 1.2.1 declara `django<5.2`. La 1.3.0 sí soporta 5.2 **pero exige Python
-3.12**, y subir el intérprete del servidor es otra decisión, no un efecto
-colateral de esta.
+La 1.2.1 declara `django<5.2`, y con Django 5.2 eso deja
+`pip install -r requirements.txt` **sin solución posible**:
 
-El techo de la 1.2.1 es de metadatos, no una incompatibilidad conocida: el
-paquete es un decorador, un middleware y una etiqueta de plantilla. El
-proyecto lo salta con el mecanismo de uv (`pyproject.toml`, `[tool.uv]
-override-dependencies`), que es de primera clase porque el repositorio ya se
-gestiona con uv (`uv.lock`).
+```
+ERROR: ResolutionImpossible
+The user requested Django==5.2.17
+django-honeypot 1.2.1 depends on Django<5.2 and >=3.2
+```
 
-**Un override que nadie comprueba es una suposición.** Por eso está
-`app_core/tests/test_honeypot.py`, que ejercita las tres cosas que el proyecto
-usa de verdad: la etiqueta que pinta el campo, un envío legítimo que pasa y
-uno con el campo relleno que se rechaza.
+La 1.3.0 sí soporta 5.2, pero exige **Python 3.12**, y cambiar el intérprete
+de un alojamiento compartido es otra decisión y otro riesgo.
 
-El día que se suba a Python 3.12, esto se cae solo: `django-honeypot==1.3.0` y
-fuera el override.
+Al principio esto se resolvió con un override de uv en `pyproject.toml`. Era
+la respuesta equivocada: **producción y cPanel instalan con `pip`**, y pip no
+lee `[tool.uv]`. El override funcionaba en el portátil y no donde hacía falta,
+que es el peor sitio donde puede fallar algo.
+
+Lo que se usaba del paquete eran un decorador y una etiqueta de plantilla.
+Están ahora en `apps/common/utils/honeypot.py` y
+`apps/common/utils/templatetags/honeypot.py`, con la misma interfaz
+—`check_honeypot`, `honeypot_exempt`, `{% render_honeypot_field %}`,
+`HONEYPOT_FIELD_NAME`, `HONEYPOT_VALUE`, `HONEYPOT_VERIFIER`,
+`HONEYPOT_RESPONDER`—, así que ni las plantillas ni las vistas cambiaron. La
+carga `{% load honeypot %}` sigue resolviendo porque el módulo se llama igual.
+
+Traerlo adentro **quita el techo en vez de esquivarlo**: funciona igual con
+pip que con uv, en cualquier versión de Python, y el proyecto tiene una
+dependencia menos.
+
+Protege el único formulario público que escribe en la base sin sesión —el de
+contacto—, así que si deja de funcionar el síntoma es un buzón lleno y nada
+avisa. Por eso `apps/common/utils/tests/test_honeypot.py` lo cubre entero: las
+tres formas del decorador, el campo relleno, el campo ausente, el envío
+legítimo, los ajustes y que lo que pinta la plantilla sea el mismo campo que
+comprueba el decorador.
 
 ### 4.2 Paquetes que hubo que subir con Django
 
@@ -178,9 +196,11 @@ toca datos.
 2. **Entrar una vez al admin contra la base de verdad.** Es lo único que
    demuestra que el §3 está bien resuelto: la suite corre sobre SQLite y ahí
    este fallo no existe. Ésta fue la lección que se pagó en GEA.
-3. `pip install -r requirements.txt` **no vale** mientras esté el override de
-   honeypot: el despliegue tiene que usar `uv sync` (o `uv pip install`), que
-   es lo que lee `[tool.uv]`.
+3. **`pip install -r requirements.txt` vale.** Se comprobó con `pip
+   --dry-run` sobre el fichero entero: resuelve y llega a
+   `Would install Django-5.2.17`. En local se sigue usando `uv`; el
+   `requirements.txt` y el `uv.lock` describen el mismo conjunto, y ya no hay
+   ningún override que los separe.
 
 ---
 

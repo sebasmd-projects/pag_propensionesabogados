@@ -29,7 +29,6 @@ dependencies = [
     "django-encrypted-model-fields==0.6.5",
     "django-environ==0.11.2",
     "django-filter==25.2",
-    "django-honeypot==1.2.1",
     "django-import-export==4.4.1",
     "django-nested-admin==4.1.6",
     "django-parler==2.4",
@@ -99,11 +98,3 @@ dependencies = [
     "xlwt==1.3.0",
 ]
 
-[tool.uv]
-# `django-honeypot` 1.2.1 declara `django<5.2` como techo de metadatos, no como
-# incompatibilidad conocida: el paquete es un decorador, un middleware y una
-# etiqueta de plantilla. Su 1.3.0 si soporta Django 5.2 pero exige Python 3.12,
-# y subir el interprete del servidor es otra decision. El override deja la 1.2.1
-# instalable sobre 5.2; que de verdad funciona lo fija
-# `app_core/tests/test_honeypot.py`.
-override-dependencies = ["django>=5.2"]

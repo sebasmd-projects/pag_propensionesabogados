@@ -57,7 +57,6 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'drf_spectacular',
     'auditlog',
-    'honeypot',
     'django_recaptcha',
     'import_export',
     'parler',

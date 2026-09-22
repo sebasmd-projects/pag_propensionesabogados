@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import TemplateView, RedirectView
 from django.views.generic.edit import FormView
 from django.views.generic.detail import DetailView
-from honeypot.decorators import check_honeypot
+from apps.common.utils.honeypot import check_honeypot
 
 from .forms import ContactForm
 from .models import ContactModel, ModalBannerModel, TeamMemberModel
