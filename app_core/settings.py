@@ -79,6 +79,7 @@ CUSTOM_APPS = [
     'apps.project.api.platform.auth_platform',
     'apps.project.api.platform.insolvency_form',
     'apps.project.api.platform.calculator',
+    'apps.project.api.platform.case_manager',
 ]
 
 

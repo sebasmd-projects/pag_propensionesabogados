@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.common.utils.models import IPBlockedModel
@@ -44,9 +47,20 @@ class EncryptedPermissionsMixin(UserPassesTestMixin):
                     attempts = self.request.session.get('key_attempts', 0) + 1
                     self.request.session['key_attempts'] = attempts
                     if attempts > 6:
+                        # `blocked_until` va siempre. El middleware filtra por
+                        # `blocked_until__gte=now`, y en SQL una fila con ese
+                        # campo a NULL no cumple esa condicion: sin fecha, el
+                        # bloqueo se escribia pero no bloqueaba a nadie.
+                        minutes = getattr(
+                            settings, 'IP_BLOCKED_TIME_IN_MINUTES', 30
+                        )
                         IPBlockedModel.objects.create(
                             current_ip=self.request.META['REMOTE_ADDR'],
-                            reason=IPBlockedModel.ReasonsChoices.SECURITY_KEY_ATTEMPTS
+                            reason=IPBlockedModel.ReasonsChoices.SECURITY_KEY_ATTEMPTS,
+                            blocked_until=timezone.now() + timedelta(
+                                minutes=minutes
+                            ),
+                            session_info={'attempt_count': attempts},
                         )
             else:
                 self.request.session['has_key_access'] = False

@@ -1,0 +1,1790 @@
+/*
+ * Portal publico de consulta de procesos.
+ *
+ * Es el diseno aprobado, tal cual: salio de un bloque <style> de 1.783
+ * lineas dentro de la propia plantilla. Aqui el navegador puede
+ * cachearlo, y la plantilla vuelve a caber en una pantalla.
+ */
+
+:root {
+  --n: #071d35;
+  --g: #c9a55c;
+  --m: #6f7b86;
+  --bg: #f3f6f8;
+  --ok: #24785b
+}
+
+* {
+  box-sizing: border-box
+}
+
+body {
+  margin: 0;
+  font-family: Segoe UI, Arial;
+  background: linear-gradient(135deg, #eef2f5, #fff);
+  color: #14202b
+}
+
+header {
+  background: var(--n);
+  color: #fff;
+  padding: 20px 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center
+}
+
+.brand {
+  font: 28px Georgia
+}
+
+.brand b {
+  color: #e2c37c
+}
+
+.logoWrap {
+  background: #fff;
+  border-radius: 12px;
+  padding: 5px 12px;
+  display: flex;
+  align-items: center
+}
+
+.logoWrap img {
+  height: 64px;
+  max-width: 420px;
+  object-fit: contain
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 35px auto;
+  padding: 0 20px
+}
+
+.hero {
+  text-align: center
+}
+
+.hero h1 {
+  font: 36px Georgia;
+  color: var(--n);
+  margin-bottom: 8px
+}
+
+.hero p {
+  color: var(--m)
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e9ed;
+  border-radius: 22px;
+  box-shadow: 0 18px 55px #14202b13;
+  padding: 28px;
+  margin: 22px 0
+}
+
+.lookup {
+  max-width: 700px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px
+}
+
+input,
+select {
+  padding: 14px;
+  border: 1px solid #ccd4dc;
+  border-radius: 12px;
+  font-size: 15px
+}
+
+button {
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--n);
+  color: white;
+  font-weight: 700;
+  cursor: pointer
+}
+
+.light {
+  background: #eef2f5;
+  color: var(--n)
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr 1.2fr;
+  gap: 12px
+}
+
+.item {
+  background: #f7f9fa;
+  padding: 14px;
+  border-radius: 14px
+}
+
+.item small {
+  display: block;
+  color: var(--m);
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-bottom: 5px
+}
+
+.item strong {
+  color: var(--n)
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px
+}
+
+.badge.activo {
+  background: #e5f4ed;
+  color: #176647
+}
+
+.badge.inactivo {
+  background: #f2e7e7;
+  color: #8b2f2f
+}
+
+.progress {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 38px
+}
+
+.progress:before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 7%;
+  right: 7%;
+  height: 3px;
+  background: #d9e0e6
+}
+
+.step {
+  width: 16.66%;
+  text-align: center;
+  z-index: 1
+}
+
+.dot {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid #cfd7df;
+  margin: auto auto 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #9aa5af
+}
+
+.done .dot {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: white
+}
+
+.current .dot {
+  background: var(--g);
+  border-color: #e6c676;
+  color: var(--n);
+  box-shadow: 0 0 0 8px #c9a55c22
+}
+
+.step span {
+  font-size: 11px;
+  font-weight: 800;
+  color: #8a949e
+}
+
+.done span,
+.current span {
+  color: var(--n)
+}
+
+.status {
+  text-align: center;
+  border-top: 1px solid #edf0f2;
+  margin-top: 30px;
+  padding-top: 22px
+}
+
+.status h2 {
+  font: 27px Georgia;
+  color: var(--n);
+  margin: 6px
+}
+
+.hidden {
+  display: none
+}
+
+.admin {
+  border-top: 4px solid var(--g)
+}
+
+.login {
+  max-width: 420px;
+  margin: auto;
+  display: grid;
+  gap: 10px
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1.4fr 1.2fr 1.2fr 1fr 1fr auto;
+  gap: 10px
+}
+
+.note {
+  font-size: 12px;
+  color: var(--m);
+  margin-top: 12px
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 18px 0
+}
+
+.kpi {
+  background: #f7f9fa;
+  border: 1px solid #e6eaee;
+  border-radius: 14px;
+  padding: 16px
+}
+
+.kpi small {
+  display: block;
+  color: var(--m);
+  font-size: 10px;
+  letter-spacing: .8px;
+  margin-bottom: 6px
+}
+
+.kpi b {
+  font-size: 20px;
+  color: var(--n)
+}
+
+.fin {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e6eaee
+}
+
+.danger {
+  background: #8b2f2f
+}
+
+.gerencial {
+  background: #071d35;
+  color: white;
+  border-radius: 18px;
+  padding: 22px;
+  margin-top: 18px
+}
+
+.gerencial h3 {
+  margin-top: 0
+}
+
+.dashgrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px
+}
+
+.dkpi {
+  background: #fff;
+  color: #14202b;
+  border-radius: 14px;
+  padding: 15px
+}
+
+.dkpi small {
+  display: block;
+  color: #6f7b86;
+  font-size: 10px
+}
+
+.dkpi b {
+  font-size: 20px;
+  color: #071d35
+}
+
+.tablaCRM {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 18px;
+  background: #fff;
+  color: #14202b;
+  border-radius: 12px;
+  overflow: hidden
+}
+
+.tablaCRM th,
+.tablaCRM td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e9ed;
+  text-align: left;
+  font-size: 12px
+}
+
+.barra {
+  height: 9px;
+  background: #e3e8ed;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 5px
+}
+
+.barra i {
+  display: block;
+  height: 100%;
+  background: #c9a55c
+}
+
+@media(max-width:800px) {
+  .kpis {
+    grid-template-columns: 1fr 1fr
+  }
+}
+
+footer {
+  text-align: center;
+  color: #8a949e;
+  padding: 20px
+}
+
+@media(max-width:800px) {
+  .meta {
+    grid-template-columns: 1fr 1fr
+  }
+
+  .lookup,
+  .grid {
+    grid-template-columns: 1fr
+  }
+
+  .progress {
+    overflow-x: auto;
+    gap: 15px
+  }
+
+  .progress:before {
+    display: none
+  }
+
+  .step {
+    min-width: 120px
+  }
+
+  .hero h1 {
+    font-size: 29px
+  }
+}
+
+/* V27 — contención visual de formularios */
+.card,
+.panel,
+.admin,
+.admin-panel,
+.form-card,
+main,
+section {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.grid {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.grid>* {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width:1100px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width:700px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+
+/* V29 — campos administrativos legibles, sin textos cortados */
+.admin .grid,
+.admin-panel .grid,
+#admin .grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr)) !important;
+  gap: 12px !important;
+  width: 100%;
+}
+
+.admin .grid input,
+.admin .grid select,
+.admin .grid button,
+.admin-panel .grid input,
+.admin-panel .grid select,
+.admin-panel .grid button,
+#admin .grid input,
+#admin .grid select,
+#admin .grid button {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+@media (max-width:1250px) {
+
+  .admin .grid,
+  .admin-panel .grid,
+  #admin .grid {
+    grid-template-columns: repeat(3, minmax(220px, 1fr)) !important;
+  }
+}
+
+@media (max-width:900px) {
+
+  .admin .grid,
+  .admin-panel .grid,
+  #admin .grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr)) !important;
+  }
+}
+
+@media (max-width:560px) {
+
+  .admin .grid,
+  .admin-panel .grid,
+  #admin .grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+
+/* V30: jerarquía real por servicio */
+#as,
+#aa,
+#subtipo {
+  min-width: 220px
+}
+
+
+/* V32 */
+#subtipo2 {
+  min-width: 220px;
+  max-width: 100%;
+  box-sizing: border-box
+}
+
+/* V33 — elimina la clasificación genérica antigua */
+#at {
+  display: none !important;
+}
+
+#at {
+  display: none !important
+}
+
+/* V40 — segundo subproceso exclusivamente por selector */
+#otroSubtipo {
+  display: none !important;
+}
+
+#subtipo2 {
+  display: block;
+  width: 100%;
+  min-width: 220px;
+  box-sizing: border-box;
+}
+
+
+#subtipo2 {
+  width: 100% !important;
+  min-width: 220px !important;
+  box-sizing: border-box !important
+}
+
+#otroSubtipo {
+  display: none !important
+}
+
+/* V46 — estado del proceso destacado en ficha pública */
+#tram {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  letter-spacing: .2px;
+}
+
+
+#radPublico {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  overflow-wrap: anywhere
+}
+
+#camposOrdinario {
+  display: block !important
+}
+
+/* V51 — tipografía uniforme; etapa/instancia destacada solo por color */
+#tram {
+  font-size: 20px !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+  color: #b88922 !important;
+}
+
+#radPublico {
+  font-size: 20px !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+}
+
+
+/* V52 — radicado con la misma jerarquía tipográfica que los demás datos */
+#radPublico {
+  font-size: 18px !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+
+.mostrarClaveV55 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #536578;
+  margin: 7px 0 0 2px;
+  cursor: pointer
+}
+
+.mostrarClaveV55 input {
+  width: auto !important;
+  min-width: auto !important
+}
+
+.clientesV56 {
+  display: grid;
+  gap: 9px;
+  margin-top: 10px
+}
+
+.clienteV56 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 13px;
+  border: 1px solid #d8e1e8;
+  border-radius: 11px;
+  background: #fff
+}
+
+.clienteV56 span {
+  font-size: 13px;
+  color: #607080
+}
+
+.clienteV56 .editarV56 {
+  flex: 0 0 auto;
+  padding: 8px 15px;
+  border: 0;
+  border-radius: 9px;
+  background: #062746;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer
+}
+
+
+/* V57 — alineación del panel económico y CRM */
+.kpis {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  align-items: stretch;
+}
+
+.kpi {
+  min-width: 0
+}
+
+.kpi b {
+  display: block;
+  white-space: nowrap
+}
+
+.gerencial {
+  overflow: hidden
+}
+
+.dashgrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  align-items: stretch;
+}
+
+.dkpi {
+  min-width: 0
+}
+
+.dkpi b {
+  display: block;
+  white-space: nowrap
+}
+
+.crmTablaWrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 18px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.tablaCRM {
+  width: 100% !important;
+  min-width: 1320px;
+  table-layout: auto;
+  margin-top: 0 !important;
+}
+
+.tablaCRM th,
+.tablaCRM td {
+  vertical-align: middle;
+  padding: 12px 10px !important;
+  white-space: normal;
+}
+
+.tablaCRM th {
+  white-space: nowrap
+}
+
+.tablaCRM td:nth-child(1) {
+  min-width: 210px
+}
+
+.tablaCRM td:nth-child(2) {
+  min-width: 180px
+}
+
+.tablaCRM td:nth-child(5) {
+  min-width: 145px
+}
+
+.tablaCRM td:nth-child(6) {
+  min-width: 180px
+}
+
+.crmCliente span,
+.crmSub {
+  color: #607080;
+  font-size: 11px
+}
+
+.crmEditar {
+  padding: 8px 13px !important;
+  border-radius: 8px !important;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+@media(max-width:1050px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important
+  }
+
+  .dashgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important
+  }
+}
+
+@media(max-width:600px) {
+
+  .kpis,
+  .dashgrid {
+    grid-template-columns: minmax(0, 1fr) !important
+  }
+}
+
+
+/* V60 — administración de clientes desde la propia lista */
+.clientesV60 {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px
+}
+
+.clienteV60 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 16px;
+  border: 1px solid #d5dfe7;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.clienteInfoV60 {
+  min-width: 0
+}
+
+.clienteInfoV60 strong {
+  font-size: 14px;
+  color: #102b45
+}
+
+.clienteInfoV60 span {
+  font-size: 13px;
+  color: #617386;
+  line-height: 1.5
+}
+
+.accionesV60 {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto
+}
+
+.accionesV60 button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btnEditarV60 {
+  background: #062746;
+  color: #fff
+}
+
+.inhabilitarV60 {
+  background: #e9eef2;
+  color: #23394d
+}
+
+.habilitarV60 {
+  background: #e1f3e9;
+  color: #12633d
+}
+
+.btnEliminarV60 {
+  background: #9d3131;
+  color: #fff
+}
+
+@media(max-width:760px) {
+  .clienteV60 {
+    align-items: flex-start;
+    flex-direction: column
+  }
+
+  .accionesV60 {
+    width: 100%;
+    flex-wrap: wrap
+  }
+
+  .accionesV60 button {
+    flex: 1
+  }
+}
+
+.inactivoPublicoV66 {
+  max-width: 900px;
+  margin: 22px auto;
+  padding: 38px 34px;
+  text-align: center;
+  border: 1px solid #d9e1e8;
+  border-top: 4px solid #c9a24c;
+  border-radius: 20px;
+  background: #fff;
+  color: #092640
+}
+
+.inactivoIconoV66 {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6edda;
+  color: #a77917;
+  font-size: 28px;
+  font-weight: 900
+}
+
+.inactivoPublicoV66 h2 {
+  margin: 0 0 12px;
+  font-size: 25px
+}
+
+.inactivoPublicoV66 p {
+  margin: 0 auto 25px;
+  max-width: 680px;
+  color: #526577;
+  line-height: 1.55
+}
+
+.contactoInactivoV66 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  text-align: left
+}
+
+.contactoInactivoV66 div {
+  padding: 17px 18px;
+  background: #f4f7f9;
+  border-radius: 13px
+}
+
+.contactoInactivoV66 small {
+  display: block;
+  color: #718292;
+  font-size: 11px;
+  letter-spacing: .7px;
+  margin-bottom: 7px
+}
+
+.contactoInactivoV66 strong {
+  font-size: 16px;
+  overflow-wrap: anywhere
+}
+
+@media(max-width:650px) {
+  .contactoInactivoV66 {
+    grid-template-columns: 1fr
+  }
+}
+
+.claveClienteV69 {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 260px
+}
+
+.claveClienteV69 input {
+  min-width: 0;
+  flex: 1
+}
+
+.claveClienteV69 button {
+  min-width: 72px;
+  border: 1px solid #cbd6df;
+  border-radius: 12px;
+  background: #eef3f6;
+  color: #082743;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0 14px;
+}
+
+
+
+/* V70 — descarga pública de paz y salvo cuando el asunto esté finalizado */
+.pazSalvoWrap {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px dashed #d7e0e8;
+  border-radius: 18px;
+  background: #f7fafc;
+  text-align: center
+}
+
+.pazSalvoWrap h3 {
+  margin: 0 0 8px;
+  color: var(--n);
+  font: 24px Georgia
+}
+
+.pazSalvoWrap p {
+  margin: 0 0 14px;
+  color: #5d6e7f;
+  line-height: 1.5
+}
+
+.pazSalvoWrap .acciones {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap
+}
+
+
+/* V73 — nota jurídica pública: buena fe, información del cliente y paz y salvo */
+.notaJuridicaPublicaV73 {
+  max-width: 1000px;
+  margin: 20px auto 0;
+  padding: 20px 22px;
+  border-left: 4px solid var(--g);
+  background: #fffaf0;
+  border-radius: 14px;
+  color: #33485b;
+  line-height: 1.62;
+  font-size: 13px;
+  box-shadow: 0 8px 26px #14202b0d;
+}
+
+.notaJuridicaPublicaV73 strong {
+  color: var(--n)
+}
+
+.notaJuridicaPublicaV73 .tituloNotaV73 {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  letter-spacing: .2px;
+  color: var(--n)
+}
+
+/* V100 — panel jurídico institucional del portal */
+.notaPortalV77 {
+  max-width: 1180px;
+  margin: 22px auto 28px;
+  background: #fff;
+  border: 1px solid #dfe6ec;
+  border-radius: 20px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 12px 32px #14202b10;
+  color: #17304f;
+  font-size: 13px;
+  line-height: 1.48
+}
+
+.notaPortalV77Top {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid #e3c98d;
+  background: linear-gradient(180deg, #fff, #fbfdff)
+}
+
+.notaPortalV77Marca {
+  font-size: 28px;
+  font-weight: 900;
+  color: #0b2d57;
+  line-height: 1
+}
+
+.notaPortalV77Marca small {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1.1px;
+  margin-top: 4px
+}
+
+.notaPortalV77Lema {
+  font: italic 21px Georgia, serif;
+  color: #0b2d57;
+  text-align: right;
+  line-height: 1.15
+}
+
+.notaPortalV77Lema small {
+  display: block;
+  font: 700 10px Arial, sans-serif;
+  letter-spacing: 3px;
+  margin-top: 6px
+}
+
+.notaPortalV77TituloFila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 15px 24px 13px;
+  border-bottom: 1px solid #e3c98d
+}
+
+.notaPortalV77Titulo {
+  color: #0b2d57;
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: .35px;
+  margin: 0
+}
+
+.notaPortalV77Aliado {
+  color: #0b2d57;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 1.7px;
+  white-space: nowrap
+}
+
+.notaPortalV77Bloque {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 14px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #ecd7a9
+}
+
+.notaPortalV77Icono {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  background: #eef7fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b2d57;
+  font-size: 29px;
+  font-weight: 900
+}
+
+.notaPortalV77Bloque h4 {
+  margin: 0 0 3px;
+  color: #0b2d57;
+  font-size: 15px;
+  letter-spacing: .1px
+}
+
+.notaPortalV77Bloque p {
+  margin: 0;
+  color: #183754
+}
+
+.notaPortalV77Bloque strong {
+  color: #0b2d57
+}
+
+.notaPortalV77Fundamento {
+  display: grid;
+  grid-template-columns: 1fr 1.7fr .9fr;
+  gap: 18px;
+  align-items: center;
+  padding: 16px 24px;
+  background: #eef8fd
+}
+
+.notaPortalV77FundamentoTitulo {
+  font-size: 18px;
+  font-weight: 900;
+  color: #0b2d57
+}
+
+.notaPortalV77Fundamento ul {
+  margin: 0;
+  padding-left: 19px;
+  color: #17304f
+}
+
+.notaPortalV77Fundamento li {
+  margin: 3px 0
+}
+
+.notaPortalV77Justicia {
+  color: #0b2d57;
+  text-align: left;
+  opacity: .95;
+  font-size: 11px;
+  line-height: 1.35
+}
+
+.notaPortalV77Justicia .aliadoV13 {
+  font: italic 18px Georgia, serif;
+  text-align: center;
+  margin-bottom: 8px
+}
+
+.notaPortalV77Justicia .protocoloV13 {
+  font-family: Arial, sans-serif
+}
+
+.notaPortalV77Justicia .protocoloV13 strong {
+  display: block;
+  margin-bottom: 3px
+}
+
+.notaPortalV77Justicia .protocoloV13 ul {
+  margin: 0;
+  padding-left: 17px
+}
+
+.notaPortalV77Contacto {
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 24px;
+  border-top: 1px solid #dfe6ec;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0b2d57
+}
+
+.notaPortalV77Contacto span {
+  white-space: nowrap
+}
+
+@media(max-width:800px) {
+
+  .notaPortalV77Top,
+  .notaPortalV77TituloFila {
+    align-items: flex-start;
+    flex-direction: column
+  }
+
+  .notaPortalV77Lema {
+    text-align: left;
+    font-size: 18px
+  }
+
+  .notaPortalV77Bloque {
+    grid-template-columns: 50px 1fr;
+    padding: 12px 15px
+  }
+
+  .notaPortalV77Icono {
+    width: 44px;
+    height: 44px;
+    font-size: 22px
+  }
+
+  .notaPortalV77Fundamento {
+    grid-template-columns: 1fr;
+    padding: 15px
+  }
+
+  .notaPortalV77Aliado {
+    white-space: normal
+  }
+
+  .notaPortalV77Titulo {
+    font-size: 17px
+  }
+}
+
+
+/* V78 — la nota se ve antes de consultar, y baja después de consultar */
+.notaPortalV77.notaPortalDebajo {
+  margin-top: 18px;
+  margin-bottom: 28px
+}
+
+
+/* V86 — Panel financiero visual tipo software de finanzas */
+.finDashV86 {
+  margin-top: 18px;
+  display: grid;
+  gap: 16px
+}
+
+.finCardsV86 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px
+}
+
+.finCardV86 {
+  background: #fff;
+  color: #14202b;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #e3e8ed
+}
+
+.finCardV86 small {
+  display: block;
+  color: #6f7b86;
+  font-size: 10px;
+  letter-spacing: .8px;
+  margin-bottom: 6px
+}
+
+.finCardV86 b {
+  display: block;
+  font-size: 22px;
+  color: #071d35
+}
+
+.finGridV86 {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 16px
+}
+
+.finBoxV86 {
+  background: #fff;
+  color: #14202b;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #e3e8ed;
+  min-width: 0
+}
+
+.finBoxV86 h4 {
+  margin: 0 0 12px;
+  color: #071d35;
+  font-size: 15px
+}
+
+.finBarRowV86 {
+  display: grid;
+  grid-template-columns: 160px 1fr 120px;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0
+}
+
+.finBarLabelV86 {
+  font-size: 12px;
+  color: #34495c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap
+}
+
+.finBarTrackV86 {
+  height: 12px;
+  background: #edf1f4;
+  border-radius: 999px;
+  overflow: hidden
+}
+
+.finBarFillV86 {
+  height: 100%;
+  background: #c9a55c;
+  border-radius: 999px
+}
+
+.finBarValueV86 {
+  text-align: right;
+  font-size: 12px;
+  font-weight: 800;
+  color: #071d35
+}
+
+.finTableV86 {
+  width: 100%;
+  border-collapse: collapse
+}
+
+.finTableV86 th,
+.finTableV86 td {
+  padding: 9px 8px;
+  border-bottom: 1px solid #e7ebef;
+  font-size: 11px;
+  text-align: left;
+  vertical-align: top
+}
+
+.finTableV86 th {
+  background: #f5f7f9;
+  color: #526577;
+  font-size: 10px;
+  letter-spacing: .5px
+}
+
+.finRightV86 {
+  text-align: right !important;
+  white-space: nowrap
+}
+
+.finBadgeV86 {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef3f6;
+  font-size: 10px;
+  font-weight: 800
+}
+
+.finPieV86 {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  align-items: center;
+  gap: 16px
+}
+
+.finDonutV86 {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+  background: conic-gradient(#2d8f68 0 var(--pagado), #d1a435 var(--pagado) var(--cobrar), #d9dee3 var(--cobrar) 100%)
+}
+
+.finDonutV86:after {
+  content: "";
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute
+}
+
+.finDonutTxtV86 {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-weight: 800;
+  color: #071d35;
+  font-size: 14px
+}
+
+.finLegendV86 {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+  color: #34495c
+}
+
+.finLegendV86 span {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px
+}
+
+.finDotV86 {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 7px
+}
+
+.finDotPagadoV86 {
+  background: #2d8f68
+}
+
+.finDotCobrarV86 {
+  background: #d1a435
+}
+
+.finDotOtrosV86 {
+  background: #d9dee3
+}
+
+.finSubnoteV86 {
+  font-size: 10px;
+  color: #718292;
+  margin-top: 8px;
+  line-height: 1.4
+}
+
+@media(max-width:1000px) {
+  .finCardsV86 {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+
+  .finGridV86 {
+    grid-template-columns: 1fr
+  }
+}
+
+@media(max-width:600px) {
+  .finCardsV86 {
+    grid-template-columns: 1fr
+  }
+
+  .finBarRowV86 {
+    grid-template-columns: 110px 1fr 95px
+  }
+
+  .finPieV86 {
+    grid-template-columns: 1fr;
+    justify-items: center
+  }
+}
+
+
+/* V87 — separación visual entre ficha individual y consolidado general */
+.crmSeccionTituloV87 {
+  margin: 18px 0 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #eef3f6;
+  color: #071d35;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: .25px
+}
+
+.crmResumenGeneralV87 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0 16px
+}
+
+.crmResumenGeneralV87 .rV87 {
+  background: #fff;
+  border: 1px solid #e3e8ed;
+  border-radius: 12px;
+  padding: 14px;
+  color: #14202b
+}
+
+.crmResumenGeneralV87 small {
+  display: block;
+  color: #6f7b86;
+  font-size: 10px;
+  letter-spacing: .7px;
+  margin-bottom: 6px
+}
+
+.crmResumenGeneralV87 b {
+  font-size: 20px;
+  color: #071d35
+}
+
+@media(max-width:800px) {
+  .crmResumenGeneralV87 {
+    grid-template-columns: 1fr
+  }
+}
+
+
+/* V88 — selector visual Individual / General */
+.crmSwitchV88 {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 14px 0 18px
+}
+
+.crmSwitchV88 button {
+  flex: 1;
+  min-width: 190px;
+  padding: 13px 18px;
+  border-radius: 12px;
+  border: 1px solid #c7d2dc;
+  background: #fff;
+  color: #071d35;
+  font-weight: 900
+}
+
+.crmSwitchV88 button.activoV88 {
+  background: #c9a55c;
+  color: #071d35;
+  border-color: #c9a55c;
+  box-shadow: 0 6px 18px #00000016
+}
+
+.vistaIndividualV88,
+.vistaGeneralV88 {
+  display: none
+}
+
+.vistaIndividualV88.activaV88,
+.vistaGeneralV88.activaV88 {
+  display: block
+}
+
+.individualCardV88 {
+  background: #fff;
+  color: #14202b;
+  border-radius: 16px;
+  padding: 18px;
+  border: 1px solid #e3e8ed
+}
+
+.individualHeadV88 {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  border-bottom: 1px solid #e7ebef;
+  padding-bottom: 14px;
+  margin-bottom: 14px
+}
+
+.individualHeadV88 h4 {
+  margin: 0;
+  color: #071d35;
+  font-size: 18px
+}
+
+.individualHeadV88 span {
+  font-size: 12px;
+  color: #607080
+}
+
+.individualGridV88 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px
+}
+
+.individualKpiV88 {
+  background: #f6f8fa;
+  border: 1px solid #e4e9ee;
+  border-radius: 12px;
+  padding: 14px
+}
+
+.individualKpiV88 small {
+  display: block;
+  color: #6f7b86;
+  font-size: 10px;
+  letter-spacing: .7px;
+  margin-bottom: 6px
+}
+
+.individualKpiV88 b {
+  display: block;
+  font-size: 19px;
+  color: #071d35
+}
+
+.individualInfoV88 {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px
+}
+
+.individualInfoV88 div {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 11px;
+  font-size: 12px;
+  color: #405466
+}
+
+.individualInfoV88 strong {
+  display: block;
+  color: #071d35;
+  margin-top: 3px
+}
+
+@media(max-width:900px) {
+  .individualGridV88 {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+
+  .individualInfoV88 {
+    grid-template-columns: 1fr
+  }
+}
+
+@media(max-width:560px) {
+  .individualGridV88 {
+    grid-template-columns: 1fr
+  }
+}
+
+
+/* V91 — seguridad administrativa y nombre PRO CRM */
+.seguridadV91 {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #d9e2e9;
+  border-radius: 14px;
+  background: #f8fafb
+}
+
+.seguridadV91 h3 {
+  margin: 0 0 10px;
+  color: var(--n);
+  font-size: 16px
+}
+
+.seguridadV91 .filaV91 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 10px
+}
+
+.seguridadV91 .notaV91 {
+  font-size: 11px;
+  color: #6f7b86;
+  line-height: 1.45;
+  margin-top: 9px
+}
+
+@media(max-width:850px) {
+  .seguridadV91 .filaV91 {
+    grid-template-columns: 1fr
+  }
+}
+
+
+/* V93 — encabezado institucional PRO CRM */
+.cabeceraMarcaV93 {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0
+}
+
+.nombreProgramaV93 {
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  color: #fff
+}
+
+.nombreProgramaV93 strong {
+  font-size: 24px;
+  letter-spacing: .5px
+}
+
+.nombreProgramaV93 span {
+  font-size: 11px;
+  opacity: .78;
+  margin-top: 4px
+}
+
+.accesoAdminV93 {
+  background: #eef2f5;
+  color: #071d35;
+  border: 1px solid #d8e0e7;
+  border-radius: 13px;
+  padding: 14px 22px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer
+}
+
+.accesoAdminV93:hover {
+  background: #fff
+}
+
+@media(max-width:720px) {
+  header {
+    gap: 12px;
+    align-items: flex-start
+  }
+
+  .cabeceraMarcaV93 {
+    gap: 10px
+  }
+
+  .nombreProgramaV93 strong {
+    font-size: 19px
+  }
+
+  .nombreProgramaV93 span {
+    display: none
+  }
+
+  .accesoAdminV93 {
+    padding: 12px 14px
+  }
+}
+
+
+/* V95 — cambio manual de contraseña desde la pantalla de acceso */
+.cambioClaveLoginV95 {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #d8e1e8;
+  border-radius: 12px;
+  background: #f7f9fb;
+  display: grid;
+  gap: 9px
+}
+
+.cambioClaveLoginV95.hidden {
+  display: none
+}
+
+.tituloCambioV95 {
+  font-weight: 900;
+  color: #071d35;
+  font-size: 14px;
+  margin-bottom: 2px
+}
+
+.notaCambioV95 {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #6f7b86
+}
+
+
+/* V97 — copia de seguridad de la base de clientes */
+.backupV97 {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #d9e2e9;
+  border-radius: 14px;
+  background: #f8fafb
+}
+
+.backupV97 h3 {
+  margin: 0 0 8px;
+  color: var(--n);
+  font-size: 16px
+}
+
+.backupV97 p {
+  margin: 0 0 12px;
+  color: #607080;
+  font-size: 12px;
+  line-height: 1.5
+}
+
+.backupAccionesV97 {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap
+}
+
+.backupAccionesV97 button {
+  flex: 1;
+  min-width: 220px
+}
+
+.backupEstadoV97 {
+  margin-top: 9px;
+  font-size: 11px;
+  color: #6f7b86
+}
+
+#archivoBackupV97 {
+  display: none
+}

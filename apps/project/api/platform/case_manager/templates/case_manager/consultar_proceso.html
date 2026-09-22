@@ -1,0 +1,262 @@
+{% load i18n static %}<!doctype html>
+{% comment %}
+  Portal publico de consulta de procesos.
+
+  El diseno es el aprobado y no ha cambiado. Lo que ha cambiado es de donde
+  salen los datos.
+
+  Antes, esta misma pagina traia dentro:
+
+    - `localStorage.propDemo`, o sea **el expediente de todos los clientes**,
+      servido a cualquier visitante;
+    - la contrasena administrativa en texto plano, con su valor por defecto
+      escrito en el HTML;
+    - la comprobacion de la clave del cliente, hecha en el navegador sobre
+      datos que el navegador ya tenia.
+
+  Ahora la pagina llega vacia, el visitante manda identificacion y clave por
+  `POST`, y el servidor devuelve **un solo expediente**: el suyo. El panel de
+  administracion ya no vive aqui; es una aplicacion con sesion de Django
+  (`access.py`).
+
+  Todo lo que se pinta pasa por el escapado de Django. Antes se concatenaba
+  con `innerHTML`, que ejecuta lo que le metan.
+{% endcomment %}
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>{% trans "Check your case" %} | Propensiones&reg;</title>
+  <link rel="stylesheet" href="{% static 'assets/custom/css/consultar_proceso.css' %}">
+</head>
+
+<body>
+  <header>
+    <div class="cabeceraMarcaV93">
+      <div class="logoWrap">
+        <img src="{% static 'assets/imgs/consultar_proceso/logo-portal.jpg' %}"
+             alt="Propensiones Abogados Internacional">
+      </div>
+      <div class="nombreProgramaV93">
+        <strong>{% trans "Check your case" %}</strong>
+        <span>{% now "Y" %}</span>
+      </div>
+    </div>
+  </header>
+  <div class="wrap">
+    <div class="hero">
+      <h1>{% trans "TRACKING OF MY CASE" %}</h1>
+      <p>{% trans "Check here the status and progress of your procedure with Propensiones® Abogados Internacional." %}</p>
+    </div>
+
+    <div class="card">
+      {% comment %}
+        `method="post"` y `{% csrf_token %}`: el formulario de antes no mandaba
+        nada a ningun sitio, asi que no habia nada que proteger. Ahora si.
+      {% endcomment %}
+      <form method="post" action="{% url 'case_manager:public_query' %}" autocomplete="off">
+        {% csrf_token %}
+        <div class="lookup">
+          <input type="text" name="identification" id="consulta" inputmode="numeric"
+                 placeholder="{% trans 'Identification number' %}" autocomplete="off"
+                 maxlength="20" required value="">
+          <div class="claveClienteV69">
+            <input type="password" name="access_key" id="claveCliente"
+                   placeholder="{% trans 'Access key' %}" maxlength="40" required>
+            <button type="button" id="verClaveCliente">{% trans "SHOW" %}</button>
+          </div>
+          <button type="submit">{% trans "CHECK MY CASE" %}</button>
+        </div>
+      </form>
+    </div>
+
+    {% if error %}
+      <div class="card" role="alert">
+        <p class="avisoConsultaV99">{{ error }}</p>
+      </div>
+    {% endif %}
+    <div class="notaPortalV77" id="notaPortalV77">
+      <div class="notaPortalV77Top">
+        <div class="notaPortalV77Marca">Propensiones®<small>ABOGADOS INTERNACIONAL</small></div>
+        <div class="notaPortalV77Lema">“Que se haga justicia,<br>aunque el cielo se caiga.”</div>
+      </div>
+      <div class="notaPortalV77TituloFila">
+        <div class="notaPortalV77Titulo">⚖ INFORMACIÓN IMPORTANTE PARA EL CLIENTE</div>
+        <div class="notaPortalV77Aliado">SU ALIADO INCONDICIONAL</div>
+      </div>
+      <div class="notaPortalV77Bloque">
+        <div class="notaPortalV77Icono">▤</div>
+        <div>
+          <h4>1. BUENA FE E INFORMACIÓN SUMINISTRADA POR EL CLIENTE</h4>
+          <p>La gestión profesional de <strong>Propensiones® Abogados Internacional</strong> se desarrolla bajo el
+            <strong>principio constitucional de buena fe (art. 83 de la Constitución Política de Colombia)</strong> y
+            con fundamento en la información, manifestaciones, documentos y soportes suministrados por el cliente. Los
+            hechos, antecedentes, relaciones, circunstancias y demás elementos propios de cada asunto son, en su origen,
+            <strong>ajenos al conocimiento directo de la firma</strong>. En consecuencia, la estructuración y desarrollo
+            de la gestión jurídica parte de la información que el cliente declara y aporta como cierta, completa y
+            veraz, correspondiéndole informar oportunamente cualquier hecho nuevo, modificación, omisión o circunstancia
+            que pueda incidir en el trámite, proceso o estrategia jurídica.
+          </p>
+        </div>
+      </div>
+      <div class="notaPortalV77Bloque">
+        <div class="notaPortalV77Icono">▱</div>
+        <div>
+          <h4>2. GESTIÓN DOCUMENTAL Y EXPEDIENTE DIGITAL</h4>
+          <p>La firma <strong>no recibe ni conserva documentos originales del cliente</strong>. La gestión profesional
+            se realiza mediante <strong>copias físicas o digitales</strong> y a través de <strong>expedientes
+              digitales</strong>. Los documentos originales permanecen bajo custodia de su titular.</p>
+        </div>
+      </div>
+      <div class="notaPortalV77Bloque">
+        <div class="notaPortalV77Icono">◈</div>
+        <div>
+          <h4>3. PROTECCIÓN DE DATOS PERSONALES Y HÁBEAS DATA</h4>
+          <p>De conformidad con el <strong>artículo 15 de la Constitución Política de Colombia</strong>, la <strong>Ley
+              Estatutaria 1581 de 2012</strong> y sus normas reglamentarias, Propensiones® Abogados Internacional
+            realizará el tratamiento de los datos personales suministrados por el cliente exclusivamente para las
+            finalidades relacionadas con la prestación, administración, seguimiento y documentación de los servicios
+            jurídicos contratados. El titular podrá ejercer sus derechos de <strong>conocer, actualizar,
+              rectificar</strong> y, cuando legalmente proceda, solicitar la supresión de sus datos o revocar la
+            autorización otorgada. La información será tratada bajo criterios de legalidad, finalidad, veracidad,
+            transparencia, acceso y circulación restringida, seguridad y confidencialidad.</p>
+        </div>
+      </div>
+      <div class="notaPortalV77Bloque">
+        <div class="notaPortalV77Icono">↔</div>
+        <div>
+          <h4>4. PAZ Y SALVO</h4>
+          <p>Una vez finalizado el proceso, o cuando exista desistimiento, terminación o cierre del encargo profesional,
+            y se encuentren cumplidas las obligaciones económicas a cargo del cliente, la firma podrá <strong>habilitar
+              en este portal el PAZ Y SALVO para impresión directa</strong>.</p>
+        </div>
+      </div>
+      <div class="notaPortalV77Bloque">
+        <div class="notaPortalV77Icono">ℹ</div>
+        <div>
+          <h4>5. TRANSPARENCIA, DEBER DE INFORMACIÓN Y RESERVA</h4>
+          <p>En cumplimiento de la <strong>Ley 1123 de 2007 – Código Disciplinario del Abogado</strong>, Propensiones®
+            facilita este portal para que sus clientes conozcan el estado general y la evolución de la gestión
+            profesional encomendada. El tratamiento de datos personales se realiza conforme a la <strong>Ley 1581 de
+              2012</strong> y sus normas reglamentarias. La información consultada a través de este portal es de
+            <strong>carácter reservado</strong> y está destinada exclusivamente al titular o a quien se encuentre
+            debidamente autorizado.
+          </p>
+        </div>
+      </div>
+      <div class="notaPortalV77Fundamento">
+        <div class="notaPortalV77FundamentoTitulo">▭ FUNDAMENTO JURÍDICO</div>
+        <ul>
+          <li><strong>Constitución Política de Colombia:</strong> artículos 15 (hábeas data) y 83 (buena fe).</li>
+          <li><strong>Ley 1123 de 2007:</strong> artículo 28 (deberes profesionales del abogado).</li>
+          <li><strong>Ley 1581 de 2012:</strong> protección de datos personales.</li>
+          <li><strong>Ley 527 de 1999:</strong> mensajes de datos y documentos electrónicos.</li>
+        </ul>
+        <div class="notaPortalV77Justicia">
+          <div class="aliadoV13">“Su aliado incondicional.”</div>
+          <div class="protocoloV13">
+            <strong>Protocolo de notificación oficial:</strong>
+            <ul>
+              <li>Correo oficial para notificaciones: <strong>notificaciones@propensionesabogados.com</strong></li>
+              <li>Teléfono institucional: <strong>+57 301 228 3818</strong></li>
+              <li>El número de celular institucional es un canal de contacto importante para la atención y seguimiento
+                del cliente.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="notaPortalV77Contacto">
+        <span>🌐 www.propensionesabogados.com</span>
+        <span>Propensiones® Abogados Internacional · Gestión jurídica con visión global</span>
+      </div>
+    </div>
+
+    {% comment %}
+      El aviso de servicio inactivo ya no se puede llegar a ver desde aqui: un
+      cliente sin vigencia recibe la misma respuesta que una clave equivocada,
+      para que probar cedulas no sirva para averiguar quien es cliente del
+      despacho. Se conserva el bloque porque el gestor interno lo usara cuando
+      exista una sesion de cliente de verdad.
+    {% endcomment %}
+
+    {% if case %}
+      <div class="card" id="cliente">
+        <div class="meta">
+          <div class="item"><small>{% trans "CLIENT" %}</small><strong>{{ case.client.full_name }}</strong></div>
+          <div class="item"><small>{% trans "IDENTIFICATION" %}</small><strong>{{ case.client.identification }}</strong></div>
+          <div class="item"><small>{% trans "CONTRACTED SERVICE" %}</small><strong>{{ case.get_service_display }}</strong></div>
+          {% if case.instance %}
+            <div class="item" id="bloqueEtapaPublica">
+              <small>{% trans "CURRENT STAGE / INSTANCE" %}</small><strong>{{ case.instance }}</strong>
+            </div>
+          {% endif %}
+          {% if case.area %}
+            <div class="item"><small>{% trans "AREA / CASE TYPE" %}</small><strong>{{ case.get_area_display }}</strong></div>
+          {% endif %}
+          {% if case.subtype %}
+            <div class="item"><small>{% trans "SUBTYPE / SPECIALITY" %}</small><strong>{{ case.subtype }}</strong></div>
+          {% endif %}
+          <div class="item"><small>{% trans "LAST UPDATE" %}</small><strong>{{ case.updated|date:"d/m/Y" }}</strong></div>
+          <div class="item"><small>{% trans "CASE NUMBER / REFERENCE" %}</small><strong>{{ case.public_reference }}</strong></div>
+          <div class="item">
+            <small>{% trans "SERVICE" %}</small>
+            <strong class="badge activo">&#9679; {% trans "ACTIVE" %}</strong>
+          </div>
+        </div>
+
+        {% comment %}
+          `pintarDetalles()` armaba esto concatenando HTML. Ahora son pares que
+          pinta la plantilla, asi que el escapado se aplica solo.
+        {% endcomment %}
+        {% if case.detail_rows %}
+          <div id="detalleTramite" class="meta" style="margin-top:14px">
+            {% for label, value in case.detail_rows %}
+              <div class="item"><small>{{ label }}</small><strong>{{ value }}</strong></div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="progress" id="progreso">
+          {% for step in case.progress %}
+            <div class="step {{ step.state }}">
+              <div class="dot">{% if step.done %}&#10003;{% else %}{{ step.number }}{% endif %}</div>
+              <span>{{ step.label|upper }}</span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="status">
+          <small>{% trans "CURRENT STATUS" %}</small>
+          <h2>{{ case.get_stage_display|upper }}</h2>
+          <p>{% trans "Your service is advancing according to the stage shown." %}</p>
+        </div>
+
+        {% if case.paz_y_salvo_authorized %}
+          <div id="bloquePazSalvoPublico" class="pazSalvoWrap">
+            <h3>{% trans "SETTLEMENT LETTER AVAILABLE" %}</h3>
+            <p>{% blocktrans %}This document is available because <b>Propensiones®</b> expressly authorized its issuance.{% endblocktrans %}</p>
+            <div class="acciones">
+              <a class="botonPazSalvoV99" href="{% url 'case_manager:paz_y_salvo' case.pk %}" target="_blank" rel="noopener">
+                {% trans "PRINT SETTLEMENT LETTER" %}
+              </a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <footer>
+    <div>
+      PROPENSIONES&reg; ABOGADOS INTERNACIONAL &middot; {% trans "Case tracking" %} &middot;
+      NIT: <span id="nitPropensiones">901.409.813-7</span> &middot;
+      <span id="fechaSistema">{% now "d/m/Y" %}</span>
+    </div>
+  </footer>
+
+  <script src="{% static 'assets/custom/js/consultar_proceso.js' %}" defer></script>
+</body>
+
+</html>

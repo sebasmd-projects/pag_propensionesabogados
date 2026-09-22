@@ -1,0 +1,732 @@
+"""
+Gestor de procesos y clientes: clientes, procesos y su informacion financiera.
+
+Sustituye al almacen que hasta ahora vivia en `localStorage.propDemo`, dentro
+de `apps/common/core/templates/pages/consultar_proceso.html`. Alli un
+expediente era una entrada de un objeto JSON con claves de dos letras (`n`,
+`s`, `hp`, `ge`, `pl`, `vl`...), el navegador de cualquier visitante recibia
+**todos** los expedientes, y borrar la cache del navegador borraba el despacho.
+
+Tres cosas que conviene entender antes de tocar nada:
+
+1. **El saldo no es una columna.** Se calcula (`CaseFinanceModel.balance`).
+   Guardarlo seria guardar dos veces el mismo hecho y abrir la puerta a que
+   no coincidan; el historico de pagos, que si justificaria guardarlo, esta
+   fuera del alcance contratado.
+
+2. **Deudores y expectativas de cobro no son tablas.** Son dos preguntas
+   distintas sobre `CaseFinanceModel` --quien debe, y cuanto se espera ganar
+   si el pleito sale-- y viven como consultas en `CaseFinanceQuerySet`. Son
+   las dos listas del panel gerencial de la pantalla aprobada.
+
+3. **`Cuota litis` con porcentaje 0 no es cuota litis.** Es un valor fijo
+   cerrado: cuenta como deuda, no como expectativa. Es la regla mas facil de
+   romper sin darse cuenta de todo el modulo, y por eso esta en
+   `CaseFinanceModel.is_contingency_expectation` y no repartida por las
+   vistas.
+"""
+
+import uuid
+
+from auditlog.registry import auditlog
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
+from django.db import models
+from django.db.models import F, Q, Sum, Value
+from django.db.models.functions import Coalesce, Greatest
+from django.utils.translation import gettext_lazy as _
+
+from apps.common.utils.models import TimeStampedModel
+
+from . import choices
+
+#: Solo digitos: la identificacion se guarda normalizada, sin puntos ni
+#: espacios, porque es la clave por la que pregunta el portal publico y
+#: "16.484.186" y "16484186" tienen que ser la misma persona.
+only_digits = RegexValidator(
+    r'^\d+$',
+    _('The identification must contain digits only.'),
+)
+
+
+class ClientModel(TimeStampedModel):
+    """
+    Una persona con uno o mas asuntos en el despacho.
+
+    `is_active` es la **vigencia** del servicio, que es lo que el portal
+    publico ensena como `ACTIVO` / `INACTIVO`: un cliente inactivo se
+    identifica bien y aun asi no ve su expediente.
+    """
+
+    id = models.UUIDField(
+        'ID',
+        default=uuid.uuid4,
+        unique=True,
+        primary_key=True,
+        serialize=False,
+        editable=False
+    )
+
+    identification = models.CharField(
+        _('identification'),
+        max_length=20,
+        unique=True,
+        validators=[only_digits],
+        help_text=_('Digits only, no dots or spaces.')
+    )
+
+    full_name = models.CharField(
+        _('full name'),
+        max_length=255
+    )
+
+    email = models.EmailField(
+        _('email'),
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    phone = models.CharField(
+        _('phone'),
+        max_length=30,
+        blank=True,
+        null=True
+    )
+
+    is_active = models.BooleanField(
+        _('service in force'),
+        default=True,
+        help_text=_(
+            'An inactive client identifies correctly but cannot see the case.'
+        )
+    )
+
+    @property
+    def access_key(self) -> str:
+        """
+        La clave con la que el cliente entra al portal publico.
+
+        Es la misma regla que ya estaba aprobada --inicial del nombre en
+        mayuscula, mas los cuatro ultimos digitos de la identificacion--,
+        movida del navegador al servidor. Que la clave sea **derivada** y no
+        propia es una limitacion conocida y esta fuera del alcance contratado
+        cambiarla; lo que si cambia es donde se comprueba: antes el navegador
+        recibia el dato y decidia, ahora decide el servidor.
+
+        Quien la sustituya algun dia solo tiene que tocar esto y
+        `check_access_key()`.
+        """
+        initial = self.full_name.strip()[:1].upper()
+        return f'{initial}{self.identification[-4:]}'
+
+    def check_access_key(self, raw_key: str) -> bool:
+        """
+        Si `raw_key` es la clave de este cliente.
+
+        Compara en tiempo constante: el tiempo que tarda un `==` depende de
+        cuantos caracteres coinciden, y con una clave de cinco caracteres eso
+        es material.
+        """
+        from django.utils.crypto import constant_time_compare
+
+        return constant_time_compare((raw_key or '').strip(), self.access_key)
+
+    def save(self, *args, **kwargs):
+        self.identification = ''.join(
+            character
+            for character in (self.identification or '')
+            if character.isdigit()
+        )
+        self.full_name = ' '.join((self.full_name or '').split())
+        return super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f'{self.identification} - {self.full_name}'
+
+    class Meta:
+        db_table = 'apps_project_case_manager_client'
+        verbose_name = _('Client')
+        verbose_name_plural = _('Clients')
+        ordering = ['full_name']
+        indexes = [
+            models.Index(fields=['identification']),
+        ]
+
+
+class CaseQuerySet(models.QuerySet):
+    def visible_to_client(self):
+        """
+        Lo que el portal publico puede llegar a ensenar.
+
+        Un caso de un cliente sin vigencia no sale por aqui: la comprobacion
+        va en el queryset y no en la plantilla, porque una plantilla que no
+        pinta algo sigue habiendolo recibido.
+        """
+        return self.filter(is_active=True, client__is_active=True)
+
+
+class CaseModel(TimeStampedModel):
+    """
+    Un asunto del despacho: el expediente que ve el cliente.
+
+    Los tres bloques de campos del final --judicial, administrativo y
+    policivo-- son excluyentes y dependen de `procedure`, igual que en la
+    pantalla aprobada, donde `actualizarCampos()` ensena uno y esconde los
+    otros dos. Lo que alli era esconder un `<div>`, aqui lo comprueba
+    `clean()`.
+    """
+
+    id = models.UUIDField(
+        'ID',
+        default=uuid.uuid4,
+        unique=True,
+        primary_key=True,
+        serialize=False,
+        editable=False
+    )
+
+    client = models.ForeignKey(
+        ClientModel,
+        on_delete=models.CASCADE,
+        related_name='cases',
+        verbose_name=_('client')
+    )
+
+    service = models.CharField(
+        _('contracted service'),
+        max_length=50,
+        choices=choices.Service.choices
+    )
+
+    procedure = models.CharField(
+        _('procedure type'),
+        max_length=50,
+        choices=choices.Procedure.choices,
+        blank=True,
+        null=True
+    )
+
+    area = models.CharField(
+        _('area / case type'),
+        max_length=50,
+        choices=choices.Area.choices,
+        blank=True,
+        null=True
+    )
+
+    subtype = models.CharField(
+        _('subtype / speciality'),
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    second_subtype = models.CharField(
+        _('second sublevel'),
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    stage = models.PositiveSmallIntegerField(
+        _('stage'),
+        choices=choices.Stage.choices,
+        default=choices.Stage.DOCUMENTS_RECEIVED
+    )
+
+    instance = models.CharField(
+        _('current stage / instance'),
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    is_active = models.BooleanField(
+        _('case in force'),
+        default=True
+    )
+
+    # --- Bloque judicial: solo con `Proceso ordinario` ----------------------
+    case_number = models.CharField(
+        _('case number'),
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    court = models.CharField(
+        _('court / judicial authority'),
+        max_length=100,
+        choices=choices.Court.choices,
+        blank=True,
+        null=True
+    )
+
+    city = models.CharField(
+        _('city of the process'),
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    # --- Bloque administrativo: solo con `Administrativo` -------------------
+    sector = models.CharField(
+        _('nature of the procedure'),
+        max_length=20,
+        choices=choices.Sector.choices,
+        blank=True,
+        null=True
+    )
+
+    entity = models.CharField(
+        _('entity / company'),
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    administrative_case_number = models.CharField(
+        _('reference number'),
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    administrative_city = models.CharField(
+        _('city of the procedure'),
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    # --- Bloque policivo: solo con `Querella policiva` ----------------------
+    police_instance = models.CharField(
+        _('police instance'),
+        max_length=30,
+        choices=choices.PoliceInstance.choices,
+        blank=True,
+        null=True
+    )
+
+    police_office = models.CharField(
+        _('police inspection / authority'),
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    police_case_number = models.CharField(
+        _('police case number'),
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    police_city = models.CharField(
+        _('city / municipality'),
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    paz_y_salvo_authorized = models.BooleanField(
+        _('paz y salvo authorized'),
+        default=False,
+        help_text=_(
+            'The client can print the settlement letter only when the firm '
+            'authorizes it here.'
+        )
+    )
+
+    objects = CaseQuerySet.as_manager()
+
+    @property
+    def detail_rows(self) -> list[tuple[str, str]]:
+        """
+        Las filas del bloque de detalle, segun el tipo de tramite.
+
+        Es `pintarDetalles()` del JavaScript, que armaba este mismo bloque
+        concatenando HTML con `innerHTML`. Al devolver pares y dejar que la
+        plantilla los pinte, el escapado de Django se aplica solo: un nombre
+        de entidad con `<` deja de poder cerrar una etiqueta.
+
+        Solo salen las filas con contenido, igual que antes.
+        """
+        by_procedure = {
+            choices.Procedure.ORDINARY: (
+                (_('CURRENT INSTANCE'), self.instance),
+                (_('CASE NUMBER'), self.case_number),
+                (_('COURT'), self.court),
+                (_('CITY OF THE PROCESS'), self.city),
+            ),
+            choices.Procedure.ADMINISTRATIVE: (
+                (_('NATURE'), self.sector),
+                (_('ENTITY / COMPANY'), self.entity),
+                (_('REFERENCE NUMBER'), self.administrative_case_number),
+                (_('CITY OF THE PROCEDURE'), self.administrative_city),
+            ),
+            choices.Procedure.POLICE: (
+                (_('CURRENT INSTANCE'), self.police_instance),
+                (_('INSPECTION / AUTHORITY'), self.police_office),
+                (_('CASE NUMBER'), self.police_case_number),
+                (_('CITY / MUNICIPALITY'), self.police_city),
+            ),
+        }
+        rows = by_procedure.get(self.procedure, ())
+        return [(label, value) for label, value in rows if value]
+
+    @property
+    def progress(self) -> list[dict]:
+        """
+        La barra de progreso: cada etapa con su estado respecto de la actual.
+
+        El JavaScript la armaba recorriendo el array `E` y comparando indices.
+        La comparacion es la misma; lo que cambia es que ahora la hace el
+        servidor y la plantilla solo pinta.
+        """
+        return [
+            {
+                'number': value + 1,
+                'label': label,
+                'state': (
+                    'done' if value < self.stage
+                    else 'current' if value == self.stage
+                    else ''
+                ),
+                'done': value < self.stage,
+            }
+            for value, label in choices.Stage.choices
+        ]
+
+    @property
+    def paz_y_salvo_subject(self) -> str:
+        """
+        Como se nombra el asunto dentro del paz y salvo.
+
+        Es `tipoProcesoPazYSalvoV77()` del JavaScript, con su regla intacta y
+        su motivo escrito al lado en el original: **el paz y salvo no lleva
+        numero de radicado**, solo identifica el tipo de tramite. Se toma lo
+        mas concreto que haya, de dentro hacia fuera.
+        """
+        return (
+            self.second_subtype
+            or self.subtype
+            or self.get_service_display()
+            or _('legal service entrusted')
+        )
+
+    @property
+    def public_reference(self) -> str:
+        """
+        El radicado que ensena el portal, venga del bloque que venga.
+
+        En la pantalla aprobada esto era `d.r || d.ra || d.rp || "—"`.
+        """
+        return (
+            self.case_number
+            or self.administrative_case_number
+            or self.police_case_number
+            or '—'
+        )
+
+    def clean(self):
+        """
+        Las reglas que en el navegador eran ensenar u ocultar un `<div>`.
+
+        Esconder un campo no es validarlo: el `<select>` se edita y se manda
+        lo que sea. Aqui se rechaza.
+        """
+        from django.core.exceptions import ValidationError
+
+        errors = {}
+
+        valid_subtypes = choices.subtypes_for(self.service, self.area)
+        if self.subtype and valid_subtypes and self.subtype not in valid_subtypes:
+            errors['subtype'] = _(
+                'This subtype does not belong to the selected service and area.'
+            )
+
+        valid_instances = choices.instances_for(self.service)
+        if self.instance and valid_instances and self.instance not in valid_instances:
+            errors['instance'] = _(
+                'This stage does not belong to the selected service.'
+            )
+
+        if errors:
+            raise ValidationError(errors)
+
+    def __str__(self) -> str:
+        return f'{self.client.identification} - {self.service}'
+
+    class Meta:
+        db_table = 'apps_project_case_manager_case'
+        verbose_name = _('Case')
+        verbose_name_plural = _('Cases')
+        ordering = ['-updated']
+        indexes = [
+            models.Index(fields=['client', '-updated']),
+        ]
+
+
+class CaseFinanceQuerySet(models.QuerySet):
+    """
+    Las preguntas del panel economico y del panel gerencial.
+
+    Cada una vive aqui y no repartida por las vistas por la misma razon por la
+    que `CaseModel.clean()` no vive en la plantilla: una regla que se repite
+    en tres sitios acaba siendo tres reglas distintas.
+    """
+
+    def in_dashboard(self):
+        """Los casos que el despacho decidio incluir en el panel economico."""
+        return self.filter(show_in_dashboard=True, case__is_active=True)
+
+    def debtors(self):
+        """
+        Quien debe dinero, hoy.
+
+        Son dos cosas sumadas, y es la parte que mas se malentiende:
+        `Modalidad de pago` con saldo, **y** `Cuota litis` al 0 %, que no es
+        una expectativa sino un valor fijo cerrado que aun no se ha cobrado.
+        """
+        return self.in_dashboard().filter(
+            Q(mandate=choices.Mandate.PAYMENT, agreed_fee__gt=F('paid_amount'))
+            | Q(
+                mandate=choices.Mandate.CONTINGENCY,
+                contingency_percentage=0,
+                contingency_value__gt=0,
+            )
+        )
+
+    def expectations(self):
+        """
+        Lo que se espera ganar si los pleitos salen: `Cuota litis` sobre 0 %.
+
+        No es dinero debido. Se ensena aparte **y ademas** se suma al
+        pendiente potencial, tal como lo explica la propia pantalla.
+        """
+        return self.in_dashboard().filter(
+            mandate=choices.Mandate.CONTINGENCY,
+            contingency_percentage__gt=0,
+            contingency_value__gt=0,
+        )
+
+    def totals(self) -> dict[str, int]:
+        """
+        Las cifras de cabecera del panel gerencial, en una sola consulta.
+
+        Reproduce `actualizarPanelGerencial()` del JavaScript:
+
+        - **pactado**: lo cerrado (`Modalidad de pago`, mas la cuota litis
+          al 0 %, que es valor fijo).
+        - **pagado**: lo que ya entro.
+        - **saldo**: lo pactado que falta por cobrar.
+        - **expectativa**: cuota litis sobre 0 %, que no es deuda.
+        - **pendiente potencial** = saldo + expectativa.
+        - **total proyectado** = pactado + expectativa.
+        """
+        zero = Value(0)
+        rows = self.in_dashboard()
+
+        payment = Q(mandate=choices.Mandate.PAYMENT)
+        fixed = Q(mandate=choices.Mandate.CONTINGENCY, contingency_percentage=0)
+        expectation = Q(
+            mandate=choices.Mandate.CONTINGENCY, contingency_percentage__gt=0
+        )
+
+        aggregated = rows.aggregate(
+            agreed_payment=Coalesce(
+                Sum('agreed_fee', filter=payment), zero
+            ),
+            paid=Coalesce(Sum('paid_amount', filter=payment), zero),
+            balance_payment=Coalesce(
+                Sum(
+                    Greatest(F('agreed_fee') - F('paid_amount'), zero),
+                    filter=payment,
+                ),
+                zero,
+            ),
+            agreed_fixed=Coalesce(
+                Sum('contingency_value', filter=fixed), zero
+            ),
+            expectation=Coalesce(
+                Sum('contingency_value', filter=expectation), zero
+            ),
+        )
+
+        agreed = aggregated['agreed_payment'] + aggregated['agreed_fixed']
+        # La cuota litis fija esta cerrada y nada de ella se ha cobrado: entra
+        # entera al saldo, igual que en la pantalla aprobada.
+        balance = aggregated['balance_payment'] + aggregated['agreed_fixed']
+
+        return {
+            'agreed': agreed,
+            'paid': aggregated['paid'],
+            'balance': balance,
+            'expectation': aggregated['expectation'],
+            'potential_pending': balance + aggregated['expectation'],
+            'projected_total': agreed + aggregated['expectation'],
+        }
+
+
+class CaseFinanceModel(TimeStampedModel):
+    """
+    El dinero de un caso: que se pacto, que entro y que falta.
+
+    Va aparte de `CaseModel` a proposito. Son dos cosas con dos publicos: el
+    expediente lo ve el cliente en el portal, y esto **no sale nunca de
+    puertas adentro**. Separarlas hace que el serializador publico no pueda
+    filtrar mal un campo que no tiene.
+
+    Cuatro modalidades, y cada una usa columnas distintas:
+
+    ===================  ==========================================
+    `Modalidad de pago`  `agreed_fee` y `paid_amount`; debe la resta
+    `Cuota litis` 0 %    `contingency_value`: valor fijo cerrado, se debe entero
+    `Cuota litis` > 0 %  `contingency_value`: expectativa, no es deuda
+    `Ad honorem`         nada; no hay dinero
+    `Curaduría`          nada; no hay dinero
+    ===================  ==========================================
+    """
+
+    id = models.UUIDField(
+        'ID',
+        default=uuid.uuid4,
+        unique=True,
+        primary_key=True,
+        serialize=False,
+        editable=False
+    )
+
+    case = models.OneToOneField(
+        CaseModel,
+        on_delete=models.CASCADE,
+        related_name='finance',
+        verbose_name=_('case')
+    )
+
+    start_date = models.DateField(
+        _('start date'),
+        blank=True,
+        null=True,
+        help_text=_('Month and year the matter started.')
+    )
+
+    mandate = models.CharField(
+        _('contract modality'),
+        max_length=30,
+        choices=choices.Mandate.choices
+    )
+
+    contingency_percentage = models.PositiveSmallIntegerField(
+        _('contingency percentage'),
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text=_('0 means a closed fixed value, not a contingency.')
+    )
+
+    contingency_value = models.PositiveBigIntegerField(
+        _('contingency value'),
+        default=0
+    )
+
+    agreed_fee = models.PositiveBigIntegerField(
+        _('agreed fee'),
+        default=0
+    )
+
+    paid_amount = models.PositiveBigIntegerField(
+        _('paid amount'),
+        default=0
+    )
+
+    show_in_dashboard = models.BooleanField(
+        _('include in the financial dashboard'),
+        default=True
+    )
+
+    objects = CaseFinanceQuerySet.as_manager()
+
+    @property
+    def is_contingency_expectation(self) -> bool:
+        """
+        Si esta fila es una **expectativa** y no una deuda.
+
+        La regla que mas facil se rompe del modulo: `Cuota litis` al 0 % no es
+        cuota litis, es un valor fijo cerrado.
+        """
+        return (
+            self.mandate == choices.Mandate.CONTINGENCY
+            and self.contingency_percentage > 0
+        )
+
+    @property
+    def agreed(self) -> int:
+        """Lo cerrado con el cliente. Una expectativa no esta cerrada."""
+        if self.mandate == choices.Mandate.PAYMENT:
+            return self.agreed_fee
+        if self.mandate == choices.Mandate.CONTINGENCY:
+            return 0 if self.is_contingency_expectation else self.contingency_value
+        return 0
+
+    @property
+    def paid(self) -> int:
+        """Lo que ya entro. Solo la modalidad de pago registra abonos."""
+        return self.paid_amount if self.mandate == choices.Mandate.PAYMENT else 0
+
+    @property
+    def balance(self) -> int:
+        """
+        Lo que falta por cobrar. **No se guarda**: se calcula.
+
+        Nunca es negativo: un abono mayor que lo pactado es un error de
+        captura o un anticipo, y en ninguno de los dos casos el cliente pasa
+        a tener saldo a favor en este panel.
+        """
+        return max(0, self.agreed - self.paid)
+
+    @property
+    def expectation(self) -> int:
+        """Lo que se espera ganar si el pleito sale. No es deuda."""
+        return self.contingency_value if self.is_contingency_expectation else 0
+
+    def clean(self):
+        """Que cada modalidad solo traiga las cifras que le corresponden."""
+        from django.core.exceptions import ValidationError
+
+        errors = {}
+
+        if self.mandate in (choices.Mandate.PRO_BONO, choices.Mandate.GUARDIANSHIP):
+            if self.agreed_fee or self.paid_amount or self.contingency_value:
+                errors['mandate'] = _(
+                    'This modality cannot carry any amount.'
+                )
+
+        if self.mandate == choices.Mandate.PAYMENT and self.contingency_value:
+            errors['contingency_value'] = _(
+                'A payment modality does not carry a contingency value.'
+            )
+
+        if self.mandate == choices.Mandate.CONTINGENCY and (
+            self.agreed_fee or self.paid_amount
+        ):
+            errors['agreed_fee'] = _(
+                'A contingency does not carry an agreed fee or payments.'
+            )
+
+        if errors:
+            raise ValidationError(errors)
+
+    def __str__(self) -> str:
+        return f'{self.case} - {self.mandate}'
+
+    class Meta:
+        db_table = 'apps_project_case_manager_case_finance'
+        verbose_name = _('Case finance')
+        verbose_name_plural = _('Case finances')
+        ordering = ['-updated']
+
+
+auditlog.register(ClientModel, serialize_data=True)
+auditlog.register(CaseModel, serialize_data=True)
+auditlog.register(CaseFinanceModel, serialize_data=True)

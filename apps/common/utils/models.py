@@ -69,6 +69,9 @@ class IPBlockedModel(TimeStampedModel):
         SECURITY_KEY_ATTEMPTS = 'SK', _(
             'Multiple failed security key entry attempts'
         )
+        CASE_QUERY_ATTEMPTS = 'CQ', _(
+            'Multiple failed access key attempts on the case query portal'
+        )
 
     is_active = models.BooleanField(_("is blocked"), default=True)
     current_ip = models.CharField(_('current user IP'), max_length=150)

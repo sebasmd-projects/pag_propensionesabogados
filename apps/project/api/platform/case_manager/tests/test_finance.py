@@ -1,0 +1,239 @@
+"""
+Los calculos financieros del gestor.
+
+Son la actividad que la cotizacion llama «procesos criticos»: cada cifra de
+estas es plata que alguien cobra o deja de cobrar. Hasta ahora vivian en
+`actualizarPanelGerencial()`, en JavaScript, sin una sola prueba.
+
+Las dos reglas que estas pruebas existen para sostener:
+
+1. `Cuota litis` al 0 % **no es una expectativa**: es un valor fijo cerrado,
+   y cuenta como deuda.
+2. El saldo nunca es negativo.
+"""
+
+from django.test import TestCase
+
+from ..choices import Mandate, Service, Stage
+from ..models import CaseFinanceModel, CaseModel, ClientModel
+
+
+def make_case(identification='1000000001', name='Ana Perez', **finance):
+    client = ClientModel.objects.create(
+        identification=identification, full_name=name
+    )
+    case = CaseModel.objects.create(
+        client=client,
+        service=Service.JUDICIAL,
+        stage=Stage.IN_PROGRESS,
+    )
+    finance.setdefault('mandate', Mandate.PAYMENT)
+    return CaseFinanceModel.objects.create(case=case, **finance)
+
+
+class BalanceTests(TestCase):
+    """`CaseFinanceModel.balance`: lo que falta por cobrar."""
+
+    def test_modalidad_de_pago_debe_la_resta(self):
+        finance = make_case(agreed_fee=3_000_000, paid_amount=1_000_000)
+
+        self.assertEqual(finance.agreed, 3_000_000)
+        self.assertEqual(finance.paid, 1_000_000)
+        self.assertEqual(finance.balance, 2_000_000)
+
+    def test_el_saldo_nunca_es_negativo(self):
+        """
+        Un abono mayor que lo pactado es un error de captura o un anticipo.
+        En ninguno de los dos casos el panel ensena saldo a favor.
+        """
+        finance = make_case(agreed_fee=1_000_000, paid_amount=1_500_000)
+
+        self.assertEqual(finance.balance, 0)
+
+    def test_cuota_litis_al_cero_por_ciento_se_debe_entera(self):
+        """Valor fijo cerrado: esta pactado y no se ha cobrado nada."""
+        finance = make_case(
+            mandate=Mandate.CONTINGENCY,
+            contingency_percentage=0,
+            contingency_value=5_000_000,
+        )
+
+        self.assertFalse(finance.is_contingency_expectation)
+        self.assertEqual(finance.agreed, 5_000_000)
+        self.assertEqual(finance.balance, 5_000_000)
+        self.assertEqual(finance.expectation, 0)
+
+    def test_cuota_litis_sobre_cero_es_expectativa_y_no_deuda(self):
+        finance = make_case(
+            mandate=Mandate.CONTINGENCY,
+            contingency_percentage=30,
+            contingency_value=8_000_000,
+        )
+
+        self.assertTrue(finance.is_contingency_expectation)
+        self.assertEqual(finance.agreed, 0)
+        self.assertEqual(finance.balance, 0)
+        self.assertEqual(finance.expectation, 8_000_000)
+
+    def test_ad_honorem_y_curaduria_no_mueven_dinero(self):
+        casos = ((Mandate.PRO_BONO, '3001'), (Mandate.GUARDIANSHIP, '3002'))
+        for mandate, identification in casos:
+            with self.subTest(mandate=mandate):
+                finance = make_case(
+                    identification=identification,
+                    mandate=mandate,
+                )
+                self.assertEqual(finance.agreed, 0)
+                self.assertEqual(finance.balance, 0)
+                self.assertEqual(finance.expectation, 0)
+
+
+class DashboardTotalsTests(TestCase):
+    """
+    `CaseFinanceQuerySet.totals()`: las cifras de cabecera.
+
+    El escenario es el mismo en todas: cuatro casos, uno de cada forma de
+    cobrar, para que cada total tenga que distinguirlos.
+    """
+
+    def setUp(self):
+        make_case('1001', 'Uno', agreed_fee=3_000_000, paid_amount=1_000_000)
+        make_case('1002', 'Dos', agreed_fee=1_000_000, paid_amount=1_000_000)
+        make_case(
+            '1003', 'Tres',
+            mandate=Mandate.CONTINGENCY,
+            contingency_percentage=0,
+            contingency_value=2_000_000,
+        )
+        make_case(
+            '1004', 'Cuatro',
+            mandate=Mandate.CONTINGENCY,
+            contingency_percentage=20,
+            contingency_value=10_000_000,
+        )
+
+    def test_los_totales(self):
+        totals = CaseFinanceModel.objects.totals()
+
+        # Pactado: 3.000.000 + 1.000.000 de las modalidades de pago, mas los
+        # 2.000.000 de la cuota litis fija. La expectativa no esta pactada.
+        self.assertEqual(totals['agreed'], 6_000_000)
+        self.assertEqual(totals['paid'], 2_000_000)
+        # Saldo: 2.000.000 del primero, 0 del segundo, 2.000.000 del fijo.
+        self.assertEqual(totals['balance'], 4_000_000)
+        self.assertEqual(totals['expectation'], 10_000_000)
+        self.assertEqual(totals['potential_pending'], 14_000_000)
+        self.assertEqual(totals['projected_total'], 16_000_000)
+
+    def test_lo_excluido_del_panel_no_suma(self):
+        """`show_in_dashboard` es del despacho, y se respeta en los totales."""
+        CaseFinanceModel.objects.filter(
+            case__client__identification='1004'
+        ).update(show_in_dashboard=False)
+
+        totals = CaseFinanceModel.objects.totals()
+
+        self.assertEqual(totals['expectation'], 0)
+        self.assertEqual(totals['potential_pending'], 4_000_000)
+
+    def test_un_caso_sin_vigencia_no_suma(self):
+        """Los totales miran casos vivos, igual que el portal."""
+        CaseModel.objects.filter(
+            client__identification='1001'
+        ).update(is_active=False)
+
+        totals = CaseFinanceModel.objects.totals()
+
+        self.assertEqual(totals['agreed'], 3_000_000)
+        self.assertEqual(totals['paid'], 1_000_000)
+        self.assertEqual(totals['balance'], 2_000_000)
+
+    def test_los_totales_se_piden_en_una_sola_consulta(self):
+        """
+        Seis cifras, una consulta.
+
+        No es microoptimizacion: el panel las pinta juntas y calcularlas en
+        Python obligaria a traerse todas las filas del despacho.
+        """
+        with self.assertNumQueries(1):
+            CaseFinanceModel.objects.totals()
+
+
+class DebtorsAndExpectationsTests(TestCase):
+    """
+    Las dos listas del panel gerencial.
+
+    Que sean dos consultas y no dos tablas es la decision de modelo que estas
+    pruebas fijan: si alguna vez se materializan, tienen que seguir dando
+    esto.
+    """
+
+    def setUp(self):
+        make_case('2001', 'Debe', agreed_fee=5_000_000, paid_amount=1_000_000)
+        make_case('2002', 'Al dia', agreed_fee=5_000_000, paid_amount=5_000_000)
+        make_case(
+            '2003', 'Fijo',
+            mandate=Mandate.CONTINGENCY,
+            contingency_percentage=0,
+            contingency_value=3_000_000,
+        )
+        make_case(
+            '2004', 'Expectativa',
+            mandate=Mandate.CONTINGENCY,
+            contingency_percentage=40,
+            contingency_value=9_000_000,
+        )
+        make_case('2005', 'Gratis', mandate=Mandate.PRO_BONO)
+
+    def test_deudores_son_los_que_deben_hoy(self):
+        identifications = set(
+            CaseFinanceModel.objects.debtors().values_list(
+                'case__client__identification', flat=True
+            )
+        )
+
+        # El que debe, y el de cuota litis fija que aun no ha pagado nada.
+        self.assertEqual(identifications, {'2001', '2003'})
+
+    def test_quien_esta_al_dia_no_es_deudor(self):
+        self.assertNotIn(
+            '2002',
+            CaseFinanceModel.objects.debtors().values_list(
+                'case__client__identification', flat=True
+            ),
+        )
+
+    def test_una_expectativa_no_es_una_deuda(self):
+        """La confusion que mas caro sale: no se le puede cobrar."""
+        self.assertNotIn(
+            '2004',
+            CaseFinanceModel.objects.debtors().values_list(
+                'case__client__identification', flat=True
+            ),
+        )
+
+    def test_expectativas_son_solo_la_cuota_litis_sobre_cero(self):
+        identifications = set(
+            CaseFinanceModel.objects.expectations().values_list(
+                'case__client__identification', flat=True
+            )
+        )
+
+        self.assertEqual(identifications, {'2004'})
+
+    def test_las_dos_listas_no_se_solapan(self):
+        """
+        Ninguna fila puede estar en las dos.
+
+        Si se solaparan, el pendiente potencial contaria dos veces el mismo
+        dinero, que es exactamente el error que la pantalla advierte al
+        separarlas.
+        """
+        debtors = set(
+            CaseFinanceModel.objects.debtors().values_list('pk', flat=True)
+        )
+        expectations = set(
+            CaseFinanceModel.objects.expectations().values_list('pk', flat=True)
+        )
+
+        self.assertEqual(debtors & expectations, set())
