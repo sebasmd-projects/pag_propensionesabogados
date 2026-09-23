@@ -8,14 +8,13 @@ estas pruebas falla si esa decision vuelve al cliente.
 
 from unittest.mock import patch
 
+from apps.common.utils.models import IPBlockedModel
 from django.conf import settings
 from django.core import mail
 from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
-
-from apps.common.utils.models import IPBlockedModel
 
 from .. import attempts, portal_otp
 from ..choices import Mandate, Procedure, Service, Stage
@@ -45,6 +44,7 @@ def identificarse(test_client, identification='16484186', code=CODIGO):
     return test_client.post(
         reverse('case_manager:public_query'), {'code': code}
     )
+
 
 # Sin el middleware de bloqueo por medio: lo que se prueba aqui es la vista,
 # y el middleware tiene su propia prueba mas abajo.
@@ -192,7 +192,7 @@ class PublicQueryTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(
             sorted(mail.outbox[0].to),
-            ['director@propensionesabogados.com',
+            ['cto@propensionesabogados.com',
              'info@propensionesabogados.com'],
         )
         self.assertTrue(response.context['sent_to_office'])
@@ -469,7 +469,8 @@ class VariosAsuntosTests(TestCase):
         self.assertContains(response, 'Etapa final')
 
     def test_un_asunto_sin_vigencia_no_sale(self):
-        CaseModel.objects.filter(pk=self.conciliacion.pk).update(is_active=False)
+        CaseModel.objects.filter(
+            pk=self.conciliacion.pk).update(is_active=False)
 
         devueltos = list(self._consultar().context['cases'])
 
@@ -487,7 +488,8 @@ class VariosAsuntosTests(TestCase):
         response = self._consultar()
 
         self.assertContains(
-            response, reverse('case_manager:paz_y_salvo', args=[self.pension.pk])
+            response, reverse('case_manager:paz_y_salvo',
+                              args=[self.pension.pk])
         )
         self.assertNotContains(
             response,

@@ -93,7 +93,7 @@ CYCLE_BLOCK = 60 * 60
 #: sabria a quien dárselas.
 OFFICE_RECIPIENTS = (
     'info@propensionesabogados.com',
-    'director@propensionesabogados.com',
+    'cto@propensionesabogados.com',
 )
 
 

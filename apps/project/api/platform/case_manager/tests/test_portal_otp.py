@@ -486,7 +486,7 @@ class OfficeFallbackTests(TestCase):
 
         self.assertEqual(
             sorted(mail.outbox[0].to),
-            ['director@propensionesabogados.com',
+            ['cto@propensionesabogados.com',
              'info@propensionesabogados.com'],
         )
 
