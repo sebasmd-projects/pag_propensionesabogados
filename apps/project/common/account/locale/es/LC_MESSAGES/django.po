@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-29 15:50-0500\n"
+"POT-Creation-Date: 2026-09-22 23:00-0500\n"
 "PO-Revision-Date: 2024-08-23 00:18-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: Propensiones Abogados\n"
@@ -19,57 +19,240 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.10.0\n"
 
-#: .\apps\project\common\account\forms.py:14
+#: emails.py:63
+msgid "Your access code for Propensiones® Abogados"
+msgstr "Tu código de acceso a Propensiones® Abogados"
+
+#: forms.py:14 templates/two_factor/core/login.html:84
+#: templates/two_factor/core/login.html:131
 msgid "User or Email"
 msgstr "Usuario o Correo"
 
-#: .\apps\project\common\account\forms.py:15
+#: forms.py:15 templates/two_factor/core/login.html:96
 msgid "Password"
 msgstr "Contraseña"
 
-#: .\apps\project\common\account\forms.py:16
+#: forms.py:16
 msgid "User"
 msgstr "Usuario"
 
-#: .\apps\project\common\account\forms.py:17
+#: forms.py:17
 msgid "Email"
 msgstr "Correo"
 
-#: .\apps\project\common\account\forms.py:59
-msgid "Credentials are invalid"
-msgstr "Las credenciales no son válidas"
-
-#: .\apps\project\common\account\forms.py:117
-#: .\apps\project\common\account\forms.py:123
-#: .\apps\project\common\account\forms.py:125
+#: forms.py:71 forms.py:77 forms.py:79
 msgid "Confirm Password"
 msgstr "Confirmar Contraseña"
 
-#: .\apps\project\common\account\forms.py:132
-#: .\apps\project\common\account\forms.py:139
-#: .\apps\project\common\account\forms.py:141
+#: forms.py:86 forms.py:93 forms.py:95
 msgid "Names"
 msgstr "Nombres"
 
-#: .\apps\project\common\account\forms.py:148
-#: .\apps\project\common\account\forms.py:155
-#: .\apps\project\common\account\forms.py:157
+#: forms.py:102 forms.py:109 forms.py:111
 msgid "Last names"
 msgstr "Apellidos"
 
-#: .\apps\project\common\account\forms.py:173
+#: forms.py:127
 msgid "Passwords do not match"
 msgstr "Las contraseñas no coinciden"
 
-#: .\apps\project\common\account\models.py:18
+#: forms.py:176 forms.py:192 templates/two_factor/core/login.html:182
+msgid "Verification code"
+msgstr "Código de verificación"
+
+#: forms.py:225
+msgid "Too many failed attempts. Please wait before trying again."
+msgstr ""
+"Demasiados intentos fallidos. Espera un poco antes de volver a intentarlo."
+
+#: forms.py:239
+msgid "The code is not valid or has expired. Request a new one."
+msgstr "El código no es válido o ha caducado. Pide uno nuevo."
+
+#: login_view.py:364
+msgid ""
+"Your sign-in could not be completed because the session was lost. Please "
+"sign in again."
+msgstr ""
+"No se pudo completar el acceso porque se perdió la sesión. Vuelve a iniciar "
+"sesión."
+
+#: login_view.py:465 templates/two_factor/core/login.html:123
+msgid "Sign in with a code"
+msgstr "Entrar con un código"
+
+#: login_view.py:466
+msgid "We send a six-digit code to the email on your account."
+msgstr "Te enviamos un código de seis cifras al correo de tu cuenta."
+
+#: login_view.py:471
+msgid "Two-step verification"
+msgstr "Verificación en dos pasos"
+
+#: login_view.py:472
+msgid "Enter the code from your authentication app."
+msgstr "Escribe el código de tu aplicación de autenticación."
+
+#: login_view.py:477
+msgid "Backup token"
+msgstr "Código de respaldo"
+
+#: login_view.py:478
+msgid ""
+"Enter one of the backup tokens you saved when you set up two-step "
+"verification."
+msgstr ""
+"Escribe uno de los códigos de respaldo que guardaste al activar la "
+"verificación en dos pasos."
+
+#: login_view.py:483 templates/two_factor/core/login.html:32
+#: templates/two_factor/core/login.html:116
+#: templates/two_factor/core/login.html:200
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+#: login_view.py:484
+msgid "Enter your credentials to access your account."
+msgstr "Escribe tus datos para entrar en tu cuenta."
+
+#: models.py:18
 msgid "User Login Attempt"
 msgstr "Intento de Inicio de Sesión de Usuario"
 
-#: .\apps\project\common\account\models.py:19
+#: models.py:19
 msgid "User Login Attempts"
 msgstr "Intentos de Inicio de Sesión de Usuario"
 
-#: .\apps\project\common\account\templates\account\login.html:19
-#: .\apps\project\common\account\templates\account\register.html:20
+#: templates/account/email/login_otp.html:23
+msgid "Your access code"
+msgstr "Tu código de acceso"
+
+#: templates/account/email/login_otp.html:48
+msgid "Access code"
+msgstr "Código de acceso"
+
+#: templates/account/email/login_otp.html:51
+msgid "Sign in to your account"
+msgstr "Entra en tu cuenta"
+
+#: templates/account/email/login_otp.html:59
+#, python-format
+msgid "Dear %(name)s,"
+msgstr "Hola, %(name)s:"
+
+#: templates/account/email/login_otp.html:62
+msgid "Use the following code to sign in to your account."
+msgstr "Usa el siguiente código para entrar en tu cuenta."
+
+#: templates/account/email/login_otp.html:78
+#, python-format
+msgid "The code expires in %(minutes)s minutes and can only be used once."
+msgstr "El código caduca en %(minutes)s minutos y solo se puede usar una vez."
+
+#: templates/account/email/login_otp.html:87
+#, python-format
+msgid ""
+"Nobody at Propensiones® will ever ask you for this code. If you did not "
+"request it, someone may be trying to access your account: write to "
+"%(contact_email)s."
+msgstr ""
+"Nadie de Propensiones® te pedirá nunca este código. Si no lo has pedido tú, "
+"puede que alguien esté intentando entrar en tu cuenta: escribe a "
+"%(contact_email)s."
+
+#: templates/account/email/login_otp.html:98
+msgid ""
+"This message was sent automatically. If you reply, it will reach our "
+"management office."
+msgstr ""
+"Este mensaje se envió automáticamente. Si respondes, tu correo llegará a "
+"nuestra dirección."
+
+#: templates/account/layout/account.html:48
+msgid "Go to the home page"
+msgstr "Ir a la página de inicio"
+
+#: templates/account/login.html:19 templates/account/register.html:20
 msgid "Control of historical activos"
 msgstr "Control de bonos históricos"
+
+#: templates/two_factor/_wizard_actions.html:13
+msgid "Next"
+msgstr "Siguiente"
+
+#: templates/two_factor/_wizard_actions.html:19
+msgid "Back"
+msgstr "Atrás"
+
+#: templates/two_factor/_wizard_actions.html:23
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: templates/two_factor/core/login.html:59
+msgid ""
+"Too many failed attempts from this connection. Please wait a few minutes "
+"before trying again."
+msgstr ""
+"Demasiados intentos fallidos desde esta conexión. Espera unos minutos antes "
+"de volver a intentarlo."
+
+#: templates/two_factor/core/login.html:106
+msgid "Show or hide the password"
+msgstr "Mostrar u ocultar la contraseña"
+
+#: templates/two_factor/core/login.html:145
+msgid "Resend"
+msgstr "Reenviar"
+
+#: templates/two_factor/core/login.html:145
+msgid "Send code"
+msgstr "Enviar código"
+
+#: templates/two_factor/core/login.html:162
+msgid "A one-time code has been sent to your email"
+msgstr "Hemos enviado un código de un solo uso a tu correo"
+
+#: templates/two_factor/core/login.html:165
+msgid ""
+"After several failed password attempts we sent you a code so you can sign in"
+" without getting locked out."
+msgstr ""
+"Tras varios intentos fallidos con la contraseña te hemos enviado un código "
+"para que puedas entrar sin quedarte bloqueado."
+
+#: templates/two_factor/core/login.html:175
+msgid ""
+"Enter your username or email and press «Send code». The code will arrive at "
+"the email address on your account."
+msgstr ""
+"Escribe tu usuario o tu correo y pulsa «Enviar código». El código llegará a "
+"la dirección de correo de tu cuenta."
+
+#: templates/two_factor/core/login.html:193
+#, python-format
+msgid "The code expires in %(minutes)s minutes."
+msgstr "El código caduca en %(minutes)s minutos."
+
+#: templates/two_factor/core/login.html:207
+msgid "Sign in with my password instead"
+msgstr "Prefiero entrar con mi contraseña"
+
+#: templates/two_factor/core/login.html:223
+msgid "Verify"
+msgstr "Verificar"
+
+#: templates/two_factor/core/login.html:229
+msgid "Or, alternatively, use one of your other authentication methods:"
+msgstr "O bien usa otro de tus métodos de autenticación:"
+
+#: templates/two_factor/core/login.html:245
+msgid "Use a backup token"
+msgstr "Usar un código de respaldo"
+
+#: templates/two_factor/core/login.html:257
+msgid "New user?"
+msgstr "¿Eres nuevo?"
+
+#: templates/two_factor/core/login.html:259
+msgid "Create an account"
+msgstr "Crea una cuenta"

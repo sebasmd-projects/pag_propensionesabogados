@@ -41,6 +41,31 @@ def make_user(username, *, staff=False, superuser=False, gestor=False,
     return user
 
 
+def login_as(client, username):
+    """
+    Deja la sesion abierta como esa cuenta, sin pasar por `authenticate()`.
+
+    `client.login()` ya no vale: desde que el proyecto usa `django-axes`,
+    llamar a `authenticate()` **sin la peticion** levanta
+    `AxesBackendRequestParameterRequired`. No es una manía de la biblioteca:
+    sin peticion no hay IP que contar ni sesion que bloquear, asi que un
+    `authenticate()` a secas seria un acceso sin freno, y prefiere reventar a
+    dejarlo pasar en silencio. El cliente de pruebas de Django llama asi.
+
+    Lo que hacen estas pruebas es comprobar **permisos**, no el acceso --eso
+    tiene las suyas en `apps/project/common/account/tests/`--, asi que lo
+    correcto aqui es abrir la sesion directamente y no simular un formulario.
+
+    El backend se nombra a mano porque hay tres configurados y el primero es
+    el de `axes`, que es un guardian y no una forma de cargar cuentas.
+    """
+    user = get_user_model()._default_manager.get(username=username)
+    client.force_login(
+        user, backend='django.contrib.auth.backends.ModelBackend'
+    )
+    return user
+
+
 class CanUseCaseManagerTests(TestCase):
     """La pregunta, en un solo sitio."""
 
@@ -88,17 +113,13 @@ class AdminAccessTests(TestCase):
 
     def test_una_cuenta_sin_el_grupo_no_ve_el_gestor(self):
         make_user('cliente', staff=True)
-        self.client.login(
-            username='cliente', password='una-contrasena-larga-de-verdad'
-        )
+        login_as(self.client, 'cliente')
 
         self.assertEqual(self.client.get(self.url).status_code, 403)
 
     def test_el_grupo_del_gestor_entra(self):
         make_user('abogada', staff=True, gestor=True)
-        self.client.login(
-            username='abogada', password='una-contrasena-larga-de-verdad'
-        )
+        login_as(self.client, 'abogada')
 
         self.assertEqual(self.client.get(self.url).status_code, 200)
 
@@ -188,9 +209,7 @@ class AdminPagesRenderTests(TestCase):
 
     def setUp(self):
         make_user('abogada', staff=True, gestor=True)
-        self.client.login(
-            username='abogada', password='una-contrasena-larga-de-verdad'
-        )
+        login_as(self.client, 'abogada')
 
     def test_el_listado_de_clientes_abre(self):
         url = reverse('admin:case_manager_clientmodel_changelist')
@@ -227,9 +246,7 @@ class AdminPagesRenderTests(TestCase):
     def test_un_superusuario_tambien(self):
         self.client.logout()
         make_user('jefe', superuser=True)
-        self.client.login(
-            username='jefe', password='una-contrasena-larga-de-verdad'
-        )
+        login_as(self.client, 'jefe')
 
         url = reverse('admin:case_manager_casemodel_change', args=[self.case.pk])
 

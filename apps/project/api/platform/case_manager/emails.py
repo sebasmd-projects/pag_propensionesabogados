@@ -21,15 +21,11 @@ autenticacion del dominio.
 
 Por que las imagenes van dentro y no enlazadas
 ----------------------------------------------
-Casi todos los clientes de correo **bloquean las imagenes remotas** por
-defecto: son el metodo clasico para saber si alguien abrio un mensaje. Un
-membrete servido desde `propensionesabogados.com` sale como un cuadro roto
-hasta que la persona pulsa «mostrar imagenes», y muchas no lo pulsan nunca.
-
-Aqui el membrete y la firma viajan **dentro del propio mensaje**, adjuntos y
-referenciados con `cid:`, que es lo que hace que se vean sin pedir permiso y
-sin delatar la apertura. El precio son unos 40 KB por correo, que para un
-puñado de avisos al dia no es nada.
+El membrete y la firma viajan **dentro del propio mensaje**, adjuntos y
+referenciados con `cid:`, porque casi todos los clientes de correo bloquean
+las imagenes remotas. El como esta en `apps.common.utils.mail`, que es el
+mismo mecanismo que usa el correo del codigo de acceso; aqui solo queda que
+imagenes lleva este correo.
 
 Y siempre se manda tambien la version en texto plano. No es un adorno: un
 correo solo-HTML puntua peor en los filtros de spam, y hay quien lee el
@@ -37,8 +33,6 @@ correo en texto.
 """
 
 import logging
-from email.mime.image import MIMEImage
-from pathlib import Path
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -46,6 +40,8 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
+
+from apps.common.utils.mail import attach_inline_images
 
 logger = logging.getLogger(__name__)
 
@@ -61,53 +57,6 @@ INLINE_IMAGES = {
     'membrete': 'assets/imgs/consultar_proceso/membrete-paz-y-salvo.jpg',
     'firma': 'assets/imgs/consultar_proceso/firma.png',
 }
-
-
-def _static_source(relative: str) -> Path | None:
-    """
-    El fichero en disco de un estatico, mirando donde de verdad esta.
-
-    Se busca primero en `STATICFILES_DIRS` --el codigo fuente-- y despues en
-    `STATIC_ROOT`, porque en desarrollo lo segundo puede no existir todavia y
-    en produccion lo primero si existe igualmente.
-    """
-    candidatos = [Path(d) / relative for d in settings.STATICFILES_DIRS]
-    if getattr(settings, 'STATIC_ROOT', None):
-        candidatos.append(Path(settings.STATIC_ROOT) / relative)
-
-    return next((ruta for ruta in candidatos if ruta.is_file()), None)
-
-
-def _attach_inline_images(message: EmailMultiAlternatives) -> None:
-    """
-    Mete las imagenes en el mensaje y las marca como `inline`.
-
-    `Content-ID` es lo que enlaza `<img src="cid:membrete">` con el adjunto.
-    Va entre `<>` porque asi lo pide el RFC 2392, y sin los angulos hay
-    clientes que no lo resuelven y ensenan el cuadro roto igual.
-
-    `Content-Disposition: inline` evita lo otro: que el cliente de correo
-    ensene el membrete y la firma como dos ficheros adjuntos al final del
-    mensaje, que es lo que hace si no se le dice.
-
-    Una imagen que falte no tumba el envio: el correo sale sin ella, con su
-    `alt`, y queda el aviso en el registro. El mensaje importa mas que el
-    membrete.
-    """
-    for cid, relative in INLINE_IMAGES.items():
-        ruta = _static_source(relative)
-        if ruta is None:
-            logger.warning(
-                'No se encontro la imagen %s para incrustar en el correo; '
-                'el mensaje sale sin ella.',
-                relative,
-            )
-            continue
-
-        imagen = MIMEImage(ruta.read_bytes())
-        imagen.add_header('Content-ID', f'<{cid}>')
-        imagen.add_header('Content-Disposition', 'inline', filename=ruta.name)
-        message.attach(imagen)
 
 
 def send_case_note(note, *, request=None) -> bool:
@@ -163,7 +112,7 @@ def send_case_note(note, *, request=None) -> bool:
     # `related` y no `mixed`: le dice al cliente de correo que los adjuntos
     # son partes del HTML, no ficheros sueltos que el lector deba ofrecer.
     mensaje.mixed_subtype = 'related'
-    _attach_inline_images(mensaje)
+    attach_inline_images(mensaje, INLINE_IMAGES)
 
     try:
         enviados = mensaje.send(fail_silently=False)

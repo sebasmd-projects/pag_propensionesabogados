@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% comment %}
+  La maqueta de las pantallas de cuenta: acceso, segundo factor, registro.
+
+  Extiende `base.html` --el mismo `raw.html` con las etiquetas, el favicon y
+  los tipos de letra del sitio-- pero **sin cabecera ni pie**. No es una
+  pagina de navegar: quien esta aqui viene a hacer una cosa, y un menu con
+  quince enlaces solo le da sitios a donde irse antes de terminarla.
+
+  Los estilos son los mismos ficheros que carga el resto del sitio, servidos
+  desde `assets/vendor/` y no desde un CDN: el sitio no depende de nadie para
+  pintarse, y la pantalla de acceso menos que ninguna.
+{% endcomment %}
+
+{% block third_css %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+{% endblock third_css %}
+
+{% block custom_css %}
+  <link href="{% static 'assets/custom/css/main.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/custom/css/account.css' %}" rel="stylesheet">
+{% endblock custom_css %}
+
+{% comment %}
+  `index-page` --lo que `raw.html` pone por defecto-- es el modificador de la
+  portada, donde la cabecera es transparente. Aqui no hay cabecera, pero la
+  clase tambien cambia colores del cuerpo: se pone `scrolled`, que es el
+  estado normal, igual que hacen `documents.html` y el portal de consulta.
+{% endcomment %}
+{% block body_css %}class="scrolled"{% endblock body_css %}
+
+{% block header %}{% endblock header %}
+{% block footer %}{% endblock footer %}
+
+{% block body_third_js %}
+  <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+{% endblock body_third_js %}
+
+{% block main %}
+  <main class="main auth-screen">
+    <div class="min-vh-100 d-flex align-items-center justify-content-center py-5 px-3">
+      <div class="w-100" style="max-width: 460px;">
+
+        <div class="text-center mb-4">
+          <a href="{% url 'core:index' %}" aria-label="{% trans 'Go to the home page' %}">
+            <img src="{% static 'assets/imgs/favicon/android-chrome-512x512.webp' %}"
+                 alt="Propensiones&reg; Abogados Internacional"
+                 class="img-fluid" style="max-width: 96px;">
+          </a>
+        </div>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} py-2 small" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        {% block account_content %}{% endblock account_content %}
+
+      </div>
+    </div>
+  </main>
+{% endblock main %}

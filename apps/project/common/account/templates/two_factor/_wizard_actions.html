@@ -1,0 +1,25 @@
+{% load i18n %}
+
+{% comment %}
+  Los botones del asistente de la biblioteca, con las clases del sitio.
+
+  El primario va **antes** que los secundarios en el HTML porque el navegador
+  dispara el primer boton de envio al pulsar Intro: con el orden al reves,
+  dar a Intro en un campo llevaba al paso anterior.
+{% endcomment %}
+
+<div class="d-grid gap-2 mt-3">
+  <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+    {% trans "Next" %}
+  </button>
+
+  {% if wizard.steps.prev %}
+    <button name="wizard_goto_step" type="submit" formnovalidate
+            value="{{ wizard.steps.prev }}"
+            class="btn btn-outline-secondary">{% trans "Back" %}</button>
+  {% endif %}
+
+  {% if cancel_url %}
+    <a href="{{ cancel_url }}" class="btn btn-link">{% trans "Cancel" %}</a>
+  {% endif %}
+</div>

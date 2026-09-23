@@ -1,0 +1,10 @@
+{% load i18n %}
+{% comment %}
+  Los campos de un paso del asistente de la biblioteca.
+
+  `as_div` y no `as_p`: es la salida que Django trae desde la 4.1 y la unica
+  que deja poner las clases de Bootstrap sin envolver cada campo a mano.
+{% endcomment %}
+<div class="mb-3 wizard-fields">
+  {{ wizard.form.as_div }}
+</div>

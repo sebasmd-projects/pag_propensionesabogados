@@ -1,0 +1,263 @@
+{% extends "two_factor/_base.html" %}
+
+{% load i18n static two_factor_tags %}
+
+{% comment %}
+  La pantalla de acceso, con sus cuatro caras: contrasena, codigo al correo,
+  segundo factor y codigo de respaldo.
+
+  Dos reglas que sostienen el maquetado y que conviene no romper:
+
+  1. **Cada pantalla tiene su boton primario, y va el primero.** El asistente
+     de la biblioteca trae un «Siguiente» generico al final; aqui se sustituye
+     por «Iniciar sesion», «Enviar el codigo» o «Verificar», que es lo que
+     alguien busca con la vista. Y va antes que los secundarios en el HTML
+     porque el navegador dispara el **primer** boton de envio al pulsar Intro:
+     con el orden al reves, dar a Intro en la contrasena llevaba a pedir un
+     codigo.
+
+  2. **Los botones que solo cambian de pantalla llevan `formnovalidate`.** Son
+     envios del mismo formulario, asi que sin el el navegador exige antes los
+     campos `required`, y pedir el codigo obligaria a escribir primero la
+     contrasena que precisamente no se recuerda.
+
+  Los campos del primer paso se llaman `auth-username` y `auth-password`:
+  `formtools` prefija cada campo con el nombre de **su paso**, no con el del
+  asistente --ese (`login_view`) solo prefija el formulario de control--. El
+  nombre no es decorativo: es lo que lee `axes_hooks.username` para saber
+  quien falla, y cambiarlo aqui dejaria otra vez todos los intentos apuntados
+  a nadie.
+{% endcomment %}
+
+{% block title %}{% trans "Sign in" %} | Propensiones&reg;{% endblock title %}
+
+{% block meta_seo %}
+  {% comment %}
+    Sin indexar: una pantalla de acceso en un buscador solo invita a probar
+    contrasenas.
+  {% endcomment %}
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+{% endblock meta_seo %}
+
+{% block account_content %}
+
+  <div class="card border-0 shadow-sm">
+
+    <div class="card-body px-4 px-md-5 pt-4 pb-4">
+
+      <div class="text-center mb-4">
+        <h1 class="h5 fw-bold mb-1">{{ step_title }}</h1>
+        <p class="text-muted small mb-0">{{ step_lead }}</p>
+      </div>
+
+      {% if locked_out %}
+        <div class="alert alert-danger py-2 small d-flex gap-2" role="alert">
+          <i class="bi bi-shield-exclamation flex-shrink-0"></i>
+          <div>
+            {% blocktrans trimmed %}
+              Too many failed attempts from this connection. Please wait a few
+              minutes before trying again.
+            {% endblocktrans %}
+          </div>
+        </div>
+      {% endif %}
+
+      <form action="" method="post" novalidate>
+
+        {% csrf_token %}
+        {{ wizard.management_form }}
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2 small" role="alert">
+            {% for error in form.non_field_errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% comment %} ---------- 1. Usuario y contrasena ---------- {% endcomment %}
+        {% if wizard.steps.current == 'auth' %}
+
+          {% trans 'User or Email' as username_label %}
+          <div class="form-floating mb-2">
+            <input id="id_auth-username" name="auth-username" type="text"
+                   class="form-control{% if form.username.errors %} is-invalid{% endif %}"
+                   placeholder=" " autocomplete="username" required autofocus
+                   value="{{ form.username.value|default:'' }}">
+            <label for="id_auth-username">{{ username_label }}</label>
+            {% for error in form.username.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          {% trans 'Password' as password_label %}
+          <div class="input-group mb-2">
+            <div class="form-floating">
+              <input id="id_auth-password" name="auth-password" type="password"
+                     class="form-control{% if form.password.errors %} is-invalid{% endif %}"
+                     placeholder=" " autocomplete="current-password" required>
+              <label for="id_auth-password">{{ password_label }}</label>
+            </div>
+            <button class="btn btn-outline-secondary" type="button" id="togglePassword"
+                    tabindex="-1" aria-pressed="false"
+                    aria-label="{% trans 'Show or hide the password' %}">
+              <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
+            </button>
+          </div>
+          {% for error in form.password.errors %}
+            <div class="text-danger small mb-2">{{ error }}</div>
+          {% endfor %}
+
+          <div class="d-grid mt-3">
+            <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+              {% trans 'Sign in' %}
+            </button>
+          </div>
+
+          <div class="text-center mt-3">
+            <button type="submit" name="use_otp" value="1" formnovalidate
+                    class="btn btn-link btn-sm p-0 text-decoration-none">
+              <i class="bi bi-envelope-check me-1"></i>{% trans 'Sign in with a code' %}
+            </button>
+          </div>
+
+        {% comment %} ---------- 2. El codigo al correo ---------- {% endcomment %}
+        {% elif wizard.steps.current == otp_step_name %}
+
+          {% trans 'User or Email' as username_label %}
+          <div class="input-group mb-2">
+            <div class="form-floating">
+              {{ form.identifier }}
+              <label for="{{ form.identifier.id_for_label }}">{{ username_label }}</label>
+            </div>
+            {% comment %}
+              El boton de enviar vive pegado al campo del identificador porque
+              es lo que hace con el. Suelto al final de la pantalla se
+              confundia con el de entrar.
+            {% endcomment %}
+            <button type="submit" name="{{ otp_send_action }}" value="1" formnovalidate
+                    class="btn btn-outline-dark text-nowrap">
+              <i class="bi bi-send me-1"></i>{% if otp_code_sent %}{% trans 'Resend' %}{% else %}{% trans 'Send code' %}{% endif %}
+            </button>
+          </div>
+          {% for error in form.identifier.errors %}
+            <div class="text-danger small mb-2">{{ error }}</div>
+          {% endfor %}
+
+          {% if otp_code_sent %}
+            {% comment %}
+              El aviso dice siempre lo mismo, se haya mandado el correo o no:
+              decir aqui «esa cuenta no existe» convertiria la pantalla en un
+              comprobador de cuentas.
+            {% endcomment %}
+            <div class="alert alert-success py-2 small d-flex gap-2 mb-3" role="status">
+              <i class="bi bi-envelope-check flex-shrink-0"></i>
+              <div>
+                {% trans 'A one-time code has been sent to your email' %}
+                {% if password_failures >= otp_failures_before_offer %}
+                  <div class="mt-1">
+                    {% blocktrans trimmed %}
+                      After several failed password attempts we sent you a code
+                      so you can sign in without getting locked out.
+                    {% endblocktrans %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% else %}
+            <p class="text-muted small mb-3">
+              {% blocktrans trimmed %}
+                Enter your username or email and press «Send code». The code
+                will arrive at the email address on your account.
+              {% endblocktrans %}
+            </p>
+          {% endif %}
+
+          {% trans 'Verification code' as code_label %}
+          <div class="form-floating mb-2">
+            {{ form.code }}
+            <label for="{{ form.code.id_for_label }}">{{ code_label }}</label>
+          </div>
+          {% for error in form.code.errors %}
+            <div class="text-danger small mb-2">{{ error }}</div>
+          {% endfor %}
+
+          <p class="text-muted small mb-3">
+            <i class="bi bi-clock me-1"></i>
+            {% blocktrans trimmed with minutes=otp_minutes %}
+              The code expires in {{ minutes }} minutes.
+            {% endblocktrans %}
+          </p>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+              {% trans 'Sign in' %}
+            </button>
+          </div>
+
+          <div class="text-center mt-3">
+            <button type="submit" name="use_password" value="1" formnovalidate
+                    class="btn btn-link btn-sm p-0 text-decoration-none">
+              <i class="bi bi-key me-1"></i>{% trans 'Sign in with my password instead' %}
+            </button>
+          </div>
+
+        {% comment %} ---------- 3. Segundo factor y respaldo ---------- {% endcomment %}
+        {% elif wizard.steps.current == 'token' or wizard.steps.current == 'backup' %}
+
+          {% if wizard.steps.current == 'token' and device %}
+            <p class="text-muted small mb-3">{{ device|as_verbose_action }}</p>
+          {% endif %}
+
+          {% include "two_factor/_wizard_forms.html" %}
+
+          <div class="d-grid mt-3">
+            <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+              {% trans 'Verify' %}
+            </button>
+          </div>
+
+          {% if other_devices %}
+            <p class="text-center text-muted small mt-3 mb-2">
+              {% trans "Or, alternatively, use one of your other authentication methods:" %}
+            </p>
+            <div class="d-grid gap-2">
+              {% for other in other_devices %}
+                <button name="challenge_device" value="{{ other.persistent_id }}" formnovalidate
+                        class="btn btn-outline-secondary btn-sm" type="submit">
+                  {{ other|as_action }}
+                </button>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if backup_tokens and wizard.steps.current == 'token' %}
+            <div class="text-center mt-3">
+              <button name="wizard_goto_step" type="submit" value="backup" formnovalidate
+                      class="btn btn-link btn-sm p-0 text-decoration-none">
+                {% trans "Use a backup token" %}
+              </button>
+            </div>
+          {% endif %}
+
+        {% endif %}
+      </form>
+
+    </div>
+
+    <div class="card-footer bg-white border-0 px-4 px-md-5 pb-4 pt-0">
+      <div class="small text-center text-muted">
+        {% trans "New user?" %}
+        <a href="{% url 'account:register' %}" class="fw-semibold text-decoration-none">
+          {% trans "Create an account" %}
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock account_content %}
+
+{% block body_custom_js %}
+  {{ block.super }}
+  <script src="{% static 'assets/custom/js/login.js' %}" defer></script>
+{% endblock body_custom_js %}

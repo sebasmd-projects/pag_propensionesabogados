@@ -33,6 +33,10 @@ third_party_urls = [
         r'^rosetta/',
         include('rosetta.urls')
     ),
+    # Las del segundo factor, con el acceso apuntando a la vista del proyecto.
+    # Se cuelgan del raiz y no de la aplicacion de cuentas porque la
+    # biblioteca y `django-otp` las buscan como `two_factor:...`, sin anidar.
+    path('', include('apps.project.common.account.two_factor_urls')),
 ]
 
 admin_urls = [

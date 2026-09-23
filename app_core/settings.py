@@ -1,5 +1,6 @@
 import logging
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from django.contrib import messages
@@ -53,6 +54,9 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    # `axes` va el primero: envuelve al backend de siempre, y su orden en la
+    # lista de aplicaciones es el que decide cuando se registran sus senales.
+    'axes',
     'corsheaders',
     'nested_admin',
     'rest_framework',
@@ -64,6 +68,25 @@ THIRD_PARTY_APPS = [
     'rosetta',
     'django_ckeditor_5',
     'encrypted_model_fields',
+
+    # El acceso: el asistente de `two_factor` sobre `formtools`, con los
+    # dispositivos de `django_otp`. Los dos complementos que se instalan son
+    # los unicos que hacen falta: `otp_totp` para la aplicacion de codigos y
+    # `otp_static` para los codigos de respaldo que se apuntan en papel.
+    'formtools',
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
+]
+
+# `two_factor` se instala **detras** de las aplicaciones del proyecto y no
+# aqui con el resto de terceros. El cargador de plantillas busca por el orden
+# de `INSTALLED_APPS`, y las pantallas de acceso del proyecto --que viven en
+# `apps/project/common/account/templates/two_factor/`-- tienen que ganarle a
+# las de ejemplo que trae la biblioteca. Puesta con los demas terceros, lo que
+# se servia era su pantalla gris con el aviso de «provide a template».
+OVERRIDDEN_THIRD_PARTY_APPS = [
+    'two_factor',
 ]
 
 CUSTOM_APPS = [
@@ -85,10 +108,12 @@ CUSTOM_APPS = [
 
 ALL_CUSTOM_APPS = CUSTOM_APPS
 
-if DEBUG:
-    INSTALLED_APPS = THIRD_PARTY_APPS + ALL_CUSTOM_APPS + DJANGO_APPS
-else:
-    INSTALLED_APPS = THIRD_PARTY_APPS + ALL_CUSTOM_APPS + DJANGO_APPS
+INSTALLED_APPS = (
+    THIRD_PARTY_APPS
+    + ALL_CUSTOM_APPS
+    + OVERRIDDEN_THIRD_PARTY_APPS
+    + DJANGO_APPS
+)
 
 # import_export
 IMPORT_EXPORT_FORMATS = [CSV, HTML, JSON, TSV, XLS, XLSX]
@@ -137,10 +162,17 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Justo detras del de autenticacion, que es de donde saca el usuario: es
+    # quien pone `request.user.is_verified()` para las vistas que exigen
+    # segundo factor.
+    'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.common.utils.middleware.RedirectWWWMiddleware',
     'apps.common.utils.middleware.DetectSuspiciousRequestMiddleware',
+    # El ultimo, como pide su documentacion: solo asi ve la respuesta ya
+    # formada y puede convertir un intento fallido en un bloqueo.
+    'axes.middleware.AxesMiddleware',
 ]
 
 MIDDLEWARE_NOT_INCLUDE = [os.getenv('MIDDLEWARE_NOT_INCLUDE')]
@@ -212,10 +244,52 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'}
 ]
 
+# `AxesStandaloneBackend` va **el primero**: es un guardian que se adelanta a
+# los demas y corta si esa pareja (IP, usuario) ya gasto sus intentos. Detras
+# quedan los dos de siempre, en el mismo orden que tenian.
 AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
     'django.contrib.auth.backends.ModelBackend',
     f'{UTILS_PATH}.backend.EmailOrUsernameModelBackend',
 ]
+
+# --- Acceso ---------------------------------------------------------------
+# A donde se manda a quien no se ha identificado. Es el asistente de
+# `account/urls.py`, que es el de `two_factor` con la entrada por codigo.
+LOGIN_URL = 'account:login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+#: Cuanto vive un codigo de seis cifras.
+LOGIN_OTP_TTL_MINUTES = int(os.getenv('LOGIN_OTP_TTL_MINUTES', 15))
+
+#: A quien escribir si a alguien le llega un codigo que no ha pedido.
+OTP_CONTACT_EMAIL = os.getenv(
+    'OTP_CONTACT_EMAIL', 'info@propensionesabogados.com')
+
+#: A donde contestan los correos de la cuenta.
+ACCOUNT_REPLY_TO = os.getenv(
+    'ACCOUNT_REPLY_TO', 'director@propensionesabogados.com')
+
+#: Lo que sale como emisor en la aplicacion de codigos.
+TWO_FACTOR_TOTP_DIGITS = 6
+TWO_FACTOR_REMEMBER_COOKIE_AGE = None
+
+# --- django-axes: freno al tanteo, sin dejar fuera al despacho ------------
+# Los valores por defecto de `axes` son tres fallos y bloqueo **permanente**
+# por IP. En un despacho que comparte salida a internet, eso es una persona
+# tecleando mal su contrasena tres veces y todo el mundo fuera hasta que
+# alguien entre a la base a mano. El porque de cada linea esta en
+# `apps/common/utils/axes_hooks.py`.
+AXES_LOCKOUT_PARAMETERS = [['ip_address', 'username']]
+AXES_FAILURE_LIMIT = int(os.getenv('AXES_FAILURE_LIMIT', 6))
+AXES_COOLOFF_TIME = timedelta(
+    minutes=int(os.getenv('AXES_COOLOFF_MINUTES', 30))
+)
+AXES_RESET_ON_SUCCESS = True
+AXES_USERNAME_CALLABLE = f'{UTILS_PATH}.axes_hooks.username'
+AXES_CLIENT_IP_CALLABLE = f'{UTILS_PATH}.axes_hooks.client_ip'
+AXES_WHITELIST_CALLABLE = f'{UTILS_PATH}.axes_hooks.is_lockout_exempt'
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',

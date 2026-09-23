@@ -21,7 +21,7 @@ from django.urls import reverse
 from ..choices import Court, Mandate, NoteKind, Procedure, Service, Stage
 from ..emails import REPLY_TO, send_case_note
 from ..models import CaseModel, CaseNoteModel, ClientModel
-from .test_access import make_user
+from .test_access import login_as, make_user
 
 CLAVE = 'una-contrasena-larga-de-verdad'
 
@@ -342,7 +342,7 @@ class NoteFromGestorTests(TestCase):
     def setUp(self):
         mail.outbox = []
         make_user('abogada', gestor=True)
-        self.client.login(username='abogada', password=CLAVE)
+        login_as(self.client, 'abogada')
 
     def datos(self, **cambios):
         datos = {
@@ -382,7 +382,7 @@ class NoteFromGestorTests(TestCase):
     def test_sin_el_grupo_no_se_puede(self):
         self.client.logout()
         make_user('cliente')
-        self.client.login(username='cliente', password=CLAVE)
+        login_as(self.client, 'cliente')
 
         self.client.post(self.url, self.datos())
 
@@ -430,7 +430,7 @@ class StageChangeEmailTests(TestCase):
         mail.outbox = []
         self.case = make_case()
         make_user('abogada', gestor=True)
-        self.client.login(username='abogada', password=CLAVE)
+        login_as(self.client, 'abogada')
         self.url = reverse(
             'case_manager:gestor_case_update', args=[self.case.pk]
         )

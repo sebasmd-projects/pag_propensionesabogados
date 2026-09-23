@@ -1,0 +1,16 @@
+{% extends 'account/layout/account.html' %}
+
+{% comment %}
+  `django-two-factor-auth` hace que todas sus pantallas extiendan esta, asi
+  que basta apuntarla a la maqueta del sitio para que las suyas --dar de alta
+  el segundo factor, el QR, los codigos de respaldo-- salgan como el resto y
+  no con la hoja de estilos de ejemplo de la biblioteca.
+{% endcomment %}
+
+{% block account_content %}
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      {% block content %}{% endblock content %}
+    </div>
+  </div>
+{% endblock account_content %}

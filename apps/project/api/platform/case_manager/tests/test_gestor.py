@@ -23,7 +23,7 @@ from django.urls import reverse
 
 from ..choices import Court, Mandate, Procedure, Service, Stage
 from ..models import CaseFinanceModel, CaseModel, ClientModel
-from .test_access import make_user
+from .test_access import login_as, make_user
 
 CLAVE = 'una-contrasena-larga-de-verdad'
 
@@ -78,7 +78,7 @@ class GestorAccessTests(TestCase):
         aqui con una sesion valida.
         """
         make_user('cliente')
-        self.client.login(username='cliente', password=CLAVE)
+        login_as(self.client, 'cliente')
 
         for ruta in self.rutas:
             with self.subTest(ruta=ruta):
@@ -86,7 +86,7 @@ class GestorAccessTests(TestCase):
 
     def test_el_grupo_del_gestor_entra_en_todas(self):
         make_user('abogada', gestor=True)
-        self.client.login(username='abogada', password=CLAVE)
+        login_as(self.client, 'abogada')
 
         for ruta in self.rutas:
             with self.subTest(ruta=ruta):
@@ -94,7 +94,7 @@ class GestorAccessTests(TestCase):
 
     def test_un_superusuario_entra_en_todas(self):
         make_user('jefe', superuser=True)
-        self.client.login(username='jefe', password=CLAVE)
+        login_as(self.client, 'jefe')
 
         for ruta in self.rutas:
             with self.subTest(ruta=ruta):
@@ -102,7 +102,7 @@ class GestorAccessTests(TestCase):
 
     def test_una_cuenta_desactivada_no_entra(self):
         make_user('exempleado', gestor=True, active=False)
-        self.client.login(username='exempleado', password=CLAVE)
+        login_as(self.client, 'exempleado')
 
         respuesta = self.client.get(self.rutas[0])
 
@@ -147,7 +147,7 @@ class GestorDashboardTests(TestCase):
 
     def setUp(self):
         make_user('abogada', gestor=True)
-        self.client.login(username='abogada', password=CLAVE)
+        login_as(self.client, 'abogada')
 
     def test_las_cifras_son_las_del_modelo(self):
         respuesta = self.client.get(self.url)
@@ -192,7 +192,7 @@ class ClientCrudTests(TestCase):
 
     def setUp(self):
         make_user('abogada', gestor=True)
-        self.client.login(username='abogada', password=CLAVE)
+        login_as(self.client, 'abogada')
 
     def test_se_puede_dar_de_alta_un_cliente(self):
         respuesta = self.client.post(
@@ -280,7 +280,7 @@ class CaseCrudTests(TestCase):
 
     def setUp(self):
         make_user('abogada', gestor=True)
-        self.client.login(username='abogada', password=CLAVE)
+        login_as(self.client, 'abogada')
 
     def datos(self, **cambios):
         datos = {
@@ -400,7 +400,7 @@ class SettlementToggleTests(TestCase):
 
     def setUp(self):
         make_user('abogada', gestor=True)
-        self.client.login(username='abogada', password=CLAVE)
+        login_as(self.client, 'abogada')
 
     def test_autoriza_y_retira(self):
         self.client.post(self.url)
@@ -426,7 +426,7 @@ class SettlementToggleTests(TestCase):
     def test_sin_el_grupo_no_se_puede(self):
         self.client.logout()
         make_user('cliente')
-        self.client.login(username='cliente', password=CLAVE)
+        login_as(self.client, 'cliente')
 
         self.client.post(self.url)
 
@@ -481,7 +481,7 @@ class ClientToCasesTests(TestCase):
 
     def setUp(self):
         make_user('abogada', gestor=True)
-        self.client.login(username='abogada', password=CLAVE)
+        login_as(self.client, 'abogada')
 
     def test_el_listado_de_clientes_enlaza_a_sus_asuntos(self):
         respuesta = self.client.get(
