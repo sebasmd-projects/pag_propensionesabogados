@@ -8,7 +8,7 @@
 
   Espera `field`, y opcionalmente `cols` (las columnas de la rejilla).
 {% endcomment %}
-<div class="{{ cols|default:'col-12 col-md-6' }}">
+<div class="{{ cols|default:'col-12 col-md-6' }}{% if field.field.other_parent_id and not field.field.other_visible %} d-none{% endif %}"{% if field.field.other_parent_id %} data-other-for="{{ field.field.other_parent_id }}"{% if not field.field.other_visible %} hidden{% endif %}{% endif %}>
   {% if field.field.widget.input_type == 'checkbox' %}
     <div class="form-check mt-md-4">
       {{ field }}

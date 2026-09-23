@@ -234,6 +234,11 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
                 choices=[('', '---------'), *((v, v) for v in dict.fromkeys(values))],
             )
 
+        for name in ('service', 'procedure', 'area', 'subtype', 'second_subtype'):
+            field = self.fields[name + '_other']
+            field.other_parent_id = self[name].id_for_label
+            field.other_visible = choices.is_other(value(name))
+
     @property
     def classification_catalog(self):
         return {

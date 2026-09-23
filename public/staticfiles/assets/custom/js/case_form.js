@@ -13,7 +13,9 @@
     ['service', 'procedure', 'area', 'subtype', 'second_subtype'].forEach(name => {
       const input = field(`${name}_other`);
       const visible = /^(otro|otra)/i.test(field(name).value);
-      input.closest('.col-12').hidden = !visible;
+      const container = input.closest('[data-other-for]');
+      container.hidden = !visible;
+      container.classList.toggle('d-none', !visible);
       input.required = visible;
     });
   };
