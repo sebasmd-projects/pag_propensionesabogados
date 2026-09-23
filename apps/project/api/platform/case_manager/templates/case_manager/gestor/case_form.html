@@ -1,15 +1,7 @@
 {% extends 'case_manager/gestor/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
-{% comment %}
-  Alta y edicion de un asunto, con su dinero en el mismo envio.
 
-  Los tres bloques por tipo de tramite --judicial, administrativo y policivo--
-  se pintan todos, plegados. **No se esconden segun el tipo con JavaScript**:
-  la pantalla anterior lo hacia y ahi estaba el problema, porque lo que se
-  esconde se sigue pudiendo mandar. Quien decide cual vale es
-  `CaseModel.clean()`, en el servidor.
-{% endcomment %}
 
 {% block gestor_content %}
   <form method="post" novalidate>
@@ -30,10 +22,15 @@
         <div class="row g-3">
           {% include 'case_manager/gestor/partials/field.html' with field=form.client %}
           {% include 'case_manager/gestor/partials/field.html' with field=form.service %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.service_other %}
           {% include 'case_manager/gestor/partials/field.html' with field=form.procedure %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.procedure_other %}
           {% include 'case_manager/gestor/partials/field.html' with field=form.area %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.area_other %}
           {% include 'case_manager/gestor/partials/field.html' with field=form.subtype %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.subtype_other %}
           {% include 'case_manager/gestor/partials/field.html' with field=form.second_subtype %}
+          {% include 'case_manager/gestor/partials/field.html' with field=form.second_subtype_other %}
           {% include 'case_manager/gestor/partials/field.html' with field=form.stage %}
           {% include 'case_manager/gestor/partials/field.html' with field=form.instance %}
           {% include 'case_manager/gestor/partials/field.html' with field=form.is_active %}
@@ -46,7 +43,7 @@
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                   data-bs-target="#bloqueJudicial">
-            <i class="bi bi-bank me-2"></i>{% trans "Ordinary process" %}
+            <i class="bi bi-bank me-2"></i>{% trans "Representación judicial" %}
           </button>
         </h2>
         <div id="bloqueJudicial" class="accordion-collapse collapse" data-bs-parent="#bloquesDelTramite">
@@ -168,4 +165,6 @@
   {% if object %}
     {% include 'case_manager/gestor/partials/notes.html' %}
   {% endif %}
+  {{ form.classification_catalog|json_script:"case-classification" }}
+  <script src="{% static 'assets/custom/js/case_form.js' %}" defer></script>
 {% endblock gestor_content %}

@@ -40,6 +40,7 @@ claves que ya no existen.
 
 import json
 from pathlib import Path
+from datetime import date
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -204,9 +205,21 @@ class Command(BaseCommand):
             'show_in_dashboard': (record.get('me') or 'si') == 'si',
         }
 
+        # fi tiene precision mensual: se representa con el primer dia del mes.
+        if record.get('fi'):
+            try:
+                raw_date = str(record['fi'])
+                defaults['start_date'] = date.fromisoformat(raw_date + '-01' if len(raw_date) == 7 else raw_date)
+            except ValueError:
+                self.stderr.write(f'  {case.client.identification}: fecha de inicio inválida')
+
         if mandate == choices.Mandate.CONTINGENCY:
             defaults['contingency_percentage'] = _as_int(record.get('pl'))
             defaults['contingency_value'] = _as_int(record.get('vl'))
+            if defaults['contingency_percentage'] == 0:
+                defaults['paid_amount'] = _as_int(record.get('pr'))
+                if record.get('estadoPagoV29') == 'PAGADO':
+                    defaults['paid_amount'] = max(defaults['paid_amount'], defaults['contingency_value'])
         elif mandate == choices.Mandate.PAYMENT:
             defaults['agreed_fee'] = _as_int(record.get('hp'))
             defaults['paid_amount'] = _as_int(record.get('ge'))

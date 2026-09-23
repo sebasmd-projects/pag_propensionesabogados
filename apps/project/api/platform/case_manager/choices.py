@@ -367,22 +367,36 @@ CONTINGENCY_PERCENTAGES = (0, 10, 20, 30, 40, 50)
 
 
 def subtypes_for(service: str, area: str) -> tuple[str, ...]:
-    """
-    Los subtipos validos para un servicio y un area.
+    """Catalogos actuales y especialidades por area de expedientes anteriores."""
+    if service == Service.JUDICIAL:
+        values = tuple(JUDICIAL_SUBTYPES) + SUBTYPES_BY_AREA.get(area, ())
+    elif service == Service.CONCILIATION:
+        values = SUBTYPES_BY_AREA.get(area, ())
+    else:
+        values = SUBTYPES_BY_SERVICE.get(service, ())
+    return tuple(dict.fromkeys((*values, OTHER)))
 
-    Reproduce la regla de la pantalla: `Representación judicial` y
-    `Conciliación` sacan el subtipo del **area**; los demas servicios lo sacan
-    del **servicio**. Cuando el servicio no ofrece ninguno, cualquier texto
-    vale y devuelve la tupla vacia.
-    """
-    if service not in (Service.JUDICIAL, Service.CONCILIATION):
-        return SUBTYPES_BY_SERVICE.get(service, ())
 
-    subtypes = SUBTYPES_BY_AREA.get(area, ())
-    if not subtypes:
-        return ()
-    # La pantalla anade siempre `Otro` al final si el area no lo trae ya.
-    return subtypes if OTHER in subtypes else subtypes + (OTHER,)
+# El formato exportado tambien usa st como jurisdiccion y st2 como especialidad.
+# Se conservan los subtipos directos por area para no reinterpretar expedientes.
+JUDICIAL_SUBTYPES = {
+    'Laboral': ('Pensión de vejez',) + SUBTYPES_BY_AREA[Area.PENSION] + SUBTYPES_BY_AREA[Area.LABOR],
+    'Civil': SUBTYPES_BY_AREA[Area.CIVIL],
+    'Familia': SUBTYPES_BY_AREA[Area.FAMILY],
+    'Sucesiones': SUBTYPES_BY_AREA[Area.INHERITANCE],
+    'Administrativo': SUBTYPES_BY_AREA[Area.ADMINISTRATIVE],
+    'Penal': SUBTYPES_BY_AREA[Area.CRIMINAL],
+    'Superintendencias': SUBTYPES_BY_AREA[Area.CONSUMER] + SUBTYPES_BY_AREA[Area.COMMERCIAL] + SUBTYPES_BY_AREA[Area.INSOLVENCY],
+}
+
+
+def second_subtypes_for(service: str, subtype: str) -> tuple[str, ...]:
+    values = JUDICIAL_SUBTYPES.get(subtype, ()) if service == Service.JUDICIAL else ()
+    return tuple(dict.fromkeys((*values, OTHER)))
+
+
+def is_other(value: str) -> bool:
+    return (value or '').lower().startswith(('otro', 'otra'))
 
 
 def instances_for(service: str) -> tuple[str, ...]:

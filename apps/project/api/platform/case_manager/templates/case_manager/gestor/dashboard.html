@@ -89,7 +89,7 @@
                     <td>
                       <a href="{% url 'case_manager:gestor_case_update' row.case.pk %}"
                          class="text-decoration-none">{{ row.case.client.full_name }}</a>
-                      <div class="text-muted small">{{ row.case.get_service_display }}</div>
+                      <div class="text-muted small">{{ row.case.service_display }}</div>
                     </td>
                     <td class="text-end">${{ row.agreed|intcomma }}</td>
                     <td class="text-end">${{ row.paid|intcomma }}</td>

@@ -92,7 +92,7 @@
                 <tr>
                   <td style="padding:14px 16px;font-size:13px;line-height:1.6;color:#4b5b6b;">
                     <strong style="color:#071d35;">{% trans "Your case" %}</strong><br>
-                    {% trans "Service" %}: {{ case.get_service_display }}<br>
+                    {% trans "Service" %}: {{ case.service_display }}<br>
                     {% if case.public_reference != "—" %}
                       {% trans "Case number" %}: {{ case.public_reference }}<br>
                     {% endif %}

@@ -126,7 +126,8 @@ class CaseAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
         (None, {
             'fields': (
                 'client', 'service', 'procedure', 'area', 'subtype',
-                'second_subtype', 'stage', 'instance', 'is_active',
+                'second_subtype', 'service_other', 'procedure_other', 'area_other',
+                'subtype_other', 'second_subtype_other', 'stage', 'instance', 'is_active',
             ),
         }),
         (_('Ordinary process'), {

@@ -17,6 +17,7 @@ from django import forms
 from django.forms import inlineformset_factory
 from django.utils.translation import gettext_lazy as _
 
+from . import choices
 from .models import (CaseFinanceModel, CaseModel, CaseNoteModel,
                      ClientModel)
 
@@ -141,6 +142,9 @@ class BootstrapFormMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if hasattr(self, "configure_fields"):
+            self.configure_fields()
+
         for nombre, campo in self.fields.items():
             widget = campo.widget
             clase = self.CLASES_POR_WIDGET.get(
@@ -205,11 +209,52 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
         ),
     )
 
+    def configure_fields(self):
+        def value(name):
+            if self.is_bound:
+                return self.data.get(self.add_prefix(name), '')
+            return self.initial.get(name, '')
+
+        service, area, subtype = value('service'), value('area'), value('subtype')
+        catalogs = {
+            'subtype': choices.subtypes_for(service, area),
+            'second_subtype': choices.second_subtypes_for(service, subtype),
+            'instance': choices.instances_for(service),
+        }
+        # El segundo subnivel antiguo era libre fuera de las jurisdicciones.
+        # Permitir conservar exactamente su valor, nunca uno arbitrario enviado.
+        old_second = self.instance.second_subtype
+        if (old_second and subtype not in choices.JUDICIAL_SUBTYPES
+                and service == self.instance.service
+                and subtype == self.instance.subtype):
+            catalogs['second_subtype'] = (*catalogs['second_subtype'], old_second)
+        for name, values in catalogs.items():
+            self.fields[name] = forms.ChoiceField(
+                label=self.fields[name].label, required=False,
+                choices=[('', '---------'), *((v, v) for v in dict.fromkeys(values))],
+            )
+
+    @property
+    def classification_catalog(self):
+        return {
+            'subtypes': {
+                s: {a: choices.subtypes_for(s, a) for a in ('', *choices.Area.values)}
+                for s in choices.Service.values
+            },
+            'seconds': {
+                s: {st: choices.second_subtypes_for(s, st)
+                    for st in choices.JUDICIAL_SUBTYPES}
+                for s in choices.Service.values
+            },
+            'instances': choices.INSTANCES_BY_SERVICE,
+        }
+
     class Meta:
         model = CaseModel
         fields = (
             'client', 'service', 'procedure', 'area', 'subtype',
-            'second_subtype', 'stage', 'instance', 'is_active',
+            'second_subtype', 'service_other', 'procedure_other', 'area_other',
+            'subtype_other', 'second_subtype_other', 'stage', 'instance', 'is_active',
             'case_number', 'court', 'city',
             'sector', 'entity', 'administrative_case_number',
             'administrative_city',

@@ -91,7 +91,7 @@
           {% for case in cases %}
             <tr{% if not case.is_active %} class="opacity-75"{% endif %}>
               <td>
-                {{ case.get_service_display }}
+                {{ case.service_display }}
                 {% if not case.is_active %}
                   <div><span class="badge text-bg-secondary">{% trans "Inactive" %}</span></div>
                 {% endif %}
@@ -99,7 +99,7 @@
               <td>
                 {{ case.area|default:"—" }}
                 {% if case.subtype %}
-                  <div class="text-muted small">{{ case.subtype }}</div>
+                  <div class="text-muted small">{{ case.subtype_display }}</div>
                 {% endif %}
               </td>
               <td>{{ case.get_stage_display }}</td>

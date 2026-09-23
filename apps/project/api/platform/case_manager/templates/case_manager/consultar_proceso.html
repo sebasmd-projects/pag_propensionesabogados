@@ -237,7 +237,7 @@
                   <div class="card-body p-4">
 
                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
-                      <h3 class="h5 mb-0">{{ case.get_service_display }}</h3>
+                      <h3 class="h5 mb-0">{{ case.service_display }}</h3>
                       {% if cases|length > 1 %}
                         <span class="badge text-bg-light">
                           {% blocktrans with number=forloop.counter total=cases|length %}Case {{ number }} of {{ total }}{% endblocktrans %}
@@ -257,13 +257,13 @@
                       {% include 'case_manager/partials/field.html' with label=_("Current stage / instance") value=case.public_instance %}
                       {% include 'case_manager/partials/field.html' with label=_("Case number / reference") value=case.public_reference %}
                       {% if case.area %}
-                        {% include 'case_manager/partials/field.html' with label=_("Area / case type") value=case.get_area_display %}
+                        {% include 'case_manager/partials/field.html' with label=_("Area / case type") value=case.area_display %}
                       {% endif %}
                       {% if case.subtype %}
-                        {% include 'case_manager/partials/field.html' with label=_("Subtype / speciality") value=case.subtype %}
+                        {% include 'case_manager/partials/field.html' with label=_("Subtype / speciality") value=case.subtype_display %}
                       {% endif %}
                       {% if case.second_subtype %}
-                        {% include 'case_manager/partials/field.html' with label=_("Second sublevel") value=case.second_subtype %}
+                        {% include 'case_manager/partials/field.html' with label=_("Second sublevel") value=case.second_subtype_display %}
                       {% endif %}
                       {% include 'case_manager/partials/field.html' with label=_("Contract modality") value=case.public_mandate %}
                       {% include 'case_manager/partials/field.html' with label=_("Last update") value=case.updated|date:"d/m/Y" %}

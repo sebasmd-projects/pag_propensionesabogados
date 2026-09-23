@@ -265,6 +265,26 @@ class CaseModel(TimeStampedModel):
         null=True
     )
 
+    service_other = models.CharField(
+        _('Otro servicio: ¿cuál?'), max_length=150, blank=True, default=''
+    )
+
+    procedure_other = models.CharField(
+        _('Otro trámite: ¿cuál?'), max_length=150, blank=True, default=''
+    )
+
+    area_other = models.CharField(
+        _('Otra área: ¿cuál?'), max_length=150, blank=True, default=''
+    )
+
+    subtype_other = models.CharField(
+        _('Otro subtipo: ¿cuál?'), max_length=150, blank=True, default=''
+    )
+
+    second_subtype_other = models.CharField(
+        _('Otro segundo subnivel: ¿cuál?'), max_length=150, blank=True, default=''
+    )
+
     stage = models.PositiveSmallIntegerField(
         _('stage'),
         choices=choices.Stage.choices,
@@ -447,11 +467,41 @@ class CaseModel(TimeStampedModel):
         mas concreto que haya, de dentro hacia fuera.
         """
         return (
-            self.second_subtype
-            or self.subtype
-            or self.get_service_display()
+            self.second_subtype_display
+            or self.subtype_display
+            or self.service_display
             or _('legal service entrusted')
         )
+
+    @property
+    def service_display(self):
+        if choices.is_other(self.service) and self.service_other:
+            return self.service_other
+        return self.service
+
+    @property
+    def procedure_display(self):
+        if choices.is_other(self.procedure) and self.procedure_other:
+            return self.procedure_other
+        return self.procedure
+
+    @property
+    def area_display(self):
+        if choices.is_other(self.area) and self.area_other:
+            return self.area_other
+        return self.area
+
+    @property
+    def subtype_display(self):
+        if choices.is_other(self.subtype) and self.subtype_other:
+            return self.subtype_other
+        return self.subtype
+
+    @property
+    def second_subtype_display(self):
+        if choices.is_other(self.second_subtype) and self.second_subtype_other:
+            return self.second_subtype_other
+        return self.second_subtype
 
     @property
     def public_reference(self) -> str:
@@ -522,6 +572,17 @@ class CaseModel(TimeStampedModel):
                 'This subtype does not belong to the selected service and area.'
             )
 
+        # Valida el segundo nivel cuando existe un catalogo para la jurisdiccion.
+        if (self.service == choices.Service.JUDICIAL
+                and self.subtype in choices.JUDICIAL_SUBTYPES
+                and self.second_subtype
+                and self.second_subtype not in choices.second_subtypes_for(self.service, self.subtype)):
+            errors['second_subtype'] = _('Este segundo subnivel no corresponde al subtipo seleccionado.')
+
+        for name in ('service', 'procedure', 'area', 'subtype', 'second_subtype'):
+            if choices.is_other(getattr(self, name)) and not getattr(self, name + '_other', '').strip():
+                errors[name + '_other'] = _('Especifique cuál.')
+
         valid_instances = choices.instances_for(self.service)
         if self.instance and valid_instances and self.instance not in valid_instances:
             errors['instance'] = _(
@@ -570,7 +631,7 @@ class CaseFinanceQuerySet(models.QuerySet):
             | Q(
                 mandate=choices.Mandate.CONTINGENCY,
                 contingency_percentage=0,
-                contingency_value__gt=0,
+                contingency_value__gt=F('paid_amount'),
             )
         )
 
@@ -614,13 +675,17 @@ class CaseFinanceQuerySet(models.QuerySet):
             agreed_payment=Coalesce(
                 Sum('agreed_fee', filter=payment), zero
             ),
-            paid=Coalesce(Sum('paid_amount', filter=payment), zero),
+            paid=Coalesce(Sum('paid_amount', filter=payment | fixed), zero),
             balance_payment=Coalesce(
                 Sum(
                     Greatest(F('agreed_fee') - F('paid_amount'), zero),
                     filter=payment,
                 ),
                 zero,
+            ),
+            balance_fixed=Coalesce(
+                Sum(Greatest(F('contingency_value') - F('paid_amount'), zero),
+                    filter=fixed), zero,
             ),
             agreed_fixed=Coalesce(
                 Sum('contingency_value', filter=fixed), zero
@@ -631,9 +696,7 @@ class CaseFinanceQuerySet(models.QuerySet):
         )
 
         agreed = aggregated['agreed_payment'] + aggregated['agreed_fixed']
-        # La cuota litis fija esta cerrada y nada de ella se ha cobrado: entra
-        # entera al saldo, igual que en la pantalla aprobada.
-        balance = aggregated['balance_payment'] + aggregated['agreed_fixed']
+        balance = aggregated['balance_payment'] + aggregated['balance_fixed']
 
         paid = aggregated['paid']
         expectation = aggregated['expectation']
@@ -734,7 +797,7 @@ class CaseFinanceModel(TimeStampedModel):
 
     ===================  ==========================================
     `Modalidad de pago`  `agreed_fee` y `paid_amount`; debe la resta
-    `Cuota litis` 0 %    `contingency_value`: valor fijo cerrado, se debe entero
+    `Cuota litis` 0 %    `contingency_value` menos `paid_amount`: valor fijo
     `Cuota litis` > 0 %  `contingency_value`: expectativa, no es deuda
     `Ad honorem`         nada; no hay dinero
     `Curaduría`          nada; no hay dinero
@@ -823,8 +886,13 @@ class CaseFinanceModel(TimeStampedModel):
 
     @property
     def paid(self) -> int:
-        """Lo que ya entro. Solo la modalidad de pago registra abonos."""
-        return self.paid_amount if self.mandate == choices.Mandate.PAYMENT else 0
+        """Abonos de modalidades de pago y cuotas litis de valor fijo."""
+        if self.mandate == choices.Mandate.PAYMENT or (
+            self.mandate == choices.Mandate.CONTINGENCY
+            and not self.is_contingency_expectation
+        ):
+            return self.paid_amount
+        return 0
 
     @property
     def balance(self) -> int:
@@ -912,12 +980,10 @@ class CaseFinanceModel(TimeStampedModel):
                 'A payment modality does not carry a contingency value.'
             )
 
-        if self.mandate == choices.Mandate.CONTINGENCY and (
-            self.agreed_fee or self.paid_amount
-        ):
-            errors['agreed_fee'] = _(
-                'A contingency does not carry an agreed fee or payments.'
-            )
+        if self.mandate == choices.Mandate.CONTINGENCY and self.agreed_fee:
+            errors['agreed_fee'] = _('Una cuota litis no admite honorarios pactados.')
+        if self.is_contingency_expectation and self.paid_amount:
+            errors['paid_amount'] = _('Solo la cuota litis de valor fijo admite abonos.')
 
         if errors:
             raise ValidationError(errors)

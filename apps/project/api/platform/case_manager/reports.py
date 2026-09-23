@@ -157,7 +157,7 @@ def _fila_de_asunto(case: CaseModel) -> list[str]:
 
     if finance is None:
         return [
-            case.get_service_display() or VACIO,
+            case.service_display or VACIO,
             case.area or VACIO,
             case.get_stage_display(),
             VACIO, VACIO, VACIO, VACIO, VACIO, VACIO,
@@ -170,7 +170,7 @@ def _fila_de_asunto(case: CaseModel) -> list[str]:
     )
 
     return [
-        case.get_service_display() or VACIO,
+        case.service_display or VACIO,
         case.area or VACIO,
         case.get_stage_display(),
         finance.elapsed,
