@@ -1,0 +1,154 @@
+{% extends 'case_manager/gestor/base.html' %}
+{% load i18n humanize case_manager_extras %}
+
+{% comment %}
+  La ficha de un cliente: quien es, que le debe al despacho y por que.
+
+  Es la «ficha financiera individual» del diseno aprobado, con una diferencia
+  que viene del modelo: alli un cliente **era** un asunto --una fila por
+  cedula-- y aqui puede tener varios. Por eso la ficha suma sus asuntos y
+  ademas los desglosa; ensenar solo el ultimo es el mismo fallo que ya se
+  corrigio en el portal publico.
+{% endcomment %}
+
+{% block gestor_actions %}
+  <div class="d-flex gap-2 flex-wrap">
+    <a class="btn btn-outline-secondary"
+       href="{% url 'case_manager:gestor_client_report' client.pk %}">
+      <i class="bi bi-file-earmark-word me-1"></i>{% trans "Download file (Word)" %}
+    </a>
+    <a class="btn btn-outline-secondary"
+       href="{% url 'case_manager:gestor_client_update' client.pk %}">
+      <i class="bi bi-pencil me-1"></i>{% trans "Edit client" %}
+    </a>
+    <a class="btn btn-primary"
+       href="{% url 'case_manager:gestor_case_create' %}?cliente={{ client.pk }}">
+      <i class="bi bi-plus-lg me-1"></i>{% trans "New case" %}
+    </a>
+  </div>
+{% endblock gestor_actions %}
+
+{% block gestor_content %}
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+          <h2 class="h5 mb-1">{{ client.full_name }}</h2>
+          <p class="text-muted small mb-0">
+            {% trans "Identification" %}:
+            <span class="font-monospace">{{ client.identification|grouped_identification }}</span>
+          </p>
+        </div>
+        <div class="text-md-end">
+          {% if client.is_active %}
+            <span class="badge text-bg-success">{% trans "In force" %}</span>
+          {% else %}
+            <span class="badge text-bg-secondary">{% trans "Inactive" %}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <dl class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-0">
+        {% include 'case_manager/partials/field.html' with label=_("Email") value=client.email|default:"—" %}
+        {% include 'case_manager/partials/field.html' with label=_("Phone") value=client.phone|default:"—" %}
+        {% comment %}
+          La clave se ensena porque hay que poder decirsela por telefono: es
+          derivada del nombre y la cedula, no un secreto que el despacho
+          custodie.
+        {% endcomment %}
+        {% include 'case_manager/partials/field.html' with label=_("Access key") value=client.access_key %}
+        {% include 'case_manager/partials/field.html' with label=_("Cases") value=cases|length %}
+      </dl>
+    </div>
+  </div>
+
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Agreed") value=totals.agreed icon="file-earmark-check" tone="secondary" %}
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Collected") value=totals.paid icon="cash-stack" tone="success" %}
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Outstanding balance") value=totals.balance icon="hourglass-split" tone="warning" %}
+    {% include 'case_manager/gestor/partials/stat.html' with label=_("Contingency expectation") value=totals.expectation icon="graph-up-arrow" tone="info" %}
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-0 pt-3 px-4">
+      <h2 class="h6 fw-bold mb-0">
+        <i class="bi bi-folder2-open me-1"></i>{% trans "Cases of this client" %}
+      </h2>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr class="text-uppercase small">
+            <th scope="col">{% trans "Service" %}</th>
+            <th scope="col">{% trans "Area / subtype" %}</th>
+            <th scope="col">{% trans "Stage" %}</th>
+            <th scope="col">{% trans "Elapsed" %}</th>
+            <th scope="col">{% trans "Modality" %}</th>
+            <th scope="col" class="text-end">{% trans "Agreed / expectation" %}</th>
+            <th scope="col" class="text-end">{% trans "Paid" %}</th>
+            <th scope="col" class="text-end">{% trans "Owes" %}</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for case in cases %}
+            <tr{% if not case.is_active %} class="opacity-75"{% endif %}>
+              <td>
+                {{ case.get_service_display }}
+                {% if not case.is_active %}
+                  <div><span class="badge text-bg-secondary">{% trans "Inactive" %}</span></div>
+                {% endif %}
+              </td>
+              <td>
+                {{ case.area|default:"—" }}
+                {% if case.subtype %}
+                  <div class="text-muted small">{{ case.subtype }}</div>
+                {% endif %}
+              </td>
+              <td>{{ case.get_stage_display }}</td>
+              <td>{{ case.finance.elapsed|default:"—" }}</td>
+              <td>
+                {{ case.finance.get_mandate_display|default:"—" }}
+                {% if case.finance.contingency_kind %}
+                  <div class="text-muted small">
+                    {{ case.finance.contingency_kind }}
+                    {% if case.finance.is_contingency_expectation %}
+                      &middot; {{ case.finance.contingency_percentage }} %
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </td>
+              {% comment %}
+                Lo pactado y la expectativa comparten columna porque nunca
+                coinciden: una cuota litis sobre 0 % no tiene nada cerrado, y
+                una modalidad de pago no tiene expectativa. Dos columnas
+                dejarian una siempre vacia en cada fila.
+              {% endcomment %}
+              <td class="text-end">
+                ${{ case.finance.agreed|default:case.finance.expectation|default:0|intcomma }}
+              </td>
+              <td class="text-end">${{ case.finance.paid|default:0|intcomma }}</td>
+              <td class="text-end fw-semibold">${{ case.finance.balance|default:0|intcomma }}</td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{% url 'case_manager:gestor_case_update' case.pk %}">
+                  <i class="bi bi-pencil"></i>
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="9" class="text-muted text-center py-4">
+                {% trans "This client has no cases yet." %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% endblock gestor_content %}

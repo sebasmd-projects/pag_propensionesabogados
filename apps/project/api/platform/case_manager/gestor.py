@@ -35,7 +35,7 @@ from django.urls import reverse
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import ListView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView, View
 from django.views.generic.edit import CreateView, UpdateView
 
 from .access import GestorRequiredMixin
@@ -43,6 +43,7 @@ from .choices import NoteKind
 from .emails import send_case_note
 from .forms import CaseFinanceFormSet, CaseForm, CaseNoteForm, ClientForm
 from .models import (CaseFinanceModel, CaseModel, CaseNoteModel, ClientModel)
+from .reports import client_report, crm_report
 
 #: Filas por pagina. La paginacion con filtros y ordenamiento propios esta
 #: fuera del alcance contratado; esto es solo no servir mil filas de una vez.
@@ -148,6 +149,69 @@ class ClientListView(GestorRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['q'] = self.request.GET.get('q', '')
         return context
+
+
+class ClientDetailView(GestorRequiredMixin, DetailView):
+    """
+    La ficha de un cliente: quien es, que le debe al despacho y por que.
+
+    Es la «ficha financiera individual» del panel aprobado, con una diferencia
+    que viene del modelo y no de un capricho: alli un cliente **era** un
+    asunto --una fila de `localStorage` por cedula-- y aqui un cliente puede
+    tener varios. Asi que la ficha suma sus asuntos y ademas los desglosa;
+    ensenar solo el ultimo, que es lo que haria una traduccion literal de
+    aquella pantalla, es el mismo fallo que ya se corrigio en el portal.
+
+    Las cifras de cabecera salen de `totals()` sobre **sus** asuntos: la misma
+    consulta y las mismas reglas que el panel general, para que la ficha y el
+    panel no puedan acabar diciendo cosas distintas del mismo cliente.
+    """
+
+    model = ClientModel
+    template_name = 'case_manager/gestor/client_detail.html'
+    context_object_name = 'client'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cliente = self.object
+
+        context['totals'] = CaseFinanceModel.objects.filter(
+            case__client=cliente
+        ).totals()
+
+        context['cases'] = (
+            CaseModel.objects.filter(client=cliente)
+            .select_related('finance')
+            .prefetch_related('notes')
+            .order_by('-is_active', '-updated')
+        )
+        context['gestor_title'] = cliente.full_name
+        context['gestor_subtitle'] = _('Client file and financial summary.')
+        context['gestor_section'] = 'clients'
+        return context
+
+
+class ClientReportView(GestorRequiredMixin, DetailView):
+    """
+    La ficha de un cliente, descargada como `.docx`.
+
+    Es una vista y no un boton de JavaScript porque el documento lo arma el
+    servidor: la pantalla anterior lo construia en el navegador concatenando
+    HTML con lo que tuviera `localStorage` delante, asi que el informe lo
+    emitia quien lo leia y decia lo que hubiera en esa maquina.
+    """
+
+    model = ClientModel
+
+    def render_to_response(self, context, **kwargs):
+        return client_report(self.object)
+
+
+class CrmReportView(GestorRequiredMixin, View):
+    """El consolidado del portafolio, descargado como `.docx`."""
+
+    def get(self, request, *args, **kwargs):
+        return crm_report()
 
 
 class ClientCreateView(GestorRequiredMixin, CreateView):

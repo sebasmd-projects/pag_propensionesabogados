@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 23:22-0500\n"
+"POT-Creation-Date: 2026-09-23 09:01-0500\n"
 "PO-Revision-Date: 2026-08-23 17:40-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: Propensiones Abogados\n"
@@ -855,7 +855,7 @@ msgstr ""
 msgid "Official Mineral Trading Company"
 msgstr "Empresa de Comercialización Oficial de Minerales"
 
-#: templates/pages/sections/9_gold.html:16
+#: templates/pages/sections/9_gold.html:19
 msgid ""
 "Institutional structure specializing in the national and international "
 "marketing of precious metals, with reach in the United States, Canada, "
@@ -865,7 +865,7 @@ msgstr ""
 "internacional de metales preciosos, con alcance en Estados Unidos, Canadá, "
 "Europa y Sudáfrica."
 
-#: templates/pages/sections/9_gold.html:17
+#: templates/pages/sections/9_gold.html:20
 msgid ""
 "Through Propensiones S.A.S., comprehensive processes of purchase, sale, "
 "transformation, benefit, intermediation and export of minerals such as gold,"
@@ -1056,11 +1056,23 @@ msgstr "Plataformas"
 msgid "Certification"
 msgstr "Certificación"
 
-#: templates/partials/header.html:87 templates/partials/header.html:88
+#: templates/partials/header.html:89
+msgid "Case manager"
+msgstr "Gestor de procesos"
+
+#: templates/partials/header.html:94 templates/partials/header.html:100
+msgid "Sign out"
+msgstr "Cerrar sesión"
+
+#: templates/partials/header.html:107
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+#: templates/partials/header.html:128 templates/partials/header.html:129
 msgid "Switch between light and dark mode"
 msgstr "Cambiar entre modo claro y oscuro"
 
-#: templates/partials/header.html:96
+#: templates/partials/header.html:137
 msgid "Language"
 msgstr "Idioma"
 

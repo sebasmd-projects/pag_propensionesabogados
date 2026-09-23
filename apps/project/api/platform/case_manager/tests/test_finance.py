@@ -330,3 +330,34 @@ class PortfolioChartTests(TestCase):
                   agreed_fee=1_000_000, show_in_dashboard=False)
 
         self.assertEqual(CaseFinanceModel.objects.by_area(), [])
+
+
+class ManagerExposeLasPreguntasTests(TestCase):
+    """
+    Que el gestor del modelo expone lo que el panel le pide.
+
+    `CaseFinanceQuerySet` se instala con `as_manager()`, que copia sus metodos
+    publicos al gestor. Es automatico, asi que parece que no hay nada que
+    probar; lo que se rompe en silencio es lo otro: mover un metodo fuera de
+    la clase --o sangrarlo mal-- lo deja como funcion suelta, el modulo sigue
+    importando, las pruebas que lo llaman directamente siguen pasando, y lo
+    unico que falla es la pantalla, con un `AttributeError` en produccion.
+    """
+
+    def test_el_gestor_tiene_las_preguntas_del_panel(self):
+        for nombre in ('in_dashboard', 'debtors', 'expectations',
+                       'totals', 'by_area'):
+            with self.subTest(pregunta=nombre):
+                self.assertTrue(
+                    hasattr(CaseFinanceModel.objects, nombre),
+                    f'`CaseFinanceModel.objects.{nombre}` no existe: '
+                    f'seguramente se salio de `CaseFinanceQuerySet`.',
+                )
+
+    def test_y_se_pueden_llamar_sobre_una_base_vacia(self):
+        """
+        Tenerlo no basta: `totals()` y `by_area()` devuelven estructuras, no
+        querysets, y un despacho recien instalado no tiene ni una fila.
+        """
+        self.assertEqual(CaseFinanceModel.objects.totals()['agreed'], 0)
+        self.assertEqual(CaseFinanceModel.objects.by_area(), [])

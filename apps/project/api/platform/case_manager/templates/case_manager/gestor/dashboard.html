@@ -11,6 +11,13 @@
   dos veces lo mismo.
 {% endcomment %}
 
+{% block gestor_actions %}
+  <a class="btn btn-outline-secondary"
+     href="{% url 'case_manager:gestor_crm_report' %}">
+    <i class="bi bi-file-earmark-word me-1"></i>{% trans "Download report (Word)" %}
+  </a>
+{% endblock gestor_actions %}
+
 {% block gestor_content %}
 
   <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-4">

@@ -173,6 +173,14 @@
   box-shadow: 0 0 30px 10px rgba(0, 0, 0, .45);
 }
 
+/*
+ * La linea que separa las plataformas aliadas de los enlaces de la cuenta
+ * esta escrita en negro translucido, que sobre un menu oscuro no se ve.
+ */
+:root[data-bs-theme="dark"] .navmenu .platforms-dropdown .platforms-divider {
+  border-top-color: rgba(255, 255, 255, .14);
+}
+
 /* El preloader dibuja su aro con un blanco fijo. */
 :root[data-bs-theme="dark"] #preloader:before {
   border-color: var(--accent-color) transparent var(--accent-color) transparent;

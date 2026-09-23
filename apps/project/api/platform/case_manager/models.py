@@ -33,7 +33,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator, RegexVa
 from django.db import models
 from django.db.models import F, Q, Sum, Value
 from django.db.models.functions import Coalesce, Greatest
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from apps.common.utils.models import TimeStampedModel
 
@@ -804,6 +806,59 @@ class CaseFinanceModel(TimeStampedModel):
     def expectation(self) -> int:
         """Lo que se espera ganar si el pleito sale. No es deuda."""
         return self.contingency_value if self.is_contingency_expectation else 0
+
+    @property
+    def contingency_kind(self) -> str:
+        """
+        De que clase es la cuota litis: fija o por expectativa.
+
+        Es la columna «Tipo cuota litis» del cuadro aprobado, y existe porque
+        la misma modalidad significa dos cosas distintas segun el porcentaje.
+        Quien lee el cuadro no tiene por que acordarse de esa regla; la
+        columna se la dice.
+        """
+        if self.mandate != choices.Mandate.CONTINGENCY:
+            return ''
+
+        return (
+            _('BY EXPECTATION') if self.is_contingency_expectation
+            else _('FIXED')
+        )
+
+    @property
+    def elapsed(self) -> str:
+        """
+        Cuanto lleva abierto el asunto, en anos y meses.
+
+        En meses y no en dias: el campo de inicio es un mes --no se guarda el
+        dia-- y decir «847 dias» sobre un dato que solo tiene precision de mes
+        seria inventarse una exactitud que no hay.
+
+        Se cuenta hasta hoy. Un inicio en el futuro --un error de captura-- da
+        cero y no un negativo, que en la tabla se leeria como un asunto que
+        empieza dentro de tres meses.
+        """
+        if not self.start_date:
+            return '—'
+
+        today = timezone.localdate()
+        months = (
+            (today.year - self.start_date.year) * 12
+            + today.month - self.start_date.month
+        )
+        months = max(0, months)
+        years, rest = divmod(months, 12)
+
+        if years and rest:
+            return _('%(years)s and %(months)s') % {
+                'years': ngettext('%d year', '%d years', years) % years,
+                'months': ngettext('%d month', '%d months', rest) % rest,
+            }
+
+        if years:
+            return ngettext('%d year', '%d years', years) % years
+
+        return ngettext('%d month', '%d months', months) % months
 
     def clean(self):
         """Que cada modalidad solo traiga las cifras que le corresponden."""

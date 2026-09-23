@@ -42,7 +42,16 @@
             <tr>
               <td class="font-monospace">{{ client.identification|grouped_identification }}</td>
               <td>
-                {{ client.full_name }}
+                {% comment %}
+                  El nombre es el enlace a la ficha. Es donde uno pulsa cuando
+                  quiere saber de alguien, y hasta ahora no llevaba a ningun
+                  sitio: habia que adivinar que el contador de asuntos era la
+                  unica puerta.
+                {% endcomment %}
+                <a class="fw-semibold text-decoration-none"
+                   href="{% url 'case_manager:gestor_client_detail' client.pk %}">
+                  {{ client.full_name }}
+                </a>
                 {% if client.email %}<div class="text-muted small">{{ client.email }}</div>{% endif %}
               </td>
               <td>

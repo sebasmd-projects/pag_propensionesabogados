@@ -194,7 +194,10 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-                f'{UTILS_PATH}.context_processors.custom_processors'
+                f'{UTILS_PATH}.context_processors.custom_processors',
+                # La cabecera del sitio ensena el enlace al gestor solo a
+                # quien puede entrar. El porque, en ese modulo.
+                'apps.project.api.platform.case_manager.context_processors.gestor_access'
             ],
         },
     },

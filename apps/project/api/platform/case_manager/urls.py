@@ -16,7 +16,8 @@ from django.utils.translation import gettext_lazy as _
 
 from .gestor import (CaseCreateView, CaseListView, CaseNoteCreateView,
                      CaseToggleSettlementView, CaseUpdateView,
-                     ClientCreateView, ClientListView, ClientUpdateView,
+                     ClientCreateView, ClientDetailView, ClientListView,
+                     ClientReportView, ClientUpdateView, CrmReportView,
                      GestorDashboardView)
 from .views import PazYSalvoView, PublicCaseQueryView
 
@@ -72,6 +73,16 @@ gestor_urls = [
         name='gestor_client_create'
     ),
     path(
+        'gestor/clientes/<uuid:pk>/ficha/',
+        ClientDetailView.as_view(),
+        name='gestor_client_detail'
+    ),
+    path(
+        'gestor/clientes/<uuid:pk>/ficha/descargar/',
+        ClientReportView.as_view(),
+        name='gestor_client_report'
+    ),
+    path(
         'gestor/clientes/<uuid:pk>/',
         ClientUpdateView.as_view(
             extra_context={
@@ -116,6 +127,11 @@ gestor_urls = [
         'gestor/asuntos/<uuid:pk>/notas/',
         CaseNoteCreateView.as_view(),
         name='gestor_case_note_create'
+    ),
+    path(
+        'gestor/reporte/descargar/',
+        CrmReportView.as_view(),
+        name='gestor_crm_report'
     ),
     path(
         'gestor/asuntos/<uuid:pk>/paz-y-salvo/',

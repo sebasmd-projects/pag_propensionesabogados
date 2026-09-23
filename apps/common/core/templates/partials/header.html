@@ -67,6 +67,46 @@
             <li class="platforms-divider">
               <a href="https://geausa.propensionesabogados.com/certificates/" target="_blank" rel="noopener"><i class="bi bi-patch-check"></i> <span>{% trans 'Certification' %}</span></a>
             </li>
+
+            {% comment %}
+              La cuenta, separada de las plataformas aliadas por una linea:
+              las de arriba llevan fuera del sitio y estas no, y mezcladas
+              cuesta ver cual es cual.
+
+              «Gestor de procesos» sale **solo a quien puede entrar**.
+              `can_use_case_manager` lo pone el procesador de contexto de esa
+              aplicacion, y es la misma funcion que usan sus vistas: si aqui
+              se comprobara el grupo a mano, el dia que cambie la regla habria
+              dos reglas y esta seria la que nadie actualiza. El enlace no es
+              la puerta --la puerta esta en la vista-- pero ensenarselo a
+              quien va a recibir un 404 tampoco ayuda a nadie.
+            {% endcomment %}
+            {% if user.is_authenticated %}
+              {% if can_use_case_manager %}
+                <li class="platforms-divider">
+                  <a href="{% url 'case_manager:gestor_dashboard' %}">
+                    <i class="bi bi-kanban"></i> <span>{% trans 'Case manager' %}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="{% url 'account:logout' %}">
+                    <i class="bi bi-box-arrow-right"></i> <span>{% trans 'Sign out' %}</span>
+                  </a>
+                </li>
+              {% else %}
+                <li class="platforms-divider">
+                  <a href="{% url 'account:logout' %}">
+                    <i class="bi bi-box-arrow-right"></i> <span>{% trans 'Sign out' %}</span>
+                  </a>
+                </li>
+              {% endif %}
+            {% else %}
+              <li class="platforms-divider">
+                <a href="{% url 'account:login' %}">
+                  <i class="bi bi-box-arrow-in-right"></i> <span>{% trans 'Sign in' %}</span>
+                </a>
+              </li>
+            {% endif %}
           </ul>
         </li>
 
