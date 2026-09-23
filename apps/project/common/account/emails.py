@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 #: A donde contesta quien le da a «responder».
 REPLY_TO = getattr(
-    settings, 'ACCOUNT_REPLY_TO', 'director@propensionesabogados.com'
+    settings, 'ACCOUNT_REPLY_TO', 'info@propensionesabogados.com'
 )
 
 #: A quien avisar si a alguien le llega un codigo que no ha pedido, que es la

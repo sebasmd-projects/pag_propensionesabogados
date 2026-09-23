@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 #: A donde contesta el cliente cuando le da a «responder».
 REPLY_TO = getattr(
-    settings, 'CASE_MANAGER_REPLY_TO', 'director@propensionesabogados.com'
+    settings, 'CASE_MANAGER_REPLY_TO', 'info@propensionesabogados.com'
 )
 
 #: Las imagenes que van dentro del mensaje, con el `cid` por el que las

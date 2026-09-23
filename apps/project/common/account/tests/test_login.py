@@ -162,7 +162,7 @@ class OtpModeTests(TestCase):
 
         mensaje = mail.outbox[0]
 
-        self.assertEqual(mensaje.reply_to, ['director@propensionesabogados.com'])
+        self.assertEqual(mensaje.reply_to, ['info@propensionesabogados.com'])
         self.assertEqual(mensaje.mixed_subtype, 'related')
         self.assertTrue(
             any(

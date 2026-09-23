@@ -272,7 +272,7 @@ OTP_CONTACT_EMAIL = os.getenv(
 
 #: A donde contestan los correos de la cuenta.
 ACCOUNT_REPLY_TO = os.getenv(
-    'ACCOUNT_REPLY_TO', 'director@propensionesabogados.com')
+    'ACCOUNT_REPLY_TO', 'info@propensionesabogados.com')
 
 #: Lo que sale como emisor en la aplicacion de codigos.
 TWO_FACTOR_TOTP_DIGITS = 6

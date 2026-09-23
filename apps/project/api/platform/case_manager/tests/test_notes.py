@@ -154,7 +154,7 @@ class EmailShapeTests(TestCase):
         mensaje = self._enviar()
 
         self.assertEqual(mensaje.reply_to, [REPLY_TO])
-        self.assertEqual(REPLY_TO, 'director@propensionesabogados.com')
+        self.assertEqual(REPLY_TO, 'info@propensionesabogados.com')
 
     def test_va_al_correo_del_cliente_y_a_nadie_mas(self):
         mensaje = self._enviar()

@@ -435,7 +435,7 @@ class AccessCodeEmailTests(TestCase):
 
     def test_contesta_a_la_direccion_del_despacho(self):
         self.assertEqual(
-            self._enviar().reply_to, ['director@propensionesabogados.com']
+            self._enviar().reply_to, ['info@propensionesabogados.com']
         )
 
     def test_el_codigo_sale_en_las_dos_versiones(self):
