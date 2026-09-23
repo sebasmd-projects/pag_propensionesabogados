@@ -56,6 +56,12 @@ CODE_NOT_SENT = _(
     'minutes or contact us.'
 )
 
+#: Lo que se pone en lugar del correo tapado cuando el codigo fue al despacho.
+#: La plantilla decide con `masked_email` que esta en el segundo paso, asi que
+#: tiene que traer algo; lo que se lee en pantalla lo pone `sent_to_office`.
+OFFICE_PLACEHOLDER = '-'
+
+
 
 class PublicCaseQueryView(TemplateView):
     """
@@ -104,9 +110,17 @@ class PublicCaseQueryView(TemplateView):
         dejar esta pantalla abierta un rato, y unos segundos calculados al
         pintarla mentirian en cuanto pasen.
         """
+        to_office = portal_otp.sent_to_office(self.request)
+
         return self.render_to_response(self.get_context_data(
             code_form=PublicAccessCodeForm(),
-            masked_email=client.masked_email,
+            # Con `to_office` no hay correo del cliente que tapar: lo que la
+            # pantalla tiene que decir es que el codigo lo tiene el despacho y
+            # hay que llamar. El campo sigue ahi porque la plantilla decide
+            # con el que esta en el segundo paso.
+            masked_email=client.masked_email or OFFICE_PLACEHOLDER,
+            sent_to_office=to_office,
+            office_notice=NO_EMAIL_ON_FILE,
             resend_at=portal_otp.next_send_allowed_at(client),
             **extra,
         ))
@@ -178,13 +192,6 @@ class PublicCaseQueryView(TemplateView):
                 ),
                 status=400,
             )
-
-        if not client.email:
-            # No hay a donde mandarlo. No es culpa suya y no hay nada que
-            # pueda teclear: lo que necesita es el telefono del despacho.
-            return self.render_to_response(self.get_context_data(
-                form=form, error=NO_EMAIL_ON_FILE, show_contact=True,
-            ))
 
         if not portal_otp.can_send(client):
             # Ya pidio codigos de sobra. Se le ensena la pantalla del codigo

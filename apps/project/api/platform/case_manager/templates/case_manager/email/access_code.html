@@ -47,20 +47,60 @@
               <p style="margin:0 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#6f7b86;">
                 {% trans "Portal access code" %}
               </p>
-              <h1 style="margin:0;font-size:20px;line-height:1.3;color:#071d35;">
-                {% trans "Check the status of your case" %}
-              </h1>
+              {% if to_office %}
+                <h1 style="margin:0;font-size:20px;line-height:1.3;color:#071d35;">
+                  {% trans "A client without an email address requested a code" %}
+                </h1>
+              {% else %}
+                <h1 style="margin:0;font-size:20px;line-height:1.3;color:#071d35;">
+                  {% trans "Check the status of your case" %}
+                </h1>
+              {% endif %}
             </td>
           </tr>
 
           <tr>
             <td style="padding:8px 32px 0;">
-              <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">
-                {% blocktrans with name=client.full_name %}Dear {{ name }},{% endblocktrans %}
-              </p>
-              <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">
-                {% trans "Use the following code to see the status of your case in our client portal." %}
-              </p>
+              {% if to_office %}
+                {% comment %}
+                  Quien lee esto no es el titular sino quien va a atender su
+                  llamada, y necesita saber **de quien** es el codigo: sin el
+                  nombre y la cedula le llegarian seis cifras sueltas.
+                {% endcomment %}
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                       style="margin:0 0 16px;border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:6px 0;font-size:15px;line-height:1.5;color:#6f7b86;width:40%;">
+                      {% trans "Client" %}
+                    </td>
+                    <td style="padding:6px 0;font-size:15px;line-height:1.5;font-weight:bold;">
+                      {{ client.full_name }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;font-size:15px;line-height:1.5;color:#6f7b86;">
+                      {% trans "Identification" %}
+                    </td>
+                    <td style="padding:6px 0;font-size:15px;line-height:1.5;font-weight:bold;">
+                      {{ client.identification }}
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">
+                  {% blocktrans trimmed %}
+                    This client has no email address on file, so the code
+                    could not be sent to them. Give it to them when they call,
+                    once you have confirmed who they are.
+                  {% endblocktrans %}
+                </p>
+              {% else %}
+                <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">
+                  {% blocktrans with name=client.full_name %}Dear {{ name }},{% endblocktrans %}
+                </p>
+                <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">
+                  {% trans "Use the following code to see the status of your case in our client portal." %}
+                </p>
+              {% endif %}
             </td>
           </tr>
 
@@ -82,11 +122,29 @@
 
           <tr>
             <td style="padding:0 32px 8px;">
-              <div style="padding:14px 16px;background-color:#fff8e6;border:1px solid #f3e0a9;border-radius:8px;">
-                <p style="margin:0;font-size:14px;line-height:1.5;color:#6b5400;">
-                  {% blocktrans %}Nobody at Propensiones® will ever ask you for this code. If you did not request it, someone may be trying to see your case: write to {{ reply_to }}.{% endblocktrans %}
-                </p>
-              </div>
+              {% if to_office %}
+                {% comment %}
+                  El recordatorio de registrar el correo. Sin el, este mismo
+                  correo vuelve a llegar la proxima vez que el cliente
+                  consulte, y la siguiente, y la siguiente.
+                {% endcomment %}
+                <div style="padding:14px 16px;background-color:#eaf4ff;border:1px solid #bcd9f5;border-radius:8px;">
+                  <p style="margin:0;font-size:14px;line-height:1.5;color:#123a5e;">
+                    {% blocktrans trimmed %}
+                      Please register their email address in the case manager.
+                      Until you do, every code for this client will keep
+                      coming here instead of reaching them, and they will have
+                      to call each time.
+                    {% endblocktrans %}
+                  </p>
+                </div>
+              {% else %}
+                <div style="padding:14px 16px;background-color:#fff8e6;border:1px solid #f3e0a9;border-radius:8px;">
+                  <p style="margin:0;font-size:14px;line-height:1.5;color:#6b5400;">
+                    {% blocktrans %}Nobody at Propensiones® will ever ask you for this code. If you did not request it, someone may be trying to see your case: write to {{ reply_to }}.{% endblocktrans %}
+                  </p>
+                </div>
+              {% endif %}
             </td>
           </tr>
 

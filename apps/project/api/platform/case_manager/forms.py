@@ -31,11 +31,16 @@ UNKNOWN_IDENTIFICATION = _(
     'We could not find a case with that identification number.'
 )
 
-#: Cuando el cliente existe pero el despacho no tiene su correo. No es culpa
-#: suya ni hay nada que pueda teclear: lo que necesita es el telefono.
+#: Cuando el cliente existe pero el despacho no tiene su correo.
+#:
+#: El codigo no se pierde: va a los buzones del despacho y se lo entregan
+#: cuando llame. Lo que la pantalla tiene que decir es eso --que lo tiene la
+#: oficina y a donde llamar-- y de paso que dejen registrado su correo, para
+#: que la proxima vez le llegue directo.
 NO_EMAIL_ON_FILE = _(
-    'We do not have an email address on file for you, so we cannot send you '
-    'the access code. Please contact us and we will register it.'
+    'We do not have an email address on file for you, so we sent the access '
+    'code to our offices. Please contact us to receive it, and we will '
+    'register your email so it reaches you directly next time.'
 )
 
 #: Un codigo equivocado, caducado o tanteado dicen todos lo mismo.

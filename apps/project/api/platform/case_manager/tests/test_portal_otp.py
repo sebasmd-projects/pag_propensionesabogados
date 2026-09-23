@@ -25,7 +25,7 @@ from unittest.mock import patch
 
 from django.core import mail
 from django.core.cache import cache
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -447,3 +447,123 @@ class AccessCodeEmailTests(TestCase):
 
         self.assertIn(CODIGO, mensaje.body)
         self.assertIn(CODIGO, mensaje.alternatives[0][0])
+
+
+class OfficeFallbackTests(TestCase):
+    """
+    El cliente sin correo registrado: su codigo va al despacho.
+
+    Es el caso normal, no el raro: los expedientes que venian del navegador no
+    traian correo. Cerrarles el portal los dejaba sin nada que pudieran hacer
+    por su cuenta; mandandolo a la oficina, quien llama lo recibe de alguien
+    que ya sabe quien es.
+
+    No relaja la acreditacion, **la traslada**: quien entrega el codigo pasa a
+    ser el despacho, que conoce al titular, en vez de un buzon que el titular
+    controla.
+    """
+
+    def setUp(self):
+        cache.clear()
+        self.url = reverse('case_manager:public_query')
+        self.client_record = ClientModel.objects.create(
+            identification='13883170',
+            full_name='Jose Arcesio Lopez Arias',
+            email='',
+        )
+        CaseModel.objects.create(
+            client=self.client_record,
+            service=Service.JUDICIAL,
+            stage=Stage.IN_PROGRESS,
+        )
+
+    def _pedir(self):
+        with patch.object(portal_otp, 'generate_code', return_value=CODIGO):
+            return self.client.post(self.url, {'identification': '13883170'})
+
+    def test_va_a_los_dos_buzones_del_despacho(self):
+        self._pedir()
+
+        self.assertEqual(
+            sorted(mail.outbox[0].to),
+            ['director@propensionesabogados.com',
+             'info@propensionesabogados.com'],
+        )
+
+    def test_el_asunto_dice_de_quien_es_el_codigo(self):
+        """
+        A la oficina le llegarian seis cifras sueltas y no sabria a quien
+        darselas. El nombre y la cedula van ya en el asunto para que se vea
+        sin abrir el correo.
+        """
+        self._pedir()
+
+        self.assertIn('Jose Arcesio Lopez Arias', mail.outbox[0].subject)
+        self.assertIn('13883170', mail.outbox[0].subject)
+
+    def test_el_cuerpo_lleva_al_cliente_y_pide_registrar_su_correo(self):
+        """
+        Sin el recordatorio, este mismo correo vuelve a llegar la proxima vez
+        que el cliente consulte, y la siguiente.
+        """
+        self._pedir()
+        html = mail.outbox[0].alternatives[0][0]
+
+        self.assertIn('Jose Arcesio Lopez Arias', html)
+        self.assertIn('13883170', html)
+        self.assertIn('register their email address', html)
+        self.assertIn(CODIGO, html)
+
+    def test_no_le_dice_al_despacho_que_nadie_le_pide_el_codigo(self):
+        """
+        El aviso de «nadie de Propensiones te pedira este codigo» es para el
+        titular. Mandarselo a la propia oficina, que es quien lo va a dictar
+        por telefono, es decir lo contrario de lo que toca hacer.
+        """
+        self._pedir()
+
+        self.assertNotIn(
+            'will ever ask you for this code',
+            mail.outbox[0].alternatives[0][0],
+        )
+
+    def test_el_codigo_sirve_igual(self):
+        """
+        Lo que cambia es a donde va, no lo que hace: quien lo teclea entra.
+        """
+        self._pedir()
+
+        respuesta = self.client.post(self.url, {'code': CODIGO})
+
+        self.assertTrue(respuesta.context['cases'])
+
+    def test_la_escalera_tambien_frena_los_que_van_al_despacho(self):
+        """
+        Si no, hostigar una cedula sin correo llenaria el buzon de la propia
+        oficina, que es donde menos conviene.
+        """
+        self._pedir()
+        mail.outbox.clear()
+
+        self._pedir()
+
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_en_cuanto_tiene_correo_deja_de_ir_al_despacho(self):
+        self.client_record.email = 'jose@example.test'
+        self.client_record.save(update_fields=['email'])
+
+        respuesta = self._pedir()
+
+        self.assertEqual(mail.outbox[0].to, ['jose@example.test'])
+        self.assertFalse(respuesta.context['sent_to_office'])
+
+    @override_settings(CASE_MANAGER_OFFICE_RECIPIENTS=[])
+    def test_sin_buzon_de_oficina_configurado_se_dice(self):
+        """
+        Quedarse callado dejaria al cliente esperando un codigo que no existe.
+        """
+        respuesta = self._pedir()
+
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertTrue(respuesta.context['show_contact'])

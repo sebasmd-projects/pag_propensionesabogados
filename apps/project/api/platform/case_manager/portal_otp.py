@@ -79,6 +79,35 @@ COOLDOWNS = (0, 60, 5 * 60, 5 * 60, 5 * 60)
 #: Lo que se descansa al agotar la escalera, antes de volver a empezar.
 CYCLE_BLOCK = 60 * 60
 
+#: A donde va el codigo cuando el cliente no tiene correo registrado.
+#:
+#: Sin esto, un expediente sin correo --y los importados vienen casi todos
+#: asi-- deja al cliente con el portal cerrado y sin nada que pueda hacer por
+#: su cuenta. Mandandolo al despacho, quien llama puede recibirlo por
+#: telefono de alguien que ya sabe quien es.
+#:
+#: **No relaja la acreditacion, la traslada**: quien entrega el codigo es el
+#: despacho, que conoce al titular, en vez de un buzon que el titular
+#: controla. Por eso el correo que reciben dice de **quien** es el codigo: sin
+#: el nombre y la cedula, a la oficina le llegarian seis cifras sueltas y no
+#: sabria a quien dárselas.
+OFFICE_RECIPIENTS = (
+    'info@propensionesabogados.com',
+    'director@propensionesabogados.com',
+)
+
+
+def office_recipients() -> list[str]:
+    """
+    A quien se le manda el codigo de un cliente sin correo.
+
+    Leido en cada llamada, como las demas: una constante de modulo se fija al
+    importar y ni `override_settings` ni un cambio de configuracion la mueven.
+    """
+    return list(
+        getattr(settings, 'CASE_MANAGER_OFFICE_RECIPIENTS', OFFICE_RECIPIENTS)
+    )
+
 
 def ttl_minutes() -> int:
     """
@@ -216,15 +245,23 @@ def issue(request, client) -> bool:
     """
     Emite un codigo, lo manda y lo deja anotado en la sesion.
 
-    Devuelve si salio. `False` cuando el cliente no tiene correo registrado o
-    cuando el correo no pudo salir: en los dos casos la pantalla tiene que
-    decir otra cosa, porque prometer un codigo que no va a llegar deja a
-    alguien esperando delante de un campo vacio.
+    **Un cliente sin correo registrado no se queda fuera**: su codigo va al
+    despacho (`office_recipients()`), que se lo entrega cuando llame. Antes se
+    devolvia `False` y el portal se le cerraba sin que hubiera nada que
+    pudiera hacer por su cuenta, y los expedientes importados vienen casi
+    todos sin correo.
+
+    Devuelve si el codigo salio. `False` solo cuando el correo no pudo
+    enviarse: la pantalla tiene que decirlo, porque prometer un codigo que no
+    va a llegar deja a alguien esperando delante de un campo vacio.
     """
-    if not client.email:
-        logger.info(
-            'Portal: el cliente %s no tiene correo registrado; no se le puede '
-            'mandar un codigo.',
+    to_office = not client.email
+    recipients = office_recipients() if to_office else [client.email]
+
+    if not recipients:
+        logger.error(
+            'Portal: el cliente %s no tiene correo y no hay buzon de oficina '
+            'configurado; no se puede mandar el codigo.',
             client.identification,
         )
         return False
@@ -235,13 +272,26 @@ def issue(request, client) -> bool:
     from .emails import send_access_code
 
     try:
-        send_access_code(client=client, code=code, minutes=minutes)
+        send_access_code(
+            client=client,
+            code=code,
+            minutes=minutes,
+            recipients=recipients,
+            to_office=to_office,
+        )
     except Exception:                                       # noqa: BLE001
         logger.exception(
-            'Portal: no se pudo mandar el codigo al cliente %s.',
+            'Portal: no se pudo mandar el codigo del cliente %s.',
             client.identification,
         )
         return False
+
+    if to_office:
+        logger.info(
+            'Portal: el cliente %s no tiene correo; su codigo se mando al '
+            'despacho.',
+            client.identification,
+        )
 
     request.session[SESSION_KEY] = {
         'client_pk': str(client.pk),
@@ -250,12 +300,20 @@ def issue(request, client) -> bool:
             timezone.now() + timedelta(minutes=minutes)
         ).isoformat(),
         'attempts': 0,
+        # Lo mira la pantalla para decir a donde fue: el correo tapado del
+        # cliente, o que lo tiene el despacho y hay que llamar.
+        'to_office': to_office,
     }
     request.session.modified = True
 
     register_send(client)
 
     return True
+
+
+def sent_to_office(request) -> bool:
+    """Si el codigo que espera esta sesion se mando al despacho."""
+    return bool((request.session.get(SESSION_KEY) or {}).get('to_office'))
 
 
 def pending_client_pk(request) -> str:

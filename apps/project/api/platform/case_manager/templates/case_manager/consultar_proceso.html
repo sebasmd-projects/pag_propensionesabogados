@@ -99,9 +99,20 @@
                         tiene anotado sigue siendo el suyo --que es el fallo
                         que mas llamadas genera--.
                       {% endcomment %}
-                      <p class="text-muted mb-0">
-                        {% blocktrans %}The access code was sent to {{ masked_email }}{% endblocktrans %}
-                      </p>
+                      {% if sent_to_office %}
+                        {% comment %}
+                          Sin correo registrado el codigo va al despacho, asi
+                          que aqui no hay buzon que tapar: lo que hace falta
+                          decir es que lo tienen ellos y a donde llamar. El
+                          campo del codigo sigue en pantalla porque el codigo
+                          existe: se lo dictan por telefono y lo escribe aqui.
+                        {% endcomment %}
+                        <p class="text-muted mb-0">{{ office_notice }}</p>
+                      {% else %}
+                        <p class="text-muted mb-0">
+                          {% blocktrans %}The access code was sent to {{ masked_email }}{% endblocktrans %}
+                        </p>
+                      {% endif %}
                     </div>
 
                     {% if code_error %}
@@ -127,6 +138,12 @@
                         </button>
                       </div>
                     </div>
+
+                    {% if sent_to_office %}
+                      <div class="mt-4">
+                        {% include 'case_manager/partials/contact_channels.html' %}
+                      </div>
+                    {% endif %}
 
                     <div class="text-center mt-3">
                       {% comment %}

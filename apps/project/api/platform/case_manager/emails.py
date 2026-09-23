@@ -153,9 +153,18 @@ def send_case_note(note, *, request=None) -> bool:
     return True
 
 
-def send_access_code(*, client, code: str, minutes: int) -> None:
+def send_access_code(
+    *, client, code: str, minutes: int,
+    recipients: list[str] | None = None, to_office: bool = False,
+) -> None:
     """
     Le manda al cliente el codigo con el que entra a ver su proceso.
+
+    Cuando el cliente **no tiene correo registrado**, `to_office` viene en
+    `True` y el codigo va a los buzones del despacho. En ese caso el mensaje
+    cambia de destinatario y de texto: quien lo lee no es el titular sino
+    quien va a atender su llamada, y necesita saber **de quien** es el codigo.
+    Sin el nombre y la cedula, a la oficina le llegarian seis cifras sueltas.
 
     Sale con `fail_silently=False` al contrario que los avisos de arriba, y no
     es una incoherencia: un aviso que no sale deja una nota sin leer, y eso se
@@ -169,19 +178,31 @@ def send_access_code(*, client, code: str, minutes: int) -> None:
         'code': code,
         'minutes': minutes,
         'reply_to': REPLY_TO,
+        'to_office': to_office,
         'year': timezone.localtime().year,
     }
     cuerpo_html = render_to_string(
         'case_manager/email/access_code.html', contexto
     )
 
+    if to_office:
+        asunto = _(
+            'Access code for %(name)s (ID %(identification)s) — '
+            'Propensiones® Abogados'
+        ) % {
+            'name': client.full_name,
+            'identification': client.identification,
+        }
+    else:
+        asunto = _('Your access code — Propensiones® Abogados')
+
     mensaje = EmailMultiAlternatives(
-        subject=_('Your access code — Propensiones® Abogados'),
+        subject=asunto,
         # El salto tras cada parrafo evita que la version en texto salga en un
         # solo renglon con el codigo pegado a la frase anterior.
         body=strip_tags(cuerpo_html.replace('</p>', '</p>\n')),
         from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[client.email],
+        to=recipients if recipients is not None else [client.email],
         reply_to=[REPLY_TO],
     )
     mensaje.attach_alternative(cuerpo_html, 'text/html')
@@ -189,4 +210,8 @@ def send_access_code(*, client, code: str, minutes: int) -> None:
     attach_inline_images(mensaje, ACCESS_CODE_IMAGES)
 
     mensaje.send(fail_silently=False)
-    logger.info('Codigo de acceso al portal enviado al cliente %s.', client.pk)
+    logger.info(
+        'Codigo de acceso al portal enviado %s (cliente %s).',
+        'al despacho' if to_office else 'al cliente',
+        client.pk,
+    )

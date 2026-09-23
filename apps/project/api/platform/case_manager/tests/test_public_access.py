@@ -177,10 +177,11 @@ class PublicQueryTests(TestCase):
 
         self.assertIn(self.case, response.context['cases'])
 
-    def test_a_un_cliente_sin_correo_no_se_le_promete_un_codigo(self):
+    def test_a_un_cliente_sin_correo_el_codigo_le_llega_al_despacho(self):
         """
-        No hay a donde mandarlo y no hay nada que pueda teclear: lo unico util
-        es el telefono del despacho.
+        No se queda fuera. Antes se le cerraba el portal sin que hubiera nada
+        que pudiera hacer por su cuenta, y los expedientes importados vienen
+        casi todos sin correo.
         """
         ClientModel.objects.create(
             identification='44444444', full_name='Sin Correo', email='',
@@ -188,9 +189,25 @@ class PublicQueryTests(TestCase):
 
         response = pedir_codigo(self.client, '44444444')
 
-        self.assertEqual(len(mail.outbox), 0)
-        self.assertTrue(response.context['show_contact'])
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(
+            sorted(mail.outbox[0].to),
+            ['director@propensionesabogados.com',
+             'info@propensionesabogados.com'],
+        )
+        self.assertTrue(response.context['sent_to_office'])
+
+    def test_la_pantalla_le_dice_que_lo_tiene_la_oficina_y_a_donde_llamar(self):
+        ClientModel.objects.create(
+            identification='44444444', full_name='Sin Correo', email='',
+        )
+
+        response = pedir_codigo(self.client, '44444444')
+
+        self.assertContains(response, 'sent the access code to our offices')
         self.assertContains(response, '+57 301 228 3818')
+        # El campo sigue ahi: el codigo existe y se lo dictan por telefono.
+        self.assertContains(response, 'name="code"')
 
     def test_si_el_correo_no_sale_se_dice(self):
         """
