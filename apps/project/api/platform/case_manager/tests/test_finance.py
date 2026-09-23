@@ -20,8 +20,9 @@ from ..models import CaseFinanceModel, CaseModel, ClientModel
 
 def make_case(identification='1000000001', name='Ana Perez', **finance):
     client = ClientModel.objects.create(
-        identification=identification, full_name=name
-    )
+        identification=identification, full_name=name,
+        email='cliente@example.test'
+        )
     case = CaseModel.objects.create(
         client=client,
         service=Service.JUDICIAL,
@@ -251,6 +252,7 @@ class PortfolioChartTests(TestCase):
         cliente = ClientModel.objects.create(
             identification=f'{CaseFinanceModel.objects.count() + 1:08d}',
             full_name='Cliente de prueba',
+            email='cliente{CaseFinanceModel.objects.count() + 1:08d}@example.test'
         )
         caso = CaseModel.objects.create(
             client=cliente, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS,

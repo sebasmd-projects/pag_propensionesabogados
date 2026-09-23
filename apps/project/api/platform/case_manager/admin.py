@@ -20,6 +20,7 @@ responsable y reportes gerenciales historicos.
 """
 
 from django.contrib import admin
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .access import can_use_case_manager
@@ -162,24 +163,45 @@ class CaseAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
 
 @admin.register(ClientModel)
 class ClientAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
-    list_display = ('identification', 'full_name', 'access_key_display', 'is_active')
+    list_display = (
+        'identification', 'full_name', 'email', 'is_active', 'code_state',
+    )
     list_filter = ('is_active',)
     search_fields = ('identification', 'full_name', 'email')
-    readonly_fields = ('access_key_display', 'created', 'updated')
+    readonly_fields = ('code_state', 'created', 'updated')
     fields = (
         'identification', 'full_name', 'email', 'phone', 'is_active',
-        'access_key_display', 'created', 'updated',
+        'code_state', 'created', 'updated',
     )
 
-    @admin.display(description=_('access key'))
-    def access_key_display(self, obj):
+    @admin.display(description=_('access codes'))
+    def code_state(self, obj):
         """
-        La clave que el cliente usa en el portal.
+        Por donde va la escalera de reenvios de ese cliente.
 
-        Se ensena porque hay que poder decirsela por telefono: es **derivada**
-        de su nombre y su cedula, no un secreto que el despacho custodie.
-        Cambiarla por una propia y entregada de forma segura esta listado
-        como trabajo aparte en la cotizacion, y hasta entonces lo unico que la
-        sostiene es el limite de intentos del portal (`attempts.py`).
+        Se ensena porque es lo primero que hay que mirar cuando alguien llama
+        diciendo que no le llega el codigo: o no tiene correo registrado, o se
+        quedo sin reenvios y esta esperando la hora.
+
+        El codigo en si **no** se ensena, ni aqui ni en ningun sitio: solo se
+        guarda su HMAC, y solo en la sesion de quien lo pidio.
         """
-        return obj.access_key if obj.pk else '—'
+        if not obj.pk:
+            return '—'
+
+        if not obj.email:
+            return _('No email on file: they cannot use the portal.')
+
+        if obj.code_blocked_until and obj.code_blocked_until > timezone.now():
+            return _('Blocked until %(when)s.') % {
+                'when': timezone.localtime(obj.code_blocked_until).strftime(
+                    '%d/%m/%Y %H:%M'
+                )
+            }
+
+        if not obj.code_sends:
+            return _('No code requested.')
+
+        return _('%(sends)s sent in the current cycle.') % {
+            'sends': obj.code_sends
+        }

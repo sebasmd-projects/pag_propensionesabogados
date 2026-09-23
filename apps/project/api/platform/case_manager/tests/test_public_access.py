@@ -6,16 +6,45 @@ visitante con el expediente de todo el despacho ya descargado. Cada una de
 estas pruebas falla si esa decision vuelve al cliente.
 """
 
+from unittest.mock import patch
+
 from django.conf import settings
+from django.core import mail
 from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.common.utils.models import IPBlockedModel
 
-from .. import attempts
+from .. import attempts, portal_otp
 from ..choices import Mandate, Procedure, Service, Stage
 from ..models import CaseFinanceModel, CaseModel, ClientModel
+
+CODIGO = '123456'
+
+
+def pedir_codigo(test_client, identification='16484186', code=CODIGO):
+    """El primer paso: la cedula. Devuelve la respuesta."""
+    with patch.object(portal_otp, 'generate_code', return_value=code):
+        return test_client.post(
+            reverse('case_manager:public_query'),
+            {'identification': identification},
+        )
+
+
+def identificarse(test_client, identification='16484186', code=CODIGO):
+    """
+    Los dos pasos del portal en una linea: la cedula y el codigo del correo.
+
+    El codigo se fija en vez de leerlo del buzon porque lo que prueban casi
+    todas las clases de abajo es lo que pasa **despues** de entrar. Las que
+    prueban el codigo en si miran `mail.outbox`.
+    """
+    pedir_codigo(test_client, identification, code)
+    return test_client.post(
+        reverse('case_manager:public_query'), {'code': code}
+    )
 
 # Sin el middleware de bloqueo por medio: lo que se prueba aqui es la vista,
 # y el middleware tiene su propia prueba mas abajo.
@@ -36,6 +65,7 @@ class PublicQueryTests(TestCase):
         cls.client_record = ClientModel.objects.create(
             identification='16484186',
             full_name='Carlos Emiro Giraldo Lozada',
+            email='cliente16484186@example.test'
         )
         cls.case = CaseModel.objects.create(
             client=cls.client_record,
@@ -53,6 +83,7 @@ class PublicQueryTests(TestCase):
             identification='99999999',
             full_name='Rosa Inactiva',
             is_active=False,
+            email='cliente99999999@example.test'
         )
         CaseModel.objects.create(
             client=cls.inactive,
@@ -63,85 +94,141 @@ class PublicQueryTests(TestCase):
     def setUp(self):
         cache.clear()
 
-    # --- la clave --------------------------------------------------------
-    def test_la_clave_es_la_inicial_mas_los_cuatro_ultimos_digitos(self):
-        """La regla aprobada, ahora calculada en el servidor."""
-        self.assertEqual(self.client_record.access_key, 'C4186')
+    # --- los dos pasos ---------------------------------------------------
+    def test_la_cedula_sola_no_abre_nada(self):
+        """
+        El primer paso no ensena expediente: manda un codigo y espera.
 
-    def test_con_la_clave_correcta_se_ve_el_expediente(self):
-        response = self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'C4186'},
-        )
+        Es el cambio entero. Antes la cedula iba acompanada de una «clave» que
+        se calculaba **con la cedula delante** --la inicial del nombre mas sus
+        cuatro ultimos digitos--, asi que el unico dato necesario para abrir
+        un expediente ajeno era un dato que circula.
+        """
+        response = pedir_codigo(self.client)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context.get('cases'))
+        self.assertNotContains(response, 'Carlos Emiro Giraldo Lozada')
+
+    def test_el_codigo_sale_al_correo_registrado(self):
+        pedir_codigo(self.client)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['cliente16484186@example.test'])
+        self.assertIn(CODIGO, mail.outbox[0].body)
+
+    def test_la_pantalla_dice_a_donde_fue_el_codigo_sin_ensenar_el_correo(self):
+        """
+        Tapado por el centro: el cliente tiene que poder reconocer su buzon
+        --si no, no sabe a cual mirar ni si el que consta es el suyo-- sin que
+        la pantalla sirva para leer el correo de un tercero.
+        """
+        response = pedir_codigo(self.client)
+
+        self.assertContains(response, 'cli****186@example.test')
+        self.assertNotContains(response, 'cliente16484186@example.test')
+
+    def test_el_codigo_correcto_abre_el_expediente(self):
+        response = identificarse(self.client)
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.case, response.context['cases'])
 
-    def test_la_cedula_con_puntos_es_la_misma_cedula(self):
-        response = self.client.post(
-            self.url,
-            {'identification': '16.484.186', 'access_key': 'C4186'},
+    def test_el_codigo_equivocado_no_abre_nada(self):
+        pedir_codigo(self.client)
+        response = self.client.post(self.url, {'code': '000000'})
+
+        self.assertFalse(response.context.get('cases'))
+        self.assertTrue(response.context.get('code_error'))
+
+    def test_un_codigo_no_sirve_dos_veces(self):
+        """
+        Se quema al usarlo: quien vea el correo por encima del hombro --o lo
+        recupere de un buzon compartido-- no entra cuando quiera.
+        """
+        identificarse(self.client)
+        self.client.session.flush()
+
+        response = self.client.post(self.url, {'code': CODIGO})
+
+        self.assertFalse(response.context.get('cases'))
+
+    def test_el_codigo_de_un_cliente_no_abre_el_de_otro(self):
+        """
+        La sesion recuerda **de quien** es el codigo. Sin eso, pedirlo para la
+        cedula propia y teclearlo mientras se dice ser otro seria la puerta.
+        """
+        otro = ClientModel.objects.create(
+            identification='55555555', full_name='Otro Titular',
+            email='cliente55555555@example.test',
         )
+        CaseModel.objects.create(
+            client=otro, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS
+        )
+
+        pedir_codigo(self.client, '16484186')
+        response = self.client.post(self.url, {'code': CODIGO})
+
+        self.assertNotContains(response, 'Otro Titular')
+        self.assertIn(self.case, response.context['cases'])
+
+    def test_la_cedula_con_puntos_es_la_misma_cedula(self):
+        response = identificarse(self.client, '16.484.186')
 
         self.assertIn(self.case, response.context['cases'])
 
-    def test_con_la_clave_equivocada_no_se_ve_nada(self):
-        response = self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'X9999'},
+    def test_a_un_cliente_sin_correo_no_se_le_promete_un_codigo(self):
+        """
+        No hay a donde mandarlo y no hay nada que pueda teclear: lo unico util
+        es el telefono del despacho.
+        """
+        ClientModel.objects.create(
+            identification='44444444', full_name='Sin Correo', email='',
         )
 
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(response.context.get('cases'))
+        response = pedir_codigo(self.client, '44444444')
 
-    def test_la_clave_distingue_mayusculas(self):
-        """`c4186` no es `C4186`: la inicial va en mayuscula."""
-        response = self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'c4186'},
-        )
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertTrue(response.context['show_contact'])
+        self.assertContains(response, '+57 301 228 3818')
 
-        self.assertFalse(response.context.get('cases'))
+    def test_si_el_correo_no_sale_se_dice(self):
+        """
+        Prometer un codigo que no va a llegar deja a alguien mirando un campo
+        vacio sin saber cuanto esperar.
+        """
+        with patch.object(
+            portal_otp, 'send_access_code', create=True, side_effect=OSError
+        ), patch(
+            'apps.project.api.platform.case_manager.emails.send_access_code',
+            side_effect=OSError,
+        ):
+            response = pedir_codigo(self.client)
+
+        self.assertTrue(response.context['show_contact'])
+        self.assertFalse(response.context.get('masked_email'))
 
     # --- lo que no se puede averiguar ------------------------------------
-    def test_una_cedula_que_no_existe_responde_lo_mismo_que_una_clave_mala(self):
+    def test_una_cedula_que_no_existe_lo_dice(self):
         """
-        El formulario no puede servir para saber quien es cliente.
-
-        Con mensajes distintos, probar cedulas convierte el portal en un
-        listado del despacho: "clave incorrecta" confirma la persona.
+        Con el codigo al correo, decir «no hay nada con ese numero» ya no
+        entrega una credencial a nadie: quien no es cliente se entera de que
+        no lo es, y quien se equivoco de digito lo corrige en vez de quedarse
+        esperando un correo que no existe.
         """
-        desconocida = self.client.post(
-            self.url,
-            {'identification': '11111111', 'access_key': 'A1111'},
-        )
-        clave_mala = self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'Z0000'},
-        )
+        response = self.client.post(self.url, {'identification': '11111111'})
 
-        self.assertEqual(desconocida.status_code, clave_mala.status_code)
-        self.assertEqual(
-            desconocida.context['error'], clave_mala.context['error']
-        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.context.get('masked_email'))
+        self.assertEqual(len(mail.outbox), 0)
 
-    def test_un_cliente_sin_vigencia_ve_la_pantalla_de_proceso_inactivo(self):
+    def test_un_cliente_sin_vigencia_recibe_su_codigo_igual(self):
         """
-        Su clave era **correcta**, asi que no se le contesta «credenciales
-        invalidas».
-
-        Antes si, y el resultado era el contrario del que se buscaba: quien
-        tenia su proceso cerrado no entendia el mensaje, daba por hecho que se
-        habia equivocado de clave, y se ponia a probar claves correctas una
-        detras de otra hasta agotar los intentos de su propia IP. No se le
-        oculta nada que no haya demostrado ya al acertar: se le dice que su
-        proceso esta inactivo y a donde llamar, que es lo unico que puede
-        hacer.
+        Si se le dijera «no encontramos nada» se pondria a probar cedulas
+        creyendo que se equivoco de numero. Se le manda el codigo, entra, y la
+        pantalla le dice que su proceso esta inactivo y a donde llamar.
         """
-        response = self.client.post(
-            self.url,
-            {'identification': '99999999', 'access_key': 'R9999'},
-        )
+        response = identificarse(self.client, '99999999')
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['inactive'])
@@ -152,12 +239,9 @@ class PublicQueryTests(TestCase):
         """
         Decirle que llame no es abrirle el expediente: sigue sin vigencia.
         """
-        response = self.client.post(
-            self.url,
-            {'identification': '99999999', 'access_key': 'R9999'},
-        )
+        response = identificarse(self.client, '99999999')
 
-        self.assertNotContains(response, '99999999')
+        self.assertNotContains(response, 'Rosa Inactiva')
         self.assertFalse(response.context.get('client'))
 
     # --- lo que viaja al navegador ---------------------------------------
@@ -175,18 +259,16 @@ class PublicQueryTests(TestCase):
         self.assertNotContains(response, 'Carlos Emiro Giraldo Lozada')
         self.assertNotContains(response, '16484186')
 
-    def test_entrar_con_una_clave_no_trae_los_expedientes_de_los_demas(self):
+    def test_entrar_no_trae_los_expedientes_de_los_demas(self):
         otro = ClientModel.objects.create(
-            identification='77777777', full_name='Otro Cliente'
+            identification='77777777', full_name='Otro Cliente',
+            email='cliente77777777@example.test'
         )
         CaseModel.objects.create(
             client=otro, service=Service.CONCILIATION, stage=Stage.FINAL_STAGE
         )
 
-        response = self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'C4186'},
-        )
+        response = identificarse(self.client)
 
         self.assertNotContains(response, 'Otro Cliente')
         self.assertNotContains(response, '77777777')
@@ -196,10 +278,7 @@ class PublicQueryTests(TestCase):
         El expediente es del cliente; lo que se le cobra es de puertas
         adentro. Van en modelos distintos justamente para que no se escape.
         """
-        response = self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'C4186'},
-        )
+        response = identificarse(self.client)
 
         self.assertNotContains(response, '4000000')
         self.assertNotContains(response, '3000000')
@@ -208,27 +287,30 @@ class PublicQueryTests(TestCase):
 @override_settings(CASE_MANAGER_MAX_ATTEMPTS=3, MIDDLEWARE=SIN_MIDDLEWARE_DE_BLOQUEO)
 class AttemptLimitTests(TestCase):
     """
-    El limite de intentos.
+    El limite de intentos por IP.
 
-    Mientras la clave sea la inicial mas cuatro digitos, esto es lo unico
-    que la separa de diez mil intentos automatizados.
+    Es lo que frena a quien recorre cedulas para saber quien es cliente del
+    despacho, y a quien tantea codigos de seis cifras. La escalera de
+    reenvios (`portal_otp`) protege otra cosa --el buzon del cliente-- y
+    tiene sus propias pruebas mas abajo.
     """
 
     @classmethod
     def setUpTestData(cls):
         cls.url = reverse('case_manager:public_query')
         ClientModel.objects.create(
-            identification='16484186', full_name='Carlos Giraldo'
+            identification='16484186', full_name='Carlos Giraldo',
+            email='cliente16484186@example.test'
         )
 
     def setUp(self):
         cache.clear()
 
     def _fallar(self, veces):
-        for _ in range(veces):
+        """Cedulas que no son de nadie, que es el tanteo que esto frena."""
+        for numero in range(veces):
             self.client.post(
-                self.url,
-                {'identification': '16484186', 'access_key': 'X0000'},
+                self.url, {'identification': f'8888888{numero}'}
             )
 
     def test_al_llegar_al_tope_se_bloquea_la_ip(self):
@@ -256,14 +338,21 @@ class AttemptLimitTests(TestCase):
 
         self.assertFalse(IPBlockedModel.objects.exists())
 
+    def test_un_codigo_equivocado_tambien_cuenta(self):
+        """
+        Si no, tantear seis cifras saldria gratis mientras que equivocarse de
+        cedula no, y el tanteo se iria por donde no cuesta.
+        """
+        pedir_codigo(self.client)
+        self.client.post(self.url, {'code': '000000'})
+
+        self.assertEqual(attempts.attempts_for('127.0.0.1'), 1)
+
     def test_acertar_borra_la_cuenta(self):
         """Dos despistes y un acierto no dejan a nadie a un fallo del cierre."""
         self._fallar(2)
 
-        self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'C4186'},
-        )
+        identificarse(self.client)
 
         self.assertEqual(attempts.attempts_for('127.0.0.1'), 0)
 
@@ -271,8 +360,7 @@ class AttemptLimitTests(TestCase):
         self._fallar(3)
 
         response = self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'C4186'},
+            self.url, {'identification': '16484186'}
         )
 
         self.assertEqual(response.status_code, 429)
@@ -323,7 +411,8 @@ class VariosAsuntosTests(TestCase):
     def setUpTestData(cls):
         cls.url = reverse('case_manager:public_query')
         cls.client_record = ClientModel.objects.create(
-            identification='16484186', full_name='Carlos Giraldo'
+            identification='16484186', full_name='Carlos Giraldo',
+            email='cliente16484186@example.test'
         )
         cls.pension = CaseModel.objects.create(
             client=cls.client_record,
@@ -342,9 +431,7 @@ class VariosAsuntosTests(TestCase):
         cache.clear()
 
     def _consultar(self):
-        return self.client.post(
-            self.url, {'identification': '16484186', 'access_key': 'C4186'}
-        )
+        return identificarse(self.client)
 
     def test_salen_los_dos(self):
         response = self._consultar()
@@ -392,7 +479,8 @@ class VariosAsuntosTests(TestCase):
 
     def test_siguen_sin_salir_los_de_otros_clientes(self):
         otro = ClientModel.objects.create(
-            identification='77777777', full_name='Otra Persona'
+            identification='77777777', full_name='Otra Persona',
+            email='cliente77777777@example.test'
         )
         CaseModel.objects.create(
             client=otro, service=Service.JUDICIAL, stage=Stage.UNDER_REVIEW
@@ -420,13 +508,11 @@ class PublicCardFieldsTests(TestCase):
         cls.client_record = ClientModel.objects.create(
             identification='16484186',
             full_name='Carlos Emiro Giraldo Lozada',
+            email='cliente16484186@example.test'
         )
 
     def consultar(self):
-        return self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'C4186'},
-        )
+        return identificarse(self.client)
 
     def test_la_instancia_sale_venga_del_bloque_que_venga(self):
         """

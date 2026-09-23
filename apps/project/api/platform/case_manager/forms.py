@@ -20,30 +20,40 @@ from django.utils.translation import gettext_lazy as _
 from .models import (CaseFinanceModel, CaseModel, CaseNoteModel,
                      ClientModel)
 
-#: Una sola respuesta para los tres noes: no existe esa identificacion, la
-#: clave no es, o el servicio no esta vigente.
+#: Lo que se contesta cuando esa identificacion no es de ningun cliente.
 #:
-#: La pantalla anterior daba tres mensajes distintos, y eso convierte el
-#: formulario en un buscador de personas: probando identificaciones, "clave
-#: incorrecta" confirma que esa cedula es cliente del despacho. Quien tenga su
-#: clave entra igual; quien no la tenga, ya no averigua nada probando.
-INVALID_CREDENTIALS = _(
-    'We could not find a service with that identification and access key.'
+#: Es distinto de «tu proceso esta inactivo» a proposito: alli el numero si es
+#: de un cliente y lo que falta es vigencia. Aqui no hay a quien mandarle un
+#: codigo, y decirlo es lo unico util --quien se equivoco de digito lo
+#: corrige, y quien no es cliente se entera de que no lo es--.
+UNKNOWN_IDENTIFICATION = _(
+    'We could not find a case with that identification number.'
 )
+
+#: Cuando el cliente existe pero el despacho no tiene su correo. No es culpa
+#: suya ni hay nada que pueda teclear: lo que necesita es el telefono.
+NO_EMAIL_ON_FILE = _(
+    'We do not have an email address on file for you, so we cannot send you '
+    'the access code. Please contact us and we will register it.'
+)
+
+#: Un codigo equivocado, caducado o tanteado dicen todos lo mismo.
+INVALID_CODE = _('The code is not valid or has expired. Request a new one.')
 
 
 class PublicCaseQueryForm(forms.Form):
-    """Identificacion y clave. Nada mas sale de aqui hacia la base."""
+    """
+    El primer paso: solo la identificacion.
+
+    Antes pedia tambien una «clave de acceso» que era la inicial del nombre
+    mas los cuatro ultimos digitos de la cedula. Eso no acreditaba a nadie: se
+    calcula con la cedula delante, y la cedula circula. Lo que acredita ahora
+    es el codigo que llega al correo registrado, y eso es el segundo paso.
+    """
 
     identification = forms.CharField(
         label=_('identification number'),
         max_length=20,
-    )
-
-    access_key = forms.CharField(
-        label=_('access key'),
-        max_length=40,
-        widget=forms.PasswordInput(render_value=False),
     )
 
     def clean_identification(self) -> str:
@@ -56,48 +66,42 @@ class PublicCaseQueryForm(forms.Form):
         raw = self.cleaned_data['identification']
         digits = ''.join(character for character in raw if character.isdigit())
         if not digits:
-            raise forms.ValidationError(INVALID_CREDENTIALS)
+            raise forms.ValidationError(UNKNOWN_IDENTIFICATION)
         return digits
 
     def get_client(self) -> ClientModel | None:
         """
-        El cliente al que corresponden estas credenciales, o `None`.
+        El cliente de esa identificacion, exista o no.
 
-        Devuelve `None` cuando la identificacion no existe **y** cuando la
-        clave no es la suya, sin decir cual de las dos: quien llama no tiene
-        que poder distinguirlas ni aunque quiera.
-
-        Un cliente **sin vigencia si se devuelve**, y eso es deliberado. Antes
-        salia `None` como los otros dos, asi que a quien tenia su proceso
-        cerrado se le contestaba «credenciales invalidas»: se ponia a probar
-        claves que eran correctas y acababa gastando los intentos de su propia
-        IP. El portal le dice ahora que su proceso esta inactivo y a donde
-        llamar; decirselo no revela nada que no haya demostrado ya al acertar
-        su clave. Quien mira `is_active` es la vista.
-
-        Cuando la identificacion no existe se comprueba igualmente una clave
-        contra una cadena fija. Sin eso, un "no existe" responde antes que un
-        "clave incorrecta", y el reloj cuenta lo mismo que contaria el
-        mensaje.
+        **Tambien devuelve a los que no estan vigentes**, y lo mira la vista:
+        a quien tiene su proceso cerrado no se le contesta «no encontramos
+        nada», porque se pondria a probar cedulas creyendo que se equivoco de
+        numero. Se le manda su codigo igual y, cuando entra, la pantalla le
+        dice que su proceso esta inactivo y a donde llamar.
         """
-        from django.utils.crypto import constant_time_compare
-
-        identification = self.cleaned_data['identification']
-        access_key = self.cleaned_data['access_key']
-
-        client = ClientModel.objects.filter(
-            identification=identification
+        return ClientModel.objects.filter(
+            identification=self.cleaned_data['identification']
         ).first()
 
-        if client is None:
-            constant_time_compare(access_key, 'no-such-client')
-            return None
 
-        if not client.check_access_key(access_key):
-            return None
+class PublicAccessCodeForm(forms.Form):
+    """El segundo paso: las seis cifras que llegaron al correo."""
 
-        return client
+    code = forms.CharField(
+        label=_('access code'),
+        min_length=6,
+        max_length=6,
+    )
 
+    def clean_code(self) -> str:
+        digits = ''.join(
+            character
+            for character in (self.cleaned_data['code'] or '')
+            if character.isdigit()
+        )
+        if len(digits) != 6:
+            raise forms.ValidationError(INVALID_CODE)
+        return digits
 
 # ---------------------------------------------------------------------------
 # El gestor interno

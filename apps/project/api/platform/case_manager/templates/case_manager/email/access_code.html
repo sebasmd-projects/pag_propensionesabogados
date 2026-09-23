@@ -1,0 +1,108 @@
+{% load i18n %}<!DOCTYPE html>
+{% comment %}
+  El codigo con el que el cliente entra a ver su proceso.
+
+  Tres cosas que parecen anticuadas y no lo son:
+
+  1. **Tablas y estilos en linea.** Gmail borra el `<style>` del `<head>` y
+     Outlook renderiza con el motor de Word, que no entiende flexbox ni grid.
+     Esto es lo unico que se ve igual en los dos.
+
+  2. **El membrete va con `cid:`**, no con una URL. Casi todos los clientes
+     bloquean las imagenes remotas, asi que uno enlazado saldria como un
+     cuadro roto justo encima del codigo, que es lo que menos conviene en el
+     mensaje que autoriza una entrada. Lo adjunta `emails.py`.
+
+  3. **El codigo va como texto, no como imagen.** Asi se puede copiar, y los
+     lectores de pantalla lo leen.
+{% endcomment %}
+<html lang="{{ LANGUAGE_CODE|default:'es' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% trans "Your access code" %}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,Helvetica,sans-serif;color:#212529;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+               style="max-width:600px;width:100%;background-color:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e3e7eb;">
+
+          <tr>
+            <td align="center" style="padding:28px 24px 16px;">
+              <img src="cid:membrete" width="150" alt="Propensiones® Abogados Internacional"
+                   style="display:block;width:150px;max-width:60%;height:auto;border:0;">
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 32px;">
+              <div style="height:1px;background-color:#e3e7eb;"></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:24px 32px 8px;">
+              <p style="margin:0 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#6f7b86;">
+                {% trans "Portal access code" %}
+              </p>
+              <h1 style="margin:0;font-size:20px;line-height:1.3;color:#071d35;">
+                {% trans "Check the status of your case" %}
+              </h1>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:8px 32px 0;">
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">
+                {% blocktrans with name=client.full_name %}Dear {{ name }},{% endblocktrans %}
+              </p>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">
+                {% trans "Use the following code to see the status of your case in our client portal." %}
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:8px 32px 0;">
+              <div style="display:inline-block;padding:16px 28px;background-color:#f4f6f8;border:1px solid #e3e7eb;border-radius:8px;">
+                <span style="font-family:'Courier New',Courier,monospace;font-size:32px;font-weight:bold;letter-spacing:.35em;color:#071d35;">{{ code }}</span>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:16px 32px 0;">
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.5;color:#6f7b86;">
+                {% blocktrans %}The code expires in {{ minutes }} minutes and can only be used once.{% endblocktrans %}
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 32px 8px;">
+              <div style="padding:14px 16px;background-color:#fff8e6;border:1px solid #f3e0a9;border-radius:8px;">
+                <p style="margin:0;font-size:14px;line-height:1.5;color:#6b5400;">
+                  {% blocktrans %}Nobody at Propensiones® will ever ask you for this code. If you did not request it, someone may be trying to see your case: write to {{ reply_to }}.{% endblocktrans %}
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:24px 32px 28px;">
+              <div style="height:1px;background-color:#e3e7eb;margin-bottom:16px;"></div>
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#6f7b86;">
+                &copy; {{ year }} Propensiones&reg; Abogados Internacional.
+                {% trans "This message was sent automatically. If you reply, it will reach our management office." %}
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

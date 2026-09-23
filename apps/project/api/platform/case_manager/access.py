@@ -25,8 +25,9 @@ Dos puertas, no una
 -------------------
 - `GestorRequiredMixin` --- para la gente del despacho. Hace falta sesion
   iniciada **y** pertenecer al grupo `GESTOR_GROUP` (o ser superusuario).
-- El portal publico no usa mixin: no hay sesion. Alli la puerta es la clave
-  del cliente, y la abre `ClientModel.check_access_key()`.
+- El portal publico no usa mixin: no hay sesion de usuario. Alli la puerta es
+  un codigo de seis cifras que sale al correo registrado del cliente, y la
+  abre `portal_otp.verify()`.
 """
 
 from django.conf import settings

@@ -22,6 +22,7 @@ from ..choices import Court, Mandate, NoteKind, Procedure, Service, Stage
 from ..emails import REPLY_TO, send_case_note
 from ..models import CaseModel, CaseNoteModel, ClientModel
 from .test_access import login_as, make_user
+from .test_public_access import identificarse
 
 CLAVE = 'una-contrasena-larga-de-verdad'
 
@@ -397,10 +398,7 @@ class NoteFromGestorTests(TestCase):
         self.client.post(self.url, self.datos())
         self.client.logout()
 
-        respuesta = self.client.post(
-            reverse('case_manager:public_query'),
-            {'identification': '16484186', 'access_key': 'C4186'},
-        )
+        respuesta = identificarse(self.client)
 
         self.assertContains(respuesta, 'Falta su cédula')
 
@@ -411,10 +409,7 @@ class NoteFromGestorTests(TestCase):
         )
         self.client.logout()
 
-        respuesta = self.client.post(
-            reverse('case_manager:public_query'),
-            {'identification': '16484186', 'access_key': 'C4186'},
-        )
+        respuesta = identificarse(self.client)
 
         self.assertNotContains(respuesta, 'Solo para el expediente')
 

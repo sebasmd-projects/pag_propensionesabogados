@@ -117,7 +117,8 @@ class ClientDetailTests(BaseReportes):
         aqui, que es lo que pasaria llamando al `totals()` general.
         """
         ajeno = ClientModel.objects.create(
-            identification='99999999', full_name='Ajena'
+            identification='99999999', full_name='Ajena',
+            email='cliente99999999@example.test'
         )
         caso = CaseModel.objects.create(
             client=ajeno, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS
@@ -222,7 +223,8 @@ class WordReportTests(BaseReportes):
 
     def test_la_ficha_no_mezcla_clientes(self):
         ClientModel.objects.create(
-            identification='99999999', full_name='Ajena Que No Va'
+            identification='99999999', full_name='Ajena Que No Va',
+            email='cliente99999999@example.test'
         )
         texto = texto_del_docx(self.client.get(self.ficha).content)
 

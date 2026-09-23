@@ -24,6 +24,7 @@ from django.urls import reverse
 from ..choices import Court, Mandate, Procedure, Service, Stage
 from ..models import CaseFinanceModel, CaseModel, ClientModel
 from .test_access import login_as, make_user
+from .test_public_access import identificarse
 
 CLAVE = 'una-contrasena-larga-de-verdad'
 
@@ -41,7 +42,8 @@ class GestorAccessTests(TestCase):
         call_command('setup_case_manager_group', stdout=StringIO())
 
         cls.client_record = ClientModel.objects.create(
-            identification='16484186', full_name='Carlos Giraldo'
+            identification='16484186', full_name='Carlos Giraldo',
+            email='cliente16484186@example.test'
         )
         cls.case = CaseModel.objects.create(
             client=cls.client_record,
@@ -124,7 +126,8 @@ class GestorDashboardTests(TestCase):
         cls.url = reverse('case_manager:gestor_dashboard')
 
         deudor = ClientModel.objects.create(
-            identification='1001', full_name='Deudor Uno'
+            identification='1001', full_name='Deudor Uno',
+            email='cliente1001@example.test'
         )
         caso = CaseModel.objects.create(
             client=deudor, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS
@@ -135,7 +138,8 @@ class GestorDashboardTests(TestCase):
         )
 
         expectante = ClientModel.objects.create(
-            identification='1002', full_name='Expectativa Dos'
+            identification='1002', full_name='Expectativa Dos',
+            email='cliente1002@example.test'
         )
         caso2 = CaseModel.objects.create(
             client=expectante, service=Service.JUDICIAL, stage=Stage.FINAL_STAGE
@@ -212,19 +216,40 @@ class ClientCrudTests(TestCase):
         # portal.
         self.assertEqual(creado.identification, '16484186')
 
-    def test_el_aviso_dice_la_clave_del_portal(self):
+    def test_el_aviso_avisa_cuando_el_cliente_no_tiene_correo(self):
         """
-        Hay que poder decirsela al cliente al colgar el telefono. Es derivada,
-        no un secreto que el despacho custodie.
+        Sin correo no hay a donde mandar el codigo, y el cliente se encontrara
+        el portal cerrado sin saber por que. Mejor decirlo ahora, cuando quien
+        puede arreglarlo esta delante.
         """
         respuesta = self.client.post(
             reverse('case_manager:gestor_client_create'),
-            {'identification': '16484186', 'full_name': 'Carlos Giraldo',
-             'email': '', 'phone': '', 'is_active': 'on'},
+            {
+                'identification': '16484186',
+                'full_name': 'Carlos Giraldo',
+                'email': '',
+                'phone': '',
+                'is_active': 'on',
+            },
             follow=True,
         )
 
-        self.assertContains(respuesta, 'C4186')
+        self.assertContains(respuesta, 'cannot use the portal')
+
+    def test_con_correo_el_aviso_dice_a_donde_ira_el_codigo(self):
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_client_create'),
+            {
+                'identification': '16484187',
+                'full_name': 'Ana Giraldo',
+                'email': 'ana@example.test',
+                'phone': '',
+                'is_active': 'on',
+            },
+            follow=True,
+        )
+
+        self.assertContains(respuesta, 'ana@example.test')
 
     def test_una_cedula_sin_digitos_no_pasa(self):
         respuesta = self.client.post(
@@ -238,7 +263,8 @@ class ClientCrudTests(TestCase):
 
     def test_se_puede_editar_un_cliente(self):
         cliente = ClientModel.objects.create(
-            identification='16484186', full_name='Nombre Viejo'
+            identification='16484186', full_name='Nombre Viejo',
+            email='cliente16484186@example.test'
         )
 
         self.client.post(
@@ -251,8 +277,8 @@ class ClientCrudTests(TestCase):
         self.assertEqual(cliente.full_name, 'Nombre Nuevo')
 
     def test_el_listado_busca_por_nombre_y_por_cedula(self):
-        ClientModel.objects.create(identification='111', full_name='Ana Perez')
-        ClientModel.objects.create(identification='222', full_name='Luis Gomez')
+        ClientModel.objects.create(identification='111', full_name='Ana Perez', email='cliente111@example.test')
+        ClientModel.objects.create(identification='222', full_name='Luis Gomez', email='cliente222@example.test')
 
         url = reverse('case_manager:gestor_client_list')
 
@@ -275,7 +301,8 @@ class CaseCrudTests(TestCase):
     def setUpTestData(cls):
         call_command('setup_case_manager_group', stdout=StringIO())
         cls.cliente = ClientModel.objects.create(
-            identification='16484186', full_name='Carlos Giraldo'
+            identification='16484186', full_name='Carlos Giraldo',
+            email='cliente16484186@example.test'
         )
 
     def setUp(self):
@@ -389,7 +416,8 @@ class SettlementToggleTests(TestCase):
     def setUpTestData(cls):
         call_command('setup_case_manager_group', stdout=StringIO())
         cliente = ClientModel.objects.create(
-            identification='16484186', full_name='Carlos Giraldo'
+            identification='16484186', full_name='Carlos Giraldo',
+            email='cliente16484186@example.test'
         )
         cls.case = CaseModel.objects.create(
             client=cliente, service=Service.JUDICIAL, stage=Stage.FINISHED
@@ -441,10 +469,7 @@ class SettlementToggleTests(TestCase):
         self.client.post(self.url)
         self.client.logout()
 
-        respuesta = self.client.post(
-            reverse('case_manager:public_query'),
-            {'identification': '16484186', 'access_key': 'C4186'},
-        )
+        respuesta = identificarse(self.client)
 
         self.assertContains(
             respuesta,
@@ -465,10 +490,12 @@ class ClientToCasesTests(TestCase):
         call_command('setup_case_manager_group', stdout=StringIO())
 
         cls.ana = ClientModel.objects.create(
-            identification='1001', full_name='Ana Perez'
+            identification='1001', full_name='Ana Perez',
+            email='cliente1001@example.test'
         )
         cls.luis = ClientModel.objects.create(
-            identification='1002', full_name='Luis Gomez'
+            identification='1002', full_name='Luis Gomez',
+            email='cliente1002@example.test'
         )
         cls.de_ana = CaseModel.objects.create(
             client=cls.ana, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS

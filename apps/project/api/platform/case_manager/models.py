@@ -103,35 +103,70 @@ class ClientModel(TimeStampedModel):
         )
     )
 
+    # -- El codigo de acceso al portal ------------------------------------
+    #
+    # Lo que habia antes era una clave **derivada**: la inicial del nombre mas
+    # los cuatro ultimos digitos de la cedula. Eso no acredita a nadie. Son
+    # diez mil combinaciones como mucho, se adivina con la cedula delante --que
+    # es publica en media Colombia-- y no prueba que quien la teclea sea el
+    # titular del proceso, que es justo lo que un expediente exige.
+    #
+    # Ahora el portal manda un codigo de seis cifras al correo registrado del
+    # cliente. Quien lo recibe demuestra que controla ese buzon, que es el que
+    # el despacho tiene anotado como suyo.
+    #
+    # Estos tres campos son la escalera de reenvios, y estan **en la base** y
+    # no en la cache o la sesion a proposito: si vivieran en la sesion, tirar
+    # la galleta la reiniciaria, y en cache con varios procesos cada uno
+    # llevaria su cuenta. Lo que frena el envio de correos al buzon de un
+    # tercero no puede depender de con que proceso le toque hablar.
+
+    code_sends = models.PositiveSmallIntegerField(
+        _('codes sent in the current cycle'),
+        default=0,
+        editable=False
+    )
+
+    last_code_sent_at = models.DateTimeField(
+        _('last code sent at'),
+        blank=True,
+        null=True,
+        editable=False
+    )
+
+    code_blocked_until = models.DateTimeField(
+        _('codes blocked until'),
+        blank=True,
+        null=True,
+        editable=False
+    )
+
     @property
-    def access_key(self) -> str:
+    def masked_email(self) -> str:
         """
-        La clave con la que el cliente entra al portal publico.
+        El correo con el centro tapado, para poder decir a donde fue el codigo.
 
-        Es la misma regla que ya estaba aprobada --inicial del nombre en
-        mayuscula, mas los cuatro ultimos digitos de la identificacion--,
-        movida del navegador al servidor. Que la clave sea **derivada** y no
-        propia es una limitacion conocida y esta fuera del alcance contratado
-        cambiarla; lo que si cambia es donde se comprueba: antes el navegador
-        recibia el dato y decidia, ahora decide el servidor.
+        Sin esto la pantalla diria «te hemos mandado un codigo» y el cliente no
+        sabria a cual de sus correos mirar --ni si el que el despacho tiene
+        anotado sigue siendo el suyo, que es el fallo que mas llamadas genera--.
 
-        Quien la sustituya algun dia solo tiene que tocar esto y
-        `check_access_key()`.
+        Se tapa con un numero **fijo** de asteriscos y no con uno por letra: la
+        longitud del nombre de un buzon tambien es informacion, y aqui no hace
+        falta para nada.
         """
-        initial = self.full_name.strip()[:1].upper()
-        return f'{initial}{self.identification[-4:]}'
+        correo = (self.email or '').strip()
 
-    def check_access_key(self, raw_key: str) -> bool:
-        """
-        Si `raw_key` es la clave de este cliente.
+        if '@' not in correo:
+            return ''
 
-        Compara en tiempo constante: el tiempo que tarda un `==` depende de
-        cuantos caracteres coinciden, y con una clave de cinco caracteres eso
-        es material.
-        """
-        from django.utils.crypto import constant_time_compare
+        nombre, dominio = correo.rsplit('@', 1)
 
-        return constant_time_compare((raw_key or '').strip(), self.access_key)
+        if len(nombre) <= 4:
+            # Un buzon corto no se puede tapar por el centro sin taparlo
+            # entero: se deja la primera letra y ya.
+            return f'{nombre[:1]}****@{dominio}'
+
+        return f'{nombre[:3]}****{nombre[-3:]}@{dominio}'
 
     def save(self, *args, **kwargs):
         self.identification = ''.join(

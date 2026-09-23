@@ -14,6 +14,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from ..choices import Service, Stage
+from .test_public_access import identificarse, pedir_codigo
 from ..models import CaseModel, ClientModel
 
 
@@ -23,7 +24,8 @@ class PazYSalvoAccessTests(TestCase):
         cls.query_url = reverse('case_manager:public_query')
 
         cls.client_record = ClientModel.objects.create(
-            identification='16484186', full_name='Carlos Giraldo'
+            identification='16484186', full_name='Carlos Giraldo',
+            email='cliente16484186@example.test'
         )
         cls.case = CaseModel.objects.create(
             client=cls.client_record,
@@ -35,7 +37,8 @@ class PazYSalvoAccessTests(TestCase):
         cls.url = reverse('case_manager:paz_y_salvo', args=[cls.case.pk])
 
         otro = ClientModel.objects.create(
-            identification='77777777', full_name='Otra Persona'
+            identification='77777777', full_name='Otra Persona',
+            email='cliente77777777@example.test'
         )
         cls.otro_case = CaseModel.objects.create(
             client=otro,
@@ -45,11 +48,8 @@ class PazYSalvoAccessTests(TestCase):
         )
         cls.otro_url = reverse('case_manager:paz_y_salvo', args=[cls.otro_case.pk])
 
-    def _identificarse(self, identification='16484186', access_key='C4186'):
-        return self.client.post(
-            self.query_url,
-            {'identification': identification, 'access_key': access_key},
-        )
+    def _identificarse(self, identification='16484186'):
+        return identificarse(self.client, identification)
 
     # --- las tres condiciones -------------------------------------------
     def test_sin_identificarse_no_hay_documento(self):
@@ -96,11 +96,19 @@ class PazYSalvoAccessTests(TestCase):
 
         self.assertEqual(self.client.get(self.url).status_code, 404)
 
-    def test_fallar_la_clave_no_deja_sesion_abierta(self):
-        self.client.post(
-            self.query_url,
-            {'identification': '16484186', 'access_key': 'X0000'},
-        )
+    def test_fallar_el_codigo_no_deja_sesion_abierta(self):
+        pedir_codigo(self.client)
+        self.client.post(self.query_url, {'code': '000000'})
+
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_pedir_el_codigo_sin_teclearlo_tampoco(self):
+        """
+        El primer paso no identifica a nadie: solo manda un correo. Si
+        abriera sesion, la cedula sola --que es un dato que circula-- bastaria
+        para imprimir un paz y salvo ajeno.
+        """
+        pedir_codigo(self.client)
 
         self.assertEqual(self.client.get(self.url).status_code, 404)
 
@@ -152,17 +160,15 @@ class SessionFixationTests(TestCase):
     def setUpTestData(cls):
         cls.url = reverse('case_manager:public_query')
         ClientModel.objects.create(
-            identification='16484186', full_name='Carlos Giraldo'
+            identification='16484186', full_name='Carlos Giraldo',
+            email='cliente16484186@example.test'
         )
 
     def test_la_sesion_se_renueva_al_acertar(self):
         self.client.get(self.url)
         antes = self.client.session.session_key
 
-        self.client.post(
-            self.url,
-            {'identification': '16484186', 'access_key': 'C4186'},
-        )
+        identificarse(self.client)
 
         self.assertNotEqual(self.client.session.session_key, antes)
 

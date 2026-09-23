@@ -54,12 +54,6 @@
       <dl class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-0">
         {% include 'case_manager/partials/field.html' with label=_("Email") value=client.email|default:"—" %}
         {% include 'case_manager/partials/field.html' with label=_("Phone") value=client.phone|default:"—" %}
-        {% comment %}
-          La clave se ensena porque hay que poder decirsela por telefono: es
-          derivada del nombre y la cedula, no un secreto que el despacho
-          custodie.
-        {% endcomment %}
-        {% include 'case_manager/partials/field.html' with label=_("Access key") value=client.access_key %}
         {% include 'case_manager/partials/field.html' with label=_("Cases") value=cases|length %}
       </dl>
     </div>

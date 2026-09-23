@@ -193,7 +193,8 @@ class AdminPagesRenderTests(TestCase):
         from ..models import CaseFinanceModel, CaseModel, ClientModel
 
         cls.client_record = ClientModel.objects.create(
-            identification='16484186', full_name='Carlos Giraldo'
+            identification='16484186', full_name='Carlos Giraldo',
+            email='cliente16484186@example.test'
         )
         cls.case = CaseModel.objects.create(
             client=cls.client_record,

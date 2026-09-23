@@ -31,7 +31,6 @@
           <tr class="text-uppercase small text-muted">
             <th scope="col">{% trans "Identification" %}</th>
             <th scope="col">{% trans "Client" %}</th>
-            <th scope="col">{% trans "Access key" %}</th>
             <th scope="col" class="text-center">{% trans "Cases" %}</th>
             <th scope="col">{% trans "Service" %}</th>
             <th scope="col" class="text-end">{% trans "Actions" %}</th>
@@ -53,15 +52,6 @@
                   {{ client.full_name }}
                 </a>
                 {% if client.email %}<div class="text-muted small">{{ client.email }}</div>{% endif %}
-              </td>
-              <td>
-                {% comment %}
-                  Se ensena porque hay que poder decirsela al cliente por
-                  telefono: es derivada de su nombre y su cedula, no un
-                  secreto que el despacho custodie. Sustituirla por una propia
-                  esta listado como trabajo aparte en la cotizacion.
-                {% endcomment %}
-                <span class="badge text-bg-light font-monospace">{{ client.access_key }}</span>
               </td>
               <td class="text-center">
                 {% comment %}

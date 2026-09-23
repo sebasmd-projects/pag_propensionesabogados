@@ -1,0 +1,10 @@
+{% load i18n %}
+{% comment %}
+  La misma informacion de contacto, dentro de una tarjeta, para cuando sale
+  junto al formulario y no en lugar de el.
+{% endcomment %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body p-4">
+    {% include 'case_manager/partials/contact_channels.html' %}
+  </div>
+</div>

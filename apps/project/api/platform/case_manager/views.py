@@ -22,14 +22,16 @@ que no tiene sesion, y el resultado seria el mismo con una pieza mas.
 
 import logging
 
+from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
-from . import attempts
-from .forms import INVALID_CREDENTIALS, PublicCaseQueryForm
-from .models import CaseModel
+from . import attempts, portal_otp
+from .forms import (NO_EMAIL_ON_FILE, INVALID_CODE, PublicAccessCodeForm,
+                    PublicCaseQueryForm, UNKNOWN_IDENTIFICATION)
+from .models import CaseModel, ClientModel
 
 #: Donde se apunta a quien acaba de identificarse con su clave.
 #:
@@ -47,13 +49,42 @@ BLOCKED_MESSAGE = _(
     'Too many failed attempts from this connection. Try again later.'
 )
 
+#: Cuando el correo no llega a salir. Se le dice, en vez de dejarle mirando un
+#: campo vacio esperando un codigo que no viene.
+CODE_NOT_SENT = _(
+    'We could not send the access code right now. Please try again in a few '
+    'minutes or contact us.'
+)
+
 
 class PublicCaseQueryView(TemplateView):
     """
-    Pide identificacion y clave, y devuelve un expediente o nada.
+    El portal, en dos pasos: la cedula, y el codigo que llega al correo.
 
-    En `GET` la pagina sale vacia: sin `case` en el contexto, la plantilla no
-    pinta la tarjeta del cliente.
+    Por que dos pasos
+    -----------------
+    Antes era uno: cedula y una «clave de acceso» que era la inicial del
+    nombre mas los cuatro ultimos digitos de la propia cedula. Con la cedula
+    delante, esa clave se calcula. O sea que el unico dato que hacia falta
+    para abrir un expediente ajeno era un dato que circula.
+
+    Ahora el segundo paso es un codigo de seis cifras que sale al correo que
+    consta en el expediente. Quien lo recibe demuestra que controla ese buzon,
+    y ese buzon es el que el cliente le dio al despacho. Eso si acredita
+    titularidad; lo otro acreditaba saber una cedula.
+
+    Las tres pantallas
+    ------------------
+    Son la misma direccion y el mismo formulario, en tres estados que se
+    deciden por lo que hay en la sesion:
+
+    1. **la cedula**, cuando no hay nada pendiente;
+    2. **el codigo**, con el correo tapado y el boton de reenviar, mientras
+       haya un codigo vivo;
+    3. **los asuntos**, cuando el codigo se acerto.
+
+    Una direccion y no tres porque el cliente no esta navegando: esta haciendo
+    una gestion, y cada redireccion es un sitio mas donde perderse.
     """
 
     template_name = 'case_manager/consultar_proceso.html'
@@ -63,6 +94,43 @@ class PublicCaseQueryView(TemplateView):
         context.setdefault('form', PublicCaseQueryForm())
         context.setdefault('stages', CaseModel._meta.get_field('stage').choices)
         return context
+
+    # -- lo que responde cada paso ----------------------------------------
+    def _pantalla_del_codigo(self, client, **extra):
+        """
+        La pantalla del codigo: a donde fue, y cuando se puede repetir.
+
+        `resend_at` sale en hora y no en segundos porque el cliente puede
+        dejar esta pantalla abierta un rato, y unos segundos calculados al
+        pintarla mentirian en cuanto pasen.
+        """
+        return self.render_to_response(self.get_context_data(
+            code_form=PublicAccessCodeForm(),
+            masked_email=client.masked_email,
+            resend_at=portal_otp.next_send_allowed_at(client),
+            **extra,
+        ))
+
+    def _cliente_pendiente(self):
+        """
+        El cliente cuyo codigo espera esta sesion, o `None`.
+
+        Se relee de la base en vez de guardarlo entero en la sesion: entre que
+        se pidio el codigo y se teclea, el despacho puede haberle dado de
+        baja, y lo que vale es lo que diga la base ahora.
+        """
+        pk = portal_otp.pending_client_pk(self.request)
+
+        if not pk:
+            return None
+
+        try:
+            return ClientModel.objects.filter(pk=pk).first()
+        except (ValidationError, ValueError):
+            # Una sesion vieja con un identificador que ya no tiene forma de
+            # UUID. `filter(pk=...)` levanta en vez de no encontrar nada.
+            portal_otp.clear(self.request)
+            return None
 
     def post(self, request, *args, **kwargs):
         ip = attempts.client_ip(request)
@@ -76,40 +144,125 @@ class PublicCaseQueryView(TemplateView):
                 status=429,
             )
 
+        if 'resend' in request.POST:
+            return self._reenviar(request, ip)
+
+        if 'code' in request.POST:
+            return self._comprobar_codigo(request, ip)
+
+        return self._pedir_codigo(request, ip)
+
+    # -- paso 1: la cedula ------------------------------------------------
+    def _pedir_codigo(self, request, ip):
         form = PublicCaseQueryForm(request.POST)
+
         if not form.is_valid():
             attempts.register_failure(ip)
             return self.render_to_response(
-                self.get_context_data(form=form, error=INVALID_CREDENTIALS),
+                self.get_context_data(form=form, error=UNKNOWN_IDENTIFICATION),
                 status=400,
             )
 
         client = form.get_client()
+
         if client is None:
             count = attempts.register_failure(ip)
             logger.info(
                 'Consulta fallida en el portal de procesos desde %s (%s en la '
                 'ventana actual).',
-                ip,
-                count,
+                ip, count,
             )
             return self.render_to_response(
-                self.get_context_data(form=form, error=INVALID_CREDENTIALS),
+                self.get_context_data(
+                    form=form, error=UNKNOWN_IDENTIFICATION
+                ),
                 status=400,
             )
 
+        if not client.email:
+            # No hay a donde mandarlo. No es culpa suya y no hay nada que
+            # pueda teclear: lo que necesita es el telefono del despacho.
+            return self.render_to_response(self.get_context_data(
+                form=form, error=NO_EMAIL_ON_FILE, show_contact=True,
+            ))
+
+        if not portal_otp.can_send(client):
+            # Ya pidio codigos de sobra. Se le ensena la pantalla del codigo
+            # --el ultimo que recibio puede seguir sirviendo-- con la hora a
+            # la que podra pedir otro.
+            return self._pantalla_del_codigo(client)
+
+        if not portal_otp.issue(request, client):
+            return self.render_to_response(self.get_context_data(
+                form=form, error=CODE_NOT_SENT, show_contact=True,
+            ))
+
+        return self._pantalla_del_codigo(client, code_sent=True)
+
+    # -- reenviar ---------------------------------------------------------
+    def _reenviar(self, request, ip):
+        client = self._cliente_pendiente()
+
+        if client is None:
+            # La sesion caduco entre pedir el codigo y darle a reenviar. Se
+            # vuelve al principio, que es lo unico que puede hacer.
+            return self.render_to_response(
+                self.get_context_data(form=PublicCaseQueryForm())
+            )
+
+        if not portal_otp.can_send(client):
+            return self._pantalla_del_codigo(client)
+
+        if not portal_otp.issue(request, client):
+            return self.render_to_response(self.get_context_data(
+                form=PublicCaseQueryForm(),
+                error=CODE_NOT_SENT,
+                show_contact=True,
+            ))
+
+        return self._pantalla_del_codigo(client, code_sent=True)
+
+    # -- paso 2: el codigo ------------------------------------------------
+    def _comprobar_codigo(self, request, ip):
+        client = self._cliente_pendiente()
+
+        if client is None:
+            return self.render_to_response(
+                self.get_context_data(form=PublicCaseQueryForm())
+            )
+
+        form = PublicAccessCodeForm(request.POST)
+
+        if not form.is_valid() or not portal_otp.verify(
+            request, form.cleaned_data.get('code', '')
+        ):
+            # Un codigo equivocado cuenta como intento fallido del portal:
+            # si no, tantear seis cifras sale gratis mientras que equivocarse
+            # de cedula no.
+            attempts.register_failure(ip)
+            return self._pantalla_del_codigo(
+                client, code_error=INVALID_CODE
+            )
+
+        return self._entrar(request, ip, client)
+
+    # -- dentro -----------------------------------------------------------
+    def _entrar(self, request, ip, client):
         attempts.reset(ip)
+        portal_otp.reset_ladder(client)
 
         # Rotar la sesion al identificarse: sin esto, un identificador de
         # sesion fijado de antemano por un tercero seguiria siendo valido
-        # despues de que el cliente acierte su clave.
+        # despues de que el cliente acierte su codigo.
+        #
+        # El codigo ya se consumio en `verify()`, asi que lo que se lleva por
+        # delante el ciclo es solo el rastro.
         request.session.cycle_key()
         request.session[SESSION_CLIENT_KEY] = str(client.pk)
 
-        # Sin vigencia: ni tarjeta ni mensaje de credenciales. La clave era
-        # buena --acaba de demostrarlo-- asi que decirle «credenciales
-        # invalidas» solo conseguia que siguiera probando claves correctas
-        # hasta gastar los intentos de su propia IP. Se le dice que su proceso
+        # Sin vigencia: ni tarjeta ni mensaje de credenciales. El codigo era
+        # bueno --acaba de demostrarlo-- asi que decirle que algo fallo solo
+        # conseguiria que volviera a intentarlo. Se le dice que su proceso
         # esta inactivo y a donde llamar, que es lo unico que puede hacer.
         if not client.is_active:
             return self.render_to_response(
@@ -136,9 +289,7 @@ class PublicCaseQueryView(TemplateView):
         if not cases:
             # El cliente esta vigente pero no le queda ningun asunto que
             # ensenar --se cerraron todos--. Para el es la misma situacion que
-            # la de arriba y tiene el mismo remedio: llamar al despacho. Asi
-            # que es la misma pantalla, y no un aviso distinto que le haria
-            # pensar que se equivoco al escribir algo.
+            # la de arriba y tiene el mismo remedio: llamar al despacho.
             return self.render_to_response(
                 self.get_context_data(form=PublicCaseQueryForm(), inactive=True)
             )

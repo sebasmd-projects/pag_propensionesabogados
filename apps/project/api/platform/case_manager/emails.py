@@ -3,12 +3,18 @@ Los correos que el despacho le manda al cliente.
 
 Que se manda
 ------------
-Dos cosas, y las dos nacen de una nota del expediente (`CaseNoteModel`):
+Tres cosas. Dos nacen de una nota del expediente (`CaseNoteModel`):
 
 - una **novedad** que alguien del despacho escribe --que falta un documento,
   que el asunto esta en espera, lo que sea--, si marca la casilla de aviso;
 - un **avance de etapa**, que lo escribe el sistema al guardar un asunto cuyo
   estado cambio, tambien solo si se marca la casilla.
+
+Y la tercera es el **codigo de acceso al portal**, que no es un aviso sino la
+puerta: quien lo recibe demuestra que controla el correo que consta en el
+expediente. Por eso sale con `fail_silently=False` --si no llega a salir, la
+pantalla tiene que decirlo en vez de prometer un codigo que no va a llegar--
+mientras que los avisos se tragan el fallo y siguen.
 
 De quien viene y a quien se responde
 ------------------------------------
@@ -56,6 +62,17 @@ REPLY_TO = getattr(
 INLINE_IMAGES = {
     'membrete': 'assets/imgs/consultar_proceso/membrete-paz-y-salvo.jpg',
     'firma': 'assets/imgs/consultar_proceso/firma.png',
+}
+
+#: El correo del codigo solo lleva el membrete.
+#:
+#: La firma escaneada del representante legal no pinta nada en un correo
+#: automatico: no hay nada firmado que enviar, son unos 40 KB por mensaje, y
+#: una firma que viaja en cada codigo de acceso es una firma que acaba
+#: circulando. Los avisos del expediente si la llevan, porque alli el
+#: despacho esta comunicando algo.
+ACCESS_CODE_IMAGES = {
+    'membrete': INLINE_IMAGES['membrete'],
 }
 
 
@@ -134,3 +151,42 @@ def send_case_note(note, *, request=None) -> bool:
         'Nota «%s» enviada a %s.', note.title, cliente.email
     )
     return True
+
+
+def send_access_code(*, client, code: str, minutes: int) -> None:
+    """
+    Le manda al cliente el codigo con el que entra a ver su proceso.
+
+    Sale con `fail_silently=False` al contrario que los avisos de arriba, y no
+    es una incoherencia: un aviso que no sale deja una nota sin leer, y eso se
+    arregla despues; un codigo que no sale deja a alguien mirando un campo
+    vacio en una pantalla que le prometio un correo. El fallo lo recoge
+    `portal_otp.issue()`, que entonces no anota nada y deja que la pantalla lo
+    diga.
+    """
+    contexto = {
+        'client': client,
+        'code': code,
+        'minutes': minutes,
+        'reply_to': REPLY_TO,
+        'year': timezone.localtime().year,
+    }
+    cuerpo_html = render_to_string(
+        'case_manager/email/access_code.html', contexto
+    )
+
+    mensaje = EmailMultiAlternatives(
+        subject=_('Your access code — Propensiones® Abogados'),
+        # El salto tras cada parrafo evita que la version en texto salga en un
+        # solo renglon con el codigo pegado a la frase anterior.
+        body=strip_tags(cuerpo_html.replace('</p>', '</p>\n')),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[client.email],
+        reply_to=[REPLY_TO],
+    )
+    mensaje.attach_alternative(cuerpo_html, 'text/html')
+    mensaje.mixed_subtype = 'related'
+    attach_inline_images(mensaje, ACCESS_CODE_IMAGES)
+
+    mensaje.send(fail_silently=False)
+    logger.info('Codigo de acceso al portal enviado al cliente %s.', client.pk)

@@ -64,46 +64,126 @@
         <div class="row justify-content-center">
           <div class="col-12 col-lg-9">
 
-            {# --- Consulta ------------------------------------------- #}
+            {% comment %}
+              La consulta, en dos pasos y una sola pantalla: primero la
+              cedula, y despues el codigo que llego al correo registrado.
+
+              Antes se pedian las dos cosas a la vez, y la segunda era una
+              «clave de acceso» que se calculaba con la primera delante --la
+              inicial del nombre mas los cuatro ultimos digitos de la
+              cedula--. O sea que el unico dato para abrir un expediente ajeno
+              era un dato que circula.
+
+              Los dos pasos son la misma direccion porque el cliente no esta
+              navegando: esta haciendo una gestion, y cada redireccion es un
+              sitio mas donde perderse.
+            {% endcomment %}
             <div class="card border-0 shadow-sm mb-4">
               <div class="card-body p-4">
-                {% comment %}
-                  `method="post"` y `{% csrf_token %}`: el formulario anterior
-                  no mandaba nada a ningun sitio, asi que no habia nada que
-                  proteger. Ahora si.
-                {% endcomment %}
                 <form method="post" action="{% url 'case_manager:public_query' %}" autocomplete="off">
                   {% csrf_token %}
-                  <div class="row g-3 align-items-end">
-                    <div class="col-12 col-md-4">
-                      <label for="consulta" class="form-label small fw-semibold text-uppercase">
-                        {% trans "Identification number" %}
-                      </label>
-                      <input type="text" name="identification" id="consulta" class="form-control form-control-lg"
-                             inputmode="numeric" maxlength="20" autocomplete="off" required>
+
+                  {% if masked_email %}
+                    {# --- Paso 2: el codigo ----------------------------- #}
+                    <div class="text-center mb-4">
+                      <div class="d-inline-flex align-items-center justify-content-center rounded-circle
+                                  bg-success-subtle text-success-emphasis mb-3"
+                           style="width: 3.5rem; height: 3.5rem;" aria-hidden="true">
+                        <i class="bi bi-envelope-check fs-4"></i>
+                      </div>
+                      <h2 class="h5 fw-bold mb-1">{% trans "Enter your access code" %}</h2>
+                      {% comment %}
+                        El correo va tapado por el centro. Decir solo «te
+                        hemos mandado un codigo» deja al cliente sin saber a
+                        cual de sus buzones mirar, ni si el que el despacho
+                        tiene anotado sigue siendo el suyo --que es el fallo
+                        que mas llamadas genera--.
+                      {% endcomment %}
+                      <p class="text-muted mb-0">
+                        {% blocktrans %}The access code was sent to {{ masked_email }}{% endblocktrans %}
+                      </p>
                     </div>
-                    <div class="col-12 col-md-4">
-                      <label for="claveCliente" class="form-label small fw-semibold text-uppercase">
-                        {% trans "Access key" %}
-                      </label>
-                      <div class="input-group input-group-lg">
-                        <input type="password" name="access_key" id="claveCliente" class="form-control"
-                               maxlength="40" required>
-                        <button class="btn btn-outline-secondary" type="button" id="verClaveCliente"
-                                aria-pressed="false" aria-label="{% trans 'Show access key' %}">
-                          <i class="bi bi-eye"></i>
+
+                    {% if code_error %}
+                      <div class="alert alert-danger py-2 small text-center" role="alert">
+                        {{ code_error }}
+                      </div>
+                    {% endif %}
+
+                    <div class="row g-3 justify-content-center">
+                      <div class="col-12 col-md-6">
+                        <label for="codigoAcceso" class="form-label small fw-semibold text-uppercase">
+                          {% trans "Access code" %}
+                        </label>
+                        <input type="text" name="code" id="codigoAcceso" autofocus
+                               class="form-control form-control-lg text-center fw-semibold"
+                               style="letter-spacing:.4em;"
+                               inputmode="numeric" pattern="[0-9]*" maxlength="6"
+                               autocomplete="one-time-code" required>
+                      </div>
+                      <div class="col-12 col-md-6 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                          {% trans "Check my case" %}
                         </button>
                       </div>
                     </div>
-                    <div class="col-12 col-md-4 d-grid">
-                      <button type="submit" class="btn btn-primary btn-lg">
-                        {% trans "Check my case" %}
-                      </button>
+
+                    <div class="text-center mt-3">
+                      {% comment %}
+                        `formnovalidate`: reenviar es un envio del mismo
+                        formulario, y sin el el navegador exigiria antes el
+                        codigo que precisamente no ha llegado.
+                      {% endcomment %}
+                      {% if resend_at %}
+                        <p class="text-muted small mb-0">
+                          <i class="bi bi-clock me-1"></i>
+                          {% blocktrans with when=resend_at|time:"H:i" %}You can request another code from {{ when }}.{% endblocktrans %}
+                        </p>
+                      {% else %}
+                        <button type="submit" name="resend" value="1" formnovalidate
+                                class="btn btn-link btn-sm p-0 text-decoration-none">
+                          <i class="bi bi-arrow-clockwise me-1"></i>{% trans "Resend code" %}
+                        </button>
+                      {% endif %}
+                      <div class="mt-2">
+                        <a class="btn btn-link btn-sm p-0 text-decoration-none"
+                           href="{% url 'case_manager:public_query' %}">
+                          <i class="bi bi-arrow-left me-1"></i>{% trans "Use another identification number" %}
+                        </a>
+                      </div>
                     </div>
-                  </div>
+
+                  {% else %}
+                    {# --- Paso 1: la cedula ----------------------------- #}
+                    <div class="row g-3 align-items-end justify-content-center">
+                      <div class="col-12 col-md-7">
+                        <label for="consulta" class="form-label small fw-semibold text-uppercase">
+                          {% trans "Identification number" %}
+                        </label>
+                        <input type="text" name="identification" id="consulta" class="form-control form-control-lg"
+                               inputmode="numeric" maxlength="20" autocomplete="off" required
+                               value="{{ form.identification.value|default:'' }}">
+                        <div class="form-text">
+                          {% trans "We will send a code to the email address on your file." %}
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-5 d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                          {% trans "Check my case" %}
+                        </button>
+                      </div>
+                    </div>
+                  {% endif %}
                 </form>
               </div>
             </div>
+
+            {% if code_sent and not code_error %}
+              <div class="alert alert-success d-flex align-items-center gap-2" role="status">
+                <i class="bi bi-check-circle-fill flex-shrink-0"></i>
+                <div>{% trans "We have sent you a new code." %}</div>
+              </div>
+            {% endif %}
 
             {% if inactive %}
               {% include 'case_manager/partials/inactive_notice.html' %}
@@ -114,6 +194,15 @@
                 <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
                 <div>{{ error }}</div>
               </div>
+            {% endif %}
+
+            {% comment %}
+              Cuando no hay nada que el cliente pueda teclear para arreglarlo
+              --no tenemos su correo, o el correo no salio-- lo unico util es
+              el telefono del despacho.
+            {% endcomment %}
+            {% if show_contact %}
+              {% include 'case_manager/partials/contact_card.html' %}
             {% endif %}
 
             {# --- Expedientes ----------------------------------------- #}
@@ -249,7 +338,3 @@
   </main>
 {% endblock main %}
 
-{% block body_custom_js %}
-  {{ block.super }}
-  <script src="{% static 'assets/custom/js/consultar_proceso.js' %}" defer></script>
-{% endblock body_custom_js %}

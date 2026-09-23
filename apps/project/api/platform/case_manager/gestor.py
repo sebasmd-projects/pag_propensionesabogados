@@ -222,13 +222,26 @@ class ClientCreateView(GestorRequiredMixin, CreateView):
 
     def form_valid(self, form):
         respuesta = super().form_valid(form)
-        messages.success(
-            self.request,
-            _('Client %(name)s created. Their access key is %(key)s.') % {
-                'name': self.object.full_name,
-                'key': self.object.access_key,
-            },
-        )
+        if self.object.email:
+            messages.success(
+                self.request,
+                _('Client %(name)s created. They will enter the portal with '
+                  'their identification number and a code sent to '
+                  '%(email)s.') % {
+                    'name': self.object.full_name,
+                    'email': self.object.email,
+                },
+            )
+        else:
+            # Sin correo no hay a donde mandar el codigo, y el cliente se
+            # encontrara el portal cerrado sin saber por que. Mejor decirlo
+            # ahora, cuando quien puede arreglarlo esta delante.
+            messages.warning(
+                self.request,
+                _('Client %(name)s created, but without an email address they '
+                  'cannot use the portal: the access code has nowhere to go.')
+                % {'name': self.object.full_name},
+            )
         return respuesta
 
 

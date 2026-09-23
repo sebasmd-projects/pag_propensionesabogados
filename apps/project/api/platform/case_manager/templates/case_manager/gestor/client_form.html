@@ -26,7 +26,7 @@
               <div class="alert alert-light border small mt-4 mb-0 d-flex gap-2">
                 <i class="bi bi-key flex-shrink-0 mt-1"></i>
                 <div>
-                  {% blocktrans with key=object.access_key %}Access key for the portal: <strong class="font-monospace">{{ key }}</strong>. It is derived from the name and the identification, so it changes if either does.{% endblocktrans %}
+                  {% blocktrans %}To see their case, the client enters their identification number and a code we email them. Without an email address on file we cannot send it, so the portal will ask them to call us.{% endblocktrans %}
                 </div>
               </div>
             {% endif %}

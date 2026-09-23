@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}
+  Los dos canales del despacho, para cuando no hay nada que el cliente pueda
+  teclear: no tenemos su correo, el correo no salio, o su proceso esta
+  cerrado. En los tres casos lo unico util es el telefono, y por eso va
+  grande y sin nada alrededor.
+
+  Esta suelto de la pantalla que lo usa porque lo usan tres.
+{% endcomment %}
+
+<div class="row g-3 justify-content-center">
+  <div class="col-12 col-md-6">
+    <div class="border rounded-3 p-3 h-100 text-center">
+      <p class="text-uppercase small text-muted mb-1">
+        {% trans "LATAM customer service line" %}
+      </p>
+      <a class="fw-semibold text-decoration-none" href="tel:+573012283818">
+        <i class="bi bi-telephone me-1"></i>+57 301 228 3818
+      </a>
+    </div>
+  </div>
+  <div class="col-12 col-md-6">
+    <div class="border rounded-3 p-3 h-100 text-center">
+      <p class="text-uppercase small text-muted mb-1">
+        {% trans "Notifications email" %}
+      </p>
+      <a class="fw-semibold text-decoration-none text-break"
+         href="mailto:notificaciones@propensionesabogados.com">
+        <i class="bi bi-envelope me-1"></i>notificaciones@propensionesabogados.com
+      </a>
+    </div>
+  </div>
+</div>
