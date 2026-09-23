@@ -400,14 +400,23 @@ class CaseModel(TimeStampedModel):
     @property
     def detail_rows(self) -> list[tuple[str, str]]:
         """
-        Las filas del bloque de detalle, segun el tipo de tramite.
+        Las filas del bloque de detalle: lo que hay, no lo que tocaria.
 
         Es `pintarDetalles()` del JavaScript, que armaba este mismo bloque
         concatenando HTML con `innerHTML`. Al devolver pares y dejar que la
         plantilla los pinte, el escapado de Django se aplica solo: un nombre
         de entidad con `<` deja de poder cerrar una etiqueta.
 
-        Solo salen las filas con contenido, igual que antes.
+        **No se mira el tipo de tramite**, y ese es el cambio. Antes se
+        elegia el bloque con el, y los expedientes reales vienen sin el --la
+        pantalla dejo de pedirlo cuando el subtipo paso a colgar del
+        servicio--, asi que el despacho y la ciudad desaparecian de la ficha
+        del cliente **aunque estuvieran guardados**: un asunto con
+        «Juzgado del Circuito» y «Armenia» dentro se le ensenaba sin ninguno
+        de los dos.
+
+        Los tres bloques no se pisan porque un asunto no llena mas de uno: se
+        recorren todos y sale lo que tenga contenido.
 
         La instancia y el radicado **no estan aqui**: el diseno aprobado los
         subio a la rejilla de arriba, junto al nombre y al servicio, porque
@@ -415,22 +424,19 @@ class CaseModel(TimeStampedModel):
         `public_reference`, que es lo mismo sin importar de que bloque venga
         cada asunto.
         """
-        by_procedure = {
-            choices.Procedure.ORDINARY: (
-                (_('COURT'), self.court),
-                (_('CITY OF THE PROCESS'), self.city),
-            ),
-            choices.Procedure.ADMINISTRATIVE: (
-                (_('NATURE'), self.sector),
-                (_('ENTITY / COMPANY'), self.entity),
-                (_('CITY OF THE PROCEDURE'), self.administrative_city),
-            ),
-            choices.Procedure.POLICE: (
-                (_('INSPECTION / AUTHORITY'), self.police_office),
-                (_('CITY / MUNICIPALITY'), self.police_city),
-            ),
-        }
-        rows = by_procedure.get(self.procedure, ())
+        rows = (
+            # Judicial.
+            (_('COURT'), self.court),
+            (_('CITY OF THE PROCESS'), self.city),
+            # Administrativo.
+            (_('NATURE'), self.sector),
+            (_('ENTITY / COMPANY'), self.entity),
+            (_('CITY OF THE PROCEDURE'), self.administrative_city),
+            # Policivo.
+            (_('INSPECTION / AUTHORITY'), self.police_office),
+            (_('CITY / MUNICIPALITY'), self.police_city),
+        )
+
         return [(label, value) for label, value in rows if value]
 
     @property

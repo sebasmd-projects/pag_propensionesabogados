@@ -124,3 +124,92 @@ class ClassificationTests(TestCase):
         with self.assertRaises(ValidationError) as error:
             finance.full_clean()
         self.assertIn('paid_amount', error.exception.message_dict)
+
+
+class DetailRowsTests(TestCase):
+    """
+    El bloque de detalle de la ficha publica.
+
+    Colgaba del tipo de tramite, y los expedientes reales vienen **sin** tipo
+    de tramite: la pantalla dejo de pedirlo cuando el subtipo paso a colgar
+    del servicio. El resultado era que el despacho y la ciudad se guardaban y
+    el cliente no los veia; un asunto con «Juzgado del Circuito» y «Armenia»
+    dentro se le ensenaba sin ninguno de los dos.
+    """
+
+    def setUp(self):
+        self.client_record = ClientModel.objects.create(
+            identification='13883170',
+            full_name='Jose Arcesio Lopez Arias',
+            email='jose@example.test',
+        )
+
+    def _caso(self, **extra):
+        datos = {
+            'client': self.client_record,
+            'service': Service.JUDICIAL,
+            'stage': 3,
+            'subtype': 'Laboral',
+            'second_subtype': 'Pensión de vejez',
+        }
+        datos.update(extra)
+        return CaseModel.objects.create(**datos)
+
+    def _etiquetas(self, caso):
+        return [str(etiqueta) for etiqueta, _valor in caso.detail_rows]
+
+    def test_sin_tipo_de_tramite_el_despacho_y_la_ciudad_salen_igual(self):
+        caso = self._caso(
+            procedure='',
+            court='Juzgado del Circuito',
+            city='Armenia',
+        )
+
+        self.assertEqual(
+            caso.detail_rows,
+            [('COURT', 'Juzgado del Circuito'), ('CITY OF THE PROCESS', 'Armenia')],
+        )
+
+    def test_el_bloque_administrativo_tampoco_lo_necesita(self):
+        caso = self._caso(
+            procedure='',
+            sector='Público',
+            entity='Colpensiones',
+            administrative_city='Bogotá',
+        )
+
+        self.assertIn('ENTITY / COMPANY', self._etiquetas(caso))
+        self.assertIn('NATURE', self._etiquetas(caso))
+
+    def test_solo_sale_lo_que_tiene_contenido(self):
+        """
+        Los tres bloques se recorren enteros, pero un asunto no llena mas de
+        uno: lo vacio no deja filas en blanco en la ficha.
+        """
+        caso = self._caso(procedure='', court='Juzgado del Circuito')
+
+        self.assertEqual(self._etiquetas(caso), ['COURT'])
+
+    def test_un_asunto_sin_ningun_detalle_no_pinta_el_bloque(self):
+        self.assertEqual(self._caso(procedure='').detail_rows, [])
+
+    def test_el_despacho_llega_al_portal_del_cliente(self):
+        """
+        La prueba de arriba mira el modelo; esta mira lo que el cliente lee.
+        """
+        from unittest.mock import patch
+
+        from django.urls import reverse
+
+        from .. import portal_otp
+
+        self._caso(procedure='', court='Juzgado del Circuito', city='Armenia')
+        url = reverse('case_manager:public_query')
+
+        with patch.object(portal_otp, 'generate_code', return_value='123456'):
+            self.client.post(url, {'identification': '13883170'})
+
+        respuesta = self.client.post(url, {'code': '123456'})
+
+        self.assertContains(respuesta, 'Juzgado del Circuito')
+        self.assertContains(respuesta, 'Armenia')
