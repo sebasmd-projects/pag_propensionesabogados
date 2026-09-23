@@ -93,6 +93,7 @@ class GestorDashboardView(GestorRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         context['totals'] = CaseFinanceModel.objects.totals()
+        context['areas'] = CaseFinanceModel.objects.by_area()
         context['debtors'] = (
             CaseFinanceModel.objects.debtors()
             .select_related('case', 'case__client')

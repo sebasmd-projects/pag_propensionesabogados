@@ -21,6 +21,11 @@
   <meta name="googlebot" content="noindex, nofollow">
 {% endblock meta_seo %}
 
+{% block custom_css %}
+  {{ block.super }}
+  <link href="{% static 'assets/custom/css/gestor.css' %}" rel="stylesheet">
+{% endblock custom_css %}
+
 {% block body_css %}class="scrolled"{% endblock body_css %}
 
 {% block main %}

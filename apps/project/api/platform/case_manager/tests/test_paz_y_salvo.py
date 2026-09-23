@@ -165,3 +165,46 @@ class SessionFixationTests(TestCase):
         )
 
         self.assertNotEqual(self.client.session.session_key, antes)
+
+
+class PazYSalvoNoSigueElTemaTests(TestCase):
+    """
+    El paz y salvo se imprime, y el papel es blanco.
+
+    La plantilla extiende `raw.html`, asi que recibe el `data-bs-theme` como
+    cualquier otra pagina; lo que no puede recibir es el modo oscuro. Su hoja
+    de estilo fija el fondo y la tinta a mano por eso, y esta prueba es lo que
+    impide que alguien los cambie por variables del tema «para que quede
+    coherente» y mande a imprimir un documento nominativo en negativo.
+    """
+
+    def test_la_hoja_fija_el_papel_blanco_y_la_tinta_oscura(self):
+        from pathlib import Path
+
+        from django.conf import settings
+
+        hoja = (
+            Path(settings.STATICFILES_DIRS[0])
+            / 'assets' / 'custom' / 'css' / 'paz_y_salvo.css'
+        )
+        contenido = hoja.read_text(encoding='utf-8')
+
+        self.assertIn('background:#fff', contenido)
+        self.assertIn('color:#12263a', contenido)
+
+    def test_no_carga_la_hoja_del_tema_por_delante_de_la_suya(self):
+        """
+        `theme.css` se carga en `raw.html` **despues** de `custom_css`. Si el
+        paz y salvo usara variables del tema, ganarian las de aquella; como
+        fija sus colores a mano, no hay nada que ganar. Esto lo deja escrito.
+        """
+        from pathlib import Path
+
+        from django.conf import settings
+
+        hoja = (
+            Path(settings.STATICFILES_DIRS[0])
+            / 'assets' / 'custom' / 'css' / 'paz_y_salvo.css'
+        )
+
+        self.assertNotIn('var(--background-color)', hoja.read_text(encoding='utf-8'))

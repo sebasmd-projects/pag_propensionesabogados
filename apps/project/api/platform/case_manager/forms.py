@@ -63,9 +63,17 @@ class PublicCaseQueryForm(forms.Form):
         """
         El cliente al que corresponden estas credenciales, o `None`.
 
-        Devuelve `None` en los tres casos --no existe, clave equivocada, sin
-        vigencia-- y a proposito no dice cual: quien llama no tiene que poder
-        distinguirlos ni aunque quiera.
+        Devuelve `None` cuando la identificacion no existe **y** cuando la
+        clave no es la suya, sin decir cual de las dos: quien llama no tiene
+        que poder distinguirlas ni aunque quiera.
+
+        Un cliente **sin vigencia si se devuelve**, y eso es deliberado. Antes
+        salia `None` como los otros dos, asi que a quien tenia su proceso
+        cerrado se le contestaba «credenciales invalidas»: se ponia a probar
+        claves que eran correctas y acababa gastando los intentos de su propia
+        IP. El portal le dice ahora que su proceso esta inactivo y a donde
+        llamar; decirselo no revela nada que no haya demostrado ya al acertar
+        su clave. Quien mira `is_active` es la vista.
 
         Cuando la identificacion no existe se comprueba igualmente una clave
         contra una cadena fija. Sin eso, un "no existe" responde antes que un
@@ -86,9 +94,6 @@ class PublicCaseQueryForm(forms.Form):
             return None
 
         if not client.check_access_key(access_key):
-            return None
-
-        if not client.is_active:
             return None
 
         return client

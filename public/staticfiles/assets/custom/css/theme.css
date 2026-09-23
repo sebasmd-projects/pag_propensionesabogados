@@ -1,0 +1,204 @@
+/*
+ * Modo oscuro para todo el sitio.
+ *
+ * Como funciona
+ * -------------
+ * El tema vive en **un solo atributo**: `data-bs-theme` en el `<html>`. Ese es
+ * el que Bootstrap 5.3 ya consulta por su cuenta, asi que con ponerlo en
+ * «dark» las tarjetas, las tablas, los formularios, el acordeon y los menus
+ * cambian solos, sin una linea escrita aqui.
+ *
+ * Lo que si hay que escribir es la paleta **del sitio**, que es anterior a
+ * Bootstrap y vive en sus propias variables (`--background-color`,
+ * `--accent-color`...) en `main.css`. Este fichero las vuelve a declarar para
+ * el modo oscuro y nada mas: no repite reglas, no duplica selectores de
+ * componente y no toca `main.css`, que es plantilla de terceros y conviene
+ * poder actualizar.
+ *
+ * Se carga desde `raw.html`, despues de `main.css`, para que gane la cascada
+ * en todas las paginas sin tener que acordarse de anadirlo en cada una.
+ *
+ * Por que el acento cambia de tono
+ * --------------------------------
+ * El azul de la marca (#2957A4) sobre un fondo claro tiene contraste de
+ * sobra; sobre uno oscuro se hunde y deja los enlaces casi ilegibles. Se
+ * aclara lo justo para pasar el AA de WCAG contra el fondo oscuro, que es lo
+ * mismo que hace Bootstrap con sus propios colores.
+ */
+
+/*
+ * Bootstrap y la marca, hablando el mismo idioma.
+ *
+ * Bootstrap trae su azul (#0d6efd) y el del despacho es otro, asi que hasta
+ * ahora cada boton `btn-primary` del sitio salia con un azul que no es el de
+ * nadie. En vez de escribir reglas para cada componente se redefinen las tres
+ * variables que Bootstrap 5.3 ya consulta, y botones, enlaces, foco, paginado
+ * y estados salen solos.
+ *
+ * El color no se copia: sale de `--accent-color`, que es donde vive la paleta
+ * (`main.css`). El texto del boton si es un valor propio, porque el
+ * `--contrast-color` de la marca es amarillo y sobre un boton generico no se
+ * lee.
+ */
+:root {
+  --boton-primario-texto: #fff;
+
+  --bs-primary: var(--accent-color);
+  --bs-link-color: var(--accent-color);
+  --bs-link-hover-color: color-mix(in srgb, var(--accent-color), #000 20%);
+}
+
+.btn-primary {
+  --bs-btn-color: var(--boton-primario-texto);
+  --bs-btn-hover-color: var(--boton-primario-texto);
+  --bs-btn-active-color: var(--boton-primario-texto);
+  --bs-btn-bg: var(--accent-color);
+  --bs-btn-border-color: var(--accent-color);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--accent-color), #000 12%);
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--accent-color), #000 12%);
+  --bs-btn-active-bg: color-mix(in srgb, var(--accent-color), #000 20%);
+  --bs-btn-active-border-color: color-mix(in srgb, var(--accent-color), #000 20%);
+}
+
+/*
+ * Los componentes que **no** leen `--bs-primary`.
+ *
+ * Bootstrap declara su azul como valor literal en cada uno de estos, no como
+ * referencia, asi que redefinir `--bs-primary` no los alcanza: el panel del
+ * gestor salia con las pestanas y el paginado en el azul de Bootstrap al lado
+ * de botones en el azul del despacho. La lista sale de buscar `#0d6efd` en el
+ * `bootstrap.min.css` que el sitio vendoriza; si se actualiza Bootstrap,
+ * conviene repetir esa busqueda.
+ */
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--accent-color);
+  --bs-nav-pills-link-active-color: var(--boton-primario-texto);
+}
+
+.pagination {
+  --bs-pagination-color: var(--accent-color);
+  --bs-pagination-hover-color: var(--bs-link-hover-color);
+  --bs-pagination-active-bg: var(--accent-color);
+  --bs-pagination-active-border-color: var(--accent-color);
+  --bs-pagination-active-color: var(--boton-primario-texto);
+}
+
+.dropdown-menu {
+  --bs-dropdown-link-active-bg: var(--accent-color);
+  --bs-dropdown-link-active-color: var(--boton-primario-texto);
+}
+
+.list-group {
+  --bs-list-group-active-bg: var(--accent-color);
+  --bs-list-group-active-border-color: var(--accent-color);
+  --bs-list-group-active-color: var(--boton-primario-texto);
+}
+
+.progress {
+  --bs-progress-bar-bg: var(--accent-color);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--accent-color);
+  --bs-btn-border-color: var(--accent-color);
+  --bs-btn-hover-bg: var(--accent-color);
+  --bs-btn-hover-border-color: var(--accent-color);
+  --bs-btn-hover-color: var(--boton-primario-texto);
+  --bs-btn-active-bg: var(--accent-color);
+  --bs-btn-active-border-color: var(--accent-color);
+  --bs-btn-active-color: var(--boton-primario-texto);
+  --bs-btn-disabled-color: var(--accent-color);
+  --bs-btn-disabled-border-color: var(--accent-color);
+}
+
+/* El campo flotante de Bootstrap deja la etiqueta demasiado marcada. */
+.form-floating > label {
+  color: var(--bs-secondary-color);
+}
+
+
+:root[data-bs-theme="dark"] {
+  /*
+   * En oscuro el acento se aclara --el azul de la marca se hunde sobre fondo
+   * oscuro y deja los enlaces casi ilegibles--, asi que el texto del boton
+   * tiene que oscurecerse con el, o el boton queda blanco sobre celeste.
+   */
+  --boton-primario-texto: #0d141c;
+  --bs-link-hover-color: color-mix(in srgb, var(--accent-color), #fff 25%);
+
+  --background-color: #0d141c;
+  --default-color: #dde5ee;
+  --heading-color: #95d0c8;
+  --accent-color: #7aa7e8;
+  --surface-color: #16202b;
+  --contrast-color: #0d141c;
+
+  --nav-color: #c3ced9;
+  --nav-hover-color: #9dc0f2;
+  --nav-mobile-background-color: #16202beb;
+  --nav-dropdown-background-color: #16202beb;
+  --nav-dropdown-color: #c3ced9;
+  --nav-dropdown-hover-color: #f08585;
+}
+
+/*
+ * Los «presets» de color de la plantilla fijan blancos y negros a mano para
+ * que una seccion se vea clara u oscura dentro de una pagina clara. En modo
+ * oscuro eso deja parches: una seccion con `light-background` seguiria siendo
+ * blanca en mitad de la pagina.
+ */
+:root[data-bs-theme="dark"] .light-background {
+  --background-color: #131d27;
+  --surface-color: #1b2733;
+}
+
+:root[data-bs-theme="dark"] .dark-background {
+  --background-color: #070c11;
+  --surface-color: #16202b;
+}
+
+/*
+ * La cabecera. En la portada es transparente sobre la foto y solo se vuelve
+ * opaca al bajar (`.scrolled`); ese opaco esta escrito en claro.
+ */
+:root[data-bs-theme="dark"] .index-page.scrolled .header,
+:root[data-bs-theme="dark"] .scrolled .header {
+  --background-color: #0d141ceb;
+  --heading-color: #dde5ee;
+  --nav-color: #c3ced9;
+  --nav-hover-color: var(--accent-color);
+}
+
+:root[data-bs-theme="dark"] .scrolled .header {
+  box-shadow: 0 0 30px 10px rgba(0, 0, 0, .45);
+}
+
+/* El preloader dibuja su aro con un blanco fijo. */
+:root[data-bs-theme="dark"] #preloader:before {
+  border-color: var(--accent-color) transparent var(--accent-color) transparent;
+}
+
+/*
+ * El interruptor.
+ *
+ * Es un boton con dos iconos superpuestos y solo uno visible: asi el ancho no
+ * cambia al pulsarlo --un boton que se mueve bajo el dedo se falla-- y no hay
+ * que tocar el DOM desde JavaScript mas que el atributo del `<html>`.
+ */
+.tema-boton {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.tema-boton .bi-sun-fill,
+:root[data-bs-theme="dark"] .tema-boton .bi-moon-stars-fill {
+  display: none;
+}
+
+:root[data-bs-theme="dark"] .tema-boton .bi-sun-fill {
+  display: inline-block;
+}

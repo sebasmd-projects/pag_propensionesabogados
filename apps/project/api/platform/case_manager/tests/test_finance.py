@@ -237,3 +237,96 @@ class DebtorsAndExpectationsTests(TestCase):
         )
 
         self.assertEqual(debtors & expectations, set())
+
+
+class PortfolioChartTests(TestCase):
+    """
+    Las dos cifras que solo existen para que se dibuje el panel.
+
+    Se prueban porque un porcentaje mal calculado no da error: pinta un aro
+    con los tramos cambiados, y quien lo mira se cree lo que ve.
+    """
+
+    def caso(self, **finanzas):
+        cliente = ClientModel.objects.create(
+            identification=f'{CaseFinanceModel.objects.count() + 1:08d}',
+            full_name='Cliente de prueba',
+        )
+        caso = CaseModel.objects.create(
+            client=cliente, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS,
+            area=finanzas.pop('area', 'Civil'),
+        )
+        return CaseFinanceModel.objects.create(case=caso, **finanzas)
+
+    def test_los_tres_tramos_del_anillo_cierran_el_circulo(self):
+        """
+        El segundo corte es **acumulado**: un `conic-gradient` dibuja donde
+        termina cada tramo, no su ancho. Si se le pasara el ancho, el tramo
+        de «por cobrar» empezaria donde tiene que acabar y el aro saldria con
+        los colores corridos.
+        """
+        self.caso(mandate=Mandate.PAYMENT, agreed_fee=1_000_000,
+                  paid_amount=250_000)
+        self.caso(mandate=Mandate.CONTINGENCY, contingency_percentage=30,
+                  contingency_value=1_000_000)
+
+        totals = CaseFinanceModel.objects.totals()
+
+        # pagado 250 000, por cobrar 750 000, expectativa 1 000 000
+        self.assertEqual(totals['projected_total'], 2_000_000)
+        self.assertEqual(totals['share_paid'], 12.5)
+        self.assertEqual(totals['share_balance'], 50.0)
+        self.assertGreaterEqual(totals['share_balance'], totals['share_paid'])
+
+    def test_la_tasa_de_recaudo_se_mide_sobre_el_total_proyectado(self):
+        """
+        No sobre lo pactado, que es la otra lectura posible y da otro numero.
+        Un despacho con mucha cuota litis sin resolver tiene la tasa baja
+        aunque haya cobrado todo lo cierto, y eso es lo que el anillo dice.
+        """
+        self.caso(mandate=Mandate.PAYMENT, agreed_fee=1_000_000,
+                  paid_amount=1_000_000)
+        self.caso(mandate=Mandate.CONTINGENCY, contingency_percentage=30,
+                  contingency_value=3_000_000)
+
+        self.assertEqual(
+            CaseFinanceModel.objects.totals()['collection_rate'], 25
+        )
+
+    def test_una_cartera_vacia_no_divide_por_cero(self):
+        totals = CaseFinanceModel.objects.totals()
+
+        self.assertEqual(totals['collection_rate'], 0)
+        self.assertEqual(totals['share_paid'], 0)
+        self.assertEqual(totals['share_balance'], 0)
+
+    def test_el_reparto_por_area_va_de_mas_a_menos(self):
+        self.caso(area='Civil', mandate=Mandate.PAYMENT, agreed_fee=1_000_000)
+        self.caso(area='Familia', mandate=Mandate.PAYMENT,
+                  agreed_fee=3_000_000)
+
+        areas = CaseFinanceModel.objects.by_area()
+
+        self.assertEqual([row['area'] for row in areas], ['Familia', 'Civil'])
+        self.assertEqual([row['share'] for row in areas], [75, 25])
+
+    def test_un_asunto_sin_area_no_se_queda_sin_nombre(self):
+        """
+        `area` puede estar vacio, y una barra con la etiqueta en blanco es una
+        barra que nadie sabe de que es.
+        """
+        self.caso(area='', mandate=Mandate.PAYMENT, agreed_fee=1_000_000)
+
+        self.assertEqual(
+            CaseFinanceModel.objects.by_area()[0]['area'], 'No area recorded'
+        )
+
+    def test_lo_excluido_del_panel_no_entra_en_el_reparto(self):
+        """
+        La casilla «no incluir en panel economico» tiene que valer tambien
+        aqui; si no, una cifra saldria en el aro y no en las tarjetas.
+        """
+        self.caso(area='Civil', mandate=Mandate.PAYMENT,
+                  agreed_fee=1_000_000, show_in_dashboard=False)
+
+        self.assertEqual(CaseFinanceModel.objects.by_area(), [])

@@ -1,0 +1,94 @@
+{% load i18n humanize %}
+{% comment %}
+  «Estado financiero del portafolio» y «Distribucion por area», que son las dos
+  piezas que el panel aprobado pone antes de las tablas.
+
+  El anillo es un `conic-gradient` y no una libreria de graficos: son tres
+  tramos y un porcentaje en el centro. Traerse Chart.js --unos 200 KB-- para
+  esto obligaria ademas a pasarle los datos por JavaScript, y entonces una
+  cifra del panel economico dejaria de estar en el HTML que Django escapa.
+
+  Las barras por area son `.progress` de Bootstrap, que ya trae el sitio.
+{% endcomment %}
+
+<div class="row g-4 mb-4">
+
+  <div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body p-4">
+        <h2 class="h6 fw-bold mb-3">
+          <i class="bi bi-pie-chart me-1"></i>{% trans "Portfolio financial status" %}
+        </h2>
+
+        <div class="d-flex align-items-center flex-wrap gap-4">
+          {% comment %}
+            El anillo se describe con `role="img"` y su `aria-label`: el
+            gradiente no dice nada a un lector de pantalla, y la cifra del
+            centro sola tampoco --«29 %» de que--.
+          {% endcomment %}
+          <div class="cp-donut" role="img"
+               style="--pagado: {{ totals.share_paid|stringformat:'s' }}%;
+                      --cobrar: {{ totals.share_balance|stringformat:'s' }}%"
+               aria-label="{% blocktrans with rate=totals.collection_rate %}Collected: {{ rate }} percent of the projected total.{% endblocktrans %}">
+            <div class="cp-donut-texto">
+              <span class="fs-5 fw-bold">{{ totals.collection_rate }} %</span>
+              <span class="d-block text-muted" style="font-size: .7rem;">{% trans "collected" %}</span>
+            </div>
+          </div>
+
+          <ul class="list-unstyled mb-0 flex-grow-1">
+            <li class="d-flex justify-content-between align-items-center gap-3 py-1">
+              <span><i class="cp-punto cp-punto-pagado"></i>{% trans "Paid" %}</span>
+              <b>${{ totals.paid|intcomma }}</b>
+            </li>
+            <li class="d-flex justify-content-between align-items-center gap-3 py-1">
+              <span><i class="cp-punto cp-punto-saldo"></i>{% trans "Outstanding" %}</span>
+              <b>${{ totals.balance|intcomma }}</b>
+            </li>
+            <li class="d-flex justify-content-between align-items-center gap-3 py-1">
+              <span><i class="cp-punto cp-punto-expectativa"></i>{% trans "Expectation" %}</span>
+              <b>${{ totals.expectation|intcomma }}</b>
+            </li>
+          </ul>
+        </div>
+
+        <p class="text-muted small mb-0 mt-3">
+          {% blocktrans trimmed %}
+            The contingency expectation is shown separately and, in addition,
+            adds into the potential pending and the projected total.
+          {% endblocktrans %}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body p-4">
+        <h2 class="h6 fw-bold mb-3">
+          <i class="bi bi-bar-chart me-1"></i>{% trans "Breakdown by area / case type" %}
+        </h2>
+
+        {% for row in areas %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center gap-2 small">
+              <span class="text-truncate">{{ row.area }}</span>
+              <b class="text-nowrap">${{ row.total|intcomma }}</b>
+            </div>
+            <div class="progress mt-1" style="height: .5rem;"
+                 role="progressbar" aria-valuenow="{{ row.share }}"
+                 aria-valuemin="0" aria-valuemax="100"
+                 aria-label="{{ row.area }}">
+              <div class="progress-bar" style="width: {{ row.share }}%"></div>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-muted small mb-0">
+            {% trans "Nothing recorded in the financial panel yet." %}
+          </p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>

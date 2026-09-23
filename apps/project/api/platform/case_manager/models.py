@@ -351,24 +351,25 @@ class CaseModel(TimeStampedModel):
         de entidad con `<` deja de poder cerrar una etiqueta.
 
         Solo salen las filas con contenido, igual que antes.
+
+        La instancia y el radicado **no estan aqui**: el diseno aprobado los
+        subio a la rejilla de arriba, junto al nombre y al servicio, porque
+        son lo que el cliente busca primero. Salen de `public_instance` y
+        `public_reference`, que es lo mismo sin importar de que bloque venga
+        cada asunto.
         """
         by_procedure = {
             choices.Procedure.ORDINARY: (
-                (_('CURRENT INSTANCE'), self.instance),
-                (_('CASE NUMBER'), self.case_number),
                 (_('COURT'), self.court),
                 (_('CITY OF THE PROCESS'), self.city),
             ),
             choices.Procedure.ADMINISTRATIVE: (
                 (_('NATURE'), self.sector),
                 (_('ENTITY / COMPANY'), self.entity),
-                (_('REFERENCE NUMBER'), self.administrative_case_number),
                 (_('CITY OF THE PROCEDURE'), self.administrative_city),
             ),
             choices.Procedure.POLICE: (
-                (_('CURRENT INSTANCE'), self.police_instance),
                 (_('INSPECTION / AUTHORITY'), self.police_office),
-                (_('CASE NUMBER'), self.police_case_number),
                 (_('CITY / MUNICIPALITY'), self.police_city),
             ),
         }
@@ -428,6 +429,44 @@ class CaseModel(TimeStampedModel):
             or self.police_case_number
             or '—'
         )
+
+    @property
+    def public_instance(self) -> str:
+        """
+        La etapa o instancia que ensena el portal, venga del bloque que venga.
+
+        En la pantalla aprobada esto era `d.i || d.ip || "—"`: el asunto
+        judicial guarda su instancia en `instance` y la querella policiva en
+        `police_instance`, y el cliente no tiene por que saber cual de los dos
+        bloques le toco.
+        """
+        return self.instance or self.police_instance or '—'
+
+    @property
+    def public_mandate(self) -> str:
+        """
+        La modalidad del contrato, tal y como se le ensena al cliente.
+
+        Sale del bloque economico, que por lo demas no se asoma al portal:
+        esta fila es la excepcion, y esta en la pantalla aprobada
+        (`modCliente`). Con cuota litis se anade el porcentaje, porque «cuota
+        litis» a secas no le dice a nadie cuanto va a pagar.
+
+        Un asunto sin bloque economico devuelve la raya, no revienta: el
+        bloque se rellena despues de dar de alta el asunto, y entre una cosa y
+        otra el cliente ya puede estar consultando.
+        """
+        finance = getattr(self, 'finance', None)
+
+        if finance is None or not finance.mandate:
+            return '—'
+
+        if (finance.mandate == choices.Mandate.CONTINGENCY
+                and finance.contingency_percentage):
+            return f'{finance.get_mandate_display()} ' \
+                   f'({finance.contingency_percentage} %)'
+
+        return finance.get_mandate_display()
 
     def clean(self):
         """
@@ -559,14 +598,90 @@ class CaseFinanceQuerySet(models.QuerySet):
         # entera al saldo, igual que en la pantalla aprobada.
         balance = aggregated['balance_payment'] + aggregated['agreed_fixed']
 
+        paid = aggregated['paid']
+        expectation = aggregated['expectation']
+        projected = agreed + expectation
+
+        def share(value: int) -> float:
+            """Que porcion del total proyectado es `value`, en tanto por cien."""
+            return round(value * 100 / projected, 2) if projected else 0
+
+        # Los tres tramos del anillo se miden sobre el **total proyectado**,
+        # que es la suma de los tres: lo pagado, lo que falta por cobrar y la
+        # expectativa. Es lo que hacia la pantalla aprobada, y no es lo mismo
+        # que medir sobre lo pactado: un despacho con mucha cuota litis por
+        # resolver tiene una tasa de recaudo baja aunque haya cobrado todo lo
+        # cierto, y eso es precisamente lo que el anillo esta diciendo.
+        #
+        # El segundo tramo es **acumulado**: un `conic-gradient` no dibuja
+        # anchos, dibuja cortes, asi que el corte de «por cobrar» va donde
+        # termina, no donde empieza.
         return {
             'agreed': agreed,
-            'paid': aggregated['paid'],
+            'paid': paid,
             'balance': balance,
-            'expectation': aggregated['expectation'],
-            'potential_pending': balance + aggregated['expectation'],
-            'projected_total': agreed + aggregated['expectation'],
+            'expectation': expectation,
+            'potential_pending': balance + expectation,
+            'projected_total': projected,
+            'collection_rate': round(share(paid)),
+            'share_paid': share(paid),
+            'share_balance': min(100, share(paid) + share(balance)),
         }
+
+    def by_area(self) -> list[dict]:
+        """
+        Lo mismo, repartido por area, de mas a menos.
+
+        Es la «Distribucion por area / tipo de caso» del panel aprobado, que
+        el JavaScript armaba acumulando en un diccionario mientras recorria
+        `localStorage`. Aqui es una consulta agrupada.
+
+        Cada fila lleva `share`, el porcentaje que le toca del total
+        proyectado, porque la barra se dibuja con el y calcularlo en la
+        plantilla obligaria a un filtro de division que Django no trae.
+        """
+        zero = Value(0)
+
+        payment = Q(mandate=choices.Mandate.PAYMENT)
+        fixed = Q(mandate=choices.Mandate.CONTINGENCY, contingency_percentage=0)
+        expectation = Q(
+            mandate=choices.Mandate.CONTINGENCY, contingency_percentage__gt=0
+        )
+
+        rows = (
+            self.in_dashboard()
+            .values('case__area')
+            .annotate(
+                agreed_payment=Coalesce(
+                    Sum('agreed_fee', filter=payment), zero
+                ),
+                agreed_fixed=Coalesce(
+                    Sum('contingency_value', filter=fixed), zero
+                ),
+                expectation=Coalesce(
+                    Sum('contingency_value', filter=expectation), zero
+                ),
+            )
+        )
+
+        areas = [
+            {
+                'area': row['case__area'] or _('No area recorded'),
+                'total': (
+                    row['agreed_payment']
+                    + row['agreed_fixed']
+                    + row['expectation']
+                ),
+            }
+            for row in rows
+        ]
+        areas = [row for row in areas if row['total']]
+        total = sum(row['total'] for row in areas)
+
+        for row in areas:
+            row['share'] = round(row['total'] * 100 / total) if total else 0
+
+        return sorted(areas, key=lambda row: row['total'], reverse=True)
 
 
 class CaseFinanceModel(TimeStampedModel):

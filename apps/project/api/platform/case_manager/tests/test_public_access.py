@@ -14,7 +14,7 @@ from django.urls import reverse
 from apps.common.utils.models import IPBlockedModel
 
 from .. import attempts
-from ..choices import Mandate, Service, Stage
+from ..choices import Mandate, Procedure, Service, Stage
 from ..models import CaseFinanceModel, CaseModel, ClientModel
 
 # Sin el middleware de bloqueo por medio: lo que se prueba aqui es la vista,
@@ -125,14 +125,40 @@ class PublicQueryTests(TestCase):
             desconocida.context['error'], clave_mala.context['error']
         )
 
-    def test_un_cliente_sin_vigencia_tampoco_se_distingue(self):
+    def test_un_cliente_sin_vigencia_ve_la_pantalla_de_proceso_inactivo(self):
+        """
+        Su clave era **correcta**, asi que no se le contesta «credenciales
+        invalidas».
+
+        Antes si, y el resultado era el contrario del que se buscaba: quien
+        tenia su proceso cerrado no entendia el mensaje, daba por hecho que se
+        habia equivocado de clave, y se ponia a probar claves correctas una
+        detras de otra hasta agotar los intentos de su propia IP. No se le
+        oculta nada que no haya demostrado ya al acertar: se le dice que su
+        proceso esta inactivo y a donde llamar, que es lo unico que puede
+        hacer.
+        """
         response = self.client.post(
             self.url,
             {'identification': '99999999', 'access_key': 'R9999'},
         )
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['inactive'])
         self.assertFalse(response.context.get('cases'))
+        self.assertContains(response, '+57 301 228 3818')
+
+    def test_la_pantalla_de_inactivo_no_ensena_ni_un_dato_del_expediente(self):
+        """
+        Decirle que llame no es abrirle el expediente: sigue sin vigencia.
+        """
+        response = self.client.post(
+            self.url,
+            {'identification': '99999999', 'access_key': 'R9999'},
+        )
+
+        self.assertNotContains(response, '99999999')
+        self.assertFalse(response.context.get('client'))
 
     # --- lo que viaja al navegador ---------------------------------------
     def test_la_pagina_vacia_no_trae_ningun_expediente(self):
@@ -376,3 +402,133 @@ class VariosAsuntosTests(TestCase):
 
         self.assertNotContains(response, 'Otra Persona')
         self.assertNotContains(response, '77777777')
+
+
+class PublicCardFieldsTests(TestCase):
+    """
+    Los datos de la tarjeta, que son los del diseno aprobado.
+
+    La etapa y el radicado estaban en el bloque de detalle de abajo, entre el
+    despacho y la ciudad; quien entraba a mirar «por donde va lo mio» tenia
+    que bajar a buscarlos. El diseno los sube arriba y anade la modalidad del
+    contrato, que hasta ahora no salia en ninguna parte del portal.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse('case_manager:public_query')
+        cls.client_record = ClientModel.objects.create(
+            identification='16484186',
+            full_name='Carlos Emiro Giraldo Lozada',
+        )
+
+    def consultar(self):
+        return self.client.post(
+            self.url,
+            {'identification': '16484186', 'access_key': 'C4186'},
+        )
+
+    def test_la_instancia_sale_venga_del_bloque_que_venga(self):
+        """
+        El asunto judicial la guarda en `instance` y la querella policiva en
+        `police_instance`. El cliente no tiene por que saber cual le toco.
+        """
+        judicial = CaseModel.objects.create(
+            client=self.client_record,
+            service=Service.JUDICIAL,
+            procedure=Procedure.ORDINARY,
+            stage=Stage.IN_PROGRESS,
+            instance='Primera instancia',
+        )
+        policiva = CaseModel.objects.create(
+            client=self.client_record,
+            service=Service.JUDICIAL,
+            procedure=Procedure.POLICE,
+            stage=Stage.IN_PROGRESS,
+            police_instance='Segunda instancia',
+        )
+
+        self.assertEqual(judicial.public_instance, 'Primera instancia')
+        self.assertEqual(policiva.public_instance, 'Segunda instancia')
+
+        respuesta = self.consultar()
+
+        self.assertContains(respuesta, 'Primera instancia')
+        self.assertContains(respuesta, 'Segunda instancia')
+
+    def test_la_cuota_litis_sale_con_su_porcentaje(self):
+        """
+        «Cuota litis» a secas no le dice a nadie cuanto va a pagar.
+        """
+        caso = CaseModel.objects.create(
+            client=self.client_record,
+            service=Service.JUDICIAL,
+            stage=Stage.IN_PROGRESS,
+        )
+        CaseFinanceModel.objects.create(
+            case=caso,
+            mandate=Mandate.CONTINGENCY,
+            contingency_percentage=30,
+            contingency_value=5_000_000,
+        )
+
+        self.assertEqual(caso.public_mandate, 'Cuota litis (30 %)')
+        self.assertContains(self.consultar(), 'Cuota litis (30 %)')
+
+    def test_un_asunto_sin_bloque_economico_no_revienta(self):
+        """
+        El bloque se rellena despues de dar de alta el asunto, y entre una
+        cosa y otra el cliente ya puede estar consultando.
+        """
+        caso = CaseModel.objects.create(
+            client=self.client_record,
+            service=Service.JUDICIAL,
+            stage=Stage.IN_PROGRESS,
+        )
+
+        self.assertEqual(caso.public_mandate, '—')
+        self.assertEqual(self.consultar().status_code, 200)
+
+    def test_el_dinero_no_se_asoma_al_portal(self):
+        """
+        La modalidad si sale --esta en el diseno aprobado-- pero las cifras
+        no: ni lo pactado, ni lo pagado, ni lo que se debe.
+        """
+        caso = CaseModel.objects.create(
+            client=self.client_record,
+            service=Service.JUDICIAL,
+            stage=Stage.IN_PROGRESS,
+        )
+        CaseFinanceModel.objects.create(
+            case=caso,
+            mandate=Mandate.PAYMENT,
+            agreed_fee=8_123_456,
+            paid_amount=3_111_222,
+        )
+
+        respuesta = self.consultar()
+
+        self.assertContains(respuesta, 'Modalidad de pago')
+        self.assertNotContains(respuesta, '8123456')
+        self.assertNotContains(respuesta, '8.123.456')
+        self.assertNotContains(respuesta, '3111222')
+
+    def test_la_tarjeta_no_repite_la_instancia_en_el_detalle(self):
+        """
+        Subirla arriba sin quitarla de abajo la habria dejado dos veces en la
+        misma tarjeta.
+        """
+        caso = CaseModel.objects.create(
+            client=self.client_record,
+            service=Service.JUDICIAL,
+            procedure=Procedure.ORDINARY,
+            stage=Stage.IN_PROGRESS,
+            instance='Primera instancia',
+            case_number='2026-00123-00',
+            court='Juzgado del Circuito',
+        )
+        etiquetas = [etiqueta for etiqueta, _valor in caso.detail_rows]
+
+        self.assertNotIn('CURRENT INSTANCE', etiquetas)
+        self.assertNotIn('CASE NUMBER', etiquetas)
+        self.assertIn('COURT', etiquetas)

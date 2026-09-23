@@ -70,6 +70,26 @@
           </ul>
         </li>
 
+        <!-- Claro / oscuro -->
+        {% comment %}
+          Va en la lista del menu para heredar su color y su espaciado: fuera
+          de ella habria que repetir a mano lo que `--nav-color` ya resuelve,
+          y ademas quedaria descolgado en el menu movil.
+
+          Los dos iconos estan siempre en el HTML y `theme.css` ensena uno u
+          otro. Asi el ancho del boton no cambia al pulsarlo --un boton que se
+          mueve bajo el dedo se falla-- y el JavaScript no toca mas que el
+          atributo del `<html>`.
+        {% endcomment %}
+        <li>
+          <a href="#" class="tema-boton" aria-pressed="false"
+             title="{% trans 'Switch between light and dark mode' %}"
+             aria-label="{% trans 'Switch between light and dark mode' %}">
+            <i class="bi bi-moon-stars-fill"></i>
+            <i class="bi bi-sun-fill"></i>
+          </a>
+        </li>
+
         <!-- Idioma -->
         <li class="dropdown dropdown-end">
           <a href="#" aria-label="{% trans 'Language' %}">

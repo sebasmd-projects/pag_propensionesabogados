@@ -91,7 +91,12 @@
 .cp-step.current .cp-dot {
   border-color: var(--accent-color);
   background-color: var(--accent-color);
-  color: #fff;
+  /*
+   * En modo oscuro el acento se aclara y un blanco fijo no se leeria sobre
+   * el. El texto sale de la misma variable que el de los botones para que los
+   * dos cambien a la vez y no haya que acordarse de este.
+   */
+  color: var(--boton-primario-texto);
 }
 
 /* En pantalla estrecha los seis pasos en fila no caben: van en columna. */

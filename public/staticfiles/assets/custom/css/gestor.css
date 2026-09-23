@@ -1,0 +1,102 @@
+/*
+ * Lo poco del panel del gestor que Bootstrap no trae hecho.
+ *
+ * Son dos cosas: el anillo del estado del portafolio y los puntos de su
+ * leyenda. Todo lo demas --tarjetas, tablas, barras, pestanas, paginado-- es
+ * Bootstrap, que el sitio ya carga.
+ *
+ * Los colores salen de las variables de Bootstrap (`--bs-success`,
+ * `--bs-warning`...) y no de una paleta propia, asi que el modo oscuro los
+ * cambia solo y no hay nada que mantener por duplicado.
+ */
+
+/* ------------------------------------------------------------------ *
+ * El anillo de recaudo
+ *
+ * Un `conic-gradient` con tres tramos y un agujero en el centro hecho con
+ * `mask`. La alternativa era traerse una libreria de graficos de unos 200 KB
+ * para dibujar tres arcos, y de paso tener que pasarle las cifras del panel
+ * economico por JavaScript --con lo que dejarian de estar en el HTML que
+ * Django escapa--.
+ *
+ * La plantilla pone los dos **cortes**, no los anchos: un `conic-gradient`
+ * dibuja donde termina cada tramo, asi que `--cobrar` viene ya acumulado
+ * desde `totals()`. El tercer tramo es el resto y no hace falta decirlo.
+ * ------------------------------------------------------------------ */
+
+.cp-donut {
+  --pagado: 0%;
+  --cobrar: 0%;
+
+  position: relative;
+  flex: 0 0 auto;
+  width: 9rem;
+  height: 9rem;
+}
+
+/*
+ * El aro va en un `::before` y no en el elemento mismo.
+ *
+ * `mask` recorta **todo** el elemento, hijos incluidos, asi que con el
+ * gradiente puesto directamente en `.cp-donut` el agujero del centro se
+ * llevaba por delante el porcentaje que iba dentro: quedaba un aro de
+ * colores sin la unica cifra que lo explica. Separandolos, la mascara solo
+ * alcanza al aro.
+ */
+.cp-donut::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--bs-success) 0 var(--pagado),
+    var(--bs-warning) var(--pagado) var(--cobrar),
+    var(--bs-info) var(--cobrar) 100%
+  );
+  /*
+   * El agujero. Con `mask` y no con un circulo encima: encima habria que
+   * darle el color del fondo, y ese cambia con el tema.
+   *
+   * El 64 % no es estetica: dentro van dos renglones --el porcentaje y la
+   * palabra «recaudado»--, y con el aro mas grueso el segundo se montaba
+   * encima del color.
+   */
+  mask: radial-gradient(farthest-side, transparent 64%, #000 65%);
+  -webkit-mask: radial-gradient(farthest-side, transparent 64%, #000 65%);
+}
+
+.cp-donut-texto {
+  position: absolute;
+  inset: 12%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.1;
+}
+
+/* ------------------------------------------------------------------ *
+ * Los puntos de la leyenda
+ * ------------------------------------------------------------------ */
+
+.cp-punto {
+  display: inline-block;
+  width: .65rem;
+  height: .65rem;
+  margin-right: .4rem;
+  border-radius: 50%;
+  vertical-align: baseline;
+}
+
+.cp-punto-pagado { background-color: var(--bs-success); }
+.cp-punto-saldo { background-color: var(--bs-warning); }
+.cp-punto-expectativa { background-color: var(--bs-info); }
+
+/* El anillo no cabe al lado de la leyenda en pantalla estrecha. */
+@media (max-width: 400px) {
+  .cp-donut {
+    width: 7rem;
+    height: 7rem;
+  }
+}

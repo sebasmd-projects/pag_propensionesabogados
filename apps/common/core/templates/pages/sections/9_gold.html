@@ -12,9 +12,12 @@
       </div>
     </div>
 
+    {# Sin `text-black`: es un color fijo, y en modo oscuro el fondo de la
+       seccion pasa a ser oscuro y el texto desaparecia. Sin la clase hereda
+       `--default-color`, que es el color de texto del tema activo. #}
     <div class="container mt-4" data-aos="fade-up">
-      <h5 class="text-start text-black">{% blocktrans %}Institutional structure specializing in the national and international marketing of precious metals, with reach in the United States, Canada, Europe and South Africa.{% endblocktrans %}</h5>
-      <h5 class="text-start text-black">{% blocktrans %}Through Propensiones S.A.S., comprehensive processes of purchase, sale, transformation, benefit, intermediation and export of minerals such as gold, silver, diamonds and emeralds are developed, under criteria of legality, traceability and compliance with international regulations throughout the value chain.{% endblocktrans %}</h5>
+      <h5 class="text-start">{% blocktrans %}Institutional structure specializing in the national and international marketing of precious metals, with reach in the United States, Canada, Europe and South Africa.{% endblocktrans %}</h5>
+      <h5 class="text-start">{% blocktrans %}Through Propensiones S.A.S., comprehensive processes of purchase, sale, transformation, benefit, intermediation and export of minerals such as gold, silver, diamonds and emeralds are developed, under criteria of legality, traceability and compliance with international regulations throughout the value chain.{% endblocktrans %}</h5>
     </div>
   </div>
 </section>

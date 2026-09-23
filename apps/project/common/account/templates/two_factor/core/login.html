@@ -246,7 +246,12 @@
 
     </div>
 
-    <div class="card-footer bg-white border-0 px-4 px-md-5 pb-4 pt-0">
+    {% comment %}
+      Sin `bg-white`: es un color fijo y en modo oscuro dejaba una franja
+      blanca debajo de la tarjeta. La tarjeta ya trae el fondo que toca en
+      cada tema, asi que el pie solo tiene que no pisarlo.
+    {% endcomment %}
+    <div class="card-footer bg-transparent border-0 px-4 px-md-5 pb-4 pt-0">
       <div class="small text-center text-muted">
         {% trans "New user?" %}
         <a href="{% url 'account:register' %}" class="fw-semibold text-decoration-none">

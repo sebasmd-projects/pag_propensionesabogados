@@ -1,0 +1,58 @@
+{% load i18n %}
+{% comment %}
+  «Su proceso esta inactivo».
+
+  Sale cuando la clave **era correcta** pero no hay nada que ensenar: o el
+  cliente ya no esta vigente, o se le cerraron todos los asuntos. Antes las
+  dos situaciones contestaban «credenciales invalidas», asi que quien tenia su
+  proceso cerrado se ponia a probar claves que eran correctas y acababa
+  gastando los intentos de su propia IP.
+
+  Lo que hace falta aqui no es una explicacion del expediente --que ya no le
+  corresponde ver-- sino a donde llamar, y por eso los dos canales van
+  grandes y sin nada alrededor.
+{% endcomment %}
+
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body p-4 p-md-5 text-center">
+
+    <div class="d-inline-flex align-items-center justify-content-center rounded-circle
+                bg-warning-subtle text-warning-emphasis mb-3"
+         style="width: 4rem; height: 4rem;" aria-hidden="true">
+      <i class="bi bi-exclamation-lg fs-2"></i>
+    </div>
+
+    <h2 class="h4 fw-bold mb-2">{% trans "Your process is inactive" %}</h2>
+    <p class="text-muted mb-4">
+      {% blocktrans trimmed %}
+        To get information about your process, please contact
+        Propensiones&reg; Abogados Internacional directly.
+      {% endblocktrans %}
+    </p>
+
+    <div class="row g-3 justify-content-center">
+      <div class="col-12 col-md-6">
+        <div class="border rounded-3 p-3 h-100">
+          <p class="text-uppercase small text-muted mb-1">
+            {% trans "LATAM customer service line" %}
+          </p>
+          <a class="fw-semibold text-decoration-none" href="tel:+573012283818">
+            <i class="bi bi-telephone me-1"></i>+57 301 228 3818
+          </a>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="border rounded-3 p-3 h-100">
+          <p class="text-uppercase small text-muted mb-1">
+            {% trans "Notifications email" %}
+          </p>
+          <a class="fw-semibold text-decoration-none text-break"
+             href="mailto:notificaciones@propensionesabogados.com">
+            <i class="bi bi-envelope me-1"></i>notificaciones@propensionesabogados.com
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

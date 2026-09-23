@@ -12,6 +12,39 @@
       {% block third_js %}{% endblock third_js %}
       {% block custom_js %}{% endblock custom_js %}
       {% block custom_css %}{% endblock custom_css %}
+
+      {% comment %}
+        El tema claro/oscuro.
+
+        La hoja va **aqui** y no en cada plantilla: se carga despues de
+        `custom_css`, asi que gana la cascada, y ninguna pagina nueva se
+        queda sin modo oscuro por olvido.
+
+        El trozo de JavaScript es corto y va en linea a proposito. Tiene que
+        correr **antes del primer pintado**, y un fichero externo --aunque no
+        lleve `defer`-- se descarga: en una conexion lenta la pagina sale
+        clara y cambia a oscura a la vista. Ese parpadeo blanco molesta justo
+        a quien elige el modo oscuro. Por eso aqui solo esta lo que no puede
+        esperar; el boton y el resto viven en `theme.js`, al final del cuerpo.
+
+        Envuelto en `try`: con el almacenamiento bloqueado --navegacion
+        privada, cookies de terceros desactivadas-- leerlo **lanza**, y una
+        excepcion aqui dejaria la pagina sin `<head>`.
+      {% endcomment %}
+      <link href="{% static 'assets/custom/css/theme.css' %}" rel="stylesheet">
+      <script>
+        (function () {
+          var tema = null;
+          try { tema = localStorage.getItem("tema"); } catch (e) {}
+          if (tema !== "dark" && tema !== "light") {
+            tema = window.matchMedia
+              && window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-bs-theme", tema);
+        })();
+      </script>
+
       {% block pre_load %}{% endblock pre_load %}
     </head>
   <body {% block body_css %}class="index-page"{% endblock body_css %}>
@@ -20,6 +53,7 @@
     {% block content %}{% endblock content %}
     {% block footer %}{% endblock footer %}
     {% block body_third_js %}{% endblock body_third_js %}
+    <script src="{% static 'assets/custom/js/theme.js' %}" defer></script>
     {% block body_custom_js %}{% endblock body_custom_js %}
   </body>
 </html>

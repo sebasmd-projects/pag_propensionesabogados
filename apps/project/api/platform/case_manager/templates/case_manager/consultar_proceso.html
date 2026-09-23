@@ -105,6 +105,10 @@
               </div>
             </div>
 
+            {% if inactive %}
+              {% include 'case_manager/partials/inactive_notice.html' %}
+            {% endif %}
+
             {% if error %}
               <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
                 <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
@@ -152,13 +156,27 @@
                       {% endif %}
                     </div>
 
+                    {% comment %}
+                      Los cinco datos que el cliente busca primero, arriba y
+                      juntos: en que va, con que radicado, de que es, de que
+                      subtipo y bajo que contrato. La etapa y el radicado
+                      estaban antes en el bloque de detalle de abajo, y quien
+                      entraba a mirar «por donde va lo mio» tenia que bajar a
+                      buscarlos entre el despacho y la ciudad.
+                    {% endcomment %}
                     <dl class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-0">
+                      {% include 'case_manager/partials/field.html' with label=_("Current stage / instance") value=case.public_instance %}
+                      {% include 'case_manager/partials/field.html' with label=_("Case number / reference") value=case.public_reference %}
                       {% if case.area %}
                         {% include 'case_manager/partials/field.html' with label=_("Area / case type") value=case.get_area_display %}
                       {% endif %}
                       {% if case.subtype %}
                         {% include 'case_manager/partials/field.html' with label=_("Subtype / speciality") value=case.subtype %}
                       {% endif %}
+                      {% if case.second_subtype %}
+                        {% include 'case_manager/partials/field.html' with label=_("Second sublevel") value=case.second_subtype %}
+                      {% endif %}
+                      {% include 'case_manager/partials/field.html' with label=_("Contract modality") value=case.public_mandate %}
                       {% include 'case_manager/partials/field.html' with label=_("Last update") value=case.updated|date:"d/m/Y" %}
                     </dl>
 

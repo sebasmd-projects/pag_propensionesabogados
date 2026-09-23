@@ -106,6 +106,16 @@ class PublicCaseQueryView(TemplateView):
         request.session.cycle_key()
         request.session[SESSION_CLIENT_KEY] = str(client.pk)
 
+        # Sin vigencia: ni tarjeta ni mensaje de credenciales. La clave era
+        # buena --acaba de demostrarlo-- asi que decirle «credenciales
+        # invalidas» solo conseguia que siguiera probando claves correctas
+        # hasta gastar los intentos de su propia IP. Se le dice que su proceso
+        # esta inactivo y a donde llamar, que es lo unico que puede hacer.
+        if not client.is_active:
+            return self.render_to_response(
+                self.get_context_data(form=PublicCaseQueryForm(), inactive=True)
+            )
+
         # **Todos** sus asuntos, no el ultimo.
         #
         # Un cliente puede tener varios a la vez --una pension y una
@@ -116,18 +126,21 @@ class PublicCaseQueryView(TemplateView):
         cases = (
             CaseModel.objects.visible_to_client()
             .filter(client=client)
-            .select_related('client')
+            # `finance` entra aqui porque la tarjeta ensena la modalidad del
+            # contrato: sin esto es una consulta mas por cada asunto, y un
+            # cliente con tres asuntos paga tres viajes a la base para pintar
+            # tres palabras.
+            .select_related('client', 'finance')
         )
 
         if not cases:
-            # El cliente existe y su clave es buena, pero no tiene ningun
-            # asunto vigente que ensenar. No es un fallo de credenciales y no
-            # cuenta como intento.
+            # El cliente esta vigente pero no le queda ningun asunto que
+            # ensenar --se cerraron todos--. Para el es la misma situacion que
+            # la de arriba y tiene el mismo remedio: llamar al despacho. Asi
+            # que es la misma pantalla, y no un aviso distinto que le haria
+            # pensar que se equivoco al escribir algo.
             return self.render_to_response(
-                self.get_context_data(
-                    form=form,
-                    error=_('There is no case in force for this client.'),
-                )
+                self.get_context_data(form=PublicCaseQueryForm(), inactive=True)
             )
 
         return self.render_to_response(

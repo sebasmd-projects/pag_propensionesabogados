@@ -21,7 +21,6 @@
 
 {% block custom_css %}
   <link href="{% static 'assets/custom/css/main.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/custom/css/account.css' %}" rel="stylesheet">
 {% endblock custom_css %}
 
 {% comment %}
@@ -40,9 +39,24 @@
 {% endblock body_third_js %}
 
 {% block main %}
-  <main class="main auth-screen">
+  <main class="main">
     <div class="min-vh-100 d-flex align-items-center justify-content-center py-5 px-3">
       <div class="w-100" style="max-width: 460px;">
+
+        {% comment %}
+          Estas pantallas no llevan la cabecera del sitio --quien esta aqui
+          viene a hacer una cosa--, asi que el interruptor de tema tiene que
+          estar en alguna parte o no habria forma de cambiarlo desde el
+          acceso.
+        {% endcomment %}
+        <div class="d-flex justify-content-end mb-2">
+          <button type="button" class="tema-boton fs-5 text-muted" aria-pressed="false"
+                  title="{% trans 'Switch between light and dark mode' %}"
+                  aria-label="{% trans 'Switch between light and dark mode' %}">
+            <i class="bi bi-moon-stars-fill"></i>
+            <i class="bi bi-sun-fill"></i>
+          </button>
+        </div>
 
         <div class="text-center mb-4">
           <a href="{% url 'core:index' %}" aria-label="{% trans 'Go to the home page' %}">

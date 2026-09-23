@@ -12,6 +12,15 @@ use**, y ninguna de las tres da error:
    texto en ingles, con la traduccion escrita justo debajo. Es el fallo mas
    desconcertante de todos, porque el fichero parece correcto.
 
+   Al quitar el flag, esta orden **vacia tambien la traduccion**, y eso no es
+   un exceso de celo: quitarlo a secas convierte la adivinanza de gettext en
+   una traduccion que si se usa. Se vio aqui mismo -- «Notifications email»
+   heredo «identificacion», y «Para obtener informacion sobre su proceso...»
+   heredo el subtitulo del buscador--, y ninguna de las dos daba error: la
+   pantalla salia en castellano diciendo otra cosa. Sin traduccion sale el
+   ingles, que se ve, se nota y se arregla; con una traduccion equivocada no
+   se entera nadie.
+
 2. **`python-format` de mas.** Ese mismo emparejamiento por parecido le pone
    el flag a cadenas que solo llevan un `%` literal --«al 0 % no es cuota
    litis»--. Con el flag puesto, `msgfmt` valida ese `%` como si fuera una
@@ -31,8 +40,8 @@ Despues de `makemessages`, y antes de `compilemessages`::
     manage.py tidy_messages
     manage.py compilemessages -l es
 
-Lo que **no** hace: traducir. Las entradas vacias las deja vacias y las
-cuenta al final, para que se vea cuanto queda.
+Lo que **no** hace: traducir. Las entradas vacias las deja vacias --y vacia
+las dudosas-- y las cuenta al final, para que se vea cuanto queda.
 """
 
 import re
@@ -47,8 +56,9 @@ FORMAT_PLACEHOLDER = re.compile(r'%\(|%[sdrf]\b|%%')
 
 class Command(BaseCommand):
     help = (
-        'Quita los `fuzzy` y los `python-format` espurios que deja '
-        '`makemessages`, y rellena las cabeceras.'
+        'Quita los `fuzzy` --vaciando la traduccion adivinada-- y los '
+        '`python-format` espurios que deja `makemessages`, y rellena las '
+        'cabeceras.'
     )
 
     def add_arguments(self, parser):
@@ -119,6 +129,10 @@ class Command(BaseCommand):
 
         fuzzy = len(re.findall(r'^#, fuzzy(?:, |\n)', despues, flags=re.M))
 
+        # Primero se vacia la traduccion adivinada de cada entrada dudosa, y
+        # despues se quita el flag. Al reves no habria por donde reconocerlas.
+        despues = Command._blank_fuzzy(despues)
+
         # Los `#|` son el msgid anterior que gettext apunta al marcar `fuzzy`;
         # sin el flag no significan nada, y si se dejan a medias rompen el
         # fichero.
@@ -151,14 +165,64 @@ class Command(BaseCommand):
         return contenido, fuzzy, flags
 
     @staticmethod
-    def _count_untranslated(contenido: str) -> int:
-        """Entradas con `msgstr` vacio, sin contar la cabecera."""
+    def _blank_fuzzy(contenido: str) -> str:
+        """
+        Deja vacia la traduccion de las entradas marcadas como dudosas.
+
+        Es lo que evita que quitar el flag ascienda la adivinanza de gettext a
+        traduccion buena. Lo que queda es una entrada sin traducir, que sale
+        en ingles y que el recuento del final canta.
+        """
         bloques = contenido.split('\n\n')
+
+        for i, bloque in enumerate(bloques):
+            if not re.search(r'^#, fuzzy(?:,|$)', bloque, flags=re.M):
+                continue
+
+            lineas, dentro = [], False
+
+            for linea in bloque.splitlines():
+                if linea.startswith('msgstr'):
+                    dentro = True
+                    # `msgstr[0]`, `msgstr[1]`... en las entradas con plural.
+                    lineas.append(re.sub(r'^(msgstr(?:\[\d+\])?) .*',
+                                         r'\1 ""', linea))
+                    continue
+
+                if dentro:
+                    # Las continuaciones `"..."` de la traduccion que se va.
+                    if linea.startswith('"'):
+                        continue
+                    dentro = False
+
+                lineas.append(linea)
+
+            bloques[i] = '\n'.join(lineas)
+
+        return '\n\n'.join(bloques)
+
+    @staticmethod
+    def _count_untranslated(contenido: str) -> int:
+        """
+        Entradas con `msgstr` vacio de verdad, sin contar la cabecera.
+
+        El «de verdad» hace falta porque una traduccion larga se escribe
+        partida::
+
+            msgstr ""
+            "Consulte el estado y avance de su tramite con Propensiones..."
+
+        Esa primera linea es identica a la de una entrada sin traducir, asi
+        que buscarla a secas contaba como pendientes justo las traducciones
+        mas largas del catalogo --las que mas trabajo costaron--. Lo que la
+        distingue es si despues viene una continuacion entre comillas.
+        """
         return sum(
             1
-            for bloque in bloques[1:]
+            for bloque in contenido.split('\n\n')[1:]
             if re.search(r'^msgid "(?!")', bloque, flags=re.M)
-            and re.search(r'^msgstr(?:\[0\])? ""$', bloque, flags=re.M)
+            and re.search(r'^msgstr(?:\[\d+\])? ""$(?!\n")', bloque,
+                          flags=re.M)
         )
 
     def _report(self, fuzzy, flags, vacias, solo_mirar):
@@ -172,8 +236,9 @@ class Command(BaseCommand):
 
         if fuzzy or flags:
             self.stdout.write(self.style.SUCCESS(
-                f'Listo: {fuzzy} entradas desmarcadas y {flags} flags '
-                f'quitados. Ahora `compilemessages`.'
+                f'Listo: {fuzzy} entradas desmarcadas --y vaciadas-- y '
+                f'{flags} flags quitados. Ahora, traducir lo que quede y '
+                f'`compilemessages`.'
             ))
         else:
             self.stdout.write(self.style.SUCCESS(
