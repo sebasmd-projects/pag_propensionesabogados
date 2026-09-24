@@ -342,6 +342,21 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
     Cada modalidad muestra sus columnas; el modelo valida los importes.
     """
 
+    def configure_fields(self):
+        mandate = (
+            self.data.get(self.add_prefix('mandate'))
+            if self.is_bound else self.initial.get('mandate')
+        )
+        if self.is_bound and mandate in (
+            choices.Mandate.PRO_BONO, choices.Mandate.GUARDIANSHIP,
+        ):
+            # Las modalidades gratuitas no reciben cifras, incluso sin JS
+            # o al cambiar desde un contrato con importes anteriores.
+            for name in ('contingency_percentage', 'contingency_value',
+                         'agreed_fee', 'paid_amount'):
+                self.fields[name].disabled = True
+                self.initial[name] = 0
+
     class Meta:
         model = CaseFinanceModel
         fields = (
