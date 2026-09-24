@@ -178,9 +178,11 @@
                         <input type="text" name="identification" id="consulta" class="form-control form-control-lg"
                                inputmode="numeric" maxlength="20" autocomplete="off" required
                                value="{{ form.identification.value|default:'' }}">
-                        <div class="form-text">
-                          {% trans "We will send a code to the email address on your file." %}
-                        </div>
+                        {% if not request.user.is_authenticated %}
+                          <div class="form-text">
+                            {% trans "We will send a code to the email address on your file." %}
+                          </div>
+                        {% endif %}
                       </div>
                       <div class="col-12 col-md-5 d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">
