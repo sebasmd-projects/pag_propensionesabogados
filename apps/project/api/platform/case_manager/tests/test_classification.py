@@ -76,9 +76,12 @@ class ClassificationTests(TestCase):
         self.assertIn('subtype', form.errors)
 
     def test_other_requires_description_and_round_trips(self):
+        # El tercer nivel solo existe dentro de una rama: sin subtipo elegido
+        # no hay «Otro» que escoger, porque no hay nada de lo que ser otro.
+        padres = {'second_subtype': {'subtype': 'Laboral'}}
         for name in ('service', 'procedure', 'area', 'subtype', 'second_subtype'):
             with self.subTest(field=name):
-                data = self.data(**{name: 'Otro'})
+                data = self.data(**{name: 'Otro'}, **padres.get(name, {}))
                 form = CaseForm(data=data)
                 self.assertFalse(form.is_valid())
                 self.assertIn(name + '_other', form.errors)
@@ -213,3 +216,152 @@ class DetailRowsTests(TestCase):
 
         self.assertContains(respuesta, 'Juzgado del Circuito')
         self.assertContains(respuesta, 'Armenia')
+
+
+class ArbolAprobadoTests(TestCase):
+    """
+    El arbol del HTML entregado, tal cual: servicio -> subtipo -> proceso.
+
+    Lo que se comprueba aqui no es que las listas tengan tal o cual palabra,
+    sino la propiedad que hacia fallar el formulario: que cada desplegable
+    ofrezca **solo** lo que cuelga de la rama elegida. Mientras el subtipo
+    judicial mezclaba las jurisdicciones con los subtipos de todas las areas,
+    un expediente bien clasificado podia recibir «este subtipo no
+    corresponde», que es exactamente lo que se reporto.
+    """
+
+    def setUp(self):
+        self.cliente = ClientModel.objects.create(
+            identification='30000', full_name='Cliente'
+        )
+
+    def datos(self, **kwargs):
+        return {'client': self.cliente.pk, 'service': Service.JUDICIAL,
+                'stage': 0, **kwargs}
+
+    def test_el_subtipo_judicial_solo_trae_las_areas_del_arbol(self):
+        from ..choices import subtypes_for
+
+        valores = subtypes_for(Service.JUDICIAL)
+
+        self.assertEqual(
+            [v for v in valores if v != 'Otro'],
+            ['Civil', 'Contencioso administrativo', 'Familia', 'Laboral',
+             'Penal', 'Superintendencias'],
+        )
+
+    def test_el_tercer_nivel_solo_trae_los_procesos_de_su_area(self):
+        from ..choices import second_subtypes_for
+
+        penales = second_subtypes_for(Service.JUDICIAL, 'Penal')
+
+        self.assertIn('Defensa penal', penales)
+        self.assertNotIn('Ejecutivo laboral', penales)
+        self.assertNotIn('Protección al consumidor', penales)
+
+    def test_una_rama_sin_tercer_nivel_no_ofrece_ninguno(self):
+        """
+        Un «Recurso de reposición» no se subdivide.
+
+        Devolver `('Otro',)` seria ensenar un desplegable con una sola opcion
+        que no significa nada; vacio es lo que le dice al formulario que
+        esconda el campo entero.
+        """
+        from ..choices import second_subtypes_for
+
+        self.assertEqual(
+            second_subtypes_for('Administrativo', 'Recurso de reposición'), ()
+        )
+
+    def test_los_desplegables_salen_en_orden_alfabetico(self):
+        from ..choices import Area, Court, Procedure, Service as Serv
+        from ..choices import alphabetical
+
+        for grupo in (Serv, Procedure, Area, Court):
+            with self.subTest(grupo=grupo.__name__):
+                self.assertEqual(
+                    list(grupo.values), list(alphabetical(grupo.values))
+                )
+
+    def test_los_juzgados_administrativos_estan_en_la_lista(self):
+        """
+        Faltaban las dos primeras instancias de lo contencioso administrativo.
+
+        Sin ellas, una nulidad y restablecimiento del derecho --que esta en el
+        arbol-- no tenia despacho que escoger: la lista saltaba del juzgado
+        del circuito al Consejo de Estado.
+        """
+        from ..choices import Court
+
+        self.assertIn('Juzgado Administrativo', Court.values)
+        self.assertIn('Tribunal Administrativo', Court.values)
+
+    def test_los_dos_expedientes_reales_siguen_siendo_validos(self):
+        """
+        Los dos que hay en produccion, con su clasificacion exportada.
+
+        Son `st`/`st2` del fichero entregado: uno laboral con pension de vejez
+        y otro de superintendencias con proteccion al consumidor. Si el arbol
+        nuevo los rechazara, el gestor no podria volver a guardarlos.
+        """
+        casos = (
+            {'area': 'Pensional / Seguridad Social', 'subtype': 'Laboral',
+             'second_subtype': 'Pensión de vejez',
+             'court': 'Juzgado del Circuito'},
+            {'subtype': 'Superintendencias',
+             'second_subtype': 'Protección al consumidor',
+             'court': 'Superintendencia'},
+        )
+
+        for caso in casos:
+            with self.subTest(subtype=caso['subtype']):
+                form = CaseForm(data=self.datos(instance='Primera instancia', **caso))
+                self.assertTrue(form.is_valid(), form.errors)
+
+    def test_el_formulario_no_ofrece_un_proceso_de_otra_area(self):
+        form = CaseForm(
+            data=self.datos(subtype='Penal', second_subtype='Ejecutivo laboral')
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('second_subtype', form.errors)
+
+
+class TiempoTranscurridoTests(TestCase):
+    """Cuanto lleva abierto el asunto, que es lo que se pregunta por telefono."""
+
+    def test_el_portal_ensena_el_tiempo_desde_el_inicio(self):
+        from unittest.mock import patch
+
+        from django.urls import reverse
+
+        from .. import portal_otp
+
+        cliente = ClientModel.objects.create(
+            identification='40000', full_name='Cliente', email='c@example.com'
+        )
+        caso = CaseModel.objects.create(
+            client=cliente, service=Service.JUDICIAL, stage=3
+        )
+        CaseFinanceModel.objects.create(
+            case=caso, start_date=date(2024, 2, 1), mandate='Cuota litis',
+            contingency_percentage=0, contingency_value=15000000,
+        )
+        url = reverse('case_manager:public_query')
+
+        with patch.object(portal_otp, 'generate_code', return_value='123456'):
+            self.client.post(url, {'identification': '40000'})
+
+        respuesta = self.client.post(url, {'code': '123456'})
+
+        self.assertContains(respuesta, '02/2024')
+        self.assertContains(respuesta, caso.public_elapsed)
+
+    def test_un_asunto_sin_bloque_economico_no_inventa_una_fecha(self):
+        cliente = ClientModel.objects.create(
+            identification='40001', full_name='Cliente'
+        )
+        caso = CaseModel.objects.create(client=cliente, service=Service.JUDICIAL)
+
+        self.assertIsNone(caso.public_start)
+        self.assertEqual(caso.public_elapsed, '—')

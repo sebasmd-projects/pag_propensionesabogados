@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-23 17:34-0500\n"
+"POT-Creation-Date: 2026-09-23 19:29-0500\n"
 "PO-Revision-Date: 2025-04-05 21:21-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: Propensiones Abogados\n"
@@ -19,211 +19,214 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.10.0\n"
 
-#: .\apps\common\utils\admin.py:27
-#, python-brace-format
+#: apps/common/utils/admin.py:27
 msgid "Maximum allowed: {} records."
 msgstr "Máximo permitido: {} registros."
 
-#: .\apps\common\utils\admin.py:34
+#: apps/common/utils/admin.py:34
 msgid "Minimum allowed: 1 record."
 msgstr "Mínimo permitido: 1 registro."
 
-#: .\apps\common\utils\admin.py:38
+#: apps/common/utils/admin.py:38
 msgid "Please enter a valid number."
 msgstr "Por favor, introduzca un número válido."
 
-#: .\apps\common\utils\admin.py:52
+#: apps/common/utils/admin.py:52
 msgid "Information"
 msgstr "Información de la sesión"
 
-#: .\apps\common\utils\admin.py:62
+#: apps/common/utils/admin.py:62
 msgid "Times"
 msgstr "Veces"
 
-#: .\apps\common\utils\admin.py:74
+#: apps/common/utils/admin.py:74
 msgid "Other"
 msgstr "Otro"
 
-#: .\apps\common\utils\context_processors\__init__.py:10
-#: .\apps\common\utils\context_processors\__init__.py:11
+#: apps/common/utils/context_processors/__init__.py:11
+#: apps/common/utils/context_processors/__init__.py:12
 msgid "Denied Pensions"
 msgstr "Pensiones Negadas"
 
-#: .\apps\common\utils\context_processors\__init__.py:15
-#: .\apps\common\utils\context_processors\__init__.py:16
+#: apps/common/utils/context_processors/__init__.py:17
+#: apps/common/utils/context_processors/__init__.py:18
 msgid "Economic Insolvency"
 msgstr "Insolvencia Económica"
 
-#: .\apps\common\utils\context_processors\__init__.py:20
-#: .\apps\common\utils\context_processors\__init__.py:21
+#: apps/common/utils/context_processors/__init__.py:23
+#: apps/common/utils/context_processors/__init__.py:24
 msgid "Labor Law"
 msgstr "Derecho Laboral"
 
-#: .\apps\common\utils\context_processors\__init__.py:25
-#: .\apps\common\utils\context_processors\__init__.py:26
+#: apps/common/utils/context_processors/__init__.py:29
+#: apps/common/utils/context_processors/__init__.py:30
 msgid "Civil Law"
 msgstr "Derecho Civil"
 
-#: .\apps\common\utils\context_processors\__init__.py:30
-#: .\apps\common\utils\context_processors\__init__.py:31
+#: apps/common/utils/context_processors/__init__.py:35
+#: apps/common/utils/context_processors/__init__.py:36
 msgid "Criminal Law"
 msgstr "Derecho Penal"
 
-#: .\apps\common\utils\context_processors\__init__.py:35
-#: .\apps\common\utils\context_processors\__init__.py:36
+#: apps/common/utils/context_processors/__init__.py:41
+#: apps/common/utils/context_processors/__init__.py:42
 msgid "International Law"
 msgstr "Derecho Internacional"
 
-#: .\apps\common\utils\context_processors\__init__.py:40
-#: .\apps\common\utils\context_processors\__init__.py:41
+#: apps/common/utils/context_processors/__init__.py:47
+#: apps/common/utils/context_processors/__init__.py:48
 msgid "Risk Analysis"
 msgstr "Análisis de Riesgos"
 
-#: .\apps\common\utils\context_processors\__init__.py:45
-#: .\apps\common\utils\context_processors\__init__.py:46
+#: apps/common/utils/context_processors/__init__.py:53
+#: apps/common/utils/context_processors/__init__.py:54
 msgid "Business Training"
 msgstr "Capacitación Empresarial"
 
-#: .\apps\common\utils\context_processors\__init__.py:50
-#: .\apps\common\utils\context_processors\__init__.py:51
+#: apps/common/utils/context_processors/__init__.py:59
+#: apps/common/utils/context_processors/__init__.py:60
 msgid "Emergency Conciliation"
 msgstr "Conciliaciones de Emergencia"
 
-#: .\apps\common\utils\context_processors\__init__.py:55
-#: .\apps\common\utils\context_processors\__init__.py:56
+#: apps/common/utils/context_processors/__init__.py:65
+#: apps/common/utils/context_processors/__init__.py:66
 msgid "Business Consulting"
 msgstr "Consultorías Empresariales"
 
-#: .\apps\common\utils\context_processors\__init__.py:60
-#: .\apps\common\utils\context_processors\__init__.py:61
+#: apps/common/utils/context_processors/__init__.py:71
+#: apps/common/utils/context_processors/__init__.py:72
 msgid "Family Law"
 msgstr "Derecho Familiar"
 
-#: .\apps\common\utils\context_processors\__init__.py:65
-#: .\apps\common\utils\context_processors\__init__.py:66
+#: apps/common/utils/context_processors/__init__.py:77
+#: apps/common/utils/context_processors/__init__.py:78
 msgid "Field Investigation"
 msgstr "Investigación de Campo"
 
-#: .\apps\common\utils\contrib\auth\mixins.py:17
+#: apps/common/utils/contrib/auth/mixins.py:20
 msgid "group_required attribute not set"
 msgstr "atributo group_required no establecido"
 
-#: .\apps\common\utils\contrib\auth\mixins.py:25
+#: apps/common/utils/contrib/auth/mixins.py:28
 msgid "You do not have permission to view this page"
 msgstr "No tienes permiso para ver esta página"
 
-#: .\apps\common\utils\forms.py:9
+#: apps/common/utils/forms.py:9
 msgid "Security Key"
 msgstr "Clave de seguridad"
 
-#: .\apps\common\utils\middleware.py:61
+#: apps/common/utils/middleware.py:61
 msgid "This IP is temporarily blocked due to suspicious activity."
 msgstr "Esta IP está bloqueada temporalmente debido a actividad sospechosa."
 
-#: .\apps\common\utils\middleware.py:62 .\apps\common\utils\views.py:49
+#: apps/common/utils/middleware.py:62 apps/common/utils/views.py:49
 msgid "Error 403"
 msgstr "Error 403"
 
-#: .\apps\common\utils\middleware.py:63
+#: apps/common/utils/middleware.py:63
 msgid "Access denied due to suspicious activity."
 msgstr "Acceso denegado debido a actividad sospechosa."
 
-#: .\apps\common\utils\models.py:24
+#: apps/common/utils/models.py:24
 msgid "Spanish"
 msgstr "Español"
 
-#: .\apps\common\utils\models.py:25
+#: apps/common/utils/models.py:25
 msgid "English"
 msgstr "Inglés"
 
-#: .\apps\common\utils\models.py:29
+#: apps/common/utils/models.py:29
 msgid "language"
 msgstr "Idioma"
 
-#: .\apps\common\utils\models.py:38
+#: apps/common/utils/models.py:38
 msgid "created"
 msgstr "f. creación"
 
-#: .\apps\common\utils\models.py:44
+#: apps/common/utils/models.py:44
 msgid "updated"
 msgstr "f. actualización"
 
-#: .\apps\common\utils\models.py:50
+#: apps/common/utils/models.py:50
 msgid "is active"
 msgstr "está activo"
 
-#: .\apps\common\utils\models.py:55
+#: apps/common/utils/models.py:55
 msgid "priority"
 msgstr "prioridad"
 
-#: .\apps\common\utils\models.py:68
+#: apps/common/utils/models.py:68
 msgid "Attempts to obtain forbidden urls"
 msgstr "Intentos de obtener URL prohibidas"
 
-#: .\apps\common\utils\models.py:70
+#: apps/common/utils/models.py:70
 msgid "Multiple failed security key entry attempts"
 msgstr "Múltiples intentos fallidos de ingreso de clave de seguridad"
 
-#: .\apps\common\utils\models.py:73
+#: apps/common/utils/models.py:73
+msgid "Multiple failed access key attempts on the case query portal"
+msgstr "Varios intentos fallidos de código de acceso en el portal de consulta"
+
+#: apps/common/utils/models.py:76
 msgid "is blocked"
 msgstr "está bloqueado"
 
-#: .\apps\common\utils\models.py:74 .\apps\common\utils\models.py:93
+#: apps/common/utils/models.py:77 apps/common/utils/models.py:96
 msgid "current user IP"
 msgstr "IP del usuario actual"
 
-#: .\apps\common\utils\models.py:76 .\apps\common\utils\models.py:98
+#: apps/common/utils/models.py:79 apps/common/utils/models.py:101
 msgid "reason"
 msgstr "razón"
 
-#: .\apps\common\utils\models.py:78
+#: apps/common/utils/models.py:81
 msgid "blocked until"
 msgstr "bloqueado hasta"
 
-#: .\apps\common\utils\models.py:80
+#: apps/common/utils/models.py:83
 msgid "session information"
 msgstr "Información de la sesión"
 
-#: .\apps\common\utils\templates\errors_template.html:49
+#: apps/common/utils/templates/errors_template.html:49
 msgid ""
 "\n"
-"      If you believe this is an error, please email us at: "
-"support&#64;propensionesabogados.com\n"
+"      If you believe this is an error, please email us at: support&#64;"
+"propensionesabogados.com\n"
 "      "
 msgstr ""
 "\n"
 "Si considera que se trata de un error, envíenos un correo electrónico a: "
 "support&#64;propensionesabogados.com"
 
-#: .\apps\common\utils\templates\errors_template.html:57
+#: apps/common/utils/templates/errors_template.html:57
 msgid "Go to Home"
 msgstr "Ir al Inicio"
 
-#: .\apps\common\utils\views.py:33
+#: apps/common/utils/views.py:33
 msgid "Error 400"
 msgstr "Error 400"
 
-#: .\apps\common\utils\views.py:34
+#: apps/common/utils/views.py:34
 msgid "Bad Request"
 msgstr "Solicitud incorrecta"
 
-#: .\apps\common\utils\views.py:50
+#: apps/common/utils/views.py:50
 msgid "Prohibited Request"
 msgstr "Solicitud Prohibida"
 
-#: .\apps\common\utils\views.py:65
+#: apps/common/utils/views.py:65
 msgid "Error 404"
 msgstr "Error 404"
 
-#: .\apps\common\utils\views.py:66
+#: apps/common/utils/views.py:66
 msgid "Page not found"
 msgstr "Página no encontrada"
 
-#: .\apps\common\utils\views.py:80
+#: apps/common/utils/views.py:80
 msgid "Error 500"
 msgstr "Error 500"
 
-#: .\apps\common\utils\views.py:81
+#: apps/common/utils/views.py:81
 msgid "Server error"
 msgstr "Error del servidor"
 

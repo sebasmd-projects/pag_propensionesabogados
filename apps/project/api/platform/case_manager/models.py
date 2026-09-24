@@ -561,6 +561,28 @@ class CaseModel(TimeStampedModel):
 
         return finance.get_mandate_display()
 
+    @property
+    def public_elapsed(self) -> str:
+        """
+        Cuanto lleva abierto el asunto, para el portal.
+
+        Es la pregunta que el cliente hace por telefono --«¿cuanto llevamos
+        con esto?»--, y hasta ahora solo se contestaba dentro del gestor: el
+        dato estaba en el bloque economico, que al portal no se asoma. Aqui
+        sale por su cuenta, sin arrastrar ninguna cifra con el.
+
+        Un asunto sin bloque economico todavia no tiene fecha de inicio y
+        devuelve la raya, igual que `public_mandate`.
+        """
+        finance = getattr(self, 'finance', None)
+        return finance.elapsed if finance is not None else '—'
+
+    @property
+    def public_start(self):
+        """El mes de inicio, o `None` si el asunto aun no tiene bloque."""
+        finance = getattr(self, 'finance', None)
+        return finance.start_date if finance is not None else None
+
     def clean(self):
         """
         Las reglas que en el navegador eran ensenar u ocultar un `<div>`.
@@ -572,18 +594,25 @@ class CaseModel(TimeStampedModel):
 
         errors = {}
 
+        # El subtipo se valida contra la rama del servicio, no contra el area:
+        # el area dejo de estar en la cadena. `subtypes_for` incluye ademas
+        # los subtipos antiguos del area guardada, para que un expediente ya
+        # clasificado se pueda volver a guardar tal cual.
         valid_subtypes = choices.subtypes_for(self.service, self.area)
         if self.subtype and valid_subtypes and self.subtype not in valid_subtypes:
             errors['subtype'] = _(
-                'This subtype does not belong to the selected service and area.'
+                'This subtype does not belong to the selected service.'
             )
 
-        # Valida el segundo nivel cuando existe un catalogo para la jurisdiccion.
-        if (self.service == choices.Service.JUDICIAL
-                and self.subtype in choices.JUDICIAL_SUBTYPES
-                and self.second_subtype
-                and self.second_subtype not in choices.second_subtypes_for(self.service, self.subtype)):
-            errors['second_subtype'] = _('Este segundo subnivel no corresponde al subtipo seleccionado.')
+        # El tercer nivel solo existe en las ramas que lo tienen. Donde no lo
+        # hay, `second_subtypes_for` devuelve vacio y no se valida nada: lo
+        # que traiga un expediente antiguo se respeta.
+        valid_seconds = choices.second_subtypes_for(self.service, self.subtype)
+        if (self.second_subtype and valid_seconds
+                and self.second_subtype not in valid_seconds):
+            errors['second_subtype'] = _(
+                'This second sublevel does not belong to the selected subtype.'
+            )
 
         for name in ('service', 'procedure', 'area', 'subtype', 'second_subtype'):
             if choices.is_other(getattr(self, name)) and not getattr(self, name + '_other', '').strip():

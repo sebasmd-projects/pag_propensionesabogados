@@ -283,6 +283,17 @@
                         {% include 'case_manager/partials/field.html' with label=_("Second sublevel") value=case.second_subtype_display %}
                       {% endif %}
                       {% include 'case_manager/partials/field.html' with label=_("Contract modality") value=case.public_mandate %}
+                      {% comment %}
+                        «¿Cuanto llevamos con esto?» es la pregunta que mas se
+                        hace por telefono, y el dato estaba solo dentro del
+                        gestor. El mes de inicio va al lado a proposito: un
+                        «2 anos y 7 meses» sin decir desde cuando no se puede
+                        comprobar.
+                      {% endcomment %}
+                      {% if case.public_start %}
+                        {% include 'case_manager/partials/field.html' with label=_("Process started") value=case.public_start|date:"m/Y" %}
+                        {% include 'case_manager/partials/field.html' with label=_("Time elapsed") value=case.public_elapsed %}
+                      {% endif %}
                       {% include 'case_manager/partials/field.html' with label=_("Last update") value=case.updated|date:"d/m/Y" %}
                     </dl>
 

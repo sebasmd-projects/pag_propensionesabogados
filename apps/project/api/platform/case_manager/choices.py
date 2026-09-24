@@ -25,65 +25,75 @@ class Service(models.TextChoices):
     """Servicio contratado. El ``<select id="as">`` de la pantalla aprobada."""
 
     ADMINISTRATIVE = 'Administrativo', _('Administrativo')
-    JUDICIAL = 'Representación judicial', _('Representación judicial')
     CONCILIATION = 'Conciliación', _('Conciliación')
     CONSULTING = 'Consultoría', _('Consultoría')
     FIELD_RESEARCH = 'Investigación de campo', _('Investigación de campo')
+    JUDICIAL = 'Representación judicial', _('Representación judicial')
     OTHER = 'Otro', _('Otro')
 
 
 class Procedure(models.TextChoices):
     """Tipo de tramite. El ``<select id="at">``; decide que bloque se pide."""
 
-    ADMINISTRATIVE = 'Administrativo', _('Administrativo')
-    PRIVATE = 'Privado', _('Privado')
     TUTELA = 'Acción de tutela', _('Acción de tutela')
-    ORDINARY = 'Proceso ordinario', _('Proceso ordinario')
-    EXECUTIVE = 'Proceso ejecutivo', _('Proceso ejecutivo')
+    ADMINISTRATIVE = 'Administrativo', _('Administrativo')
     CONCILIATION = 'Conciliación', _('Conciliación')
     FIELD_RESEARCH = 'Investigación de campo', _('Investigación de campo')
+    PRIVATE = 'Privado', _('Privado')
+    EXECUTIVE = 'Proceso ejecutivo', _('Proceso ejecutivo')
+    ORDINARY = 'Proceso ordinario', _('Proceso ordinario')
+    POLICE = 'Querella policiva', _('Querella policiva')
     NOTARIAL = 'Trámite notarial', _('Trámite notarial')
     REGISTRY = 'Trámite registral', _('Trámite registral')
-    POLICE = 'Querella policiva', _('Querella policiva')
     OTHER = 'Otro', _('Otro')
 
 
 class Area(models.TextChoices):
     """Area o tipo de caso. El ``<select id="aa">``."""
 
-    PENSION = 'Pensional / Seguridad Social', _('Pensional / Seguridad Social')
-    LABOR = 'Laboral', _('Laboral')
-    CIVIL = 'Civil', _('Civil')
-    FAMILY = 'Familia', _('Familia')
-    INHERITANCE = 'Sucesiones', _('Sucesiones')
     ADMINISTRATIVE = 'Administrativo', _('Administrativo')
-    INSURANCE = 'Seguros', _('Seguros')
-    INSOLVENCY = 'Insolvencia', _('Insolvencia')
-    CONCILIATION = 'Conciliación', _('Conciliación')
-    CRIMINAL = 'Penal', _('Penal')
-    CONSUMER = 'Consumidor', _('Consumidor')
+    CIVIL = 'Civil', _('Civil')
     COMMERCIAL = 'Comercial / Empresarial', _('Comercial / Empresarial')
+    CONCILIATION = 'Conciliación', _('Conciliación')
+    CONSUMER = 'Consumidor', _('Consumidor')
+    FAMILY = 'Familia', _('Familia')
+    INSOLVENCY = 'Insolvencia', _('Insolvencia')
     FIELD_RESEARCH = 'Investigación de campo', _('Investigación de campo')
+    LABOR = 'Laboral', _('Laboral')
+    CRIMINAL = 'Penal', _('Penal')
+    PENSION = 'Pensional / Seguridad Social', _('Pensional / Seguridad Social')
+    INSURANCE = 'Seguros', _('Seguros')
+    INHERITANCE = 'Sucesiones', _('Sucesiones')
     OTHER = 'Otro', _('Otro')
 
 
 class Court(models.TextChoices):
-    """Despacho o autoridad judicial. Solo en `Proceso ordinario`."""
+    """
+    Despacho o autoridad judicial. Solo en `Representación judicial`.
 
-    MUNICIPAL = 'Juzgado Municipal', _('Juzgado Municipal')
-    CIRCUIT = 'Juzgado del Circuito', _('Juzgado del Circuito')
-    SUPERIOR = 'Tribunal Superior', _('Tribunal Superior')
-    SUPREME = 'Corte Suprema de Justicia', _('Corte Suprema de Justicia')
+    La lista aprobada saltaba de `Juzgado del Circuito` al `Consejo de Estado`
+    y dejaba fuera las dos primeras instancias de lo contencioso
+    administrativo, que son justamente donde se radica un medio de control:
+    sin ellas, una nulidad y restablecimiento del derecho no tenia despacho
+    que escoger. Estan `JUDGE_ADMIN` y `TRIBUNAL_ADMIN`.
+    """
+
     STATE_COUNCIL = 'Consejo de Estado', _('Consejo de Estado')
     CONSTITUTIONAL = 'Corte Constitucional', _('Corte Constitucional')
+    SUPREME = 'Corte Suprema de Justicia', _('Corte Suprema de Justicia')
+    JUDGE_ADMIN = 'Juzgado Administrativo', _('Juzgado Administrativo')
+    CIRCUIT = 'Juzgado del Circuito', _('Juzgado del Circuito')
+    MUNICIPAL = 'Juzgado Municipal', _('Juzgado Municipal')
     SUPERINTENDENCE = 'Superintendencia', _('Superintendencia')
+    TRIBUNAL_ADMIN = 'Tribunal Administrativo', _('Tribunal Administrativo')
+    SUPERIOR = 'Tribunal Superior', _('Tribunal Superior')
 
 
 class Sector(models.TextChoices):
     """Naturaleza del tramite. Solo en `Administrativo`."""
 
-    PUBLIC = 'Público', _('Público')
     PRIVATE = 'Privado', _('Privado')
+    PUBLIC = 'Público', _('Público')
 
 
 class PoliceInstance(models.TextChoices):
@@ -101,10 +111,10 @@ class Mandate(models.TextChoices):
     caso en el panel: ver ``CaseFinanceModel``.
     """
 
-    CONTINGENCY = 'Cuota litis', _('Cuota litis')
-    PAYMENT = 'Modalidad de pago', _('Modalidad de pago')
     PRO_BONO = 'Ad honorem', _('Ad honorem')
+    CONTINGENCY = 'Cuota litis', _('Cuota litis')
     GUARDIANSHIP = 'Curaduría', _('Curaduría')
+    PAYMENT = 'Modalidad de pago', _('Modalidad de pago')
 
 
 class NoteKind(models.TextChoices):
@@ -163,11 +173,15 @@ class Stage(models.IntegerChoices):
     FINISHED = 5, _('Finalizado')
 
 
-#: Subtipo segun el area (``SUBTIPOS`` del JavaScript).
+#: Subtipo segun el area: el ``SUBTIPOS`` del JavaScript **anterior**.
 #:
-#: Django no sabe validar un campo contra el valor de otro, asi que esto no
-#: puede ser `choices`: lo comprueba ``CaseModel.clean()``.
-SUBTYPES_BY_AREA: dict[str, tuple[str, ...]] = {
+#: Ya no alimenta ningun desplegable --la cadena aprobada es servicio ->
+#: subtipo -> segundo subnivel, sin area por medio--. Se conserva por una
+#: sola razon: los expedientes que ya estan guardados se clasificaron con
+#: estas listas, y borrarlas haria que al abrir uno de ellos el formulario
+#: rechazara su propio subtipo. Se aceptan al validar; no se ofrecen al
+#: clasificar de nuevo.
+LEGACY_SUBTYPES_BY_AREA: dict[str, tuple[str, ...]] = {
     Area.PENSION: (
         'Pensión integral de vejez',
         'Pensión de invalidez',
@@ -292,31 +306,117 @@ SUBTYPES_BY_AREA: dict[str, tuple[str, ...]] = {
     Area.OTHER: ('Otro',),
 }
 
-#: Subnivel segun el servicio (``SUBSERVICIOS`` del JavaScript). Los servicios
-#: que no estan aqui toman su subtipo del area, via `SUBTYPES_BY_AREA`.
-SUBTYPES_BY_SERVICE: dict[str, tuple[str, ...]] = {
-    Service.ADMINISTRATIVE: (
-        'PQR / Derecho de petición',
-        'Recurso de reposición',
-        'Recurso de insistencia',
-        'Acción de tutela',
-    ),
-    Service.CONSULTING: (
-        'Consultoría procesal',
-        'Consultoría empresarial',
-    ),
-    Service.FIELD_RESEARCH: (
-        'Investigación judicial',
-        'Estudio de seguridad',
-    ),
-    Service.JUDICIAL: (),
-    Service.CONCILIATION: (),
-    Service.OTHER: (),
+#: El arbol de clasificacion, tal y como quedo en el HTML aprobado
+#: (``ARBOL41``: «CONTROL ÚNICO DE SERVICIO / ÁREA / TIPO DE PROCESO»).
+#:
+#: Tiene tres niveles y **solo** tres: servicio -> subtipo -> segundo
+#: subnivel. En `Representación judicial` el segundo nivel se rotula «Área» y
+#: el tercero «Tipo concreto de proceso» --eso es lo que quiere decir
+#: «representación judicial > penal > tipo de proceso»--; en los demas
+#: servicios el segundo nivel es el subnivel y no hay tercero.
+#:
+#: Que el arbol este completo aqui es lo que permite que cada desplegable
+#: cargue **solo** lo que cuelga de la rama elegida. Antes el subtipo judicial
+#: mezclaba las jurisdicciones con los subtipos de todas las areas, y por eso
+#: un expediente correcto podia recibir «este subtipo no corresponde».
+CLASSIFICATION_TREE: dict[str, dict[str, tuple[str, ...]]] = {
+    Service.ADMINISTRATIVE: {
+        'PQR / Derecho de petición': (),
+        'Recurso de reposición': (),
+        'Recurso de insistencia': (),
+        'Acción de tutela': (),
+    },
+    Service.CONCILIATION: {
+        'Conciliación privada': (),
+        'Centro de conciliación': (),
+        'Conciliación judicial': (),
+        'Comisaría de Familia': (),
+        'Inspección de Policía': (),
+    },
+    Service.CONSULTING: {
+        'Consultoría procesal': (),
+        'Consultoría empresarial': (),
+    },
+    Service.FIELD_RESEARCH: {
+        'Investigación judicial': (),
+        'Estudio de seguridad': (),
+    },
+    Service.JUDICIAL: {
+        'Civil': (
+            'Ejecutivo',
+            'Monitorio',
+            'Pertenencia / prescripción adquisitiva',
+            'Reivindicatorio',
+            'Restitución de inmueble',
+            'Divisorio',
+            'Deslinde y amojonamiento',
+            'Servidumbre',
+            'Responsabilidad civil',
+            'Incumplimiento contractual',
+            'Promesa de compraventa',
+        ),
+        'Laboral': (
+            'Ordinario laboral',
+            'Ejecutivo laboral',
+            'Contrato realidad',
+            'Reintegro / estabilidad laboral reforzada',
+            'Fuero sindical',
+            'Acreencias laborales',
+            'Pensión de vejez',
+            'Pensión de invalidez',
+            'Pensión de sobrevivientes',
+            'Reliquidación pensional',
+            'Calificación / pérdida de capacidad laboral',
+        ),
+        'Familia': (
+            'Divorcio / cesación de efectos civiles',
+            'Unión marital de hecho',
+            'Liquidación de sociedad conyugal o patrimonial',
+            'Alimentos',
+            'Ejecutivo de alimentos',
+            'Custodia y cuidado personal',
+            'Regulación de visitas',
+            'Filiación',
+            'Investigación de paternidad',
+            'Impugnación de paternidad',
+            'Sucesión',
+            'Petición de herencia',
+        ),
+        'Penal': (
+            'Defensa penal',
+            'Representación de víctimas',
+            'Denuncia penal',
+            'Querella penal',
+            'Incidente de reparación integral',
+            'Ejecución de penas',
+        ),
+        'Contencioso administrativo': (
+            'Nulidad',
+            'Nulidad y restablecimiento del derecho',
+            'Reparación directa',
+            'Controversias contractuales',
+            'Ejecutivo administrativo',
+            'Cumplimiento',
+            'Repetición',
+        ),
+        'Superintendencias': (
+            'Protección al consumidor',
+            'Protección al consumidor financiero',
+            'Asuntos societarios',
+            'Competencia desleal',
+            'Propiedad industrial',
+        ),
+    },
+    Service.OTHER: {},
 }
 
 #: Etapa o instancia segun el servicio (``ETAPAS_V35`` del JavaScript). Es
 #: distinta de `Stage`: `Stage` es el avance publico, esto es donde va el
 #: expediente dentro de su propio tramite.
+#:
+#: **No** se ordena alfabeticamente, y es la unica lista que no: igual que
+#: `Stage`, el orden *es* la mitad del significado --una casacion va despues
+#: de una segunda instancia, no entre «Casación» y «Ejecución»--.
 INSTANCES_BY_SERVICE: dict[str, tuple[str, ...]] = {
     Service.JUDICIAL: (
         'Primera instancia',
@@ -365,38 +465,60 @@ OTHER = 'Otro'
 #: expectativa. Ver `CaseFinanceModel`.
 CONTINGENCY_PERCENTAGES = (0, 10, 20, 30, 40, 50)
 
-
-def subtypes_for(service: str, area: str) -> tuple[str, ...]:
-    """Catalogos actuales y especialidades por area de expedientes anteriores."""
-    if service == Service.JUDICIAL:
-        values = tuple(JUDICIAL_SUBTYPES) + SUBTYPES_BY_AREA.get(area, ())
-    elif service == Service.CONCILIATION:
-        values = SUBTYPES_BY_AREA.get(area, ())
-    else:
-        values = SUBTYPES_BY_SERVICE.get(service, ())
-    return tuple(dict.fromkeys((*values, OTHER)))
+#: Equivalencias para ordenar sin que las tildes manden al final lo que
+#: empieza por vocal acentuada. `sorted()` compara puntos de codigo, y en
+#: Unicode la «ó» va despues de la «z»: sin esto, «Acción de tutela» quedaria
+#: detras de «Trámite registral».
+_SIN_TILDE = str.maketrans('áàäâéèëêíìïîóòöôúùüûñ', 'aaaaeeeeiiiioooouuuun')
 
 
-# El formato exportado tambien usa st como jurisdiccion y st2 como especialidad.
-# Se conservan los subtipos directos por area para no reinterpretar expedientes.
-JUDICIAL_SUBTYPES = {
-    'Laboral': ('Pensión de vejez',) + SUBTYPES_BY_AREA[Area.PENSION] + SUBTYPES_BY_AREA[Area.LABOR],
-    'Civil': SUBTYPES_BY_AREA[Area.CIVIL],
-    'Familia': SUBTYPES_BY_AREA[Area.FAMILY],
-    'Sucesiones': SUBTYPES_BY_AREA[Area.INHERITANCE],
-    'Administrativo': SUBTYPES_BY_AREA[Area.ADMINISTRATIVE],
-    'Penal': SUBTYPES_BY_AREA[Area.CRIMINAL],
-    'Superintendencias': SUBTYPES_BY_AREA[Area.CONSUMER] + SUBTYPES_BY_AREA[Area.COMMERCIAL] + SUBTYPES_BY_AREA[Area.INSOLVENCY],
-}
+def alphabetical(values) -> tuple[str, ...]:
+    """
+    Los valores en orden alfabetico, con los «Otro…» al final.
 
-
-def second_subtypes_for(service: str, subtype: str) -> tuple[str, ...]:
-    values = JUDICIAL_SUBTYPES.get(subtype, ()) if service == Service.JUDICIAL else ()
-    return tuple(dict.fromkeys((*values, OTHER)))
+    Un desplegable largo se lee buscando, y buscar en una lista que no esta
+    ordenada es recorrerla entera. Lo unico que no se ordena es el comodin:
+    «Otro» es la salida de emergencia y su sitio es el ultimo, no el que le
+    toque por la o.
+    """
+    sin_duplicados = tuple(dict.fromkeys(v for v in values if v))
+    return tuple(sorted(
+        sin_duplicados,
+        key=lambda v: (is_other(v), v.translate(_SIN_TILDE).casefold()),
+    ))
 
 
 def is_other(value: str) -> bool:
     return (value or '').lower().startswith(('otro', 'otra'))
+
+
+def subtypes_for(service: str, area: str = '') -> tuple[str, ...]:
+    """
+    Los subtipos que cuelgan del servicio, y nada mas.
+
+    `area` ya no decide nada --el arbol aprobado la dejo fuera de la cadena--,
+    pero se sigue recibiendo para aceptar los subtipos de expedientes
+    anteriores, que si se clasificaron por area. Un expediente viejo se puede
+    volver a guardar sin que el formulario le cambie la clasificacion por su
+    cuenta.
+    """
+    values = tuple(CLASSIFICATION_TREE.get(service, {}))
+    if not values:
+        return (OTHER,) if service else ()
+    legacy = LEGACY_SUBTYPES_BY_AREA.get(area, ()) if area else ()
+    return (*alphabetical((*values, *legacy)), OTHER)
+
+
+def second_subtypes_for(service: str, subtype: str) -> tuple[str, ...]:
+    """
+    El tercer nivel, si esa rama tiene uno.
+
+    Devuelve vacio cuando no lo tiene --un «Recurso de reposición» no se
+    subdivide--, y eso es lo que le dice al formulario que esconda el campo en
+    vez de ensenarlo con un unico «Otro» dentro.
+    """
+    branch = CLASSIFICATION_TREE.get(service, {}).get(subtype, ())
+    return (*alphabetical(branch), OTHER) if branch else ()
 
 
 def instances_for(service: str) -> tuple[str, ...]:

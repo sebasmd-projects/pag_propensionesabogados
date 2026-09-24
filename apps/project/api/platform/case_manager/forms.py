@@ -222,17 +222,25 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
 
         service, area, subtype = value('service'), value('area'), value('subtype')
         catalogs = {
-            'subtype': choices.subtypes_for(service, area),
+            'subtype': choices.subtypes_for(service, area),  # `area`: solo lo historico
             'second_subtype': choices.second_subtypes_for(service, subtype),
             'instance': choices.instances_for(service),
         }
-        # El segundo subnivel antiguo era libre fuera de las jurisdicciones.
-        # Permitir conservar exactamente su valor, nunca uno arbitrario enviado.
-        old_second = self.instance.second_subtype
-        if (old_second and subtype not in choices.JUDICIAL_SUBTYPES
-                and service == self.instance.service
-                and subtype == self.instance.subtype):
-            catalogs['second_subtype'] = (*catalogs['second_subtype'], old_second)
+        # Lo que ya estaba guardado se sigue pudiendo guardar. Un expediente
+        # anterior se clasifico con otro arbol, y si el formulario no le
+        # ofreciera su propio valor, abrirlo y darle a guardar se lo cambiaria
+        # sin que nadie lo pidiera. Solo el valor que tiene: no uno enviado.
+        if service == self.instance.service:
+            if subtype == self.instance.subtype and self.instance.second_subtype:
+                catalogs['second_subtype'] = (
+                    *catalogs['second_subtype'], self.instance.second_subtype
+                )
+            if self.instance.subtype:
+                catalogs['subtype'] = (
+                    *catalogs['subtype'], self.instance.subtype
+                )
+        if self.instance.instance:
+            catalogs['instance'] = (*catalogs['instance'], self.instance.instance)
         for name, values in catalogs.items():
             self.fields[name] = forms.ChoiceField(
                 label=self.fields[name].label, required=False,
@@ -246,15 +254,28 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
 
     @property
     def classification_catalog(self):
+        """
+        El arbol que el navegador necesita para repintar los desplegables.
+
+        Va entero y de una vez --son unas pocas decenas de cadenas-- porque la
+        alternativa es una peticion al servidor por cada cambio de servicio,
+        y quien esta capturando un expediente cambia de servicio mirando.
+
+        Que aqui viaje el arbol **no** lo convierte en la fuente de la verdad:
+        lo que se guarde lo vuelve a comprobar `CaseModel.clean()`. Esto solo
+        decide que se ve.
+        """
         return {
             'subtypes': {
-                s: {a: choices.subtypes_for(s, a) for a in ('', *choices.Area.values)}
-                for s in choices.Service.values
+                service: choices.subtypes_for(service)
+                for service in choices.Service.values
             },
             'seconds': {
-                s: {st: choices.second_subtypes_for(s, st)
-                    for st in choices.JUDICIAL_SUBTYPES}
-                for s in choices.Service.values
+                service: {
+                    subtype: choices.second_subtypes_for(service, subtype)
+                    for subtype in branch
+                }
+                for service, branch in choices.CLASSIFICATION_TREE.items()
             },
             'instances': choices.INSTANCES_BY_SERVICE,
         }
