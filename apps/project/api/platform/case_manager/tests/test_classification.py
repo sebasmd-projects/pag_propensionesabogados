@@ -92,9 +92,17 @@ class ClassificationTests(TestCase):
                 case.refresh_from_db()
                 self.assertEqual(getattr(case, name + '_display'), 'Especialidad particular')
 
-    def test_direct_area_subtype_remains_valid(self):
+    def test_new_cases_do_not_offer_legacy_area_subtypes(self):
         form = CaseForm(data=self.data(area='Civil', subtype='Responsabilidad civil'))
-        self.assertTrue(form.is_valid(), form.errors)
+        self.assertFalse(form.is_valid())
+        self.assertIn('subtype', form.errors)
+
+    def test_legacy_selectors_are_hidden_and_judicial_labels_match_reference(self):
+        form = CaseForm(initial={'service': Service.JUDICIAL})
+        for name in ('procedure', 'area', 'procedure_other', 'area_other'):
+            self.assertTrue(form[name].is_hidden)
+        self.assertEqual(form['subtype'].label, 'Área')
+        self.assertEqual(form['second_subtype'].label, 'Tipo concreto de proceso')
 
     def test_model_rejects_wrong_second_level(self):
         case = CaseModel(client=self.customer, service=Service.JUDICIAL,

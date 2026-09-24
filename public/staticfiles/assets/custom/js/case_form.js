@@ -1,90 +1,89 @@
-/*
- * Los desplegables de clasificacion, encadenados.
- *
- * La cadena aprobada tiene tres eslabones y solo tres: servicio -> subtipo
- * (que en `Representación judicial` se lee como area) -> segundo subnivel
- * (el tipo concreto de proceso). Cada uno carga **unicamente** lo que cuelga
- * del anterior; el que no tiene nada que ofrecer se esconde en vez de
- * quedarse vacio delante de quien captura.
- *
- * Esconder no es validar: lo que se mande lo vuelve a comprobar
- * `CaseModel.clean()` en el servidor. Esto decide que se ve, no que vale.
- */
+/* Flujo del HTML de referencia: servicio -> área/subnivel -> proceso. */
 (() => {
   const source = document.getElementById('case-classification');
   if (!source) return;
   const catalog = JSON.parse(source.textContent);
   const field = name => document.getElementById(`id_${name}`);
-  const service = field('service'), subtype = field('subtype');
-
-  // El contenedor de la columna, para poder plegar el campo entero --etiqueta
-  // incluida-- y no dejar un rotulo suelto sobre un hueco.
-  const column = select => select.closest('[data-field-for]') || select.parentElement;
-
-  const refill = (name, values) => {
-    const select = field(name), previous = select.value;
-    select.replaceChildren(
-      new Option('---------', ''),
-      ...values.map(value => new Option(value, value)),
-    );
-    select.value = values.includes(previous) ? previous : '';
-    const box = column(select);
-    const hide = values.length === 0;
-    box.hidden = hide;
-    box.classList.toggle('d-none', hide);
+  const column = input => input.closest('[data-field-for]');
+  const show = (box, visible) => {
+    box.hidden = !visible;
+    box.classList.toggle('d-none', !visible);
   };
-
+  const service = field('service'), subtype = field('subtype');
+  const originalService = service.value;
+  const refill = (name, values) => {
+    const select = field(name);
+    select.replaceChildren(new Option('---------', ''), ...values.map(v => new Option(v, v)));
+    show(column(select), values.length > 0);
+  };
   const updateOthers = () => {
-    ['service', 'procedure', 'area', 'subtype', 'second_subtype'].forEach(name => {
-      const input = field(`${name}_other`);
-      const parent = field(name);
+    ['service', 'subtype', 'second_subtype'].forEach(name => {
+      const input = field(`${name}_other`), parent = field(name);
       const visible = !column(parent).hidden && /^(otro|otra)/i.test(parent.value);
-      const container = input.closest('[data-other-for]');
-      container.hidden = !visible;
-      container.classList.toggle('d-none', !visible);
+      show(column(input), visible);
       input.required = visible;
     });
   };
-
-  const updateSecond = () => {
-    refill('second_subtype', catalog.seconds[service.value]?.[subtype.value] || []);
+  const details = () => {
+    const judicial = service.value === 'Representación judicial';
+    document.querySelector(`label[for="${subtype.id}"]`).textContent = judicial ? 'Área' : 'Subnivel';
+    document.getElementById('case-details-title').textContent = judicial ? 'Representación judicial' : 'Datos del proceso';
+    show(column(field('court')), judicial);
+    document.querySelectorAll('[data-procedure-block]').forEach(block => {
+      const type = block.dataset.procedureBlock;
+      show(block, type === 'general' || (service.value === originalService && field('procedure').value === type));
+    });
     updateOthers();
   };
-
-  const updateClassification = () => {
-    refill('subtype', catalog.subtypes[service.value] || []);
+  service.addEventListener('change', () => {
+    refill('subtype', service.value === 'Otro' ? [] : catalog.subtypes[service.value] || []);
+    refill('second_subtype', []);
     refill('instance', catalog.instances[service.value] || []);
-    updateSecond();
-  };
-
-  service.addEventListener('change', updateClassification);
-  subtype.addEventListener('change', updateSecond);
-  ['procedure', 'second_subtype'].forEach(
-    name => field(name).addEventListener('change', updateOthers),
-  );
-
-  // No se reconstruye al abrir: las opciones que manda el servidor ya traen
-  // el valor historico del expediente, y repintarlas aqui se lo comeria.
-  // Lo que si se hace es plegar de entrada lo que no tiene nada dentro.
-  [['second_subtype'], ['subtype'], ['instance']].forEach(([name]) => {
-    const select = field(name);
-    const vacio = select.options.length <= 1 && !select.value;
-    column(select).hidden = vacio;
-    column(select).classList.toggle('d-none', vacio);
+    if (service.value !== 'Representación judicial') field('court').value = '';
+    details();
   });
-  updateOthers();
+  subtype.addEventListener('change', () => {
+    refill('second_subtype', catalog.seconds[service.value]?.[subtype.value] || []);
+    updateOthers();
+  });
+  field('second_subtype').addEventListener('change', updateOthers);
+  ['subtype', 'second_subtype', 'instance'].forEach(name => {
+    const input = field(name);
+    show(column(input), !!input.value || (input.options.length > 1 && !(name === 'subtype' && service.value === 'Otro')));
+  });
+  details();
 
-  // Abrir los bloques que ya traen datos o errores, aunque el exportado no
-  // tenga tipo de tramite.
-  ['bloqueJudicial', 'bloqueAdministrativo', 'bloquePolicivo'].forEach(id => {
-    const block = document.getElementById(id);
-    if (Array.from(block.querySelectorAll('input, select')).some(
-      input => input.value || input.classList.contains('is-invalid'),
-    )) {
-      block.classList.add('show');
-      const button = document.querySelector(`[data-bs-target="#${id}"]`);
-      button.classList.remove('collapsed');
-      button.setAttribute('aria-expanded', 'true');
-    }
+  document.querySelectorAll('select[name$="-mandate"]').forEach(mandate => {
+    const prefix = mandate.name.slice(0, -'mandate'.length);
+    const moneyField = name => document.getElementsByName(prefix + name)[0];
+    const percentage = moneyField('contingency_percentage');
+    const value = moneyField('contingency_value');
+    const summary = mandate.closest('.card-body').querySelector('[data-finance-summary]');
+    const currency = n => new Intl.NumberFormat('es-CO', {style: 'currency', currency: 'COP', maximumFractionDigits: 0}).format(n);
+    const updateFinance = (changed = false) => {
+      const litis = mandate.value === 'Cuota litis';
+      const payment = mandate.value === 'Modalidad de pago';
+      const fixed = litis && percentage.value === '0';
+      const visibility = {contingency_percentage: litis, contingency_value: litis,
+        agreed_fee: payment, paid_amount: payment || fixed};
+      Object.entries(visibility).forEach(([name, visible]) => {
+        const input = moneyField(name);
+        // Al cambiar modalidad se eliminan importes que ya no aplican.
+        if (changed && !visible) input.value = '0';
+        show(column(input), visible || (!changed && input.classList.contains('is-invalid')));
+      });
+      document.querySelector(`label[for="${value.id}"]`).textContent = fixed ? 'Valor fijo cerrado' : 'Valor esperado / expectativa';
+      value.disabled = litis && percentage.value === '';
+      const agreed = Number(moneyField(payment ? 'agreed_fee' : 'contingency_value').value || 0);
+      const paid = Number(moneyField('paid_amount').value || 0);
+      show(summary, payment || litis);
+      summary.textContent = payment || fixed
+        ? `Pactado: ${currency(agreed)} · Pagado: ${currency(paid)} · Saldo: ${currency(Math.max(0, agreed - paid))}`
+        : `Expectativa: ${currency(agreed)}`;
+    };
+    mandate.addEventListener('change', () => updateFinance(true));
+    percentage.addEventListener('change', () => updateFinance(true));
+    ['contingency_value', 'agreed_fee', 'paid_amount'].forEach(name => moneyField(name).addEventListener('input', () => updateFinance()));
+    updateFinance();
   });
 })();

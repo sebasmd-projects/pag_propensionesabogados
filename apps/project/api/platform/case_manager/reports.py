@@ -160,7 +160,7 @@ def _fila_de_asunto(case: CaseModel) -> list[str]:
             case.service_display or VACIO,
             case.area or VACIO,
             case.get_stage_display(),
-            VACIO, VACIO, VACIO, VACIO, VACIO, VACIO,
+            VACIO, VACIO, VACIO, VACIO, VACIO, VACIO, VACIO,
         ]
 
     contingencia = (
@@ -183,14 +183,19 @@ def _fila_de_asunto(case: CaseModel) -> list[str]:
     ]
 
 
-def client_report(client: ClientModel) -> HttpResponse:
+def client_report(client: ClientModel, case: CaseModel | None = None) -> HttpResponse:
     """La ficha interna de seguimiento de un cliente."""
-    totals = CaseFinanceModel.objects.filter(case__client=client).totals()
+    finances = CaseFinanceModel.objects.filter(case__client=client)
     cases = (
         CaseModel.objects.filter(client=client)
         .select_related('finance')
+        .prefetch_related('notes')
         .order_by('-is_active', '-updated')
     )
+    if case is not None:
+        cases = cases.filter(pk=case.pk)
+        finances = finances.filter(case=case)
+    totals = finances.totals()
 
     document = _documento(
         _('Internal case file'),
@@ -227,11 +232,32 @@ def client_report(client: ClientModel) -> HttpResponse:
         [_fila_de_asunto(case) for case in cases],
     )
 
+    for current in cases:
+        document.add_heading(current.paz_y_salvo_subject, level=2)
+        _pares(document, [
+            (_('Service'), current.service_display),
+            ('Área / subnivel', current.subtype_display or current.area_display),
+            ('Tipo concreto de proceso', current.second_subtype_display),
+            (_('Status'), _('ACTIVE') if current.is_active else _('INACTIVE')),
+            (_('Stage'), current.get_stage_display()),
+            ('Instancia', current.public_instance),
+            ('Radicado / referencia', current.public_reference),
+            *current.detail_rows,
+            ('Última actualización', timezone.localtime(current.updated).strftime('%d/%m/%Y %H:%M')),
+        ])
+        if current.notes.all():
+            document.add_heading('Novedades del proceso', level=3)
+            for note in current.notes.all():
+                document.add_paragraph(note.title, style='Heading 4')
+                document.add_paragraph(note.body)
+
     _pie(document)
 
     nombre = _('File_%(identification)s_Propensiones') % {
         'identification': client.identification
     }
+    if case is not None:
+        nombre += f'_{case.pk}'
     return _descarga(document, nombre)
 
 
@@ -251,7 +277,7 @@ def crm_report() -> HttpResponse:
     )
 
     document = _documento(
-        _('Management / CRM report'),
+        'REPORTE GERENCIAL',
         _('Consolidated portfolio across all clients.'),
     )
 
@@ -304,7 +330,7 @@ def crm_report() -> HttpResponse:
 
     _pie(document)
 
-    nombre = _('CRM_report_%(date)s_Propensiones') % {
+    nombre = 'Reporte_gerencial_%(date)s_Propensiones' % {
         'date': date.today().strftime('%Y-%m-%d')
     }
     return _descarga(document, nombre)

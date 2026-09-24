@@ -125,6 +125,7 @@
                 </form>
               </td>
               <td class="text-end">
+                <a href="{% url 'case_manager:gestor_case_report' case.pk %}" class="btn btn-sm btn-outline-secondary">Imprimir ficha</a>
                 <a href="{% url 'case_manager:gestor_case_update' case.pk %}"
                    class="btn btn-sm btn-outline-secondary">
                   <i class="bi bi-pencil me-1"></i>{% trans "Edit" %}

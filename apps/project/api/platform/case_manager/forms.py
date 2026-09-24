@@ -198,11 +198,8 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
     """
     Alta y edicion de un asunto.
 
-    Los tres bloques por tipo de tramite --judicial, administrativo y
-    policivo-- se pintan todos y la plantilla los pliega; lo que decide cual
-    vale es `CaseModel.clean()`, en el servidor. Esconderlos con JavaScript
-    seria repetir el error de la pantalla anterior: lo que se esconde se
-    sigue pudiendo mandar.
+    Sigue servicio -> área/subnivel -> proceso. Los selectores anteriores
+    se conservan como datos históricos, fuera del flujo de clasificación.
     """
 
     notify_stage_change = forms.BooleanField(
@@ -221,8 +218,14 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
             return self.initial.get(name, '')
 
         service, area, subtype = value('service'), value('area'), value('subtype')
+        for name in ('procedure', 'area', 'procedure_other', 'area_other'):
+            self.fields[name].widget = forms.HiddenInput()
+        self.fields['subtype'].label = (
+            'Área' if service == choices.Service.JUDICIAL else 'Subnivel'
+        )
+        self.fields['second_subtype'].label = 'Tipo concreto de proceso'
         catalogs = {
-            'subtype': choices.subtypes_for(service, area),  # `area`: solo lo historico
+            'subtype': choices.subtypes_for(service),
             'second_subtype': choices.second_subtypes_for(service, subtype),
             'instance': choices.instances_for(service),
         }
@@ -336,9 +339,7 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
     """
     El dinero de un asunto.
 
-    Cada modalidad usa columnas distintas y `CaseFinanceModel.clean()` rechaza
-    las que no le tocan, asi que el formulario las ofrece todas y el servidor
-    decide. El saldo no esta: se calcula.
+    Cada modalidad muestra sus columnas; el modelo valida los importes.
     """
 
     class Meta:

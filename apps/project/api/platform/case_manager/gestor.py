@@ -214,6 +214,15 @@ class CrmReportView(GestorRequiredMixin, View):
         return crm_report()
 
 
+class CaseReportView(GestorRequiredMixin, DetailView):
+    """Descarga el estado guardado de un único proceso del cliente."""
+
+    model = CaseModel
+
+    def render_to_response(self, context, **kwargs):
+        return client_report(self.object.client, case=self.object)
+
+
 class ClientCreateView(GestorRequiredMixin, CreateView):
     model = ClientModel
     form_class = ClientForm
