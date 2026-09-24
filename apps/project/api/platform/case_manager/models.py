@@ -174,7 +174,7 @@ class ClientModel(TimeStampedModel):
             for character in (self.identification or '')
             if character.isdigit()
         )
-        self.full_name = ' '.join((self.full_name or '').split())
+        self.full_name = ' '.join((self.full_name or '').split()).title()
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
