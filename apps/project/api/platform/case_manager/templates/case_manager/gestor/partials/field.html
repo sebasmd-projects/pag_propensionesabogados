@@ -26,7 +26,6 @@
     <div class="form-text">{{ field.help_text }}</div>
   {% endif %}
   {% for error in field.errors %}
-    {# `invalid-feedback` solo se ve si el campo lleva `is-invalid`, que se lo pone `BootstrapFormMixin`. #}
     <div class="invalid-feedback d-block">{{ error }}</div>
   {% endfor %}
 </div>
