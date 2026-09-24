@@ -343,6 +343,13 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
     """
 
     def configure_fields(self):
+        self.fields['mandate'].choices = [
+            ('', 'Modalidad del contrato'),
+            (choices.Mandate.CONTINGENCY.value, choices.Mandate.CONTINGENCY.label),
+            (choices.Mandate.PAYMENT.value, choices.Mandate.PAYMENT.label),
+            (choices.Mandate.PRO_BONO.value, choices.Mandate.PRO_BONO.label),
+            (choices.Mandate.GUARDIANSHIP.value, choices.Mandate.GUARDIANSHIP.label),
+        ]
         mandate = (
             self.data.get(self.add_prefix('mandate'))
             if self.is_bound else self.initial.get('mandate')
