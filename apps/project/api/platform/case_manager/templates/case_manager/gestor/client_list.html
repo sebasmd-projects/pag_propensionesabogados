@@ -78,6 +78,12 @@
               </td>
               <td class="text-end">
                 <div class="btn-group">
+                  <a href="{% url 'case_manager:public_query' %}?identification={{ client.identification|urlencode }}"
+                     class="btn btn-sm btn-outline-secondary"
+                     title="{% trans 'Tracking of my case' %}"
+                     aria-label="{% trans 'Tracking of my case' %}">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                  </a>
                   <a href="{% url 'case_manager:gestor_case_create' %}?cliente={{ client.pk }}"
                      class="btn btn-sm btn-outline-secondary"
                      title="{% trans 'New case for this client' %}">

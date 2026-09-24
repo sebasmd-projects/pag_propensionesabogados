@@ -80,3 +80,24 @@ class AuthenticatedPortalTests(TestCase):
         self.assertEqual(self.client.get(url).status_code, 200)
         self.client.logout()
         self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_eye_link_opens_requested_client_instead_of_previous_client(self):
+        self.client.force_login(make_user('manager', gestor=True))
+        self.client.post(self.url, {'identification': self.record.identification})
+        other = ClientModel.objects.create(identification='999', full_name='Otro')
+        other_case = CaseModel.objects.create(client=other, service='Representación judicial')
+        response = self.client.get(self.url, {'identification': '999'})
+        self.assertEqual(list(response.context['cases']), [other_case])
+        self.assertEqual(response.context['client'], other)
+        self.assertEqual(len(mail.outbox), 0)
+        listing = self.client.get(reverse('case_manager:gestor_client_list'))
+        self.assertContains(listing, self.url + '?identification=999')
+        self.assertContains(listing, 'bi bi-eye')
+        invalid = self.client.get(self.url, {'identification': '000'})
+        self.assertEqual(invalid.status_code, 400)
+        self.assertNotIn('cases', invalid.context)
+
+    def test_eye_url_does_not_authorize_anonymous_visitor(self):
+        response = self.client.get(self.url, {'identification': self.record.identification})
+        self.assertNotIn('cases', response.context)
+        self.assertEqual(len(mail.outbox), 0)

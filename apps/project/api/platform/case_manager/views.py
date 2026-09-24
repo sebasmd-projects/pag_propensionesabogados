@@ -115,6 +115,8 @@ class PublicCaseQueryView(TemplateView):
         return context
 
     def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated and 'identification' in request.GET:
+            return self._pedir_codigo(request, attempts.client_ip(request))
         pk = authorized_client_pk(request)
         if pk:
             try:
@@ -201,7 +203,9 @@ class PublicCaseQueryView(TemplateView):
 
     # -- paso 1: la cedula ------------------------------------------------
     def _pedir_codigo(self, request, ip):
-        form = PublicCaseQueryForm(request.POST)
+        form = PublicCaseQueryForm(
+            request.GET if request.method == 'GET' else request.POST
+        )
 
         if not form.is_valid():
             attempts.register_failure(ip)
