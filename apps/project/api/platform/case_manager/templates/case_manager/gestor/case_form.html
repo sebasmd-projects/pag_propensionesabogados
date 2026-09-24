@@ -52,7 +52,7 @@
         <h2 class="accordion-header">
           <button class="accordion-button" aria-expanded="true" type="button" data-bs-toggle="collapse"
                   data-bs-target="#bloqueJudicial">
-            <i class="bi bi-bank me-2"></i><span id="case-details-title">Datos del proceso</span>
+            <i class="bi bi-bank me-2"></i><span id="case-details-title">{{ form.details_title }}</span>
           </button>
         </h2>
         <div id="bloqueJudicial" class="accordion-collapse collapse show" data-bs-parent="#bloquesDelTramite">
@@ -66,7 +66,7 @@
         </div>
       </div>
 
-      <div class="accordion-item" data-procedure-block="Administrativo" hidden>
+      <div class="accordion-item" data-procedure-block="Administrativo"{% if not form.show_administrative %} hidden{% endif %}>
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                   data-bs-target="#bloqueAdministrativo">
@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <div class="accordion-item" data-procedure-block="Querella policiva" hidden>
+      <div class="accordion-item" data-procedure-block="Querella policiva"{% if not form.show_police %} hidden{% endif %}>
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                   data-bs-target="#bloquePolicivo">

@@ -1,0 +1,130 @@
+{
+  "services": {
+    "Administrativo": {
+      "PQR / Derecho de petición": [],
+      "Recurso de reposición": [],
+      "Recurso de insistencia": [],
+      "Acción de tutela": []
+    },
+    "Conciliación": {
+      "Conciliación privada": [],
+      "Centro de conciliación": [],
+      "Conciliación judicial": [],
+      "Comisaría de Familia": [],
+      "Inspección de Policía": []
+    },
+    "Consultoría": {
+      "Consultoría procesal": [],
+      "Consultoría empresarial": []
+    },
+    "Investigación de campo": {
+      "Investigación judicial": [],
+      "Estudio de seguridad": []
+    },
+    "Representación judicial": {
+      "Civil": [
+        "Ejecutivo",
+        "Monitorio",
+        "Pertenencia / prescripción adquisitiva",
+        "Reivindicatorio",
+        "Restitución de inmueble",
+        "Divisorio",
+        "Deslinde y amojonamiento",
+        "Servidumbre",
+        "Responsabilidad civil",
+        "Incumplimiento contractual",
+        "Promesa de compraventa"
+      ],
+      "Laboral": [
+        "Ordinario laboral",
+        "Ejecutivo laboral",
+        "Contrato realidad",
+        "Reintegro / estabilidad laboral reforzada",
+        "Fuero sindical",
+        "Acreencias laborales",
+        "Pensión de vejez",
+        "Pensión de invalidez",
+        "Pensión de sobrevivientes",
+        "Reliquidación pensional",
+        "Calificación / pérdida de capacidad laboral"
+      ],
+      "Familia": [
+        "Divorcio / cesación de efectos civiles",
+        "Unión marital de hecho",
+        "Liquidación de sociedad conyugal o patrimonial",
+        "Alimentos",
+        "Ejecutivo de alimentos",
+        "Custodia y cuidado personal",
+        "Regulación de visitas",
+        "Filiación",
+        "Investigación de paternidad",
+        "Impugnación de paternidad",
+        "Sucesión",
+        "Petición de herencia"
+      ],
+      "Penal": [
+        "Defensa penal",
+        "Representación de víctimas",
+        "Denuncia penal",
+        "Querella penal",
+        "Incidente de reparación integral",
+        "Ejecución de penas"
+      ],
+      "Contencioso administrativo": [
+        "Nulidad",
+        "Nulidad y restablecimiento del derecho",
+        "Reparación directa",
+        "Controversias contractuales",
+        "Ejecutivo administrativo",
+        "Cumplimiento",
+        "Repetición"
+      ],
+      "Superintendencias": [
+        "Protección al consumidor",
+        "Protección al consumidor financiero",
+        "Asuntos societarios",
+        "Competencia desleal",
+        "Propiedad industrial"
+      ]
+    }
+  },
+  "instances": {
+    "Representación judicial": [
+      "Primera instancia",
+      "Segunda instancia",
+      "Casación",
+      "Ejecución"
+    ],
+    "Administrativo": [
+      "Etapa inicial",
+      "Recurso",
+      "Decisión definitiva"
+    ],
+    "Conciliación": [
+      "Solicitud presentada",
+      "Audiencia programada",
+      "En negociación",
+      "Finalizada"
+    ],
+    "Consultoría": [
+      "En estudio",
+      "En elaboración",
+      "Entregada",
+      "Finalizada"
+    ],
+    "Investigación de campo": [
+      "Asignada",
+      "En investigación",
+      "Informe en elaboración",
+      "Informe entregado",
+      "Finalizada"
+    ],
+    "Otro": [
+      "Inicial",
+      "En trámite",
+      "En desarrollo",
+      "Etapa final",
+      "Finalizado"
+    ]
+  }
+}

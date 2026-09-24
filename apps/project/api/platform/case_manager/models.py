@@ -32,7 +32,7 @@ from auditlog.registry import auditlog
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import F, Q, Sum, Value
-from django.db.models.functions import Coalesce, Greatest
+from django.db.models.functions import Coalesce, Greatest, NullIf
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
@@ -785,7 +785,17 @@ class CaseFinanceQuerySet(models.QuerySet):
 
         rows = (
             self.in_dashboard()
-            .values('case__area')
+            .annotate(classification_area=models.Case(
+                models.When(
+                    case__service=choices.Service.JUDICIAL,
+                    case__subtype__in=tuple(choices.CLASSIFICATION_TREE[choices.Service.JUDICIAL]),
+                    then=F('case__subtype'),
+                ),
+                default=Coalesce(NullIf('case__area', Value('')),
+                                 NullIf('case__subtype', Value('')), Value('')),
+                output_field=models.CharField(),
+            ))
+            .values('classification_area')
             .annotate(
                 agreed_payment=Coalesce(
                     Sum('agreed_fee', filter=payment), zero
@@ -801,7 +811,7 @@ class CaseFinanceQuerySet(models.QuerySet):
 
         areas = [
             {
-                'area': row['case__area'] or _('No area recorded'),
+                'area': row['classification_area'] or _('No area recorded'),
                 'total': (
                     row['agreed_payment']
                     + row['agreed_fixed']

@@ -215,6 +215,12 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
     )
 
     def configure_fields(self):
+        if not self.is_bound and not self.instance._state.adding:
+            service, subtype, second = choices.restore_classification(
+                self.instance.service, self.instance.subtype, self.instance.second_subtype,
+            )
+            self.initial.update(service=service, subtype=subtype, second_subtype=second)
+
         def value(name):
             if self.is_bound:
                 return self.data.get(self.add_prefix(name), '')
@@ -245,7 +251,7 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
                 catalogs['subtype'] = (
                     *catalogs['subtype'], self.instance.subtype
                 )
-        if self.instance.instance:
+        if service == self.instance.service and self.instance.instance:
             catalogs['instance'] = (*catalogs['instance'], self.instance.instance)
         for name, values in catalogs.items():
             self.fields[name] = forms.ChoiceField(
@@ -253,10 +259,36 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
                 choices=[('', '---------'), *((v, v) for v in dict.fromkeys(values))],
             )
 
+        # La primera respuesta HTML debe respetar las mismas dependencias
+        # que el navegador, sin mostrar brevemente todos los campos.
+        for name in ('subtype', 'second_subtype', 'instance'):
+            self.fields[name].flow_hidden = not (
+                catalogs[name] and (name != 'subtype' or service != choices.Service.OTHER)
+            )
+        self.fields['court'].flow_hidden = service != choices.Service.JUDICIAL
+        self.fields['city'].label = (
+            'Ciudad del proceso' if service == choices.Service.JUDICIAL
+            else 'Ciudad / municipio (opcional)'
+        )
+        self.fields['case_number'].label = 'Número de radicado / referencia (opcional)'
+        self.details_title = (
+            'Representación judicial' if service == choices.Service.JUDICIAL
+            else 'Datos del proceso'
+        )
+        self.show_administrative = value('procedure') == choices.Procedure.ADMINISTRATIVE or any(
+            value(name) for name in ('sector', 'entity', 'administrative_case_number', 'administrative_city')
+        )
+        self.show_police = value('procedure') == choices.Procedure.POLICE or any(
+            value(name) for name in ('police_instance', 'police_office', 'police_case_number', 'police_city')
+        )
+
         for name in ('service', 'procedure', 'area', 'subtype', 'second_subtype'):
             field = self.fields[name + '_other']
             field.other_parent_id = self[name].id_for_label
-            field.other_visible = choices.is_other(value(name))
+            field.other_visible = (
+                choices.is_other(value(name))
+                and not getattr(self.fields[name], 'flow_hidden', False)
+            )
 
     @property
     def classification_catalog(self):
