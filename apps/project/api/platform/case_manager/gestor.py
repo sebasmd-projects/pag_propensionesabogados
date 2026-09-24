@@ -135,7 +135,11 @@ class ClientListView(GestorRequiredMixin, ListView):
     paginate_by = PER_PAGE
 
     def get_queryset(self):
-        queryset = ClientModel.objects.annotate(case_count=Count('cases'))
+        # La agregacion no conserva el orden por defecto del modelo.
+        # La cedula unica desempata clientes con el mismo nombre.
+        queryset = ClientModel.objects.annotate(
+            case_count=Count('cases')
+        ).order_by('full_name', 'identification')
 
         buscado = self.request.GET.get('q', '').strip()
         if buscado:
