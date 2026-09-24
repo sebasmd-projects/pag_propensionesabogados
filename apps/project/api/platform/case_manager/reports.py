@@ -245,6 +245,15 @@ def client_report(client: ClientModel, case: CaseModel | None = None) -> HttpRes
             *current.detail_rows,
             ('Última actualización', timezone.localtime(current.updated).strftime('%d/%m/%Y %H:%M')),
         ])
+        finance = getattr(current, 'finance', None)
+        if finance and finance.mandate == Mandate.PAYMENT and finance.payment_history:
+            document.add_heading('Historial de pagos', level=3)
+            _tabla(document, ['Pago', 'Valor', 'Fecha de pago', 'Próxima fecha de pago'], [
+                ['Administrativo / externo' if row['kind'] == 'administrative' else 'Abono',
+                 _dinero(row['amount']), row.get('date') or 'Sin fecha registrada',
+                 row.get('next_date') or VACIO]
+                for row in finance.payment_history
+            ])
         if current.notes.all():
             document.add_heading('Novedades del proceso', level=3)
             for note in current.notes.all():

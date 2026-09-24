@@ -1,0 +1,18 @@
+<div class="border rounded p-3 mb-3" data-payment-row data-kind="{{ payment.kind }}" data-legacy="{{ payment.legacy|yesno:'true,false' }}">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h3 class="h6 mb-0" data-payment-title>{% if payment.kind == 'administrative' %}Pago administrativo / externo{% else %}Pago / abono{% endif %}</h3>
+    <button type="button" class="btn btn-sm btn-outline-danger" data-remove-payment{% if payment.kind == 'administrative' %} hidden{% endif %}>Quitar</button>
+  </div>
+  <div class="row g-3">
+    <div class="col-12 col-md-4"><label class="form-label d-block">Valor del pago
+      <input class="form-control" type="number" min="0" step="1" max="9000000000000" value="{{ payment.amount|default:0 }}" data-payment-amount>
+    </label></div>
+    <div class="col-12 col-md-4"><label class="form-label d-block">Fecha de pago
+      <input class="form-control" type="date" value="{{ payment.date|default:'' }}" data-payment-date>
+    </label></div>
+    <div class="col-12 col-md-4"><label class="form-label d-block">Próxima fecha de pago
+      <input class="form-control" type="date" value="{{ payment.next_date|default:'' }}" data-payment-next-date>
+    </label></div>
+  </div>
+  {% if payment.legacy %}<p class="small text-muted mb-0">Abono anterior sin fecha registrada. Puede completar su fecha real.</p>{% endif %}
+</div>

@@ -16,6 +16,7 @@ Lo que mas se cuida aqui son dos cosas:
 """
 
 from io import StringIO
+import json
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -357,6 +358,54 @@ class CaseCrudTests(TestCase):
         caso = CaseModel.objects.get()
         self.assertEqual(caso.case_number, '2026-00145-00')
         self.assertEqual(caso.finance.balance, 4_000_000)
+
+    def test_payment_history_round_trips_and_drives_totals(self):
+        rows = [
+            {'kind': 'administrative', 'amount': 100000, 'date': '2026-09-01', 'next_date': '2026-09-10'},
+            {'kind': 'payment', 'amount': 900000, 'date': '2026-09-10', 'next_date': '2026-10-10'},
+            {'kind': 'payment', 'amount': 2000000, 'date': '2026-10-10', 'next_date': ''},
+        ]
+        response = self.client.post(reverse('case_manager:gestor_case_create'), self.datos(**{
+            'finance-0-payment_history': json.dumps(rows),
+            'finance-0-paid_amount': '99999999',
+        }))
+        self.assertEqual(response.status_code, 302)
+        case = CaseModel.objects.get()
+        self.assertEqual(case.finance.paid_amount, 3000000)
+        self.assertEqual(case.finance.balance, 3000000)
+        self.assertEqual(CaseFinanceModel.objects.totals()['paid'], 3000000)
+        response = self.client.get(reverse('case_manager:gestor_case_update', args=[case.pk]))
+        self.assertContains(response, '2026-10-10')
+        self.assertContains(response, '2000000')
+        self.assertEqual(len(case.finance.payment_history), 3)
+
+    def test_invalid_payment_dates_do_not_save_case_or_finance(self):
+        for row in (
+            {'kind': 'payment', 'amount': 50000, 'date': '', 'next_date': ''},
+            {'kind': 'payment', 'amount': 50000, 'date': '2026-09-10', 'next_date': '2026-09-01'},
+            {'kind': 'payment', 'amount': -1, 'date': '2026-09-10'},
+        ):
+            with self.subTest(row=row):
+                response = self.client.post(reverse('case_manager:gestor_case_create'), self.datos(**{
+                    'finance-0-payment_history': json.dumps([row]),
+                }))
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.context['finance_formset'].errors[0]['payment_history'])
+                self.assertFalse(CaseModel.objects.exists())
+
+    def test_old_payment_without_date_is_preserved(self):
+        self.client.post(reverse('case_manager:gestor_case_create'), self.datos())
+        case = CaseModel.objects.get()
+        from ..forms import CaseFinanceForm
+        rows = CaseFinanceForm(instance=case.finance).payment_rows
+        response = self.client.post(reverse('case_manager:gestor_case_update', args=[case.pk]), self.datos(**{
+            'finance-INITIAL_FORMS': '1', 'finance-0-id': str(case.finance.pk),
+            'finance-0-case': str(case.pk), 'finance-0-payment_history': json.dumps(rows),
+        }))
+        self.assertEqual(response.status_code, 302)
+        case.finance.refresh_from_db()
+        self.assertEqual(case.finance.paid_amount, 2000000)
+        self.assertTrue(case.finance.payment_history[1]['legacy'])
 
     def test_si_el_dinero_no_vale_no_se_guarda_nada(self):
         """

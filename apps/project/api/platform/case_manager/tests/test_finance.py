@@ -29,7 +29,7 @@ class FreeModalityFormTests(TestCase):
                     'mandate': mandate, 'contingency_percentage': 20,
                 })
                 for name in ('agreed_fee', 'paid_amount', 'contingency_value'):
-                    visible = (mandate == Mandate.PAYMENT and name != 'contingency_value') or (
+                    visible = (mandate == Mandate.PAYMENT and name == 'agreed_fee') or (
                         mandate == Mandate.CONTINGENCY and name == 'contingency_value'
                     )
                     html = render_to_string('case_manager/gestor/partials/field.html', {'field': form[name]})

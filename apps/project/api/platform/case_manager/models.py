@@ -890,6 +890,8 @@ class CaseFinanceModel(TimeStampedModel):
         default=0
     )
 
+    payment_history = models.JSONField('Historial de pagos', default=list, blank=True)
+
     show_in_dashboard = models.BooleanField(
         _('include in the financial dashboard'),
         default=True
