@@ -347,9 +347,24 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
             self.data.get(self.add_prefix('mandate'))
             if self.is_bound else self.initial.get('mandate')
         )
-        if self.is_bound and mandate in (
+        self.is_free = mandate in (
             choices.Mandate.PRO_BONO, choices.Mandate.GUARDIANSHIP,
-        ):
+        )
+        percentage = (
+            self.data.get(self.add_prefix('contingency_percentage'), '0')
+            if self.is_bound else self.initial.get('contingency_percentage', 0)
+        )
+        litis = mandate == choices.Mandate.CONTINGENCY
+        payment = mandate == choices.Mandate.PAYMENT
+        for name, visible in {
+            'contingency_percentage': litis,
+            'contingency_value': litis,
+            'agreed_fee': payment,
+            'paid_amount': payment or (litis and str(percentage) == '0'),
+            'show_in_dashboard': not self.is_free,
+        }.items():
+            self.fields[name].flow_hidden = not visible
+        if self.is_bound and self.is_free:
             # Las modalidades gratuitas no reciben cifras, incluso sin JS
             # o al cambiar desde un contrato con importes anteriores.
             for name in ('contingency_percentage', 'contingency_value',

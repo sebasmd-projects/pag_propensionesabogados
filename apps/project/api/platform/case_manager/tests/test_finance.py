@@ -13,13 +13,37 @@ Las dos reglas que estas pruebas existen para sostener:
 """
 
 from django.test import TestCase
+from django.template.loader import render_to_string
 
 from ..choices import Mandate, Service, Stage
 from ..models import CaseFinanceModel, CaseModel, ClientModel
-from ..forms import CaseFinanceForm
+from ..forms import CaseFinanceForm, CaseForm, CaseFinanceFormSet
 
 
 class FreeModalityFormTests(TestCase):
+    def test_initial_fields_follow_modality_before_javascript(self):
+        for mandate in (Mandate.PRO_BONO, Mandate.GUARDIANSHIP,
+                        Mandate.PAYMENT, Mandate.CONTINGENCY):
+            with self.subTest(mandate=mandate):
+                form = CaseFinanceForm(initial={
+                    'mandate': mandate, 'contingency_percentage': 20,
+                })
+                for name in ('agreed_fee', 'paid_amount', 'contingency_value'):
+                    visible = (mandate == Mandate.PAYMENT and name != 'contingency_value') or (
+                        mandate == Mandate.CONTINGENCY and name == 'contingency_value'
+                    )
+                    html = render_to_string('case_manager/gestor/partials/field.html', {'field': form[name]})
+                    self.assertEqual(' hidden' in html, not visible)
+
+    def test_form_delivers_payment_logic_without_external_static_file(self):
+        html = render_to_string('case_manager/gestor/case_form.html', {
+            'form': CaseForm(), 'finance_formset': CaseFinanceFormSet(),
+        })
+        self.assertNotIn('/static/assets/custom/js/payment_form.js', html)
+        self.assertNotIn('/static/assets/custom/js/case_form.js', html)
+        self.assertIn("mandate.addEventListener('change'", html)
+        self.assertIn('servicio gratuito', html)
+
     def test_free_modalities_save_without_amounts(self):
         for mandate in (Mandate.PRO_BONO, Mandate.GUARDIANSHIP):
             with self.subTest(mandate=mandate):

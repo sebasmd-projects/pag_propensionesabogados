@@ -128,7 +128,7 @@
             {% include 'case_manager/gestor/partials/field.html' with field=finance.agreed_fee cols="col-12 col-md-3" %}
             {% include 'case_manager/gestor/partials/field.html' with field=finance.paid_amount cols="col-12 col-md-3" %}
           </div>
-          <div class="alert alert-light border small mt-3 mb-0" data-finance-summary aria-live="polite"></div>
+          <div class="alert alert-light border small mt-3 mb-0" data-finance-summary aria-live="polite"{% if not finance.is_free %} hidden{% endif %}>{% if finance.is_free %}Servicio gratuito. Sin honorarios, pagos ni saldo por cobrar.{% endif %}</div>
         {% endfor %}
       </div>
     </div>
@@ -169,6 +169,6 @@
     {% include 'case_manager/gestor/partials/notes.html' %}
   {% endif %}
   {{ form.classification_catalog|json_script:"case-classification" }}
-  <script src="{% static 'assets/custom/js/case_form.js' %}?v=20260924-2" defer></script>
-  <script src="{% static 'assets/custom/js/payment_form.js' %}?v=20260924-2" defer></script>
+  <script>{% include "case_manager/gestor/scripts/case_form.js" %}</script>
+  <script>{% include "case_manager/gestor/scripts/payment_form.js" %}</script>
 {% endblock gestor_content %}
