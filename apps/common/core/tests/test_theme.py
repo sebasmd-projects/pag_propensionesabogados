@@ -72,3 +72,53 @@ class ThemeWiringTests(TestCase):
         cabeza = html.split('</head>')[0]
 
         self.assertIn('try { tema = localStorage.getItem("tema"); }', cabeza)
+
+
+class UtilidadesFijasEnOscuroTests(TestCase):
+    """
+    Las clases de Bootstrap que **no** cambian solas con el modo oscuro.
+
+    Bootstrap 5.3 redefine para el modo oscuro los colores del cuerpo y las
+    familias `*-bg-subtle` y `*-text-emphasis`, pero deja `--bs-light-rgb`
+    igual en los dos modos. Asi que `.bg-light` pinta el mismo gris casi
+    blanco de siempre, y el texto que hay dentro hereda el claro del tema:
+    gris claro sobre blanco. Es lo que dejo ilegibles las novedades del
+    expediente, y volveria a pasar en cuanto alguien escriba `bg-light` otra
+    vez --que es una clase normal de Bootstrap, no un error--.
+
+    Se comprueba la hoja y no una pagina porque el puente vive en la hoja: es
+    lo que hace que la proxima tarjeta con `bg-light` nazca bien sin que nadie
+    se acuerde de esto.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        from pathlib import Path
+
+        from django.conf import settings
+
+        cls.hoja = next(
+            Path(carpeta, 'assets/custom/css/theme.css')
+            for carpeta in [*settings.STATICFILES_DIRS, settings.STATIC_ROOT]
+            if Path(carpeta, 'assets/custom/css/theme.css').is_file()
+        ).read_text(encoding='utf-8')
+
+    def test_el_gris_claro_se_oscurece(self):
+        oscuro = self.hoja.split(':root[data-bs-theme="dark"]')
+
+        self.assertTrue(
+            any('--bs-light-rgb' in trozo for trozo in oscuro[1:]),
+            'Sin redefinir `--bs-light-rgb`, `bg-light` deja un bloque blanco '
+            'con el texto claro del tema encima.',
+        )
+
+    def test_el_texto_de_text_bg_light_deja_de_ser_negro(self):
+        """
+        `text-bg-light` ademas fija `color: #000`. Cambiarle solo el fondo lo
+        deja negro sobre gris oscuro, que se lee igual de mal.
+        """
+        self.assertIn('.text-bg-light', self.hoja)
+        bloque = self.hoja.split('.text-bg-light')[1].split('}')[0]
+
+        self.assertIn('var(--bs-body-color)', bloque)

@@ -277,3 +277,35 @@
 .table-responsive:has(> .dt-container) {
   overflow: visible;
 }
+
+/* ---------------------------------------------------------------------------
+   `bg-light` y `text-bg-light` en modo oscuro
+
+   Bootstrap 5.3 redefine para el modo oscuro los colores del cuerpo y las
+   familias `*-bg-subtle` y `*-text-emphasis`, pero **no** `--bs-light-rgb`:
+   `.bg-light` sigue siendo el mismo gris casi blanco en los dos modos. Un
+   bloque con `bg-light` en oscuro queda entonces blanco con el texto gris
+   claro que hereda del tema --que es lo que dejaba las novedades del
+   expediente ilegibles--.
+
+   Se arregla aqui y no en cada plantilla porque son clases de Bootstrap que
+   se seguiran escribiendo: la proxima tarjeta que alguien pinte con
+   `bg-light` ya nace bien.
+
+   `text-bg-light` ademas fija `color: #000`, asi que no basta con cambiarle
+   el fondo: hay que devolverle el color del texto del tema, o queda negro
+   sobre gris oscuro.
+   --------------------------------------------------------------------------- */
+:root[data-bs-theme="dark"] {
+  --bs-light-rgb: var(--bs-tertiary-bg-rgb);
+}
+
+:root[data-bs-theme="dark"] .text-bg-light {
+  color: var(--bs-body-color) !important;
+}
+
+/* Un borde suave para que la insignia no se pierda: sobre el fondo terciario
+   del tema oscuro, el chip y la tarjeta quedan casi del mismo gris. */
+:root[data-bs-theme="dark"] .badge.text-bg-light {
+  border: 1px solid var(--bs-border-color);
+}
