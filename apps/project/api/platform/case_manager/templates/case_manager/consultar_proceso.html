@@ -84,7 +84,6 @@
                   {% csrf_token %}
 
                   {% if masked_email %}
-                    {# --- Paso 2: el codigo ----------------------------- #}
                     <div class="text-center mb-4">
                       <div class="d-inline-flex align-items-center justify-content-center rounded-circle
                                   bg-success-subtle text-success-emphasis mb-3"
@@ -171,7 +170,6 @@
                     </div>
 
                   {% else %}
-                    {# --- Paso 1: la cedula ----------------------------- #}
                     <div class="row g-3 align-items-center justify-content-center">
                       <div class="col-12 col-md-7">
                         <label for="consulta" class="form-label small fw-semibold text-uppercase">
@@ -180,9 +178,11 @@
                         <input type="text" name="identification" id="consulta" class="form-control form-control-lg"
                                inputmode="numeric" maxlength="20" autocomplete="off" required
                                value="{{ form.identification.value|default:'' }}">
-                        <div class="form-text">
-                          {% trans "We will send a code to the email address on your file." %}
-                        </div>
+                        {% if not request.user.is_authenticated %}
+                          <div class="form-text">
+                            {% trans "We will send a code to the email address on your file." %}
+                          </div>
+                        {% endif %}
                       </div>
                       <div class="col-12 col-md-5 d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">
@@ -222,7 +222,6 @@
               {% include 'case_manager/partials/contact_card.html' %}
             {% endif %}
 
-            {# --- Expedientes ----------------------------------------- #}
             {% if cases %}
               {% comment %}
                 El cliente arriba una vez, y debajo **cada uno de sus
@@ -313,7 +312,6 @@
                     {% endif %}
                   </div>
 
-                  {# El unico trozo con CSS propio: Bootstrap no trae un stepper. #}
                   <div class="cp-stepper" role="list"
                        aria-label="{% trans 'Case progress' %}">
                     {% for step in case.progress %}

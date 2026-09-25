@@ -30,8 +30,6 @@
 
   <form method="get" class="mb-3" role="search">
     {% if cliente %}
-      {# El filtro sobrevive a la busqueda: sin esto, buscar dentro de los
-         asuntos de alguien devuelve los de todo el mundo. #}
       <input type="hidden" name="cliente" value="{{ cliente.pk }}">
     {% endif %}
     <div class="input-group">
@@ -83,8 +81,6 @@
                   <span class="badge text-bg-secondary">{% trans "Inactive" %}</span>
                 {% endif %}
                 {% if case.public_start %}
-                  {# Cuanto lleva abierto, que es la mitad de leer una etapa: #}
-                  {# «en desarrollo» dice poco sin «desde hace tres años». #}
                   <div class="text-muted small">{{ case.public_elapsed }}</div>
                 {% endif %}
               </td>
@@ -125,6 +121,7 @@
                 </form>
               </td>
               <td class="text-end">
+                <a href="{% url 'case_manager:gestor_case_report' case.pk %}" class="btn btn-sm btn-outline-secondary">Imprimir ficha</a>
                 <a href="{% url 'case_manager:gestor_case_update' case.pk %}"
                    class="btn btn-sm btn-outline-secondary">
                   <i class="bi bi-pencil me-1"></i>{% trans "Edit" %}

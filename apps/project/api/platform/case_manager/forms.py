@@ -13,6 +13,9 @@ O sea: el dato viajaba primero y se decidia despues, en la maquina de quien
 preguntaba. Ahora viaja despues de decidir, y decide el servidor.
 """
 
+import json
+from datetime import date
+
 from django import forms
 from django.forms import inlineformset_factory
 from django.utils.translation import gettext_lazy as _
@@ -198,11 +201,8 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
     """
     Alta y edicion de un asunto.
 
-    Los tres bloques por tipo de tramite --judicial, administrativo y
-    policivo-- se pintan todos y la plantilla los pliega; lo que decide cual
-    vale es `CaseModel.clean()`, en el servidor. Esconderlos con JavaScript
-    seria repetir el error de la pantalla anterior: lo que se esconde se
-    sigue pudiendo mandar.
+    Sigue servicio -> área/subnivel -> proceso. Los selectores anteriores
+    se conservan como datos históricos, fuera del flujo de clasificación.
     """
 
     notify_stage_change = forms.BooleanField(
@@ -215,14 +215,26 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
     )
 
     def configure_fields(self):
+        if not self.is_bound and not self.instance._state.adding:
+            service, subtype, second = choices.restore_classification(
+                self.instance.service, self.instance.subtype, self.instance.second_subtype,
+            )
+            self.initial.update(service=service, subtype=subtype, second_subtype=second)
+
         def value(name):
             if self.is_bound:
                 return self.data.get(self.add_prefix(name), '')
             return self.initial.get(name, '')
 
         service, area, subtype = value('service'), value('area'), value('subtype')
+        for name in ('procedure', 'area', 'procedure_other', 'area_other'):
+            self.fields[name].widget = forms.HiddenInput()
+        self.fields['subtype'].label = (
+            'Área' if service == choices.Service.JUDICIAL else 'Subnivel'
+        )
+        self.fields['second_subtype'].label = 'Tipo concreto de proceso'
         catalogs = {
-            'subtype': choices.subtypes_for(service, area),  # `area`: solo lo historico
+            'subtype': choices.subtypes_for(service),
             'second_subtype': choices.second_subtypes_for(service, subtype),
             'instance': choices.instances_for(service),
         }
@@ -239,7 +251,7 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
                 catalogs['subtype'] = (
                     *catalogs['subtype'], self.instance.subtype
                 )
-        if self.instance.instance:
+        if service == self.instance.service and self.instance.instance:
             catalogs['instance'] = (*catalogs['instance'], self.instance.instance)
         for name, values in catalogs.items():
             self.fields[name] = forms.ChoiceField(
@@ -247,10 +259,36 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
                 choices=[('', '---------'), *((v, v) for v in dict.fromkeys(values))],
             )
 
+        # La primera respuesta HTML debe respetar las mismas dependencias
+        # que el navegador, sin mostrar brevemente todos los campos.
+        for name in ('subtype', 'second_subtype', 'instance'):
+            self.fields[name].flow_hidden = not (
+                catalogs[name] and (name != 'subtype' or service != choices.Service.OTHER)
+            )
+        self.fields['court'].flow_hidden = service != choices.Service.JUDICIAL
+        self.fields['city'].label = (
+            'Ciudad del proceso' if service == choices.Service.JUDICIAL
+            else 'Ciudad / municipio (opcional)'
+        )
+        self.fields['case_number'].label = 'Número de radicado / referencia (opcional)'
+        self.details_title = (
+            'Representación judicial' if service == choices.Service.JUDICIAL
+            else 'Datos del proceso'
+        )
+        self.show_administrative = value('procedure') == choices.Procedure.ADMINISTRATIVE or any(
+            value(name) for name in ('sector', 'entity', 'administrative_case_number', 'administrative_city')
+        )
+        self.show_police = value('procedure') == choices.Procedure.POLICE or any(
+            value(name) for name in ('police_instance', 'police_office', 'police_case_number', 'police_city')
+        )
+
         for name in ('service', 'procedure', 'area', 'subtype', 'second_subtype'):
             field = self.fields[name + '_other']
             field.other_parent_id = self[name].id_for_label
-            field.other_visible = choices.is_other(value(name))
+            field.other_visible = (
+                choices.is_other(value(name))
+                and not getattr(self.fields[name], 'flow_hidden', False)
+            )
 
     @property
     def classification_catalog(self):
@@ -336,10 +374,119 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
     """
     El dinero de un asunto.
 
-    Cada modalidad usa columnas distintas y `CaseFinanceModel.clean()` rechaza
-    las que no le tocan, asi que el formulario las ofrece todas y el servidor
-    decide. El saldo no esta: se calcula.
+    Cada modalidad muestra sus columnas; el modelo valida los importes.
     """
+
+    def configure_fields(self):
+        self.fields['mandate'].choices = [
+            ('', 'Seleccione una modalidad'),
+            (choices.Mandate.CONTINGENCY.value, choices.Mandate.CONTINGENCY.label),
+            (choices.Mandate.PAYMENT.value, 'Modalidad del contrato'),
+            (choices.Mandate.PRO_BONO.value, choices.Mandate.PRO_BONO.label),
+            (choices.Mandate.GUARDIANSHIP.value, choices.Mandate.GUARDIANSHIP.label),
+        ]
+        mandate = (
+            self.data.get(self.add_prefix('mandate'))
+            if self.is_bound else self.initial.get('mandate')
+        )
+        self.is_free = mandate in (
+            choices.Mandate.PRO_BONO, choices.Mandate.GUARDIANSHIP,
+        )
+        percentage = (
+            self.data.get(self.add_prefix('contingency_percentage'), '0')
+            if self.is_bound else self.initial.get('contingency_percentage', 0)
+        )
+        litis = mandate == choices.Mandate.CONTINGENCY
+        payment = mandate == choices.Mandate.PAYMENT
+        self.is_payment = payment
+        self.initial['payment_history'] = self.instance.payment_history or (
+            [{'kind': 'payment', 'amount': self.instance.paid_amount,
+              'date': '', 'next_date': '', 'legacy': True}]
+            if self.instance.paid_amount and self.instance.mandate == choices.Mandate.PAYMENT
+            else []
+        )
+        if self.is_bound and not payment:
+            self.fields['payment_history'].disabled = True
+        if self.is_bound and payment and self.add_prefix('payment_history') in self.data:
+            self.fields['paid_amount'].disabled = True
+            self.initial['paid_amount'] = 0
+        for name, visible in {
+            'contingency_percentage': litis,
+            'contingency_value': litis,
+            'agreed_fee': payment,
+            'paid_amount': litis and str(percentage) == '0',
+            'show_in_dashboard': not self.is_free,
+        }.items():
+            self.fields[name].flow_hidden = not visible
+        if self.is_bound and self.is_free:
+            # Las modalidades gratuitas no reciben cifras, incluso sin JS
+            # o al cambiar desde un contrato con importes anteriores.
+            for name in ('contingency_percentage', 'contingency_value',
+                         'agreed_fee', 'paid_amount'):
+                self.fields[name].disabled = True
+                self.initial[name] = 0
+
+    @property
+    def payment_rows(self):
+        raw = self['payment_history'].value()
+        try:
+            rows = json.loads(raw) if isinstance(raw, str) else raw
+        except (ValueError, TypeError):
+            rows = []
+        rows = [r for r in (rows or []) if isinstance(r, dict)] if isinstance(rows, list) else []
+        admin = next((r for r in rows if r.get('kind') == 'administrative'), None)
+        payments = [r for r in rows if r.get('kind') == 'payment']
+        return [admin or {'kind': 'administrative', 'amount': 0},
+                *(payments or [{'kind': 'payment', 'amount': 0}])]
+
+    def clean_payment_history(self):
+        rows = self.cleaned_data.get('payment_history') or []
+        if not self.is_payment:
+            return self.instance.payment_history
+        if not isinstance(rows, list) or len(rows) > 100:
+            raise forms.ValidationError('El historial admite hasta 100 pagos.')
+        result = []
+        admin_count = 0
+        old_rows = self.initial.get('payment_history', [])
+        for index, row in enumerate(rows):
+            if not isinstance(row, dict) or row.get('kind') not in ('administrative', 'payment'):
+                raise forms.ValidationError('Tipo de pago inválido.')
+            amount = row.get('amount', 0)
+            if type(amount) is not int or not 0 <= amount <= 9_000_000_000_000:
+                raise forms.ValidationError('Cada pago debe ser un valor entero no negativo.')
+            admin_count += row['kind'] == 'administrative'
+            if admin_count > 1:
+                raise forms.ValidationError('Solo puede existir un pago administrativo.')
+            dates = {}
+            for key in ('date', 'next_date'):
+                value = row.get(key) or ''
+                try:
+                    dates[key] = date.fromisoformat(value).isoformat() if value else ''
+                except (TypeError, ValueError):
+                    raise forms.ValidationError(f'Fecha inválida en el pago {index + 1}.')
+            legacy = (index < len(old_rows) and old_rows[index].get('legacy')
+                      and old_rows[index].get('amount') == amount
+                      and old_rows[index].get('kind') == row['kind'])
+            # La interfaz agrega al inicio la fila administrativa a los abonos importados.
+            if not legacy and index == 1 and len(old_rows) == 1:
+                legacy = (old_rows[0].get('legacy') and old_rows[0].get('amount') == amount
+                          and row['kind'] == 'payment')
+            if amount and not dates['date'] and not legacy:
+                raise forms.ValidationError(f'Indique la fecha del pago {index + 1}.')
+            if dates['date'] and dates['next_date'] and dates['next_date'] < dates['date']:
+                raise forms.ValidationError('La próxima fecha de pago no puede ser anterior al pago.')
+            result.append({'kind': row['kind'], 'amount': amount, **dates,
+                           'legacy': bool(legacy and not dates['date'])})
+        return result
+
+    def clean(self):
+        data = super().clean()
+        if self.is_payment and 'payment_history' in data:
+            if self.add_prefix('payment_history') in self.data or self.instance.payment_history:
+                if self.add_prefix('payment_history') not in self.data:
+                    data['payment_history'] = self.instance.payment_history
+                data['paid_amount'] = sum(row['amount'] for row in data['payment_history'])
+        return data
 
     class Meta:
         model = CaseFinanceModel
@@ -347,8 +494,10 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
             'start_date', 'mandate', 'contingency_percentage',
             'contingency_value', 'agreed_fee', 'paid_amount',
             'show_in_dashboard',
+            'payment_history',
         )
         widgets = {
+            'payment_history': forms.HiddenInput(),
             'start_date': forms.DateInput(
                 attrs={'type': 'date'}, format='%Y-%m-%d'
             ),

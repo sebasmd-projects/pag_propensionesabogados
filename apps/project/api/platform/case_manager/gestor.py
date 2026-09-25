@@ -139,12 +139,11 @@ class ClientListView(GestorRequiredMixin, ListView):
         # consulta agrupada deja de considerarse ordenada --`queryset.ordered`
         # da falso-- aunque el `Meta` diga lo contrario. Sin esto, la base
         # devuelve las filas en el orden que le apetezca y un mismo cliente
-        # puede salir en dos paginas y en ninguna.
-        queryset = (
-            ClientModel.objects
-            .annotate(case_count=Count('cases'))
-            .order_by('full_name')
-        )
+        # puede salir en dos paginas y en ninguna. La cedula, que es unica,
+        # desempata a los que se llaman igual.
+        queryset = ClientModel.objects.annotate(
+            case_count=Count('cases')
+        ).order_by('full_name', 'identification')
 
         buscado = self.request.GET.get('q', '').strip()
         if buscado:
@@ -221,6 +220,15 @@ class CrmReportView(GestorRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         return crm_report()
+
+
+class CaseReportView(GestorRequiredMixin, DetailView):
+    """Descarga el estado guardado de un único proceso del cliente."""
+
+    model = CaseModel
+
+    def render_to_response(self, context, **kwargs):
+        return client_report(self.object.client, case=self.object)
 
 
 class ClientCreateView(GestorRequiredMixin, CreateView):

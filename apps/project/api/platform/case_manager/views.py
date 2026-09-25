@@ -40,6 +40,19 @@ from .models import CaseModel, ClientModel
 #: permite que el paz y salvo sea una direccion propia sin quedar abierta a
 #: cualquiera que la teclee.
 SESSION_CLIENT_KEY = 'case_manager_client_id'
+SESSION_CLIENT_AUTH_KEY = 'case_manager_client_auth'
+
+
+def authorized_client_pk(request):
+    # Las cuentas del sitio son del despacho. Su acceso al portal dura
+    # mientras mantengan la sesion iniciada, tambien para el paz y salvo.
+    if (request.session.get(SESSION_CLIENT_AUTH_KEY) == 'account'
+            and not request.user.is_authenticated):
+        request.session.pop(SESSION_CLIENT_KEY, None)
+        request.session.pop(SESSION_CLIENT_AUTH_KEY, None)
+        return None
+    return request.session.get(SESSION_CLIENT_KEY)
+
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +114,21 @@ class PublicCaseQueryView(TemplateView):
         context.setdefault('stages', CaseModel._meta.get_field('stage').choices)
         return context
 
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated and 'identification' in request.GET:
+            return self._pedir_codigo(request, attempts.client_ip(request))
+        pk = authorized_client_pk(request)
+        if pk:
+            try:
+                client = ClientModel.objects.filter(pk=pk).first()
+            except (ValidationError, ValueError):
+                client = None
+            if client is not None:
+                return self._mostrar_cliente(client)
+            request.session.pop(SESSION_CLIENT_KEY, None)
+            request.session.pop(SESSION_CLIENT_AUTH_KEY, None)
+        return super().get(request, *args, **kwargs)
+
     # -- lo que responde cada paso ----------------------------------------
     def _pantalla_del_codigo(self, client, **extra):
         """
@@ -158,6 +186,13 @@ class PublicCaseQueryView(TemplateView):
                 status=429,
             )
 
+        if request.user.is_authenticated and (
+            'resend' in request.POST or 'code' in request.POST
+        ):
+            client = self._cliente_pendiente()
+            if client is not None:
+                return self._entrar(request, ip, client, otp_verified=False)
+
         if 'resend' in request.POST:
             return self._reenviar(request, ip)
 
@@ -168,7 +203,9 @@ class PublicCaseQueryView(TemplateView):
 
     # -- paso 1: la cedula ------------------------------------------------
     def _pedir_codigo(self, request, ip):
-        form = PublicCaseQueryForm(request.POST)
+        form = PublicCaseQueryForm(
+            request.GET if request.method == 'GET' else request.POST
+        )
 
         if not form.is_valid():
             attempts.register_failure(ip)
@@ -192,6 +229,11 @@ class PublicCaseQueryView(TemplateView):
                 ),
                 status=400,
             )
+
+        if request.user.is_authenticated:
+            return self._entrar(request, ip, client, otp_verified=False)
+        if authorized_client_pk(request) == str(client.pk):
+            return self._mostrar_cliente(client)
 
         if not portal_otp.can_send(client):
             # Ya pidio codigos de sobra. Se le ensena la pantalla del codigo
@@ -254,9 +296,12 @@ class PublicCaseQueryView(TemplateView):
         return self._entrar(request, ip, client)
 
     # -- dentro -----------------------------------------------------------
-    def _entrar(self, request, ip, client):
+    def _entrar(self, request, ip, client, *, otp_verified=True):
         attempts.reset(ip)
-        portal_otp.reset_ladder(client)
+        if otp_verified:
+            portal_otp.reset_ladder(client)
+        else:
+            portal_otp.clear(request)
 
         # Rotar la sesion al identificarse: sin esto, un identificador de
         # sesion fijado de antemano por un tercero seguiria siendo valido
@@ -266,6 +311,10 @@ class PublicCaseQueryView(TemplateView):
         # delante el ciclo es solo el rastro.
         request.session.cycle_key()
         request.session[SESSION_CLIENT_KEY] = str(client.pk)
+        request.session[SESSION_CLIENT_AUTH_KEY] = 'otp' if otp_verified else 'account'
+        return self._mostrar_cliente(client)
+
+    def _mostrar_cliente(self, client):
 
         # Sin vigencia: ni tarjeta ni mensaje de credenciales. El codigo era
         # bueno --acaba de demostrarlo-- asi que decirle que algo fallo solo
@@ -334,7 +383,7 @@ class PazYSalvoView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        session_client = self.request.session.get(SESSION_CLIENT_KEY)
+        session_client = authorized_client_pk(self.request)
         if not session_client:
             raise Http404
 

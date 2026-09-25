@@ -13,9 +13,64 @@ Las dos reglas que estas pruebas existen para sostener:
 """
 
 from django.test import TestCase
+from django.template.loader import render_to_string
 
 from ..choices import Mandate, Service, Stage
 from ..models import CaseFinanceModel, CaseModel, ClientModel
+from ..forms import CaseFinanceForm, CaseForm, CaseFinanceFormSet
+
+
+class FreeModalityFormTests(TestCase):
+    def test_initial_fields_follow_modality_before_javascript(self):
+        for mandate in (Mandate.PRO_BONO, Mandate.GUARDIANSHIP,
+                        Mandate.PAYMENT, Mandate.CONTINGENCY):
+            with self.subTest(mandate=mandate):
+                form = CaseFinanceForm(initial={
+                    'mandate': mandate, 'contingency_percentage': 20,
+                })
+                for name in ('agreed_fee', 'paid_amount', 'contingency_value'):
+                    visible = (mandate == Mandate.PAYMENT and name == 'agreed_fee') or (
+                        mandate == Mandate.CONTINGENCY and name == 'contingency_value'
+                    )
+                    html = render_to_string('case_manager/gestor/partials/field.html', {'field': form[name]})
+                    self.assertEqual(' hidden' in html, not visible)
+
+    def test_form_delivers_payment_logic_without_external_static_file(self):
+        html = render_to_string('case_manager/gestor/case_form.html', {
+            'form': CaseForm(), 'finance_formset': CaseFinanceFormSet(),
+        })
+        self.assertNotIn('/static/assets/custom/js/payment_form.js', html)
+        self.assertNotIn('/static/assets/custom/js/case_form.js', html)
+        self.assertIn("mandate.addEventListener('change'", html)
+        self.assertIn('servicio gratuito', html)
+
+    def test_free_modalities_save_without_amounts(self):
+        for mandate in (Mandate.PRO_BONO, Mandate.GUARDIANSHIP):
+            with self.subTest(mandate=mandate):
+                form = CaseFinanceForm(data={'mandate': mandate})
+                self.assertTrue(form.is_valid(), form.errors)
+                finance = form.save(commit=False)
+                self.assertEqual(finance.agreed, 0)
+                self.assertEqual(finance.paid, 0)
+                self.assertEqual(finance.balance, 0)
+                self.assertEqual(finance.expectation, 0)
+
+    def test_switching_to_free_clears_previous_amounts_on_server(self):
+        for index, mandate in enumerate((Mandate.PRO_BONO, Mandate.GUARDIANSHIP)):
+            with self.subTest(mandate=mandate):
+                finance = make_case(identification=str(90000 + index),
+                                    agreed_fee=5000000, paid_amount=1000000)
+                form = CaseFinanceForm(instance=finance, data={
+                    'mandate': mandate, 'agreed_fee': '5000000',
+                    'paid_amount': '1000000', 'contingency_value': 'invalid',
+                    'contingency_percentage': '30',
+                })
+                self.assertTrue(form.is_valid(), form.errors)
+                form.save()
+                finance.refresh_from_db()
+                for name in ('agreed_fee', 'paid_amount', 'contingency_value',
+                             'contingency_percentage'):
+                    self.assertEqual(getattr(finance, name), 0)
 
 
 def make_case(identification='1000000001', name='Ana Perez', **finance):

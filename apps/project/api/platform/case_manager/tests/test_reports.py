@@ -18,7 +18,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from ..choices import Mandate, Service, Stage
-from ..models import CaseFinanceModel, CaseModel, ClientModel
+from ..models import CaseFinanceModel, CaseModel, ClientModel, CaseNoteModel
 from .test_access import login_as, make_user
 
 CLAVE = 'una-contrasena-larga-de-verdad'
@@ -152,6 +152,7 @@ class WordReportTests(BaseReportes):
             'case_manager:gestor_client_report', args=[self.client_record.pk]
         )
         self.crm = reverse('case_manager:gestor_crm_report')
+        self.case_file = reverse('case_manager:gestor_case_report', args=[self.case.pk])
 
     # --- la puerta -------------------------------------------------------
     def test_sin_el_grupo_no_se_descargan(self):
@@ -163,14 +164,14 @@ class WordReportTests(BaseReportes):
         make_user('cliente')
         login_as(self.client, 'cliente')
 
-        for url in (self.ficha, self.crm):
+        for url in (self.ficha, self.crm, self.case_file):
             with self.subTest(url=url):
                 self.assertEqual(self.client.get(url).status_code, 404)
 
     def test_sin_sesion_tampoco(self):
         self.client.logout()
 
-        for url in (self.ficha, self.crm):
+        for url in (self.ficha, self.crm, self.case_file):
             with self.subTest(url=url):
                 self.assertNotEqual(self.client.get(url).status_code, 200)
 
@@ -182,7 +183,7 @@ class WordReportTests(BaseReportes):
         abre como una pagina web. Un `.docx` es un zip con `word/document.xml`
         dentro; si algun dia esto vuelve a ser HTML, el zip no abre.
         """
-        for url in (self.ficha, self.crm):
+        for url in (self.ficha, self.crm, self.case_file):
             with self.subTest(url=url):
                 respuesta = self.client.get(url)
 
@@ -202,6 +203,24 @@ class WordReportTests(BaseReportes):
         self.assertIn('.docx', respuesta['Content-Disposition'])
 
     # --- el contenido ----------------------------------------------------
+    def test_case_file_contains_current_process_and_notes_only(self):
+        self.case.case_number = 'RADICADO-123'
+        self.case.court = 'Juzgado del Circuito'
+        self.case.city = 'Armenia'
+        self.case.save()
+        CaseNoteModel.objects.create(case=self.case, title='Última actuación', body='Audiencia programada')
+        CaseNoteModel.objects.create(case=self.otro, title='Otro asunto', body='No incluir esta novedad')
+        text = texto_del_docx(self.client.get(self.case_file).content)
+        for value in ('RADICADO-123', 'Juzgado del Circuito', 'Armenia', 'Audiencia programada', '$5.000.000'):
+            self.assertIn(value, text)
+        self.assertNotIn('No incluir esta novedad', text)
+        self.assertNotIn('$9.000.000', text)
+
+    def test_management_report_has_requested_name(self):
+        response = self.client.get(self.crm)
+        self.assertIn('REPORTE GERENCIAL', texto_del_docx(response.content))
+        self.assertIn('Reporte_gerencial_', response['Content-Disposition'])
+
     def test_la_ficha_lleva_al_cliente_y_sus_dos_asuntos(self):
         texto = texto_del_docx(self.client.get(self.ficha).content)
 

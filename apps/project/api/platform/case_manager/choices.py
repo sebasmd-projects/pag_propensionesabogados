@@ -524,3 +524,23 @@ def second_subtypes_for(service: str, subtype: str) -> tuple[str, ...]:
 def instances_for(service: str) -> tuple[str, ...]:
     """Las etapas o instancias validas para un servicio."""
     return INSTANCES_BY_SERVICE.get(service, ())
+
+
+def restore_classification(service, subtype, second_subtype):
+    """Recupera los padres de procesos antiguos solo si el arbol es inequívoco.
+
+    Los formularios antiguos guardaban a veces el proceso en st, o llamaban
+    «Administrativo» al área judicial hoy «Contencioso administrativo».
+    No se adivinan padres de textos libres ni se cambia una rama ya válida.
+    """
+    if service not in ('', None, Service.JUDICIAL, Service.ADMINISTRATIVE):
+        return service, subtype, second_subtype
+    if subtype in CLASSIFICATION_TREE.get(service, {}):
+        return service, subtype, second_subtype
+    process = second_subtype or subtype
+    matches = [
+        (Service.JUDICIAL, parent, process)
+        for parent, processes in CLASSIFICATION_TREE[Service.JUDICIAL].items()
+        if process in processes
+    ]
+    return matches[0] if len(matches) == 1 else (service, subtype, second_subtype)
