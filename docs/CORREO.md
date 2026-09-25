@@ -205,27 +205,106 @@ Tipo:    TXT
 Valor:   v=spf1 -all
 ```
 
----
+Y lo mismo para un **dominio entero que no envía**, como `tracecertificates.com`
+mientras el proyecto esté pausado. Ahí no hay nada que romper, así que se va
+directo a `reject` sin pasar por las fases:
 
-## Antes de endurecer: la comprobación que no te puedes saltar
-
-En el `.env` de producción:
-
-```bash
-grep DJANGO_EMAIL_HOST .env
+```
+TXT  @        v=spf1 -all
+TXT  _dmarc   v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s; rua=mailto:dmarc@propensionesabogados.com
+MX   @        0 .
 ```
 
-- Si es `localhost`, `mail.propensionesabogados.com` o la IP del servidor →
-  el correo de la plataforma sale por el mismo sitio que el resto y queda
-  alineado solo. Los registros de arriba bastan.
-- Si es un SMTP externo (Gmail, SendGrid, Mailgun, Zoho…) → **todo el correo
-  que manda la aplicación** (los códigos de acceso del portal, los avisos de
-  novedades a los clientes, el segundo factor del gestor) empezará a fallar
-  DMARC en cuanto pongas `quarantine`. Ese proveedor hay que añadirlo al SPF
-  con su `include:` y configurarle DKIM con dominio propio antes de pasar de
-  fase.
+`MX 0 .` es un **MX nulo**: declara que el dominio no recibe correo. En
+`tracecertificates.com` arregla además que su MX apunta hoy a Vercel, donde
+no hay servidor de correo, así que todo lo que se le escriba rebota.
 
-La fase `p=none` existe justamente para descubrir esto sin romper nada.
+Un dominio pausado es el blanco preferido para suplantar, precisamente
+porque nadie vigila su correo.
+
+---
+
+## El correo de la plataforma: comprobado y alineado
+
+Esta era la comprobación que había que hacer antes de endurecer, porque si
+la aplicación relayara por un SMTP externo, **todo lo que manda** --los
+códigos de acceso del portal, los avisos de novedades, el segundo factor del
+gestor-- empezaría a fallar DMARC al poner `quarantine`, y sin rebote que lo
+delatara.
+
+Medido el 25/09/2026:
+
+```
+DJANGO_EMAIL_HOST                 mail.propensionesabogados.com  → 190.90.160.103
+DJANGO_EMAIL_HOST_USER            no-reply@propensionesabogados.com
+DJANGO_EMAIL_DEFAULT_FROM_EMAIL   no-reply@propensionesabogados.com
+```
+
+Relaya por el propio cPanel con SMTP autenticado, así que sale por
+`190.90.160.109` --que está en el SPF-- y lo firma el DKIM de
+`propensionesabogados.com`. **Alineado.**
+
+Lo que decide la alineación es el `From:`, no el host: un correo puede salir
+del servidor correcto y firmado, y aun así fallar DMARC si el `From:` dice
+otro dominio. En este proyecto las once llamadas de envío usan
+`settings.DEFAULT_FROM_EMAIL` y ninguna pone remitente propio, así que basta
+con vigilar esa variable. Los `info@propensionesabogados.com` que aparecen en
+el código son `Reply-To` y destinatarios, que a DMARC no le afectan.
+
+**Si algún día se mete un proveedor externo** --una pasarela de facturación,
+un boletín, un SMTP de terceros--, hay que añadirlo al SPF con su `include:`
+y darle DKIM con dominio propio **antes** de que envíe nada.
+
+### Cuánto puede durar cada fase
+
+Las dos semanas de `p=none` sirven para responder una sola pregunta: *¿quién
+más envía como yo?* Con un único remitente confirmado y alineado, se puede
+comprimir usando `pct`, que aplica la política a solo un porcentaje del
+correo que falla:
+
+```
+v=DMARC1; p=quarantine; pct=25; sp=none; adkim=r; aspf=r; rua=…; fo=1
+```
+
+Si aparece un remitente legítimo desconocido, solo le afecta a 1 de cada 4
+mensajes: suficiente para que salga en el informe, poco para hacer daño. Se
+sube `25 → 100` con dos informes limpios, y de ahí a `reject`.
+
+**Por qué el fallo de `quarantine` es el más traicionero:** con `reject` el
+remitente recibe un `550` al instante y te enteras en treinta segundos. Con
+`quarantine` el correo va a Spam en silencio --el que envía ve «enviado» y
+el que recibe no mira--, y el fallo puede durar semanas. Para un despacho,
+un aviso a un cliente perdido en Spam cuesta más que uno que rebota.
+
+### Cómo comprobar cada fase
+
+Un envío falsificado contra un buzón propio, con
+[swaks](https://jetmore.org/john/code/swaks/):
+
+```bash
+swaks --to tu-buzon@otro-dominio.com \
+      --from director@propensionesabogados.com \
+      --server <un servidor que no sea el tuyo>
+```
+
+| Fase | Qué tiene que pasar |
+|---|---|
+| `p=none` | Llega. Si va a Spam, es por reputación de IP, no por política |
+| `-all` | `SPF_FAIL` en vez de `SPF_SOFTFAIL` |
+| `p=quarantine` | Carpeta Spam **por política**, sin importar la IP |
+| `p=reject` | **`550` en el SMTP**: el mensaje no llega a existir |
+
+Solo el último cuenta como prueba de que el agujero está cerrado.
+
+Dos avisos sobre el método: enviar desde una conexión doméstica inflá el
+resultado --las listas de Spamhaus penalizan la IP residencial y eso no
+tiene nada que ver con tu política--, y conviene probar contra Gmail o
+Outlook además de un buzón propio, porque ahí el correo no pasa por tu
+propio cPanel y ves lo que ve un tercero.
+
+Y una prueba funcional al llegar a `quarantine`: **pedir un código de acceso
+en el portal contra un Gmail** y comprobar que llega a la bandeja. Es el
+correo que más duele perder.
 
 ---
 
