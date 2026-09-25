@@ -5,12 +5,15 @@ Hay un CNAME de `www` en la zona, asi que la direccion con `www` existe y la
 teclea gente. Lo que decide si funciona no es el middleware que la redirige,
 sino `ALLOWED_HOSTS`: `request.get_host()` lanza `DisallowedHost` --y Django
 contesta 400-- **antes** de que ningun middleware propio llegue a mirar el
-host. Con el `www` fuera de la lista, la redireccion existe y no se ejecuta
-nunca.
+host. Si el `www` se cae de la lista, la redireccion sigue escrita y deja de
+ejecutarse: el sitio no se rompe de una forma ruidosa, simplemente la
+direccion con `www` empieza a contestar 400.
 
-Esto se descubrio leyendo el log de produccion: entre los `DisallowedHost` de
-`mail.propensionesabogados.com` --que son de cPanel y son correctos-- estaba
-el del `www`, que no lo era.
+Produccion lo tiene bien --comprobado: `https://www.propensionesabogados.com/`
+contesta 301 y las cabeceras son de Django--. Lo que estaba mal era
+`docs/env.example`, que documentaba solo el dominio pelado; quien montara el
+proyecto siguiendolo se encontraba el `www` caido. Estas pruebas estan para
+que la lista no se pueda encoger sin que salte algo.
 """
 
 from django.test import SimpleTestCase, TestCase, override_settings
