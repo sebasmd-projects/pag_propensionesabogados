@@ -155,6 +155,11 @@ ADMIN_URL = os.getenv('DJANGO_ADMIN_URL')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Arriba del todo, detras del de seguridad. Una peticion al `www` se va a
+    # contestar con un 301 y nada mas, asi que no tiene sentido abrirle sesion,
+    # resolverle el idioma, comprobarle el CSRF y anotarla en la auditoria
+    # antes de mandarla a la direccion buena.
+    'apps.common.utils.middleware.RedirectWWWMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -168,7 +173,6 @@ MIDDLEWARE = [
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.common.utils.middleware.RedirectWWWMiddleware',
     'apps.common.utils.middleware.DetectSuspiciousRequestMiddleware',
     # El ultimo, como pide su documentacion: solo asi ve la respuesta ya
     # formada y puede convertir un intento fallido en un bloqueo.
