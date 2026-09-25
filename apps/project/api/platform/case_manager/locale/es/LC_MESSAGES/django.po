@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 19:29-0500\n"
+"POT-Creation-Date: 2026-09-24 19:35-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Propensiones Abogados\n"
@@ -388,12 +388,12 @@ msgstr ""
 "Si esto está desmarcado, la nota se queda en el expediente y no se envía "
 "ningún correo."
 
-#: apps/project/api/platform/case_manager/gestor.py:189
+#: apps/project/api/platform/case_manager/gestor.py:198
 #: apps/project/api/platform/case_manager/reports.py:197
 msgid "Client file and financial summary."
 msgstr "Ficha del cliente y resumen económico."
 
-#: apps/project/api/platform/case_manager/gestor.py:228
+#: apps/project/api/platform/case_manager/gestor.py:237
 #, python-format
 msgid ""
 "Client %(name)s created. They will enter the portal with their "
@@ -402,7 +402,7 @@ msgstr ""
 "Cliente %(name)s creado. Entrará al portal con su número de identificación y "
 "un código que le enviaremos a %(email)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:241
+#: apps/project/api/platform/case_manager/gestor.py:250
 #, python-format
 msgid ""
 "Client %(name)s created, but without an email address they cannot use the "
@@ -411,19 +411,19 @@ msgstr ""
 "Cliente %(name)s creado, pero sin correo electrónico no puede usar el "
 "portal: el código de acceso no tiene a dónde ir."
 
-#: apps/project/api/platform/case_manager/gestor.py:256
+#: apps/project/api/platform/case_manager/gestor.py:265
 msgid "Client updated."
 msgstr "Cliente actualizado."
 
-#: apps/project/api/platform/case_manager/gestor.py:371
+#: apps/project/api/platform/case_manager/gestor.py:380
 msgid "Case saved."
 msgstr "Asunto guardado."
 
-#: apps/project/api/platform/case_manager/gestor.py:401
+#: apps/project/api/platform/case_manager/gestor.py:410
 msgid "Your procedure has moved forward"
 msgstr "Su trámite ha avanzado"
 
-#: apps/project/api/platform/case_manager/gestor.py:403
+#: apps/project/api/platform/case_manager/gestor.py:412
 #, python-format
 msgid ""
 "Your case is now at the stage «%(stage)s». We will keep you posted on any "
@@ -432,12 +432,12 @@ msgstr ""
 "Su asunto se encuentra ahora en la etapa «%(stage)s». Le seguiremos "
 "informando de cualquier novedad."
 
-#: apps/project/api/platform/case_manager/gestor.py:413
+#: apps/project/api/platform/case_manager/gestor.py:422
 msgid "The client was emailed about the new stage."
 msgstr "Se avisó al cliente por correo del cambio de etapa."
 
-#: apps/project/api/platform/case_manager/gestor.py:419
-#: apps/project/api/platform/case_manager/gestor.py:526
+#: apps/project/api/platform/case_manager/gestor.py:428
+#: apps/project/api/platform/case_manager/gestor.py:535
 msgid ""
 "The note was saved, but no email was sent: check that the client has an "
 "email address on file."
@@ -445,30 +445,30 @@ msgstr ""
 "La nota se guardó, pero no se envió ningún correo: compruebe que el cliente "
 "tenga correo registrado."
 
-#: apps/project/api/platform/case_manager/gestor.py:469
+#: apps/project/api/platform/case_manager/gestor.py:478
 #, python-format
 msgid "Settlement letter enabled for %(name)s."
 msgstr "Paz y salvo habilitado para %(name)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:471
+#: apps/project/api/platform/case_manager/gestor.py:480
 #, python-format
 msgid "Settlement letter disabled for %(name)s."
 msgstr "Paz y salvo retirado a %(name)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:507
+#: apps/project/api/platform/case_manager/gestor.py:516
 msgid "Note added."
 msgstr "Nota añadida."
 
-#: apps/project/api/platform/case_manager/gestor.py:513
+#: apps/project/api/platform/case_manager/gestor.py:522
 #, python-format
 msgid "Emailed to %(email)s."
 msgstr "Enviado por correo a %(email)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:520
+#: apps/project/api/platform/case_manager/gestor.py:529
 msgid "Internal note: nothing was emailed to the client."
 msgstr "Nota interna: no se le envió nada al cliente."
 
-#: apps/project/api/platform/case_manager/gestor.py:549
+#: apps/project/api/platform/case_manager/gestor.py:558
 #: apps/project/api/platform/case_manager/urls.py:120
 msgid "Edit case"
 msgstr "Editar asunto"
@@ -1574,20 +1574,22 @@ msgstr "Enviado el %(when)s"
 msgid "No notes on this case yet."
 msgstr "Este asunto todavía no tiene notas."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:11
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:19
 msgid "Pagination"
 msgstr "Paginación"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:16
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:25
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:30
 msgid "Previous"
 msgstr "Anterior"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:21
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:36
 #, python-format
 msgid "Page %(current)s of %(total)s"
 msgstr "Página %(current)s de %(total)s"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:27
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:44
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:49
 msgid "Next"
 msgstr "Siguiente"
 

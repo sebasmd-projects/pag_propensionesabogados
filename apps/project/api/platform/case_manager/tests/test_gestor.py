@@ -567,3 +567,71 @@ class ClientToCasesTests(TestCase):
         respuesta = self.client.get(reverse('case_manager:gestor_case_create'))
 
         self.assertIsNone(respuesta.context['form'].initial.get('client'))
+
+
+class PaginacionTests(TestCase):
+    """
+    Las listas con mas de una pagina.
+
+    Son las pruebas de un 500 de produccion: `/gestor/clientes/` reventaba en
+    cuanto el despacho paso de veinticinco clientes. El enlace «anterior» de
+    la primera pagina llamaba a `page_obj.previous_page_number`, que en la
+    primera pagina no devuelve `None` sino que lanza `EmptyPage`, y el
+    `|default:1` que lo acompanaba no atrapa excepciones.
+
+    No se prueba la plantilla por dentro: se piden las paginas, que es donde
+    se veia el fallo. Una prueba de la funcion de paginar no lo habria
+    encontrado, porque la funcion estaba bien.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+        cls.user = make_user('gestora_paginacion', gestor=True)
+        for numero in range(30):
+            ClientModel.objects.create(
+                identification=f'9000{numero:04d}',
+                full_name=f'Cliente {numero:02d}',
+            )
+
+    def setUp(self):
+        login_as(self.client, 'gestora_paginacion')
+
+    def test_la_primera_pagina_de_clientes_no_revienta(self):
+        respuesta = self.client.get(reverse('case_manager:gestor_client_list'))
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'page=2')
+
+    def test_la_ultima_pagina_tampoco(self):
+        respuesta = self.client.get(
+            reverse('case_manager:gestor_client_list'), {'page': 2}
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'page=1')
+
+    def test_la_busqueda_se_conserva_al_pasar_de_pagina(self):
+        respuesta = self.client.get(
+            reverse('case_manager:gestor_client_list'), {'q': 'Cliente'}
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'q=Cliente&amp;page=2')
+
+    def test_la_lista_de_clientes_sale_ordenada(self):
+        """
+        `annotate` agrupa, y una consulta agrupada deja de estar ordenada
+        aunque el `Meta` lo diga. Paginar sin orden reparte las filas como le
+        parezca a la base: el mismo cliente puede salir en dos paginas y en
+        ninguna.
+        """
+        clientes = self.client.get(
+            reverse('case_manager:gestor_client_list')
+        ).context['clients']
+
+        self.assertTrue(clientes.ordered)
+        self.assertEqual(
+            [c.full_name for c in clientes],
+            sorted(c.full_name for c in clientes),
+        )

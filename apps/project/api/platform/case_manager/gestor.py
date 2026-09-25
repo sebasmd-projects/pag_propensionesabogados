@@ -135,7 +135,16 @@ class ClientListView(GestorRequiredMixin, ListView):
     paginate_by = PER_PAGE
 
     def get_queryset(self):
-        queryset = ClientModel.objects.annotate(case_count=Count('cases'))
+        # `order_by` explicito y no el del modelo: `annotate` agrupa, y una
+        # consulta agrupada deja de considerarse ordenada --`queryset.ordered`
+        # da falso-- aunque el `Meta` diga lo contrario. Sin esto, la base
+        # devuelve las filas en el orden que le apetezca y un mismo cliente
+        # puede salir en dos paginas y en ninguna.
+        queryset = (
+            ClientModel.objects
+            .annotate(case_count=Count('cases'))
+            .order_by('full_name')
+        )
 
         buscado = self.request.GET.get('q', '').strip()
         if buscado:
