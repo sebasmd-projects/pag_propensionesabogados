@@ -1,8 +1,9 @@
 # Autenticación del correo: SPF, DKIM y DMARC
 
-Estado comprobado en el DNS público el **25 de septiembre de 2026**. Si lees
-esto mucho después, vuelve a comprobarlo antes de tocar nada: son registros
-que cambian fuera del repositorio y este fichero no se entera.
+Estado comprobado en el DNS público el **25 de septiembre de 2026**, con SPF
+y DMARC ya instalados y en **fase 1** (`p=none`). Si lees esto mucho después,
+vuelve a comprobarlo antes de tocar nada: son registros que cambian fuera del
+repositorio y este fichero no se entera.
 
 ---
 
@@ -39,40 +40,72 @@ DMARC es la única pieza que cierra el agujero, porque es la única que dice
 
 ## Estado actual
 
-Todo sale de la misma máquina: **190.90.160.103**.
+**La IP del correo no es la del web.** Es el error que costó dos vueltas:
+`190.90.160.103` es el servidor web y `190.90.160.109` el de correo saliente.
+Un SPF escrito mirando el registro `A` autoriza la máquina equivocada, y eso
+no se nota hasta la fase 3 --con `p=none` no rechaza nadie--, momento en el
+que empieza a fallar el correo propio.
 
-### Dominios de la cuenta
+```
+190.90.160.103  →  cpanel2-co.conexcol.net        (web)
+190.90.160.109  →  smtp.cpanel2-co.conexcol.net   (correo saliente)  ← esta
+190.90.160.170  →  cpanel4-co.conexcol.net        (web, otra cuenta)
+190.90.160.14   →  smtp.cpanel4-co.conexcol.net   (correo saliente) ← y esta
+```
 
-| Dominio | SPF | DMARC | DKIM |
-|---|---|---|---|
-| `propensionesabogados.com` | ❌ | ❌ | ✅ |
-| `fundacionattlas.org` | ✅ `v=spf1 a mx ip4:190.90.160.103 ~all` | ❌ | ✅ |
-| `fundacionattlas.com` | ❌ | ❌ | ✅ |
-| `tracecertificates.com` | ❌ | ❌ | ✅ |
+La forma fiable de saberlo es el `PTR`, no el `A`:
 
-Que `fundacionattlas.org` ya tenga esa línea confirma la receta y la IP: es la
-misma para todos.
+```bash
+dig +short -x 190.90.160.109    # smtp.cpanel2-co.conexcol.net.
+```
 
-### Subdominios de `propensionesabogados.com` que envían
+O más simple: dejar que lo calcule **cPanel → Email Deliverability → Repair**,
+que sí conoce la IP de salida de su propio servidor.
 
-Cada uno tiene su propia clave DKIM en `default._domainkey`, lo que significa
-que cPanel los trata como remitentes independientes.
+### Los remitentes
 
-| Subdominio | SPF | DMARC |
+Cada subdominio con clave en `default._domainkey` es un remitente
+independiente para cPanel. La lista completa **no se puede deducir del DNS**:
+sale de **cPanel → Email Deliverability**, y por eso aparecieron cuatro que no
+estaban en la primera pasada.
+
+| Remitente | Servidor | Estado (25/09/2026) |
 |---|---|---|
-| `atlas` | ❌ | hereda |
-| `correo` | ❌ | hereda |
-| `attlasconciliacion` | ❌ | hereda |
-| `fa` | ❌ | hereda |
-| `geausa` | ❌ | hereda |
+| `propensionesabogados.com` | cpanel2 · `.109` | ✅ SPF + DMARC con `rua` |
+| `fundacionattlas.com` | cpanel2 · `.109` | ✅ SPF + DMARC con `rua` |
+| `atlas`, `attlasconciliacion`, `correo`, `fa`, `fa.org`, `gea`, `geausa`, `rt`, `tc` (subdominios) | cpanel2 · `.109` | ✅ SPF propio; DMARC heredado |
+| `procesodeinsolvencia.com` | cpanel4 · `.14` | ✅ SPF + DMARC con `rua` |
+| `sebasmd.com` | cpanel4 · `.14` | ⚠️ SPF con la IP del web |
+| `fundacionattlas.org` | Vercel | ⚠️ `+a` autoriza Vercel entero |
+| `tracecertificates.com` | Vercel | ⚠️ `+a` autoriza Vercel entero |
 
-**Dos reglas de herencia que es donde se cuela el error:**
+`fa.org.propensionesabogados.com` tiene pinta de subdominio creado por error
+--parece un `fa.org` escrito donde iba `fa`--. Un subdominio olvidado con
+clave DKIM propia es justo lo que no conviene tener; si no se usa, se borra.
+
+**Tres reglas de herencia, que es donde se cuela el error:**
 
 - **SPF no se hereda.** `atlas.propensionesabogados.com` no usa el SPF de la
   raíz. Sin uno propio, un correo con `From: algo@atlas.…` no tiene SPF que
   validar y solo le queda el DKIM.
-- **DMARC sí se hereda.** El `_dmarc` de la raíz, con `sp=reject`, cubre de
-  golpe los cinco subdominios. Es la pieza que más rinde por registro puesto.
+- **DMARC sí se hereda, pero solo si el subdominio no tiene el suyo.** El
+  `Repair` de cPanel crea un `_dmarc` en **cada** subdominio, y eso anula el
+  `sp=` de la raíz: al llegar a la fase 3, los subdominios se quedarían en
+  `p=none` con el registro de la raíz viéndose perfecto. Se borran los
+  `_dmarc` de subdominio y se deja solo el de la raíz.
+- **`sp=` es un campo aparte de `p=`.** cPanel genera `p=none;sp=none;`, con
+  los dos explícitos. En la fase 3 hay que cambiar **los dos**.
+
+### Cuidado con `+a` en dominios alojados fuera
+
+`+a` autoriza a quien esté en el registro `A`. En un cPanel propio eso es la
+misma máquina y no pasa nada; en un alojamiento compartido como Vercel, el
+`A` es una IP **anycast que comparten todos sus clientes**, así que `+a`
+autoriza a cualquiera de ellos a enviar como tuyo.
+
+Le pasa a `fundacionattlas.org` y a `tracecertificates.com`: su web se movió a
+Vercel y el `A` dejó de ser el cPanel. El botón `Repair` lo añade sin mirar a
+dónde apunta, así que en esos dos hay que quitar el `+a` a mano.
 
 ---
 
@@ -85,14 +118,23 @@ Va como TXT. **Puede haber varios TXT en el mismo nombre** —el
 SPF**: si hay dos, los receptores tratan el dominio como si no tuviera
 ninguno.
 
-En la raíz de cada dominio y en cada subdominio que envíe:
+En la raíz de cada dominio y en cada subdominio que envíe. El Zone Editor de
+cPanel **no acepta `@`**: hay que escribir el nombre completo **con punto
+final**, o cPanel le añade el dominio otra vez y el registro acaba en
+`propensionesabogados.com.propensionesabogados.com` sin dar ningún error.
 
 ```
-Nombre:  @   (o el subdominio: atlas, correo, attlasconciliacion, fa, geausa)
+Nombre:  propensionesabogados.com.          ← el punto final importa
 Tipo:    TXT
 TTL:     14400
-Valor:   v=spf1 +a +mx +ip4:190.90.160.103 ~all
+Valor:   v=spf1 +mx +ip4:190.90.160.109 ~all
 ```
+
+El valor va **sin comillas**: cPanel las pone al guardar, y si se escriben a
+mano acaban dobles y el registro deja de ser un SPF válido.
+
+En cpanel4 (`sebasmd.com`, `procesodeinsolvencia.com`) la IP es
+`190.90.160.14`.
 
 `~all` es *softfail*: «lo que no venga de ahí es sospechoso, pero entrégalo».
 Se empieza así a propósito, y se sube a `-all` cuando DMARC lleve un mes
@@ -102,8 +144,14 @@ qué.
 
 ### Paso 2 · DMARC
 
-Antes de nada, **crea el buzón `dmarc@propensionesabogados.com`**. Si no
-existe, los informes se pierden y la fase de inventario no sirve para nada.
+Antes de nada, **crea el buzón `dmarc@` de cada dominio**. Si no existe, los
+informes se pierden y la fase de inventario no sirve para nada. Y escribe la
+dirección entera: un `rua=mailto:dmarc@<el-dominio>` copiado de una plantilla
+sin sustituir no es una dirección válida, así que el registro se ve correcto,
+pasa cualquier validador, y no recoge nada. Pasó.
+
+Existen: `dmarc@propensionesabogados.com`, `dmarc@fundacionattlas.com`,
+`dmarc@sebasmd.com`, `dmarc@procesodeinsolvencia.com`.
 
 Esto va por fases. No es burocracia: cada fase te da la información que
 necesitas para no romper nada en la siguiente.
@@ -133,12 +181,19 @@ borde: no llega ni a Spam.
 Valor:   v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s; rua=mailto:dmarc@propensionesabogados.com; fo=1
 ```
 
-`sp=reject` extiende la protección a todos los subdominios. `adkim=s` y
-`aspf=s` exigen alineación **estricta**: el dominio de la firma tiene que ser
-exactamente el del `From:`, no uno de su familia.
+**`p=` y `sp=` son dos campos.** cPanel genera los dos explícitos
+(`p=none;sp=none;`), así que cambiar solo `p=` deja los nueve subdominios sin
+proteger con el registro de la raíz viéndose perfecto. Hay que cambiar los dos.
 
-Repite los tres pasos en `fundacionattlas.com`, `fundacionattlas.org` y
-`tracecertificates.com`. Los subdominios no llevan `_dmarc` propio: lo heredan.
+`adkim=s` y `aspf=s` exigen alineación **estricta**: el dominio de la firma
+tiene que ser exactamente el del `From:`, no uno de su familia.
+
+Repite los tres pasos en cada dominio. Los subdominios no llevan `_dmarc`
+propio: lo heredan, y por eso se borran los que crea `Repair`.
+
+**Antes de la fase 3, sube también el SPF de `~all` a `-all`.** Con `~all` un
+receptor puede entregar igual lo que no venga de tu servidor; es el par que
+cierra la puerta.
 
 ### Paso 3 · Subdominios que NO envían
 
