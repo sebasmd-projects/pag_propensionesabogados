@@ -25,7 +25,9 @@
         }
         const amount = Number(row.querySelector('[data-payment-amount]').value || 0);
         const date = row.querySelector('[data-payment-date]');
-        date.required = amount > 0 && row.dataset.legacy !== 'true';
+        // Ningun campo del pago es obligatorio: se registra el importe cuando
+        // se sabe y la fecha cuando llega el comprobante.
+        date.required = false;
         row.querySelector('[data-payment-next-date]').min = date.value;
         return {kind, amount, date: date.value,
           next_date: row.querySelector('[data-payment-next-date]').value,

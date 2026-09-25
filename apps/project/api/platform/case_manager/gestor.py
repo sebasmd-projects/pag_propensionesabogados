@@ -367,6 +367,59 @@ class CaseFormMixin:
             )
         return context
 
+    def _avisar_errores(self, *formularios):
+        """
+        Los errores que no son de un campo, como aviso flotante.
+
+        Un error de campo se pinta debajo de su campo y alli se ve. Los que no
+        son de ningun campo --«la próxima fecha no puede ser anterior al
+        pago»-- se pintaban en una franja al principio de la pagina, y quien
+        acaba de darle a guardar al final de un formulario largo se queda
+        mirando el final: el formulario no se envio y nada se lo dijo.
+
+        Pasan por `messages` y no por la plantilla para que salgan por el
+        mismo sitio que todo lo demas. Son de nivel error, asi que no se van
+        solos.
+        """
+        vistos = set()
+
+        def ocultos(formulario):
+            """
+            Los errores de los campos que no se pintan.
+
+            El historial de pagos viaja en un `<input type="hidden">` --lo
+            arma el navegador-- y un error suyo no tiene debajo de que campo
+            salir. Antes se pintaba en una franja suelta encima de la tarjeta
+            del dinero; sin esto, se perderia del todo.
+            """
+            for campo in formulario.hidden_fields():
+                yield from campo.errors
+
+        def anotar(errores):
+            for error in errores or []:
+                if error not in vistos:
+                    vistos.add(error)
+                    messages.error(self.request, error)
+
+        for formulario in formularios:
+            if formulario is None:
+                continue
+            # Un formulario tiene `non_field_errors`; un formset tiene
+            # `non_form_errors` y ademas los de cada uno de sus formularios.
+            if hasattr(formulario, 'non_form_errors'):
+                anotar(formulario.non_form_errors())
+                for interno in formulario.forms:
+                    anotar(interno.non_field_errors())
+                    anotar(ocultos(interno))
+            else:
+                anotar(formulario.non_field_errors())
+                anotar(ocultos(formulario))
+
+    def form_invalid(self, form):
+        contexto = self.get_context_data(form=form)
+        self._avisar_errores(form, contexto.get('finance_formset'))
+        return self.render_to_response(contexto)
+
     def form_valid(self, form):
         formset = CaseFinanceFormSet(
             self.request.POST, instance=form.instance
@@ -375,6 +428,7 @@ class CaseFormMixin:
         if not formset.is_valid():
             # `form_invalid` vuelve a pintar la pagina; el formset con sus
             # errores tiene que ir en el contexto o se pierden.
+            self._avisar_errores(formset)
             return self.render_to_response(
                 self.get_context_data(form=form, finance_formset=formset)
             )

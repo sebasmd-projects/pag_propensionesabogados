@@ -63,6 +63,16 @@
       pageLength: estrecha ? 10 : 25,
       lengthMenu: [10, 25, 50, 100],
       responsive: true,
+      // El cuerpo se desplaza por dentro, asi que la cabecera de la tabla
+      // --que dice que es cada columna-- y su pie --donde se pasa de pagina--
+      // se quedan quietos. El alto de partida son cuatro quintos de la
+      // pantalla; `encajar()`, mas abajo, lo baja si con eso el pie se saliera
+      // por debajo, que es lo que hay que evitar.
+      //
+      // `scrollCollapse` evita lo contrario: una tabla de tres filas no deja
+      // medio pantallazo de hueco blanco debajo.
+      scrollY: estrecha ? '40vh' : '80vh',
+      scrollCollapse: true,
       layout: estrecha ? {
         topStart: null,
         topEnd: 'search',
@@ -85,6 +95,46 @@
         bottomStart: 'info',
         bottomEnd: 'paging',
       },
+    });
+
+    if (estrecha) return;
+
+    // Cuatro quintos de pantalla es el techo, no la medida. Encima de la
+    // tabla hay cabecera del sitio, titulo, pestanas y los botones de
+    // exportar: con 80vh de cuerpo, el paginador quedaba **debajo** del
+    // borde inferior y habia que bajar la pagina para pasar de pagina, que
+    // es justo lo que se queria quitar.
+    //
+    // Asi que en vez de adivinar cuanto ocupa todo eso, se mide: el cuerpo se
+    // queda con lo que va desde donde empieza hasta el borde de abajo, menos
+    // lo que mide su pie. Se mide en coordenadas del documento para que
+    // valga igual con la pagina desplazada.
+    const contenedor = tabla.closest('.dt-container');
+    const encajar = () => {
+      const cuerpo = contenedor.querySelector('.dt-scroll-body');
+      if (!cuerpo) return;
+      cuerpo.style.maxHeight = '';
+      const arriba = cuerpo.getBoundingClientRect().top + window.scrollY;
+      // El pie no es un elemento: son las filas que DataTables pone **debajo**
+      // de la de la tabla --contador, paginador, «Mostrar [25]»--, y son una
+      // o dos segun la pantalla. Se suman las que haya, con su margen.
+      const filas = [...contenedor.querySelectorAll(':scope > .row')];
+      const tablaFila = filas.findIndex(f => f.classList.contains('dt-layout-table'));
+      const altoPie = filas
+        .slice(tablaFila + 1)
+        .reduce((suma, fila) => suma + fila.getBoundingClientRect().height + 8, 0);
+      const disponible = window.innerHeight - arriba - altoPie - 32;
+      // El minimo evita que en una pantalla baja la tabla se quede en una
+      // rendija de dos filas: alli es preferible que la pagina se desplace.
+      const alto = Math.max(200, Math.min(window.innerHeight * 0.8, disponible));
+      cuerpo.style.maxHeight = Math.round(alto) + 'px';
+    };
+
+    encajar();
+    let pendiente;
+    window.addEventListener('resize', () => {
+      clearTimeout(pendiente);
+      pendiente = setTimeout(encajar, 150);
     });
   });
 })();

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 20:20-0500\n"
+"POT-Creation-Date: 2026-09-24 20:44-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Propensiones Abogados\n"
@@ -56,12 +56,12 @@ msgid "Ordinary process"
 msgstr "Proceso ordinario"
 
 #: apps/project/api/platform/case_manager/admin.py:137
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:73
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:70
 msgid "Administrative procedure"
 msgstr "Trámite administrativo"
 
 #: apps/project/api/platform/case_manager/admin.py:144
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:92
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:89
 msgid "Police complaint"
 msgstr "Querella policiva"
 
@@ -414,15 +414,15 @@ msgstr ""
 msgid "Client updated."
 msgstr "Cliente actualizado."
 
-#: apps/project/api/platform/case_manager/gestor.py:397
+#: apps/project/api/platform/case_manager/gestor.py:451
 msgid "Case saved."
 msgstr "Asunto guardado."
 
-#: apps/project/api/platform/case_manager/gestor.py:427
+#: apps/project/api/platform/case_manager/gestor.py:481
 msgid "Your procedure has moved forward"
 msgstr "Su trámite ha avanzado"
 
-#: apps/project/api/platform/case_manager/gestor.py:429
+#: apps/project/api/platform/case_manager/gestor.py:483
 #, python-format
 msgid ""
 "Your case is now at the stage «%(stage)s». We will keep you posted on any "
@@ -431,12 +431,12 @@ msgstr ""
 "Su asunto se encuentra ahora en la etapa «%(stage)s». Le seguiremos "
 "informando de cualquier novedad."
 
-#: apps/project/api/platform/case_manager/gestor.py:439
+#: apps/project/api/platform/case_manager/gestor.py:493
 msgid "The client was emailed about the new stage."
 msgstr "Se avisó al cliente por correo del cambio de etapa."
 
-#: apps/project/api/platform/case_manager/gestor.py:445
-#: apps/project/api/platform/case_manager/gestor.py:563
+#: apps/project/api/platform/case_manager/gestor.py:499
+#: apps/project/api/platform/case_manager/gestor.py:617
 msgid ""
 "The note was saved, but no email was sent: check that the client has an "
 "email address on file."
@@ -444,30 +444,30 @@ msgstr ""
 "La nota se guardó, pero no se envió ningún correo: compruebe que el cliente "
 "tenga correo registrado."
 
-#: apps/project/api/platform/case_manager/gestor.py:506
+#: apps/project/api/platform/case_manager/gestor.py:560
 #, python-format
 msgid "Settlement letter enabled for %(name)s."
 msgstr "Paz y salvo habilitado para %(name)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:508
+#: apps/project/api/platform/case_manager/gestor.py:562
 #, python-format
 msgid "Settlement letter disabled for %(name)s."
 msgstr "Paz y salvo retirado a %(name)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:544
+#: apps/project/api/platform/case_manager/gestor.py:598
 msgid "Note added."
 msgstr "Nota añadida."
 
-#: apps/project/api/platform/case_manager/gestor.py:550
+#: apps/project/api/platform/case_manager/gestor.py:604
 #, python-format
 msgid "Emailed to %(email)s."
 msgstr "Enviado por correo a %(email)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:557
+#: apps/project/api/platform/case_manager/gestor.py:611
 msgid "Internal note: nothing was emailed to the client."
 msgstr "Nota interna: no se le envió nada al cliente."
 
-#: apps/project/api/platform/case_manager/gestor.py:586
+#: apps/project/api/platform/case_manager/gestor.py:640
 #: apps/project/api/platform/case_manager/urls.py:125
 msgid "Edit case"
 msgstr "Editar asunto"
@@ -1305,11 +1305,11 @@ msgstr "Gestor de procesos"
 msgid "Dashboard"
 msgstr "Panel"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:28
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:25
 msgid "The matter"
 msgstr "El asunto"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:112
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:109
 #, python-format
 msgid ""
 "A contingency at 0 %% is not a contingency: it is a closed fixed value, and "
@@ -1318,13 +1318,13 @@ msgstr ""
 "Una cuota litis al 0 %% no es cuota litis: es un valor fijo cerrado, y "
 "cuenta como deuda, no como expectativa."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:164
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:159
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:183
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_form.html:36
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:167
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:162
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_form.html:39
 msgid "Save"
 msgstr "Guardar"
@@ -1401,7 +1401,9 @@ msgstr "¿Autorizar el paz y salvo?"
 msgid ""
 "From this moment the client can download and present their settlement "
 "letter. Withdrawing it later does not undo the copy they already took."
-msgstr "Desde este momento el cliente puede descargar y presentar su paz y salvo. Retirarlo después no deshace la copia que ya se llevó."
+msgstr ""
+"Desde este momento el cliente puede descargar y presentar su paz y salvo. "
+"Retirarlo después no deshace la copia que ya se llevó."
 
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:199
 msgid "Yes, authorize"
@@ -1415,7 +1417,9 @@ msgstr "¿Retirar el paz y salvo?"
 msgid ""
 "The client will stop being able to download it. If they are up to date, they "
 "usually need it for a deadline."
-msgstr "El cliente dejará de poder descargarlo. Si está al día, suele necesitarlo para una fecha."
+msgstr ""
+"El cliente dejará de poder descargarlo. Si está al día, suele necesitarlo "
+"para una fecha."
 
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:205
 msgid "Yes, withdraw"

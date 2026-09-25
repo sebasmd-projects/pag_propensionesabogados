@@ -251,3 +251,29 @@
 .avisos-flotantes .text-bg-secondary .btn-close {
   filter: var(--bs-btn-close-white-filter, invert(1) grayscale(100%) brightness(200%));
 }
+
+/* ---------------------------------------------------------------------------
+   Las tablas del gestor
+
+   El cuerpo se desplaza por dentro (`scrollY`), asi que la cabecera y el pie
+   de la tabla se quedan siempre a la vista. Lo que falta es aire: la tarjeta
+   no tiene relleno y el «Mostrar [25]» y el paginador quedaban pegados al
+   borde de abajo, como si se hubieran salido.
+   --------------------------------------------------------------------------- */
+.dt-container {
+  padding: 0.75rem 1rem 1rem;
+}
+
+/* El desplazamiento vertical lo lleva el cuerpo de la tabla, no la tarjeta:
+   dos barras, una dentro de otra, hacen que la rueda del raton mueva la que
+   no toca. */
+.dt-container .dt-scroll-body {
+  overscroll-behavior: contain;
+}
+
+/* `table-responsive` corta con su propio desplazamiento horizontal y se pelea
+   con el de DataTables: la cabecera fija se queda quieta y el cuerpo se
+   mueve, asi que las columnas dejan de coincidir. DataTables ya se ocupa. */
+.table-responsive:has(> .dt-container) {
+  overflow: visible;
+}

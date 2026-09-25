@@ -379,9 +379,30 @@ class CaseCrudTests(TestCase):
         self.assertContains(response, '2000000')
         self.assertEqual(len(case.finance.payment_history), 3)
 
+    def test_un_abono_sin_fecha_se_guarda(self):
+        """
+        Ningun campo del pago es obligatorio.
+
+        Un abono se registra muchas veces antes de tener el comprobante
+        delante --el cliente avisa por telefono y el papel llega dias
+        despues--, y obligar a inventarse una fecha para poder guardar el
+        importe es peor que guardarlo sin ella: la inventada parece un dato y
+        la que falta se ve que falta.
+        """
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_case_create'),
+            self.datos(**{'finance-0-payment_history': json.dumps(
+                [{'kind': 'payment', 'amount': 50000, 'date': '', 'next_date': ''}]
+            )}),
+        )
+
+        self.assertEqual(respuesta.status_code, 302)
+        caso = CaseModel.objects.get()
+        self.assertEqual(caso.finance.paid_amount, 50000)
+        self.assertEqual(caso.finance.payment_history[0]['date'], '')
+
     def test_invalid_payment_dates_do_not_save_case_or_finance(self):
         for row in (
-            {'kind': 'payment', 'amount': 50000, 'date': '', 'next_date': ''},
             {'kind': 'payment', 'amount': 50000, 'date': '2026-09-10', 'next_date': '2026-09-01'},
             {'kind': 'payment', 'amount': -1, 'date': '2026-09-10'},
         ):
@@ -392,6 +413,10 @@ class CaseCrudTests(TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertTrue(response.context['finance_formset'].errors[0]['payment_history'])
                 self.assertFalse(CaseModel.objects.exists())
+                # Y ya no se pinta la franja de arriba: los errores que no son
+                # de un campo salen flotando, donde quien acaba de darle a
+                # guardar los ve sin subir.
+                self.assertNotContains(response, 'alert alert-danger')
 
     def test_old_payment_without_date_is_preserved(self):
         self.client.post(reverse('case_manager:gestor_case_create'), self.datos())

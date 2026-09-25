@@ -16,12 +16,9 @@
   <form method="post" novalidate>
     {% csrf_token %}
 
-    {% if form.non_field_errors or finance_formset.non_form_errors %}
-      <div class="alert alert-danger">
-        {{ form.non_field_errors }}
-        {{ finance_formset.non_form_errors }}
-      </div>
-    {% endif %}
+    {# Los errores que no son de un campo salen como aviso flotante, desde la #}
+    {# vista: la franja de aqui arriba quedaba fuera de la pantalla de quien #}
+    {# acaba de darle a guardar al final de un formulario largo. #}
 
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-transparent border-0 pt-3">
@@ -116,9 +113,6 @@
         {{ finance_formset.management_form }}
         {% for finance in finance_formset %}
           {% for hidden in finance.hidden_fields %}{{ hidden }}{% endfor %}
-          {% if finance.non_field_errors %}
-            <div class="alert alert-danger">{{ finance.non_field_errors }}</div>
-          {% endif %}
           <div class="row g-3">
             {% include 'case_manager/gestor/partials/field.html' with field=finance.start_date cols="col-12 col-md-4" %}
             {% include 'case_manager/gestor/partials/field.html' with field=finance.mandate cols="col-12 col-md-4" %}
@@ -128,7 +122,8 @@
             {% include 'case_manager/gestor/partials/field.html' with field=finance.agreed_fee cols="col-12 col-md-3" %}
             {% include 'case_manager/gestor/partials/field.html' with field=finance.paid_amount cols="col-12 col-md-3" %}
           </div>
-          {% if finance.payment_history.errors %}<div class="alert alert-danger">{{ finance.payment_history.errors }}</div>{% endif %}
+          {# Los errores del historial salen flotando: es un campo oculto y no #}
+          {# tiene debajo de que campo pintarse. #}
           <div data-payment-history{% if not finance.is_payment %} hidden{% endif %} class="mt-3">
             <div data-payment-rows>
               {% for payment in finance.payment_rows %}

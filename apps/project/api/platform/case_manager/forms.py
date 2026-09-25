@@ -471,8 +471,11 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
             if not legacy and index == 1 and len(old_rows) == 1:
                 legacy = (old_rows[0].get('legacy') and old_rows[0].get('amount') == amount
                           and row['kind'] == 'payment')
-            if amount and not dates['date'] and not legacy:
-                raise forms.ValidationError(f'Indique la fecha del pago {index + 1}.')
+            # La fecha no se exige. Un abono se registra muchas veces antes de
+            # tener el comprobante delante --el cliente avisa por telefono y el
+            # papel llega dias despues-- y obligar a inventarse una fecha para
+            # poder guardar el importe es peor que guardarlo sin ella: la
+            # inventada parece un dato y la que falta se ve que falta.
             if dates['date'] and dates['next_date'] and dates['next_date'] < dates['date']:
                 raise forms.ValidationError('La próxima fecha de pago no puede ser anterior al pago.')
             result.append({'kind': row['kind'], 'amount': amount, **dates,
