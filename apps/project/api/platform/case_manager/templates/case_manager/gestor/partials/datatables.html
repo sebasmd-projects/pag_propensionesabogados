@@ -1,0 +1,16 @@
+{% comment %}
+  DataTables, desde el CDN y con la version exacta que aprobo el despacho.
+
+  Las integridades (`integrity`) son las del paquete descargado de
+  datatables.net: si el CDN sirviera otra cosa, el navegador no la ejecuta.
+  Por eso van copiadas literalmente y no se tocan al cambiar de version sin
+  volver a sacarlas del generador.
+
+  Se carga solo en las pantallas del gestor. El sitio publico no tiene
+  tablas que ordenar y no tiene por que pagar trescientos kilobytes por
+  ello.
+{% endcomment %}
+<link href="https://cdn.datatables.net/v/bs5/dt-3.1.1/af-3.1.1/b-4.1.1/cc-2.1.1/fc-6.1.0/fh-5.1.0/kt-3.1.0/r-4.1.0/rr-2.1.0/sc-3.1.0/sb-2.1.0/sl-4.1.0/datatables.min.css"
+      rel="stylesheet"
+      integrity="sha384-GqnWbvrAAyzOC67bK2kKrj9rZyJE2xI1VWGUK1Bi+NcTD+p1nlI7ivFuwrvuuPI6"
+      crossorigin="anonymous">

@@ -30,7 +30,7 @@ import uuid
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
@@ -45,9 +45,15 @@ from .forms import CaseFinanceFormSet, CaseForm, CaseNoteForm, ClientForm
 from .models import (CaseFinanceModel, CaseModel, CaseNoteModel, ClientModel)
 from .reports import client_report, crm_report
 
-#: Filas por pagina. La paginacion con filtros y ordenamiento propios esta
-#: fuera del alcance contratado; esto es solo no servir mil filas de una vez.
-PER_PAGE = 25
+#: Paginar, buscar y ordenar los listados lo hace ahora DataTables en el
+#: navegador, con todas las filas delante. Por eso las vistas ya no paginan:
+#: mezclar las dos cosas seria peor que cualquiera de las dos --la caja de
+#: busqueda de la tabla buscaria dentro de las veinticinco filas servidas y
+#: diria que eso es todo lo que hay--.
+#:
+#: Es una decision de escala, no de gusto: el despacho tiene clientes y
+#: asuntos en cientos, no en cientos de miles. El dia que no quepan, lo que
+#: toca es el modo de servidor de DataTables, no volver a este.
 
 
 def _client_or_none(pedido):
@@ -95,15 +101,20 @@ class GestorDashboardView(GestorRequiredMixin, TemplateView):
 
         context['totals'] = CaseFinanceModel.objects.totals()
         context['areas'] = CaseFinanceModel.objects.by_area()
+        # Sin recortar a diez. Antes la tarjeta ensenaba los diez primeros y
+        # se callaba los demas: quien debia el puesto once no aparecia en
+        # ninguna parte del panel, y nada en la pantalla decia que faltaba
+        # nadie. Ahora vienen todos y la tabla los pagina de diez en diez,
+        # que se ve igual de corto pero se puede recorrer.
         context['debtors'] = (
             CaseFinanceModel.objects.debtors()
             .select_related('case', 'case__client')
-            .order_by('-agreed_fee')[:10]
+            .order_by('-agreed_fee')
         )
         context['expectations'] = (
             CaseFinanceModel.objects.expectations()
             .select_related('case', 'case__client')
-            .order_by('-contingency_value')[:10]
+            .order_by('-contingency_value')
         )
         context['counters'] = ClientModel.objects.aggregate(
             clients=Count('pk'),
@@ -132,7 +143,6 @@ class ClientListView(GestorRequiredMixin, ListView):
     model = ClientModel
     template_name = 'case_manager/gestor/client_list.html'
     context_object_name = 'clients'
-    paginate_by = PER_PAGE
 
     def get_queryset(self):
         # `order_by` explicito y no el del modelo: `annotate` agrupa, y una
@@ -292,7 +302,6 @@ class CaseListView(GestorRequiredMixin, ListView):
     model = CaseModel
     template_name = 'case_manager/gestor/case_list.html'
     context_object_name = 'cases'
-    paginate_by = PER_PAGE
 
     def get_queryset(self):
         queryset = CaseModel.objects.select_related('client', 'finance')
@@ -462,35 +471,46 @@ class CaseUpdateView(CaseFormMixin, GestorRequiredMixin, UpdateView):
         return CaseModel.objects.select_related('client', 'finance')
 
 
-class CaseToggleSettlementView(GestorRequiredMixin, UpdateView):
+class CaseToggleSettlementView(GestorRequiredMixin, View):
     """
     Autorizar o retirar el paz y salvo de un asunto, desde el listado.
 
     Es un `POST` y no un enlace a proposito: cambia un dato, y un `GET` que
     cambia datos lo dispara cualquier cosa que siga enlaces --un prefetch del
     navegador, un antivirus, un rastreador--.
+
+    Y es una vista pelada y no un `UpdateView`, que es lo que era. Un
+    `UpdateView` con `fields = ()` sigue construyendo un formulario de modelo,
+    y un formulario de modelo valida **el objeto entero** antes de guardar:
+    bastaba que un expediente antiguo tuviera una instancia que ya no
+    pertenece a su servicio para que el boton contestara un 500. El asunto
+    quedaba con su paz y salvo atascado y sin forma de moverlo desde la
+    pantalla; justo los expedientes viejos, que son los que mas piden el
+    documento.
+
+    Aqui se cambia una columna y se guarda esa columna. Lo demas del
+    expediente no se toca, asi que no hay por que revisarlo: quien lo edite de
+    verdad pasara por su formulario, que si lo valida.
     """
 
-    model = CaseModel
-    fields = ()
     http_method_names = ['post']
-    success_url = reverse_lazy('case_manager:gestor_case_list')
 
-    def form_valid(self, form):
-        self.object.paz_y_salvo_authorized = (
-            not self.object.paz_y_salvo_authorized
+    def post(self, request, *args, **kwargs):
+        asunto = get_object_or_404(
+            CaseModel.objects.select_related('client'), pk=kwargs['pk']
         )
-        self.object.save(update_fields=['paz_y_salvo_authorized', 'updated'])
+        asunto.paz_y_salvo_authorized = not asunto.paz_y_salvo_authorized
+        asunto.save(update_fields=['paz_y_salvo_authorized', 'updated'])
 
         plantilla = (
             _('Settlement letter enabled for %(name)s.')
-            if self.object.paz_y_salvo_authorized
+            if asunto.paz_y_salvo_authorized
             else _('Settlement letter disabled for %(name)s.')
         )
         messages.success(
-            self.request, plantilla % {'name': self.object.client.full_name}
+            request, plantilla % {'name': asunto.client.full_name}
         )
-        return super().form_valid(form)
+        return redirect('case_manager:gestor_case_list')
 
 
 class CaseNoteCreateView(GestorRequiredMixin, CreateView):

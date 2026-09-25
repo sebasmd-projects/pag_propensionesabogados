@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 19:35-0500\n"
+"POT-Creation-Date: 2026-09-24 20:20-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Propensiones Abogados\n"
@@ -20,7 +20,7 @@ msgstr ""
 "1 : 2;\n"
 
 #: apps/project/api/platform/case_manager/admin.py:84
-#: apps/project/api/platform/case_manager/reports.py:224
+#: apps/project/api/platform/case_manager/reports.py:229
 msgid "Contingency"
 msgstr "Cuota litis"
 
@@ -47,7 +47,7 @@ msgid "balance"
 msgstr "saldo"
 
 #: apps/project/api/platform/case_manager/admin.py:106
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:97
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:100
 msgid "expectation"
 msgstr "expectativa"
 
@@ -56,17 +56,17 @@ msgid "Ordinary process"
 msgstr "Proceso ordinario"
 
 #: apps/project/api/platform/case_manager/admin.py:137
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:64
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:73
 msgid "Administrative procedure"
 msgstr "Trámite administrativo"
 
 #: apps/project/api/platform/case_manager/admin.py:144
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:83
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:92
 msgid "Police complaint"
 msgstr "Querella policiva"
 
 #: apps/project/api/platform/case_manager/admin.py:151
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:61
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:65
 #: apps/project/api/platform/case_manager/templates/case_manager/paz_y_salvo.html:22
 msgid "Settlement letter"
 msgstr "Paz y salvo"
@@ -128,7 +128,6 @@ msgid "Investigación de campo"
 msgstr "Investigación de campo"
 
 #: apps/project/api/platform/case_manager/choices.py:31
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:46
 msgid "Representación judicial"
 msgstr "Representación judicial"
 
@@ -327,11 +326,11 @@ msgstr ""
 msgid "Your access code — Propensiones® Abogados"
 msgstr "Tu código de acceso — Propensiones® Abogados"
 
-#: apps/project/api/platform/case_manager/forms.py:31
+#: apps/project/api/platform/case_manager/forms.py:34
 msgid "We could not find a case with that identification number."
 msgstr "No encontramos ningún proceso con ese número de identificación."
 
-#: apps/project/api/platform/case_manager/forms.py:41
+#: apps/project/api/platform/case_manager/forms.py:44
 msgid ""
 "We do not have an email address on file for you, so we sent the access code "
 "to our offices. Please contact us to receive it, and we will register your "
@@ -341,19 +340,19 @@ msgstr ""
 "acceso a nuestras oficinas. Comuníquese con nosotros para recibirlo y "
 "registramos su correo, para que la próxima vez le llegue directamente."
 
-#: apps/project/api/platform/case_manager/forms.py:47
+#: apps/project/api/platform/case_manager/forms.py:50
 msgid "The code is not valid or has expired. Request a new one."
 msgstr "El código no es válido o ha caducado. Pida uno nuevo."
 
-#: apps/project/api/platform/case_manager/forms.py:61
+#: apps/project/api/platform/case_manager/forms.py:64
 msgid "identification number"
 msgstr "número de identificación"
 
-#: apps/project/api/platform/case_manager/forms.py:97
+#: apps/project/api/platform/case_manager/forms.py:100
 msgid "access code"
 msgstr "código de acceso"
 
-#: apps/project/api/platform/case_manager/forms.py:192
+#: apps/project/api/platform/case_manager/forms.py:195
 #: apps/project/api/platform/case_manager/models.py:49
 msgid "The identification must contain digits only."
 msgstr "La identificación solo puede contener dígitos."
@@ -370,11 +369,11 @@ msgstr ""
 "Solo si la etapa cambia de verdad en este guardado, y solo si el cliente "
 "tiene correo registrado."
 
-#: apps/project/api/platform/case_manager/forms.py:309
+#: apps/project/api/platform/case_manager/forms.py:347
 msgid "Email this note to the client"
 msgstr "Enviar esta nota al cliente por correo"
 
-#: apps/project/api/platform/case_manager/forms.py:313
+#: apps/project/api/platform/case_manager/forms.py:351
 msgid ""
 "It goes out with the firm letterhead. Nothing is sent if the client has no "
 "email address on file."
@@ -382,18 +381,18 @@ msgstr ""
 "Sale con el membrete de la firma. No se envía nada si el cliente no tiene "
 "correo registrado."
 
-#: apps/project/api/platform/case_manager/forms.py:331
+#: apps/project/api/platform/case_manager/forms.py:369
 msgid "If this is off, the note stays in the file and no email is sent."
 msgstr ""
 "Si esto está desmarcado, la nota se queda en el expediente y no se envía "
 "ningún correo."
 
-#: apps/project/api/platform/case_manager/gestor.py:198
-#: apps/project/api/platform/case_manager/reports.py:197
+#: apps/project/api/platform/case_manager/gestor.py:207
+#: apps/project/api/platform/case_manager/reports.py:202
 msgid "Client file and financial summary."
 msgstr "Ficha del cliente y resumen económico."
 
-#: apps/project/api/platform/case_manager/gestor.py:237
+#: apps/project/api/platform/case_manager/gestor.py:255
 #, python-format
 msgid ""
 "Client %(name)s created. They will enter the portal with their "
@@ -402,7 +401,7 @@ msgstr ""
 "Cliente %(name)s creado. Entrará al portal con su número de identificación y "
 "un código que le enviaremos a %(email)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:250
+#: apps/project/api/platform/case_manager/gestor.py:268
 #, python-format
 msgid ""
 "Client %(name)s created, but without an email address they cannot use the "
@@ -411,19 +410,19 @@ msgstr ""
 "Cliente %(name)s creado, pero sin correo electrónico no puede usar el "
 "portal: el código de acceso no tiene a dónde ir."
 
-#: apps/project/api/platform/case_manager/gestor.py:265
+#: apps/project/api/platform/case_manager/gestor.py:283
 msgid "Client updated."
 msgstr "Cliente actualizado."
 
-#: apps/project/api/platform/case_manager/gestor.py:380
+#: apps/project/api/platform/case_manager/gestor.py:397
 msgid "Case saved."
 msgstr "Asunto guardado."
 
-#: apps/project/api/platform/case_manager/gestor.py:410
+#: apps/project/api/platform/case_manager/gestor.py:427
 msgid "Your procedure has moved forward"
 msgstr "Su trámite ha avanzado"
 
-#: apps/project/api/platform/case_manager/gestor.py:412
+#: apps/project/api/platform/case_manager/gestor.py:429
 #, python-format
 msgid ""
 "Your case is now at the stage «%(stage)s». We will keep you posted on any "
@@ -432,12 +431,12 @@ msgstr ""
 "Su asunto se encuentra ahora en la etapa «%(stage)s». Le seguiremos "
 "informando de cualquier novedad."
 
-#: apps/project/api/platform/case_manager/gestor.py:422
+#: apps/project/api/platform/case_manager/gestor.py:439
 msgid "The client was emailed about the new stage."
 msgstr "Se avisó al cliente por correo del cambio de etapa."
 
-#: apps/project/api/platform/case_manager/gestor.py:428
-#: apps/project/api/platform/case_manager/gestor.py:535
+#: apps/project/api/platform/case_manager/gestor.py:445
+#: apps/project/api/platform/case_manager/gestor.py:563
 msgid ""
 "The note was saved, but no email was sent: check that the client has an "
 "email address on file."
@@ -445,31 +444,31 @@ msgstr ""
 "La nota se guardó, pero no se envió ningún correo: compruebe que el cliente "
 "tenga correo registrado."
 
-#: apps/project/api/platform/case_manager/gestor.py:478
+#: apps/project/api/platform/case_manager/gestor.py:506
 #, python-format
 msgid "Settlement letter enabled for %(name)s."
 msgstr "Paz y salvo habilitado para %(name)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:480
+#: apps/project/api/platform/case_manager/gestor.py:508
 #, python-format
 msgid "Settlement letter disabled for %(name)s."
 msgstr "Paz y salvo retirado a %(name)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:516
+#: apps/project/api/platform/case_manager/gestor.py:544
 msgid "Note added."
 msgstr "Nota añadida."
 
-#: apps/project/api/platform/case_manager/gestor.py:522
+#: apps/project/api/platform/case_manager/gestor.py:550
 #, python-format
 msgid "Emailed to %(email)s."
 msgstr "Enviado por correo a %(email)s."
 
-#: apps/project/api/platform/case_manager/gestor.py:529
+#: apps/project/api/platform/case_manager/gestor.py:557
 msgid "Internal note: nothing was emailed to the client."
 msgstr "Nota interna: no se le envió nada al cliente."
 
-#: apps/project/api/platform/case_manager/gestor.py:558
-#: apps/project/api/platform/case_manager/urls.py:120
+#: apps/project/api/platform/case_manager/gestor.py:586
+#: apps/project/api/platform/case_manager/urls.py:125
 msgid "Edit case"
 msgstr "Editar asunto"
 
@@ -515,20 +514,20 @@ msgid "codes blocked until"
 msgstr "códigos bloqueados hasta"
 
 #: apps/project/api/platform/case_manager/models.py:185
-#: apps/project/api/platform/case_manager/reports.py:201
-#: apps/project/api/platform/case_manager/reports.py:283
+#: apps/project/api/platform/case_manager/reports.py:206
+#: apps/project/api/platform/case_manager/reports.py:318
 #: apps/project/api/platform/case_manager/templates/case_manager/email/access_code.html:75
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:57
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:33
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:80
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:124
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:61
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:46
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:85
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:130
 msgid "Client"
 msgstr "Cliente"
 
 #: apps/project/api/platform/case_manager/models.py:186
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/base.html:56
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:43
-#: apps/project/api/platform/case_manager/urls.py:59
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/base.html:67
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:47
+#: apps/project/api/platform/case_manager/urls.py:64
 msgid "Clients"
 msgstr "Clientes"
 
@@ -697,75 +696,75 @@ msgid "Case"
 msgstr "Asunto"
 
 #: apps/project/api/platform/case_manager/models.py:636
-#: apps/project/api/platform/case_manager/reports.py:206
-#: apps/project/api/platform/case_manager/reports.py:219
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/base.html:62
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:57
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:34
-#: apps/project/api/platform/case_manager/urls.py:100
+#: apps/project/api/platform/case_manager/reports.py:211
+#: apps/project/api/platform/case_manager/reports.py:224
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/base.html:73
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:61
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:47
+#: apps/project/api/platform/case_manager/urls.py:105
 msgid "Cases"
 msgstr "Asuntos"
 
-#: apps/project/api/platform/case_manager/models.py:804
+#: apps/project/api/platform/case_manager/models.py:814
 msgid "No area recorded"
 msgstr "Sin área"
 
-#: apps/project/api/platform/case_manager/models.py:855
-#: apps/project/api/platform/case_manager/models.py:1092
+#: apps/project/api/platform/case_manager/models.py:865
+#: apps/project/api/platform/case_manager/models.py:1104
 msgid "case"
 msgstr "asunto"
 
-#: apps/project/api/platform/case_manager/models.py:859
+#: apps/project/api/platform/case_manager/models.py:869
 msgid "start date"
 msgstr "fecha de inicio"
 
-#: apps/project/api/platform/case_manager/models.py:862
+#: apps/project/api/platform/case_manager/models.py:872
 msgid "Month and year the matter started."
 msgstr "Mes y año en que empezó el asunto."
 
-#: apps/project/api/platform/case_manager/models.py:866
+#: apps/project/api/platform/case_manager/models.py:876
 msgid "contract modality"
 msgstr "modalidad del contrato"
 
-#: apps/project/api/platform/case_manager/models.py:872
+#: apps/project/api/platform/case_manager/models.py:882
 msgid "contingency percentage"
 msgstr "porcentaje de cuota litis"
 
-#: apps/project/api/platform/case_manager/models.py:875
+#: apps/project/api/platform/case_manager/models.py:885
 msgid "0 means a closed fixed value, not a contingency."
 msgstr "0 significa valor fijo cerrado, no cuota litis."
 
-#: apps/project/api/platform/case_manager/models.py:879
+#: apps/project/api/platform/case_manager/models.py:889
 msgid "contingency value"
 msgstr "valor de la cuota litis"
 
-#: apps/project/api/platform/case_manager/models.py:884
+#: apps/project/api/platform/case_manager/models.py:894
 msgid "agreed fee"
 msgstr "honorario pactado"
 
-#: apps/project/api/platform/case_manager/models.py:889
+#: apps/project/api/platform/case_manager/models.py:899
 msgid "paid amount"
 msgstr "pagado / abono"
 
-#: apps/project/api/platform/case_manager/models.py:894
+#: apps/project/api/platform/case_manager/models.py:906
 msgid "include in the financial dashboard"
 msgstr "incluir en el panel económico"
 
-#: apps/project/api/platform/case_manager/models.py:962
+#: apps/project/api/platform/case_manager/models.py:974
 msgid "BY EXPECTATION"
 msgstr "POR EXPECTATIVA"
 
-#: apps/project/api/platform/case_manager/models.py:963
+#: apps/project/api/platform/case_manager/models.py:975
 msgid "FIXED"
 msgstr "FIJA"
 
-#: apps/project/api/platform/case_manager/models.py:991
+#: apps/project/api/platform/case_manager/models.py:1003
 #, python-format
 msgid "%(years)s and %(months)s"
 msgstr "%(years)s y %(months)s"
 
-#: apps/project/api/platform/case_manager/models.py:992
-#: apps/project/api/platform/case_manager/models.py:997
+#: apps/project/api/platform/case_manager/models.py:1004
+#: apps/project/api/platform/case_manager/models.py:1009
 #, python-format
 msgid "%d year"
 msgid_plural "%d years"
@@ -773,8 +772,8 @@ msgstr[0] "%d año"
 msgstr[1] "%d años"
 msgstr[2] "%d años"
 
-#: apps/project/api/platform/case_manager/models.py:993
-#: apps/project/api/platform/case_manager/models.py:999
+#: apps/project/api/platform/case_manager/models.py:1005
+#: apps/project/api/platform/case_manager/models.py:1011
 #, python-format
 msgid "%d month"
 msgid_plural "%d months"
@@ -782,43 +781,43 @@ msgstr[0] "%d mes"
 msgstr[1] "%d meses"
 msgstr[2] "%d meses"
 
-#: apps/project/api/platform/case_manager/models.py:1010
+#: apps/project/api/platform/case_manager/models.py:1022
 msgid "This modality cannot carry any amount."
 msgstr "Esta modalidad no puede llevar ningún importe."
 
-#: apps/project/api/platform/case_manager/models.py:1015
+#: apps/project/api/platform/case_manager/models.py:1027
 msgid "A payment modality does not carry a contingency value."
 msgstr "Una modalidad de pago no lleva valor de cuota litis."
 
-#: apps/project/api/platform/case_manager/models.py:1019
+#: apps/project/api/platform/case_manager/models.py:1031
 msgid "Una cuota litis no admite honorarios pactados."
 msgstr "Una cuota litis no admite honorarios pactados."
 
-#: apps/project/api/platform/case_manager/models.py:1021
+#: apps/project/api/platform/case_manager/models.py:1033
 msgid "Solo la cuota litis de valor fijo admite abonos."
 msgstr "Solo la cuota litis de valor fijo admite abonos."
 
-#: apps/project/api/platform/case_manager/models.py:1031
+#: apps/project/api/platform/case_manager/models.py:1043
 msgid "Case finance"
 msgstr "Información financiera del asunto"
 
-#: apps/project/api/platform/case_manager/models.py:1032
+#: apps/project/api/platform/case_manager/models.py:1044
 msgid "Case finances"
 msgstr "Información financiera de los asuntos"
 
-#: apps/project/api/platform/case_manager/models.py:1096
+#: apps/project/api/platform/case_manager/models.py:1108
 msgid "kind"
 msgstr "tipo"
 
-#: apps/project/api/platform/case_manager/models.py:1103
+#: apps/project/api/platform/case_manager/models.py:1115
 msgid "title"
 msgstr "título"
 
-#: apps/project/api/platform/case_manager/models.py:1108
+#: apps/project/api/platform/case_manager/models.py:1120
 msgid "body"
 msgstr "mensaje"
 
-#: apps/project/api/platform/case_manager/models.py:1110
+#: apps/project/api/platform/case_manager/models.py:1122
 msgid ""
 "The client reads this as written. Keep it plain and say what, if anything, "
 "they have to do."
@@ -826,32 +825,32 @@ msgstr ""
 "El cliente lo lee tal cual. Escríbalo claro y diga qué tiene que hacer, si "
 "tiene que hacer algo."
 
-#: apps/project/api/platform/case_manager/models.py:1116
+#: apps/project/api/platform/case_manager/models.py:1128
 msgid "visible to the client"
 msgstr "visible para el cliente"
 
-#: apps/project/api/platform/case_manager/models.py:1118
+#: apps/project/api/platform/case_manager/models.py:1130
 msgid "Uncheck for notes that belong to the file, not to them."
 msgstr ""
 "Desmárquelo para las notas que son del expediente y no para el cliente."
 
-#: apps/project/api/platform/case_manager/models.py:1122
+#: apps/project/api/platform/case_manager/models.py:1134
 msgid "notified at"
 msgstr "avisado el"
 
-#: apps/project/api/platform/case_manager/models.py:1126
+#: apps/project/api/platform/case_manager/models.py:1138
 msgid "When the client was emailed about this note, if ever."
 msgstr "Cuándo se le mandó el correo al cliente por esta nota, si se le mandó."
 
-#: apps/project/api/platform/case_manager/models.py:1135
+#: apps/project/api/platform/case_manager/models.py:1147
 msgid "written by"
 msgstr "escrita por"
 
-#: apps/project/api/platform/case_manager/models.py:1164
+#: apps/project/api/platform/case_manager/models.py:1176
 msgid "Case note"
 msgstr "Nota del asunto"
 
-#: apps/project/api/platform/case_manager/models.py:1165
+#: apps/project/api/platform/case_manager/models.py:1177
 msgid "Case notes"
 msgstr "Notas del asunto"
 
@@ -860,191 +859,187 @@ msgstr "Notas del asunto"
 msgid "Generated by the Propensiones® case manager on %(when)s."
 msgstr "Generado por el gestor de procesos de Propensiones® el %(when)s."
 
-#: apps/project/api/platform/case_manager/reports.py:196
+#: apps/project/api/platform/case_manager/reports.py:201
 msgid "Internal case file"
 msgstr "Ficha interna de seguimiento"
 
-#: apps/project/api/platform/case_manager/reports.py:202
-#: apps/project/api/platform/case_manager/reports.py:283
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:245
+#: apps/project/api/platform/case_manager/reports.py:207
+#: apps/project/api/platform/case_manager/reports.py:318
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:244
 #: apps/project/api/platform/case_manager/templates/case_manager/email/access_code.html:83
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:39
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:32
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:43
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:45
 msgid "Identification"
 msgstr "Identificación"
 
-#: apps/project/api/platform/case_manager/reports.py:203
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:55
+#: apps/project/api/platform/case_manager/reports.py:208
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:59
 msgid "Email"
 msgstr "Correo"
 
-#: apps/project/api/platform/case_manager/reports.py:204
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:56
+#: apps/project/api/platform/case_manager/reports.py:209
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:60
 msgid "Phone"
 msgstr "Teléfono"
 
-#: apps/project/api/platform/case_manager/reports.py:205
+#: apps/project/api/platform/case_manager/reports.py:210
+#: apps/project/api/platform/case_manager/reports.py:241
 msgid "Status"
 msgstr "Estado"
 
-#: apps/project/api/platform/case_manager/reports.py:205
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:250
+#: apps/project/api/platform/case_manager/reports.py:210
+#: apps/project/api/platform/case_manager/reports.py:241
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:249
 msgid "ACTIVE"
 msgstr "ACTIVO"
 
-#: apps/project/api/platform/case_manager/reports.py:205
+#: apps/project/api/platform/case_manager/reports.py:210
+#: apps/project/api/platform/case_manager/reports.py:241
 msgid "INACTIVE"
 msgstr "INACTIVO"
 
-#: apps/project/api/platform/case_manager/reports.py:209
+#: apps/project/api/platform/case_manager/reports.py:214
 msgid "Financial summary"
 msgstr "Resumen económico"
 
-#: apps/project/api/platform/case_manager/reports.py:211
-#: apps/project/api/platform/case_manager/reports.py:259
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:63
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:24
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:81
+#: apps/project/api/platform/case_manager/reports.py:216
+#: apps/project/api/platform/case_manager/reports.py:294
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:67
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:28
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:86
 msgid "Agreed"
 msgstr "Pactado"
 
-#: apps/project/api/platform/case_manager/reports.py:212
-#: apps/project/api/platform/case_manager/reports.py:260
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:64
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:25
+#: apps/project/api/platform/case_manager/reports.py:217
+#: apps/project/api/platform/case_manager/reports.py:295
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:68
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:29
 msgid "Collected"
 msgstr "Cobrado"
 
-#: apps/project/api/platform/case_manager/reports.py:213
-#: apps/project/api/platform/case_manager/reports.py:261
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:65
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:26
+#: apps/project/api/platform/case_manager/reports.py:218
+#: apps/project/api/platform/case_manager/reports.py:296
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:69
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:30
 msgid "Outstanding balance"
 msgstr "Saldo pendiente"
 
-#: apps/project/api/platform/case_manager/reports.py:214
-#: apps/project/api/platform/case_manager/reports.py:262
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:66
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:27
+#: apps/project/api/platform/case_manager/reports.py:219
+#: apps/project/api/platform/case_manager/reports.py:297
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:70
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:31
 msgid "Contingency expectation"
 msgstr "Expectativa de cuota litis"
 
-#: apps/project/api/platform/case_manager/reports.py:215
-#: apps/project/api/platform/case_manager/reports.py:263
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:28
+#: apps/project/api/platform/case_manager/reports.py:220
+#: apps/project/api/platform/case_manager/reports.py:298
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:32
 msgid "Potential pending"
 msgstr "Pendiente potencial"
 
-#: apps/project/api/platform/case_manager/reports.py:216
-#: apps/project/api/platform/case_manager/reports.py:264
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:29
+#: apps/project/api/platform/case_manager/reports.py:221
+#: apps/project/api/platform/case_manager/reports.py:299
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:33
 msgid "Projected total"
 msgstr "Total proyectado"
 
-#: apps/project/api/platform/case_manager/reports.py:223
+#: apps/project/api/platform/case_manager/reports.py:228
+#: apps/project/api/platform/case_manager/reports.py:238
 #: apps/project/api/platform/case_manager/templates/case_manager/email/case_note.html:96
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:58
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:79
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:35
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:62
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:84
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:48
 msgid "Service"
 msgstr "Servicio"
 
-#: apps/project/api/platform/case_manager/reports.py:223
-#: apps/project/api/platform/case_manager/reports.py:283
+#: apps/project/api/platform/case_manager/reports.py:228
+#: apps/project/api/platform/case_manager/reports.py:318
 msgid "Area"
 msgstr "Área"
 
-#: apps/project/api/platform/case_manager/reports.py:223
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:59
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:81
+#: apps/project/api/platform/case_manager/reports.py:228
+#: apps/project/api/platform/case_manager/reports.py:242
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:63
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:86
 msgid "Stage"
 msgstr "Etapa"
 
-#: apps/project/api/platform/case_manager/reports.py:223
-#: apps/project/api/platform/case_manager/reports.py:284
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:82
+#: apps/project/api/platform/case_manager/reports.py:228
+#: apps/project/api/platform/case_manager/reports.py:319
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:87
 msgid "Elapsed"
 msgstr "Tiempo"
 
-#: apps/project/api/platform/case_manager/reports.py:224
-#: apps/project/api/platform/case_manager/reports.py:284
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:83
+#: apps/project/api/platform/case_manager/reports.py:229
+#: apps/project/api/platform/case_manager/reports.py:319
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:88
 msgid "Modality"
 msgstr "Modalidad"
 
-#: apps/project/api/platform/case_manager/reports.py:224
-#: apps/project/api/platform/case_manager/reports.py:284
+#: apps/project/api/platform/case_manager/reports.py:229
+#: apps/project/api/platform/case_manager/reports.py:319
 msgid "Contingency type"
 msgstr "Tipo de cuota litis"
 
-#: apps/project/api/platform/case_manager/reports.py:225
-#: apps/project/api/platform/case_manager/reports.py:285
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:84
+#: apps/project/api/platform/case_manager/reports.py:230
+#: apps/project/api/platform/case_manager/reports.py:320
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:89
 msgid "Agreed / expectation"
 msgstr "Pactado / expectativa"
 
-#: apps/project/api/platform/case_manager/reports.py:225
-#: apps/project/api/platform/case_manager/reports.py:285
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:85
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:82
+#: apps/project/api/platform/case_manager/reports.py:230
+#: apps/project/api/platform/case_manager/reports.py:320
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:90
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:87
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/portfolio.html:42
 msgid "Paid"
 msgstr "Pagado"
 
-#: apps/project/api/platform/case_manager/reports.py:225
-#: apps/project/api/platform/case_manager/reports.py:285
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:86
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:83
+#: apps/project/api/platform/case_manager/reports.py:230
+#: apps/project/api/platform/case_manager/reports.py:320
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:91
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:88
 msgid "Owes"
 msgstr "Debe"
 
-#: apps/project/api/platform/case_manager/reports.py:232
+#: apps/project/api/platform/case_manager/reports.py:265
 #, python-format
 msgid "File_%(identification)s_Propensiones"
 msgstr "Ficha_%(identification)s_Propensiones"
 
-#: apps/project/api/platform/case_manager/reports.py:254
-msgid "Management / CRM report"
-msgstr "Reporte gerencial / CRM"
-
-#: apps/project/api/platform/case_manager/reports.py:255
+#: apps/project/api/platform/case_manager/reports.py:290
 msgid "Consolidated portfolio across all clients."
 msgstr "Consolidado del portafolio de todos los clientes."
 
-#: apps/project/api/platform/case_manager/reports.py:265
+#: apps/project/api/platform/case_manager/reports.py:300
 msgid "Collection rate"
 msgstr "Tasa de recaudo"
 
-#: apps/project/api/platform/case_manager/reports.py:269
+#: apps/project/api/platform/case_manager/reports.py:304
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/portfolio.html:70
 msgid "Breakdown by area / case type"
 msgstr "Distribución por área / tipo de caso"
 
-#: apps/project/api/platform/case_manager/reports.py:272
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:285
+#: apps/project/api/platform/case_manager/reports.py:307
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:284
 msgid "Area / case type"
 msgstr "Área / tipo de caso"
 
-#: apps/project/api/platform/case_manager/reports.py:272
+#: apps/project/api/platform/case_manager/reports.py:307
 msgid "Total"
 msgstr "Total"
 
-#: apps/project/api/platform/case_manager/reports.py:272
+#: apps/project/api/platform/case_manager/reports.py:307
 msgid "Share"
 msgstr "Participación"
 
-#: apps/project/api/platform/case_manager/reports.py:279
+#: apps/project/api/platform/case_manager/reports.py:314
 msgid "Detail by case"
 msgstr "Detalle por asunto"
 
-#: apps/project/api/platform/case_manager/reports.py:283
+#: apps/project/api/platform/case_manager/reports.py:318
 msgid "Started"
 msgstr "Inicio"
-
-#: apps/project/api/platform/case_manager/reports.py:307
-#, python-format
-msgid "CRM_report_%(date)s_Propensiones"
-msgstr "Reporte_CRM_%(date)s_Propensiones"
 
 #: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:17
 msgid "Track my case"
@@ -1059,6 +1054,8 @@ msgstr ""
 "Internacional."
 
 #: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:59
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:98
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:99
 msgid "Tracking of my case"
 msgstr "Seguimiento de mi proceso"
 
@@ -1070,42 +1067,42 @@ msgstr ""
 "Consulte aquí el estado y avance de su trámite con Propensiones® Abogados "
 "Internacional."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:96
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:95
 msgid "Enter your access code"
 msgstr "Escriba su código de acceso"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:117
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:116
 #, python-format
 msgid "The access code was sent to %(masked_email)s"
 msgstr "El código de acceso fue enviado a %(masked_email)s"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:131
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:130
 msgid "Access code"
 msgstr "Código de acceso"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:141
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:140
 #: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:194
 msgid "Check my case"
 msgstr "Consultar mi proceso"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:162
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:161
 #, python-format
 msgid "You can request another code from %(when)s."
 msgstr "Puede pedir otro código a partir de las %(when)s."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:167
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:166
 msgid "Resend code"
 msgstr "Reenviar código"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:173
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:172
 msgid "Use another identification number"
 msgstr "Usar otro número de identificación"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:183
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:181
 msgid "Identification number"
 msgstr "Número de identificación"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:189
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:188
 msgid "We will send a code to the email address on your file."
 msgstr ""
 "Le enviaremos un código al correo electrónico registrado en su expediente."
@@ -1114,7 +1111,7 @@ msgstr ""
 msgid "We have sent you a new code."
 msgstr "Le hemos enviado un código nuevo."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:253
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:252
 #, python-format
 msgid "%(total)s case in force"
 msgid_plural "%(total)s cases in force"
@@ -1122,61 +1119,61 @@ msgstr[0] "%(total)s asunto vigente"
 msgstr[1] "%(total)s asuntos vigentes"
 msgstr[2] "%(total)s asuntos vigentes"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:267
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:266
 #, python-format
 msgid "Case %(number)s of %(total)s"
 msgstr "Asunto %(number)s de %(total)s"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:282
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:281
 msgid "Current stage / instance"
 msgstr "Etapa / instancia actual"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:283
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:282
 msgid "Case number / reference"
 msgstr "Radicado / referencia"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:288
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:287
 msgid "Subtype / speciality"
 msgstr "Subtipo / especialidad"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:291
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:290
 msgid "Second sublevel"
 msgstr "Segundo subnivel"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:293
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:292
 msgid "Contract modality"
 msgstr "Modalidad del contrato"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:303
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:302
 msgid "Process started"
 msgstr "Inicio del proceso"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:304
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:303
 msgid "Time elapsed"
 msgstr "Tiempo transcurrido"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:306
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:305
 msgid "Last update"
 msgstr "Actualización"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:328
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:326
 msgid "Case progress"
 msgstr "Avance del proceso"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:343
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:341
 #: apps/project/api/platform/case_manager/templates/case_manager/email/case_note.html:100
 msgid "Current status"
 msgstr "Estado actual"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:346
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:344
 msgid "Your service is advancing according to the stage shown."
 msgstr "Su servicio avanza conforme a la etapa indicada."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:354
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:352
 msgid "Settlement letter available"
 msgstr "Paz y salvo disponible"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:357
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:355
 msgid ""
 "This document is available because <b>Propensiones®</b> expressly authorized "
 "its issuance."
@@ -1184,7 +1181,7 @@ msgstr ""
 "Este documento está disponible porque <b>Propensiones®</b> autorizó "
 "expresamente su expedición."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:361
+#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:359
 msgid "Print settlement letter"
 msgstr "Imprimir paz y salvo"
 
@@ -1300,27 +1297,19 @@ msgstr ""
 "conforme a la Ley 1581 de 2012."
 
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/base.html:16
-#: apps/project/api/platform/case_manager/urls.py:47
+#: apps/project/api/platform/case_manager/urls.py:52
 msgid "Case manager"
 msgstr "Gestor de procesos"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/base.html:50
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/base.html:61
 msgid "Dashboard"
 msgstr "Panel"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/base.html:72
-msgid "Close"
-msgstr "Cerrar"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:19
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:28
 msgid "The matter"
 msgstr "El asunto"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:101
-msgid "Money"
-msgstr "Dinero"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:103
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:112
 #, python-format
 msgid ""
 "A contingency at 0 %% is not a contingency: it is a closed fixed value, and "
@@ -1329,128 +1318,128 @@ msgstr ""
 "Una cuota litis al 0 %% no es cuota litis: es un valor fijo cerrado, y "
 "cuenta como deuda, no como expectativa."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:124
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:60
-msgid "Balance"
-msgstr "Saldo"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:125
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/portfolio.html:50
-msgid "Expectation"
-msgstr "Expectativa"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:126
-msgid "Calculated, not stored."
-msgstr "Calculado, no guardado."
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:151
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:164
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:183
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_form.html:36
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:154
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_form.html:167
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_form.html:39
 msgid "Save"
 msgstr "Guardar"
 
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:6
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:26
-#: apps/project/api/platform/case_manager/urls.py:110
+#: apps/project/api/platform/case_manager/urls.py:115
 msgid "New case"
 msgstr "Nuevo asunto"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:16
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:20
 #, python-format
 msgid "Showing only the cases of <strong>%(name)s</strong>."
 msgstr "Mostrando solo los asuntos de <strong>%(name)s</strong>."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:21
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:25
 msgid "Open client"
 msgstr "Abrir cliente"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:25
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:29
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:50
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:34
 msgid "Show all"
 msgstr "Ver todos"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:40
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:41
-msgid "Search by client or case number"
-msgstr "Buscar por cliente o número de radicado"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:42
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:18
-msgid "Search"
-msgstr "Buscar"
-
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:46
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:21
-msgid "Clear"
-msgstr "Limpiar"
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:31
+#, python-format
+msgid "Showing only what matches <strong>%(q)s</strong>."
+msgstr "Mostrando solo lo que coincide con <strong>%(q)s</strong>."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:62
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:36
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:64
+msgid "Balance"
+msgstr "Saldo"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:66
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:49
 msgid "Actions"
 msgstr "Acciones"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:83
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:47
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:96
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:78
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:87
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:51
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:101
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:91
 msgid "Inactive"
 msgstr "Inactivo"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:117
-msgid "Authorized. Click to withdraw."
-msgstr "Autorizado. Pulse para retirarlo."
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:118
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:129
 msgid "Authorized"
 msgstr "Autorizado"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:122
-msgid "Not authorized. Click to enable."
-msgstr "Sin autorizar. Pulse para habilitarlo."
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:123
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:131
 msgid "Withheld"
 msgstr "Sin autorizar"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:131
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:90
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:139
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:109
 msgid "Edit"
 msgstr "Editar"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:139
-msgid "No case matches that search."
-msgstr "Ningún asunto coincide con esa búsqueda."
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:141
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:147
 msgid "There are no cases yet."
 msgstr "Todavía no hay asuntos."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:18
-msgid "Download file (Word)"
-msgstr "Descargar ficha (Word)"
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:172
+msgid "Close"
+msgstr "Cerrar"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:197
+msgid "Authorize the settlement letter?"
+msgstr "¿Autorizar el paz y salvo?"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:198
+msgid ""
+"From this moment the client can download and present their settlement "
+"letter. Withdrawing it later does not undo the copy they already took."
+msgstr "Desde este momento el cliente puede descargar y presentar su paz y salvo. Retirarlo después no deshace la copia que ya se llevó."
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:199
+msgid "Yes, authorize"
+msgstr "Sí, autorizar"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:203
+msgid "Withdraw the settlement letter?"
+msgstr "¿Retirar el paz y salvo?"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:204
+msgid ""
+"The client will stop being able to download it. If they are up to date, they "
+"usually need it for a deadline."
+msgstr "El cliente dejará de poder descargarlo. Si está al día, suele necesitarlo para una fecha."
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/case_list.html:205
+msgid "Yes, withdraw"
+msgstr "Sí, retirar"
 
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:22
-#: apps/project/api/platform/case_manager/urls.py:89
+#: apps/project/api/platform/case_manager/urls.py:94
 msgid "Edit client"
 msgstr "Editar cliente"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:45
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:76
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:49
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:89
 msgid "In force"
 msgstr "Vigente"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:72
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:76
 msgid "Cases of this client"
 msgstr "Asuntos de este cliente"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:80
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:85
 msgid "Area / subtype"
 msgstr "Área / subtipo"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:140
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:150
 msgid "This client has no cases yet."
 msgstr "Este cliente todavía no tiene asuntos."
 
@@ -1465,37 +1454,24 @@ msgstr ""
 "enviárselo, y el portal le pedirá que nos llame."
 
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:6
-#: apps/project/api/platform/case_manager/urls.py:69
+#: apps/project/api/platform/case_manager/urls.py:74
 msgid "New client"
 msgstr "Nuevo cliente"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:16
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:17
-msgid "Search by name or identification"
-msgstr "Buscar por nombre o identificación"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:67
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:80
 #, python-format
 msgid "See the cases of %(name)s"
 msgstr "Ver los asuntos de %(name)s"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:85
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:104
 msgid "New case for this client"
 msgstr "Nuevo asunto para este cliente"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:99
-msgid "No client matches that search."
-msgstr "Ningún cliente coincide con esa búsqueda."
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:101
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_list.html:123
 msgid "There are no clients yet."
 msgstr "Todavía no hay clientes."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:17
-msgid "Download report (Word)"
-msgstr "Descargar reporte (Word)"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:35
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:39
 #, python-format
 msgid ""
 "<strong>Contingency expectation</strong> is not money owed: it is what the "
@@ -1508,34 +1484,98 @@ msgstr ""
 "además se suma al pendiente potencial. Una cuota litis al 0 %% no es cuota "
 "litis: es un valor fijo cerrado, y cuenta como deuda."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:46
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:57
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:50
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:61
 msgid "in total"
 msgstr "en total"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:54
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:58
 msgid "Cases in force"
 msgstr "Asuntos vigentes"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:72
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:76
 msgid "Clients with an outstanding balance"
 msgstr "Clientes con saldo pendiente"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:101
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:106
 msgid "No outstanding balances recorded."
 msgstr "No hay saldos pendientes registrados."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:116
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:121
 msgid "Contingency expectations"
 msgstr "Expectativas de cuota litis"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:126
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:132
 msgid "Expected"
 msgstr "Esperado"
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:143
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/dashboard.html:149
 msgid "No contingency expectations recorded."
 msgstr "No hay expectativas de cuota litis registradas."
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:20
+msgid "There is nothing here yet."
+msgstr "Aquí todavía no hay nada."
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:21
+msgid "_START_ to _END_ of _TOTAL_"
+msgstr "_START_ a _END_ de _TOTAL_"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:22
+msgid "Nothing to show"
+msgstr "Nada que mostrar"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:23
+msgid "(filtered from _MAX_)"
+msgstr "(filtrado de _MAX_)"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:24
+msgid "Show _MENU_"
+msgstr "Mostrar _MENU_"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:25
+msgid "Loading…"
+msgstr "Cargando…"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:26
+msgid "Working…"
+msgstr "Trabajando…"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:28
+msgid "Search in the table"
+msgstr "Buscar en la tabla"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:29
+msgid "Nothing matches that search."
+msgstr "Nada coincide con esa búsqueda."
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:31
+msgid "First"
+msgstr "Primera"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:32
+msgid "Last"
+msgstr "Última"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:33
+msgid "Next"
+msgstr "Siguiente"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:34
+msgid "Previous"
+msgstr "Anterior"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:37
+msgid "Copied"
+msgstr "Copiado"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:39
+msgid "Copy"
+msgstr "Copiar"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/datatables_js.html:42
+msgid "Print"
+msgstr "Imprimir"
 
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/notes.html:16
 msgid "Notes and notices"
@@ -1574,25 +1614,6 @@ msgstr "Enviado el %(when)s"
 msgid "No notes on this case yet."
 msgstr "Este asunto todavía no tiene notas."
 
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:19
-msgid "Pagination"
-msgstr "Paginación"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:25
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:30
-msgid "Previous"
-msgstr "Anterior"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:36
-#, python-format
-msgid "Page %(current)s of %(total)s"
-msgstr "Página %(current)s de %(total)s"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:44
-#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/pagination.html:49
-msgid "Next"
-msgstr "Siguiente"
-
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/portfolio.html:20
 msgid "Portfolio financial status"
 msgstr "Estado financiero del portafolio"
@@ -1609,6 +1630,10 @@ msgstr "recaudado"
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/portfolio.html:46
 msgid "Outstanding"
 msgstr "Por cobrar"
+
+#: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/portfolio.html:50
+msgid "Expectation"
+msgstr "Expectativa"
 
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/partials/portfolio.html:57
 msgid ""
@@ -1662,21 +1687,66 @@ msgstr "Información importante para el cliente"
 msgid "Your unconditional ally"
 msgstr "Su aliado incondicional"
 
-#: apps/project/api/platform/case_manager/urls.py:48
+#: apps/project/api/platform/case_manager/urls.py:53
 msgid "Cases, clients and their money."
 msgstr "Asuntos, clientes y su dinero."
 
-#: apps/project/api/platform/case_manager/views.py:49
+#: apps/project/api/platform/case_manager/views.py:62
 msgid "Too many failed attempts from this connection. Try again later."
 msgstr "Demasiados intentos fallidos desde esta conexión. Inténtelo más tarde."
 
-#: apps/project/api/platform/case_manager/views.py:55
+#: apps/project/api/platform/case_manager/views.py:68
 msgid ""
 "We could not send the access code right now. Please try again in a few "
 "minutes or contact us."
 msgstr ""
 "No pudimos enviar el código de acceso en este momento. Inténtelo de nuevo en "
 "unos minutos o comuníquese con nosotros."
+
+#~ msgid "Authorized. Click to withdraw."
+#~ msgstr "Autorizado. Pulse para retirarlo."
+
+#~ msgid "Not authorized. Click to enable."
+#~ msgstr "Sin autorizar. Pulse para habilitarlo."
+
+#~ msgid "Management / CRM report"
+#~ msgstr "Reporte gerencial / CRM"
+
+#~ msgid "CRM_report_%(date)s_Propensiones"
+#~ msgstr "Reporte_CRM_%(date)s_Propensiones"
+
+#~ msgid "Money"
+#~ msgstr "Dinero"
+
+#~ msgid "Calculated, not stored."
+#~ msgstr "Calculado, no guardado."
+
+#~ msgid "Search by client or case number"
+#~ msgstr "Buscar por cliente o número de radicado"
+
+#~ msgid "Search"
+#~ msgstr "Buscar"
+
+#~ msgid "Clear"
+#~ msgstr "Limpiar"
+
+#~ msgid "No case matches that search."
+#~ msgstr "Ningún asunto coincide con esa búsqueda."
+
+#~ msgid "Download file (Word)"
+#~ msgstr "Descargar ficha (Word)"
+
+#~ msgid "Search by name or identification"
+#~ msgstr "Buscar por nombre o identificación"
+
+#~ msgid "Download report (Word)"
+#~ msgstr "Descargar reporte (Word)"
+
+#~ msgid "Pagination"
+#~ msgstr "Paginación"
+
+#~ msgid "Page %(current)s of %(total)s"
+#~ msgstr "Página %(current)s de %(total)s"
 
 #~ msgid "This subtype does not belong to the selected service and area."
 #~ msgstr "Este subtipo no corresponde al servicio y al área seleccionados."

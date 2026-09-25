@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 19:29-0500\n"
+"POT-Creation-Date: 2026-09-24 20:20-0500\n"
 "PO-Revision-Date: 2026-08-23 17:40-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: Propensiones Abogados\n"
@@ -882,7 +882,7 @@ msgstr ""
 msgid "Official Mineral Trading Company"
 msgstr "Empresa de Comercialización Oficial de Minerales"
 
-#: apps/common/core/templates/pages/sections/9_gold.html:19
+#: apps/common/core/templates/pages/sections/9_gold.html:16
 msgid ""
 "Institutional structure specializing in the national and international "
 "marketing of precious metals, with reach in the United States, Canada, "
@@ -892,7 +892,7 @@ msgstr ""
 "internacional de metales preciosos, con alcance en Estados Unidos, Canadá, "
 "Europa y Sudáfrica."
 
-#: apps/common/core/templates/pages/sections/9_gold.html:20
+#: apps/common/core/templates/pages/sections/9_gold.html:17
 msgid ""
 "Through Propensiones S.A.S., comprehensive processes of purchase, sale, "
 "transformation, benefit, intermediation and export of minerals such as gold, "
@@ -1006,6 +1006,7 @@ msgid "Back to team"
 msgstr "Regresar al equipo"
 
 #: apps/common/core/templates/partials/banner.html:30
+#: apps/common/core/templates/partials/toasts.html:33
 msgid "Close"
 msgstr "Cerrar"
 

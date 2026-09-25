@@ -1,0 +1,38 @@
+{% load i18n %}
+{% comment %}
+  Los avisos de Django, como notificaciones flotantes.
+
+  Antes eran una franja al principio del contenido. El problema no era el
+  aspecto: era que el aviso se pinta arriba y la accion que lo provoca suele
+  dejarte a media pagina --guardar un asunto largo, cambiar el paz y salvo de
+  la fila cuarenta--, asi que el «guardado» aparecia fuera de la pantalla y
+  nadie lo leia. Un aviso que no se lee no es un aviso.
+
+  Van **abajo a la izquierda**, que es la unica esquina libre: abajo a la
+  derecha esta el boton de WhatsApp, arriba la cabecera fija, y arriba a la
+  derecha el boton de accion de la pantalla --«Nuevo cliente», «Nuevo
+  asunto»--, que es justamente el que se acaba de pulsar cuando llega el
+  aviso.
+
+  Los de exito y los informativos se van solos; los de error y aviso no. Un
+  «no se pudo guardar» que desaparece a los cinco segundos es peor que no
+  avisar, porque quien parpadeo se queda creyendo que se guardo.
+{% endcomment %}
+{% if messages %}
+  <div class="toast-container position-fixed p-3 avisos-flotantes" aria-live="polite" aria-atomic="true">
+    {% for message in messages %}
+      <div class="toast show align-items-center border-0 text-bg-{{ message.tags|default:'info' }}"
+           role="{% if message.level >= 40 %}alert{% else %}status{% endif %}"
+           aria-live="{% if message.level >= 40 %}assertive{% else %}polite{% endif %}"
+           aria-atomic="true"
+           data-bs-autohide="{% if message.level >= 30 %}false{% else %}true{% endif %}"
+           data-bs-delay="6000">
+        <div class="d-flex">
+          <div class="toast-body">{{ message }}</div>
+          <button type="button" class="btn-close me-2 m-auto"
+                  data-bs-dismiss="toast" aria-label="{% trans 'Close' %}"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

@@ -10,10 +10,14 @@ membrete y la firma escaneada del representante legal dentro.
 Estas pruebas son las tres condiciones que ahora hacen falta a la vez.
 """
 
+from io import StringIO
+
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
 from ..choices import Service, Stage
+from .test_access import login_as, make_user
 from .test_public_access import identificarse, pedir_codigo
 from ..models import CaseModel, ClientModel
 
@@ -214,3 +218,94 @@ class PazYSalvoNoSigueElTemaTests(TestCase):
         )
 
         self.assertNotIn('var(--background-color)', hoja.read_text(encoding='utf-8'))
+
+
+class ConfirmacionPazYSalvoTests(TestCase):
+    """
+    El boton del listado: se pregunta antes, y no revienta con lo viejo.
+
+    Dos cosas distintas que se descubrieron juntas. La primera es de
+    interfaz: un dedo torcido aqui publica o retira un documento que el
+    cliente descarga y presenta, y eso no se deshace retirandolo despues.
+
+    La segunda es un fallo que estaba desde el principio. La vista era un
+    `UpdateView` con `fields = ()`, y aun sin campos construye un formulario
+    de modelo, que valida **el expediente entero** antes de guardar. Bastaba
+    que un asunto antiguo tuviera una instancia que ya no pertenece a su
+    servicio para que el boton contestara un 500 y el paz y salvo se quedara
+    atascado --en los expedientes viejos, que son los que mas piden el
+    documento--.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+        cls.user = make_user('gestora_ps', gestor=True)
+        cls.cliente = ClientModel.objects.create(
+            identification='55550000', full_name='Cliente Paz y Salvo'
+        )
+
+    def setUp(self):
+        login_as(self.client, 'gestora_ps')
+
+    def _asunto(self, **kwargs):
+        return CaseModel.objects.create(
+            client=self.cliente, service=Service.JUDICIAL, stage=0, **kwargs
+        )
+
+    def test_el_listado_pregunta_antes_de_cambiarlo(self):
+        """
+        El boton no envia: abre la confirmacion, y la confirmacion lleva el
+        formulario. Sin el nombre del cliente delante, un «¿seguro?» solo
+        pregunta si quieres pulsar el boton que acabas de pulsar.
+        """
+        self._asunto()
+
+        respuesta = self.client.get(reverse('case_manager:gestor_case_list'))
+
+        self.assertContains(respuesta, 'data-ps-toggle')
+        self.assertContains(respuesta, 'confirmarPazYSalvo')
+        # El modelo normaliza el nombre al guardar, asi que se compara con
+        # lo que quedo en la base y no con lo que se escribio.
+        self.cliente.refresh_from_db()
+        self.assertContains(respuesta, self.cliente.full_name)
+        # Ya no hay un `submit` suelto en la celda que envie al primer clic.
+        self.assertNotContains(respuesta, 'Authorized. Click to withdraw.')
+
+    def test_el_post_sigue_cambiandolo(self):
+        asunto = self._asunto()
+
+        self.client.post(
+            reverse('case_manager:gestor_case_toggle_settlement', args=[asunto.pk])
+        )
+
+        asunto.refresh_from_db()
+        self.assertTrue(asunto.paz_y_salvo_authorized)
+
+    def test_un_expediente_antiguo_invalido_tambien_se_puede_cambiar(self):
+        """
+        `Consultoría` no tiene «Primera instancia» entre sus etapas, y hay
+        expedientes guardados asi. Antes esto daba un 500.
+        """
+        asunto = self._asunto()
+        CaseModel.objects.filter(pk=asunto.pk).update(
+            service='Consultoría', instance='Primera instancia'
+        )
+
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_case_toggle_settlement', args=[asunto.pk])
+        )
+
+        self.assertEqual(respuesta.status_code, 302)
+        asunto.refresh_from_db()
+        self.assertTrue(asunto.paz_y_salvo_authorized)
+        # Y el aviso sale --ahora flotante-- que es lo que el gestor lee para
+        # saber que paso.
+        self.cliente.refresh_from_db()
+        siguiente = self.client.get(respuesta.url)
+        self.assertTrue(
+            any(self.cliente.full_name in str(m)
+                for m in siguiente.context['messages'])
+        )
+        self.assertContains(siguiente, 'avisos-flotantes')
+        self.assertContains(siguiente, 'toast show')

@@ -18,6 +18,10 @@
   </a>
 {% endblock gestor_actions %}
 
+
+{% block gestor_tables_css %}{% include 'case_manager/gestor/partials/datatables.html' %}{% endblock gestor_tables_css %}
+{% block gestor_tables_js %}{% include 'case_manager/gestor/partials/datatables_js.html' %}{% endblock gestor_tables_js %}
+
 {% block gestor_content %}
 
   <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-4">
@@ -74,7 +78,8 @@
         </div>
         <div class="card-body pt-2">
           <div class="table-responsive">
-            <table class="table table-sm align-middle mb-0">
+            <table class="table table-sm align-middle mb-0 w-100" id="tablaDeudores"
+                   data-datatable data-dt-compact data-dt-order="3 desc">
               <thead>
                 <tr class="text-uppercase small text-muted">
                   <th scope="col">{% trans "Client" %}</th>
@@ -91,9 +96,9 @@
                          class="text-decoration-none">{{ row.case.client.full_name }}</a>
                       <div class="text-muted small">{{ row.case.service_display }}</div>
                     </td>
-                    <td class="text-end">${{ row.agreed|intcomma }}</td>
-                    <td class="text-end">${{ row.paid|intcomma }}</td>
-                    <td class="text-end fw-semibold">${{ row.balance|intcomma }}</td>
+                    <td class="text-end" data-order="{{ row.agreed }}">${{ row.agreed|intcomma }}</td>
+                    <td class="text-end" data-order="{{ row.paid }}">${{ row.paid|intcomma }}</td>
+                    <td class="text-end fw-semibold" data-order="{{ row.balance }}">${{ row.balance|intcomma }}</td>
                   </tr>
                 {% empty %}
                   <tr>
@@ -118,7 +123,8 @@
         </div>
         <div class="card-body pt-2">
           <div class="table-responsive">
-            <table class="table table-sm align-middle mb-0">
+            <table class="table table-sm align-middle mb-0 w-100" id="tablaExpectativas"
+                   data-datatable data-dt-compact data-dt-order="2 desc">
               <thead>
                 <tr class="text-uppercase small text-muted">
                   <th scope="col">{% trans "Client" %}</th>
@@ -134,8 +140,8 @@
                          class="text-decoration-none">{{ row.case.client.full_name }}</a>
                       <div class="text-muted small">{{ row.case.paz_y_salvo_subject }}</div>
                     </td>
-                    <td class="text-end">{{ row.contingency_percentage }} %</td>
-                    <td class="text-end fw-semibold">${{ row.expectation|intcomma }}</td>
+                    <td class="text-end" data-order="{{ row.contingency_percentage }}">{{ row.contingency_percentage }} %</td>
+                    <td class="text-end fw-semibold" data-order="{{ row.expectation }}">${{ row.expectation|intcomma }}</td>
                   </tr>
                 {% empty %}
                   <tr>

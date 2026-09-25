@@ -1,0 +1,55 @@
+{% load i18n static %}
+{% comment %}
+  Los guiones de DataTables, sus textos y el arranque.
+
+  `pdfmake` va delante porque el boton de PDF lo busca al construirse, no al
+  pulsarse: si llegara despues, el boton existiria y no haria nada.
+
+  No hace falta jQuery. DataTables 2 en adelante trae su propia API --`new
+  DataTable(tabla)`-- y el proyecto no carga jQuery en ningun sitio; meterlo
+  solo para esto seria otra biblioteca en cada pantalla del gestor.
+
+  Los textos van aqui y no dentro del `.js` por una razon prosaica:
+  `makemessages` solo mira las plantillas `.html` salvo que se le diga lo
+  contrario, asi que un `{% templatetag openblock %} trans {% templatetag closeblock %}`
+  dentro del fichero de guion se quedaria sin traducir y nadie se enteraria
+  hasta ver la tabla hablando en ingles.
+{% endcomment %}
+<script type="application/json" id="dt-i18n">
+{
+  "emptyTable": "{% trans 'There is nothing here yet.' %}",
+  "info": "{% trans '_START_ to _END_ of _TOTAL_' %}",
+  "infoEmpty": "{% trans 'Nothing to show' %}",
+  "infoFiltered": "{% trans '(filtered from _MAX_)' %}",
+  "lengthMenu": "{% trans 'Show _MENU_' %}",
+  "loadingRecords": "{% trans 'Loading…' %}",
+  "processing": "{% trans 'Working…' %}",
+  "search": "",
+  "searchPlaceholder": "{% trans 'Search in the table' %}",
+  "zeroRecords": "{% trans 'Nothing matches that search.' %}",
+  "paginate": {
+    "first": "{% trans 'First' %}",
+    "last": "{% trans 'Last' %}",
+    "next": "{% trans 'Next' %}",
+    "previous": "{% trans 'Previous' %}"
+  },
+  "buttons": {
+    "copyTitle": "{% trans 'Copied' %}",
+    "copyKeys": "",
+    "copy": "{% trans 'Copy' %}",
+    "csv": "CSV",
+    "pdf": "PDF",
+    "print": "{% trans 'Print' %}"
+  }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.3.11/build/pdfmake.min.js"
+        integrity="sha384-vsaIaEjAOZA6uoCQ2pryCKIc8YGpQ/0HK5krdezL4PYvnmLzrizBMDJCZulvIomS"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.3.11/build/vfs_fonts.js"
+        integrity="sha384-pkBUW1wxcm6m7ZjKDxADnNHqnz+Sx9sAL1ndsLNv/GZnWZgodPYsju1yxeyQnn0c"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/v/bs5/dt-3.1.1/af-3.1.1/b-4.1.1/cc-2.1.1/fc-6.1.0/fh-5.1.0/kt-3.1.0/r-4.1.0/rr-2.1.0/sc-3.1.0/sb-2.1.0/sl-4.1.0/datatables.min.js"
+        integrity="sha384-IFBAlan3GUZYgp7gBubm7a7csvumppU9BL72na4IoLSFkyPHiQY3RsAnD6YOaFw1"
+        crossorigin="anonymous"></script>
+<script src="{% static 'assets/custom/js/gestor_tables.js' %}" defer></script>

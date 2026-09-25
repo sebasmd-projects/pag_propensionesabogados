@@ -210,3 +210,44 @@
 :root[data-bs-theme="dark"] .tema-boton .bi-sun-fill {
   display: inline-block;
 }
+
+/* ---------------------------------------------------------------------------
+   Avisos flotantes
+
+   Abajo a la izquierda. Las otras tres esquinas estan ocupadas: abajo a la
+   derecha vive el boton de WhatsApp --`position: fixed; bottom: 15px; right:
+   20px`--, arriba esta la cabecera fija, y arriba a la derecha esta el boton
+   de accion de cada pantalla («Nuevo cliente», «Nuevo asunto»), que es
+   justamente el que se acaba de pulsar cuando llega el aviso.
+
+   El `z-index` va por encima del de la cabecera y del boton de WhatsApp, pero
+   por debajo del de los dialogos de Bootstrap (1055): un aviso no tiene que
+   poder taparle a nadie la confirmacion del paz y salvo.
+   --------------------------------------------------------------------------- */
+.avisos-flotantes {
+  bottom: 0;
+  left: 0;
+  z-index: 1050;
+  max-width: min(26rem, calc(100vw - 2rem));
+}
+
+@media (max-width: 575.98px) {
+  .avisos-flotantes {
+    /* En el movil ocupan el ancho --una tarjeta estrecha parte las frases en
+       tres palabras por linea-- y suben por encima del boton de WhatsApp, que
+       ahi ya no cabe a un lado: son 45 px de boton mas 15 de margen. */
+    right: 0;
+    max-width: none;
+    margin-bottom: 3.75rem;
+  }
+}
+
+/* La cruz de cerrar sobre los fondos oscuros. `text-bg-success`,
+   `text-bg-danger` y `text-bg-secondary` llevan texto blanco, y la cruz de
+   Bootstrap es negra: sobre verde oscuro no se ve. `text-bg-info` y
+   `text-bg-warning` llevan texto oscuro y se quedan como estan. */
+.avisos-flotantes .text-bg-success .btn-close,
+.avisos-flotantes .text-bg-danger .btn-close,
+.avisos-flotantes .text-bg-secondary .btn-close {
+  filter: var(--bs-btn-close-white-filter, invert(1) grayscale(100%) brightness(200%));
+}

@@ -7,33 +7,45 @@
   </a>
 {% endblock gestor_actions %}
 
+
+{% block gestor_tables_css %}{% include 'case_manager/gestor/partials/datatables.html' %}{% endblock gestor_tables_css %}
+{% block gestor_tables_js %}{% include 'case_manager/gestor/partials/datatables_js.html' %}{% endblock gestor_tables_js %}
+
 {% block gestor_content %}
 
-  <form method="get" class="mb-3" role="search">
-    <div class="input-group">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="search" name="q" value="{{ q }}" class="form-control"
-             placeholder="{% trans 'Search by name or identification' %}"
-             aria-label="{% trans 'Search by name or identification' %}">
-      <button class="btn btn-outline-secondary" type="submit">{% trans "Search" %}</button>
-      {% if q %}
-        <a class="btn btn-outline-secondary" href="{% url 'case_manager:gestor_client_list' %}">
-          {% trans "Clear" %}
-        </a>
-      {% endif %}
+  {% comment %}
+    Ya no hay formulario de busqueda ni paginacion del servidor: la tabla
+    trae todas las filas y DataTables busca, ordena y pagina sobre ellas.
+    Mantener las dos cosas era lo peor de las dos: la caja de DataTables
+    habria buscado dentro de los veinticinco de la pagina y habria dicho que
+    eso era todo.
+
+    El `?q=` de la direccion se sigue respetando en el servidor, para que un
+    enlace guardado no se rompa.
+  {% endcomment %}
+  {% if q %}
+    <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <i class="bi bi-funnel me-1"></i>
+        {% blocktrans %}Showing only what matches <strong>{{ q }}</strong>.{% endblocktrans %}
+      </div>
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'case_manager:gestor_client_list' %}">
+        <i class="bi bi-x-lg me-1"></i>{% trans "Show all" %}
+      </a>
     </div>
-  </form>
+  {% endif %}
 
   <div class="card border-0 shadow-sm">
     <div class="table-responsive">
-      <table class="table align-middle mb-0">
+      <table class="table align-middle mb-0 w-100" id="tablaClientes"
+             data-datatable data-dt-order="1 asc">
         <thead>
           <tr class="text-uppercase small text-muted">
             <th scope="col">{% trans "Identification" %}</th>
             <th scope="col">{% trans "Client" %}</th>
             <th scope="col" class="text-center">{% trans "Cases" %}</th>
             <th scope="col">{% trans "Service" %}</th>
-            <th scope="col" class="text-end">{% trans "Actions" %}</th>
+            <th scope="col" class="text-end" data-dt-no-sort>{% trans "Actions" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -97,13 +109,14 @@
               </td>
             </tr>
           {% empty %}
+            {% comment %}
+              La fila de «no hay nada» solo se pinta si DataTables no llega a
+              arrancar. Cuando arranca, la borra y pone la suya, que es la
+              que tambien sale al filtrar y quedarse sin resultados.
+            {% endcomment %}
             <tr>
-              <td colspan="6" class="text-muted text-center py-4">
-                {% if q %}
-                  {% trans "No client matches that search." %}
-                {% else %}
-                  {% trans "There are no clients yet." %}
-                {% endif %}
+              <td colspan="5" class="text-muted text-center py-4">
+                {% trans "There are no clients yet." %}
               </td>
             </tr>
           {% endfor %}
@@ -112,5 +125,4 @@
     </div>
   </div>
 
-  {% include 'case_manager/gestor/partials/pagination.html' %}
 {% endblock gestor_content %}

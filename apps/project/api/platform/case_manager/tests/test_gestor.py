@@ -618,25 +618,23 @@ class ClientToCasesTests(TestCase):
         self.assertIsNone(respuesta.context['form'].initial.get('client'))
 
 
-class PaginacionTests(TestCase):
+class TablasTests(TestCase):
     """
-    Las listas con mas de una pagina.
+    Los listados largos, ahora que los pagina el navegador.
 
-    Son las pruebas de un 500 de produccion: `/gestor/clientes/` reventaba en
-    cuanto el despacho paso de veinticinco clientes. El enlace «anterior» de
-    la primera pagina llamaba a `page_obj.previous_page_number`, que en la
-    primera pagina no devuelve `None` sino que lanza `EmptyPage`, y el
-    `|default:1` que lo acompanaba no atrapa excepciones.
-
-    No se prueba la plantilla por dentro: se piden las paginas, que es donde
-    se veia el fallo. Una prueba de la funcion de paginar no lo habria
-    encontrado, porque la funcion estaba bien.
+    Antes esto probaba la paginacion del servidor, y una de las pruebas
+    nacio de un 500 de produccion: el enlace «anterior» de la primera pagina
+    llamaba a `page_obj.previous_page_number`, que en la primera pagina lanza
+    `EmptyPage`. Ese codigo ya no existe --las vistas no paginan--, asi que
+    lo que se comprueba es lo que lo sustituye: que las filas llegan
+    **todas**, porque DataTables ordena y busca sobre lo que hay en el HTML,
+    y que la tabla trae el enganche y los guiones que la arrancan.
     """
 
     @classmethod
     def setUpTestData(cls):
         call_command('setup_case_manager_group', stdout=StringIO())
-        cls.user = make_user('gestora_paginacion', gestor=True)
+        cls.user = make_user('gestora_tablas', gestor=True)
         for numero in range(30):
             ClientModel.objects.create(
                 identification=f'9000{numero:04d}',
@@ -644,36 +642,46 @@ class PaginacionTests(TestCase):
             )
 
     def setUp(self):
-        login_as(self.client, 'gestora_paginacion')
+        login_as(self.client, 'gestora_tablas')
 
-    def test_la_primera_pagina_de_clientes_no_revienta(self):
+    def test_el_listado_trae_todas_las_filas(self):
+        """
+        Sin esto, DataTables ordenaria veinticinco filas y diria que eso es
+        el orden de los treinta.
+        """
         respuesta = self.client.get(reverse('case_manager:gestor_client_list'))
 
         self.assertEqual(respuesta.status_code, 200)
-        self.assertContains(respuesta, 'page=2')
+        self.assertEqual(len(respuesta.context['clients']), 30)
+        # `ListView` deja la clave puesta aunque no pagine; lo que importa es
+        # que venga vacia, que es lo que dice que no se partio la lista.
+        self.assertIsNone(respuesta.context['page_obj'])
+        self.assertFalse(respuesta.context['is_paginated'])
 
-    def test_la_ultima_pagina_tampoco(self):
-        respuesta = self.client.get(
-            reverse('case_manager:gestor_client_list'), {'page': 2}
-        )
+    def test_la_tabla_lleva_el_enganche_y_los_guiones(self):
+        respuesta = self.client.get(reverse('case_manager:gestor_client_list'))
 
-        self.assertEqual(respuesta.status_code, 200)
-        self.assertContains(respuesta, 'page=1')
+        self.assertContains(respuesta, 'data-datatable')
+        self.assertContains(respuesta, 'datatables.min.js')
+        self.assertContains(respuesta, 'pdfmake.min.js')
+        self.assertContains(respuesta, 'gestor_tables.js')
+        self.assertContains(respuesta, 'dt-i18n')
 
-    def test_la_busqueda_se_conserva_al_pasar_de_pagina(self):
-        respuesta = self.client.get(
-            reverse('case_manager:gestor_client_list'), {'q': 'Cliente'}
-        )
+    def test_la_columna_de_acciones_no_se_ordena(self):
+        """
+        Son botones. Ordenar por una columna de botones no significa nada, y
+        el `<th>` es quien lo dice para no tener que renumerar indices cada
+        vez que alguien mete una columna en medio.
+        """
+        respuesta = self.client.get(reverse('case_manager:gestor_client_list'))
 
-        self.assertEqual(respuesta.status_code, 200)
-        self.assertContains(respuesta, 'q=Cliente&amp;page=2')
+        self.assertContains(respuesta, 'data-dt-no-sort')
 
     def test_la_lista_de_clientes_sale_ordenada(self):
         """
         `annotate` agrupa, y una consulta agrupada deja de estar ordenada
-        aunque el `Meta` lo diga. Paginar sin orden reparte las filas como le
-        parezca a la base: el mismo cliente puede salir en dos paginas y en
-        ninguna.
+        aunque el `Meta` lo diga. Sigue importando sin paginacion: es el
+        orden que ve quien entra antes de tocar ninguna cabecera.
         """
         clientes = self.client.get(
             reverse('case_manager:gestor_client_list')
@@ -684,3 +692,20 @@ class PaginacionTests(TestCase):
             [c.full_name for c in clientes],
             sorted(c.full_name for c in clientes),
         )
+
+    def test_el_filtro_de_la_direccion_se_sigue_respetando(self):
+        """Un enlace guardado con `?q=` no se rompe por quitar el buscador."""
+        respuesta = self.client.get(
+            reverse('case_manager:gestor_client_list'), {'q': 'Cliente 0'}
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(len(respuesta.context['clients']), 10)
+        self.assertContains(respuesta, 'Show all')
+
+    def test_los_asuntos_tambien(self):
+        respuesta = self.client.get(reverse('case_manager:gestor_case_list'))
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'data-datatable')
+        self.assertFalse(respuesta.context['is_paginated'])

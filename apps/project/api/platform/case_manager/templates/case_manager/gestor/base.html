@@ -23,7 +23,18 @@
 {% block custom_css %}
   {{ block.super }}
   <link href="{% static 'assets/custom/css/gestor.css' %}" rel="stylesheet">
+  {% comment %}
+    DataTables lo pide la pantalla que tiene tabla, no todas. Son casi
+    trescientos kilobytes entre hoja y guiones, y el formulario de un asunto
+    no tiene nada que ordenar.
+  {% endcomment %}
+  {% block gestor_tables_css %}{% endblock gestor_tables_css %}
 {% endblock custom_css %}
+
+{% block body_third_js %}
+  {{ block.super }}
+  {% block gestor_tables_js %}{% endblock gestor_tables_js %}
+{% endblock body_third_js %}
 
 {% block body_css %}class="scrolled"{% endblock body_css %}
 
@@ -63,15 +74,7 @@
           </li>
         </ul>
 
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-              {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert"
-                      aria-label="{% trans 'Close' %}"></button>
-            </div>
-          {% endfor %}
-        {% endif %}
+        {# Los avisos salen como notificaciones flotantes, desde `raw.html`. #}
 
         {% block gestor_content %}{% endblock gestor_content %}
 

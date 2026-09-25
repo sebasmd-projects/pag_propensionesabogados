@@ -51,9 +51,12 @@
     {% block header %}{% endblock header %}
     {% block main %}{% endblock main %}
     {% block content %}{% endblock content %}
+    {# Los avisos van en la raiz: los manda cualquier vista, no una pantalla. #}
+    {% include 'partials/toasts.html' %}
     {% block footer %}{% endblock footer %}
     {% block body_third_js %}{% endblock body_third_js %}
     <script src="{% static 'assets/custom/js/theme.js' %}" defer></script>
+    <script src="{% static 'assets/custom/js/toasts.js' %}" defer></script>
     {% block body_custom_js %}{% endblock body_custom_js %}
   </body>
 </html>

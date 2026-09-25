@@ -66,13 +66,7 @@
           </a>
         </div>
 
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} py-2 small" role="alert">
-              {{ message }}
-            </div>
-          {% endfor %}
-        {% endif %}
+        {# Idem: los avisos salen flotando, desde `raw.html`. #}
 
         {% block account_content %}{% endblock account_content %}
 

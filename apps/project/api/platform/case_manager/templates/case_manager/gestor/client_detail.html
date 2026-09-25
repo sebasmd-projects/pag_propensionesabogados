@@ -28,6 +28,10 @@
   </div>
 {% endblock gestor_actions %}
 
+
+{% block gestor_tables_css %}{% include 'case_manager/gestor/partials/datatables.html' %}{% endblock gestor_tables_css %}
+{% block gestor_tables_js %}{% include 'case_manager/gestor/partials/datatables_js.html' %}{% endblock gestor_tables_js %}
+
 {% block gestor_content %}
 
   <div class="card border-0 shadow-sm mb-4">
@@ -73,7 +77,8 @@
       </h2>
     </div>
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
+      <table class="table table-hover align-middle mb-0 w-100" id="tablaFicha"
+             data-datatable data-dt-order="0 asc">
         <thead>
           <tr class="text-uppercase small">
             <th scope="col">{% trans "Service" %}</th>
@@ -84,7 +89,7 @@
             <th scope="col" class="text-end">{% trans "Agreed / expectation" %}</th>
             <th scope="col" class="text-end">{% trans "Paid" %}</th>
             <th scope="col" class="text-end">{% trans "Owes" %}</th>
-            <th scope="col"></th>
+            <th scope="col" data-dt-no-sort></th>
           </tr>
         </thead>
         <tbody>
@@ -121,11 +126,16 @@
                 una modalidad de pago no tiene expectativa. Dos columnas
                 dejarian una siempre vacia en cada fila.
               {% endcomment %}
-              <td class="text-end">
+              <td class="text-end"
+                  data-order="{{ case.finance.agreed|default:case.finance.expectation|default:0 }}">
                 ${{ case.finance.agreed|default:case.finance.expectation|default:0|intcomma }}
               </td>
-              <td class="text-end">${{ case.finance.paid|default:0|intcomma }}</td>
-              <td class="text-end fw-semibold">${{ case.finance.balance|default:0|intcomma }}</td>
+              <td class="text-end" data-order="{{ case.finance.paid|default:0 }}">
+                ${{ case.finance.paid|default:0|intcomma }}
+              </td>
+              <td class="text-end fw-semibold" data-order="{{ case.finance.balance|default:0 }}">
+                ${{ case.finance.balance|default:0|intcomma }}
+              </td>
               <td class="text-end">
                 <a class="btn btn-sm btn-outline-secondary"
                    href="{% url 'case_manager:gestor_case_update' case.pk %}">
