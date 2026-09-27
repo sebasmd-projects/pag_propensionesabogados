@@ -54,8 +54,6 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    # `axes` va el primero: envuelve al backend de siempre, y su orden en la
-    # lista de aplicaciones es el que decide cuando se registran sus senales.
     'axes',
     'corsheaders',
     'nested_admin',
@@ -68,23 +66,12 @@ THIRD_PARTY_APPS = [
     'rosetta',
     'django_ckeditor_5',
     'encrypted_model_fields',
-
-    # El acceso: el asistente de `two_factor` sobre `formtools`, con los
-    # dispositivos de `django_otp`. Los dos complementos que se instalan son
-    # los unicos que hacen falta: `otp_totp` para la aplicacion de codigos y
-    # `otp_static` para los codigos de respaldo que se apuntan en papel.
     'formtools',
     'django_otp',
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
 ]
 
-# `two_factor` se instala **detras** de las aplicaciones del proyecto y no
-# aqui con el resto de terceros. El cargador de plantillas busca por el orden
-# de `INSTALLED_APPS`, y las pantallas de acceso del proyecto --que viven en
-# `apps/project/common/account/templates/two_factor/`-- tienen que ganarle a
-# las de ejemplo que trae la biblioteca. Puesta con los demas terceros, lo que
-# se servia era su pantalla gris con el aviso de «provide a template».
 OVERRIDDEN_THIRD_PARTY_APPS = [
     'two_factor',
 ]
