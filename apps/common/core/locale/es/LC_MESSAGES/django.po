@@ -1087,7 +1087,7 @@ msgstr "Responsabilidad Social"
 
 #: apps/common/core/templates/partials/header.html:48
 msgid "My processes"
-msgstr "Mis procesos"
+msgstr "Mi proceso"
 
 #: apps/common/core/templates/partials/header.html:53
 msgid "Platforms"
