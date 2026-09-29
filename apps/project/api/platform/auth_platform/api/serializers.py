@@ -1,7 +1,10 @@
 # apps/project/api/platform/auth_platform/api/serializers.py
 
+import secrets
+
+from django.contrib.auth.hashers import check_password, make_password
+from apps.common.utils.login_attempts import note_failure
 from django.utils.translation import gettext_lazy as _
-from rest_framework import serializers
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -9,6 +12,10 @@ from ..models import (AttlasInsolvencyAuthConsultantsModel,
                       AttlasInsolvencyAuthModel, hash_value)
 
 from apps.project.api.platform.insolvency_form.models import AttlasInsolvencyFormModel
+
+
+# A usable hash performs the same password work for unknown consultants.
+DUMMY_HASH = make_password(secrets.token_urlsafe(32))
 
 
 class ClientSearchSerializer(serializers.Serializer):
@@ -74,38 +81,32 @@ class AttlasInsolvencyAuthSerializer(serializers.Serializer):
         doc_hash = hash_value(data['document_number'])
         birth_hash = hash_value(str(data['birth_date']))
         password = data['password']
-        user = data['user'].upper()
+        user = data['user'].strip().upper()
+        request = self.context['request']
 
-        # 1. Verificar existencia del usuario (cliente)
-        try:
-            auth_user = AttlasInsolvencyAuthModel.objects.get(
-                document_number_hash=doc_hash,
-                birth_date_hash=birth_hash
-            )
-        except AttlasInsolvencyAuthModel.DoesNotExist:
-            raise serializers.ValidationError({
-                'document_number': _('ID card not found with that date of birth.')
-            })
+        auth_user = AttlasInsolvencyAuthModel.objects.filter(
+            document_number_hash=doc_hash,
+            birth_date_hash=birth_hash,
+        ).first()
+        consultant = AttlasInsolvencyAuthConsultantsModel.objects.filter(
+            user=user,
+        ).first()
+        password_valid = (
+            consultant.check_password(password) if consultant is not None
+            else check_password(password, DUMMY_HASH)
+        )
 
-        # 2. Verificar existencia del asesor con las iniciales
-        try:
-            consultant = AttlasInsolvencyAuthConsultantsModel.objects.get(
-                user=user)
-        except AttlasInsolvencyAuthConsultantsModel.DoesNotExist:
+        if auth_user is None or consultant is None or not password_valid:
+            note_failure(request, username=user, reason='attlas_login')
             raise serializers.ValidationError({
-                'user': _('Invalid advisor. No advisor exists with the provided initials.')
-            })
-
-        # 3. Verificar contraseña del asesor
-        if not consultant.check_password(password):
-            raise serializers.ValidationError({
-                'password': _('Incorrect password for the specified advisor.')
+                'non_field_errors': [_('Invalid credentials.')]
             })
 
         return {
             "user_id": auth_user.id,
             "document_number": data['document_number'],
-            "consultant_id": consultant.id
+            "consultant_id": consultant.id,
+            "user": user
         }
 
 

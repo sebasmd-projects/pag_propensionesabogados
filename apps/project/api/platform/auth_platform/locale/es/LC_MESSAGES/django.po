@@ -65,3 +65,6 @@ msgstr "ATTLAS Insolvencia | Sesión"
 
 #~ msgid "Invalid credentials"
 #~ msgstr "Credenciales invalidas"
+
+msgid "Invalid credentials."
+msgstr "Credenciales inválidas."

@@ -11,6 +11,7 @@ from drf_spectacular.utils import extend_schema
 
 from apps.common.utils.functions import generate_token, verify_token
 from apps.common.utils.throttling import RateLimit
+from apps.common.utils.login_attempts import is_locked_out
 
 from ..models import AttlasInsolvencyAuthModel
 from .serializers import (
@@ -20,6 +21,8 @@ from .serializers import (
     ClientSearchSerializer,
 )
 
+
+attlas_login_ip = RateLimit('attlas_login_ip', limit=10, window=15 * 60)
 
 clients_search_ip = RateLimit('clients_search_ip', limit=20, window=10*60)
 clients_search_doc = RateLimit('clients_search_doc', limit=5, window=10*60)
@@ -79,7 +82,19 @@ class AttlasInsolvencyAuthLoginAPIView(APIView):
 
     def post(self, request):
 
-        serializer = AttlasInsolvencyAuthSerializer(data=request.data)
+        username = request.data.get('user', '')
+        username = username.strip().upper() if isinstance(username, str) else ''
+        if not attlas_login_ip.consume(request) or is_locked_out(
+            request, username=username,
+        ):
+            return Response(
+                {'detail': 'Demasiados intentos. Intente más tarde.'},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        serializer = AttlasInsolvencyAuthSerializer(
+            data=request.data, context={'request': request},
+        )
 
         if serializer.is_valid():
 
@@ -90,7 +105,7 @@ class AttlasInsolvencyAuthLoginAPIView(APIView):
                     'token': token,
                     'expires_in': settings.ATTLAS_TOKEN_TIMEOUT,
                     # AttlasInsolvencyAuthConsultantsModel.user
-                    'user': request.data['user'],
+                    'user': serializer.validated_data['user'],
                 },
                 status=status.HTTP_200_OK
             )
@@ -115,5 +130,5 @@ class TokenInfoAPIView(APIView):
                 'document_number': user.document_number,
                 'birth_date': user.birth_date,
             })
-        except Exception as e:
-            return Response({'detail': str(e)}, status=401)
+        except (ValueError, AttlasInsolvencyAuthModel.DoesNotExist):
+            return Response({'detail': 'Token inválido o expirado.'}, status=401)
