@@ -1,7 +1,7 @@
 # apps/project/api/platform/calculator/views.py
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from apps.common.utils.api_keys import HasServerKey
 from rest_framework.response import Response
 
 from drf_spectacular.utils import extend_schema
@@ -29,7 +29,7 @@ class ClientViewSet(mixins.CreateModelMixin,
     - retrieve (GET), update (PUT), partial_update (PATCH) -> /clients/{id}/
     """
     queryset = AttlasInsolvencyFormModel.objects.all()
-    permission_classes = [AllowAny]  # Ajustar según necesidades de seguridad
+    permission_classes = [HasServerKey]
 
     def get_serializer_class(self):
         if self.action == 'create':

@@ -1,7 +1,7 @@
 #  apps/project/api/platform/insolvency_form/api/views.py
 
 from .serializers import SignatureCreateSerializer
-from rest_framework.permissions import AllowAny
+from apps.common.utils.api_keys import HasServerKey
 from rest_framework.generics import CreateAPIView
 import logging
 
@@ -76,7 +76,7 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
         'resources__tables__items'
     )
     authentication_classes = [BearerTokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasServerKey, IsAuthenticated]
     lookup_field = 'id'
 
     def get_serializer_class(self):
@@ -243,7 +243,7 @@ class SignatureUpdateView(RetrieveUpdateAPIView):
     PATCH /api/v1/insolvency-form/signature/<id>/
     """
     authentication_classes = [BearerTokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasServerKey, IsAuthenticated]
     serializer_class = Step11Serializer
     lookup_field = 'id'   # o usa 'id' y adapta los kwargs
 
@@ -270,7 +270,7 @@ class SignatureCreateAPIView(CreateAPIView):
     }
     """
     serializer_class = SignatureCreateSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [HasServerKey]
 
     def create(self, request, *args, **kwargs):
         # Validar y guardar

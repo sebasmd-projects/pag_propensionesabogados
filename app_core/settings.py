@@ -296,6 +296,8 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SESSION_COOKIE_AGE = 7200
 
+ATTLAS_SERVER_KEY = os.getenv('ATTLAS_SERVER_KEY', '')
+
 ATTLAS_TOKEN_TIMEOUT = int(os.getenv('ATTLAS_TOKEN_TIMEOUT'))*60*60
 
 # Bootstrap llama `danger` a lo que Django llama `error`, y sin esto un

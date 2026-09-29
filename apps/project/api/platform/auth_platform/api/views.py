@@ -3,7 +3,7 @@
 from django.conf import settings
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny
+from apps.common.utils.api_keys import HasServerKey
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -30,7 +30,7 @@ class ClientSearchView(APIView):
     Busca por los campos _hash para no comparar texto cifrado.
     Devuelve datos en claro + form_id del formulario de insolvencia.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [HasServerKey]
 
     def get(self, request):
         params = ClientSearchSerializer(data=request.query_params)
@@ -60,18 +60,24 @@ class ClientSearchView(APIView):
 
 @extend_schema(tags=['Auth Attlas'])
 class AttlasInsolvencyAuthRegisterAPIView(CreateAPIView):
+    permission_classes = [HasServerKey]
+
     serializer_class = AttlasInsolvencyAuthRegisterSerializer
     queryset = AttlasInsolvencyAuthModel.objects.all()
 
 
 @extend_schema(tags=['Auth Attlas'])
 class AttlasInsolvencyAuthConsultantsRegisterAPIView(CreateAPIView):
+    permission_classes = [HasServerKey]
+
     serializer_class = AttlasInsolvencyAuthConsultantsRegisterSerializer
     queryset = AttlasInsolvencyAuthModel.objects.all()
 
 
 @extend_schema(tags=['Auth Attlas'])
 class AttlasInsolvencyAuthLoginAPIView(APIView):
+    permission_classes = [HasServerKey]
+
     def post(self, request):
 
         serializer = AttlasInsolvencyAuthSerializer(data=request.data)
@@ -94,7 +100,7 @@ class AttlasInsolvencyAuthLoginAPIView(APIView):
 
 @extend_schema(tags=['Auth Attlas'])
 class TokenInfoAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [HasServerKey]
 
     def get(self, request):
         token = request.headers.get('Authorization', '').replace('Bearer ', '')
