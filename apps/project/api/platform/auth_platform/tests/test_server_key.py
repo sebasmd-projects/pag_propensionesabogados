@@ -1,8 +1,8 @@
 from uuid import UUID
 from django.core import checks
-from django.db import transaction
+from django.core.cache import cache
 from django.test import TestCase, override_settings
-from django.urls import resolve, reverse
+from django.urls import NoReverseMatch, resolve, reverse
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.test import APIRequestFactory, APITestCase
@@ -20,7 +20,6 @@ ROUTES = [
     ('token-info', {}, ('get',)),
     ('calculator_api:client-list', {}, ('post',)),
     ('calculator_api:client-detail', {'pk': OBJECT_ID}, ('get', 'put', 'patch')),
-    ('calculator_api:client-search', {}, ('get',)),
     ('insolvency_form_api:wizard', {'id': OBJECT_ID}, ('get', 'put', 'patch')),
     ('insolvency_form_api:wizard-me', {}, ('get', 'put', 'patch')),
     ('insolvency_form_api:signature-update', {'id': OBJECT_ID}, ('get', 'put', 'patch')),
@@ -30,6 +29,9 @@ ROUTES = [
 
 @override_settings(ATTLAS_SERVER_KEY=SERVER_KEY, SECURE_SSL_REDIRECT=False)
 class ServerKeyAPITests(APITestCase):
+    def setUp(self):
+        cache.clear()
+
     def assert_routes_denied(self, headers):
         for name, kwargs, methods in ROUTES:
             for method in methods:
@@ -68,18 +70,10 @@ class ServerKeyAPITests(APITestCase):
                     self.assertEqual(resolve(url).func.cls.permission_classes, [HasServerKey, IsAuthenticated])
                     self.assertEqual(self.client.get(url, HTTP_X_SERVER_KEY=SERVER_KEY).status_code, 401)
 
-    def test_calculator_search_permission_despite_shadowed_url(self):
-        # Ambas rutas search comparten URL; el resolver selecciona ClientSearchView.
-        view = ClientViewSet.as_view({'get': 'search'})
-        factory = APIRequestFactory()
-        for headers in ({}, {'HTTP_X_SERVER_KEY': 'wrong'}):
-            with self.subTest(headers=headers), transaction.atomic():
-                response = view(factory.get(reverse('calculator_api:client-search'), **headers))
-                self.assertEqual(response.status_code, 403)
-        response = view(factory.get(reverse('calculator_api:client-search'),
-            {'documentNumber': 'nonexistent', 'birthDate': '1990-01-01'}, HTTP_X_SERVER_KEY=SERVER_KEY))
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('non_field_errors', response.data)
+    def test_duplicate_calculator_search_is_removed(self):
+        self.assertFalse(hasattr(ClientViewSet, 'search'))
+        with self.assertRaises(NoReverseMatch):
+            reverse('calculator_api:client-search')
 
 
 @override_settings(ATTLAS_SERVER_KEY=SERVER_KEY)

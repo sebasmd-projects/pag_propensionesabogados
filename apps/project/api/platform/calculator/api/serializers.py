@@ -7,28 +7,6 @@ from apps.project.api.platform.auth_platform.models import AttlasInsolvencyAuthM
 from apps.project.api.platform.insolvency_form.models import AttlasInsolvencyFormModel
 
 # ------------------------------------------------------------
-# Validación para búsqueda por cédula y fecha de nacimiento
-# ------------------------------------------------------------
-
-
-class ClientSearchSerializer(serializers.Serializer):
-    documentNumber = serializers.CharField(max_length=20)
-    birthDate = serializers.DateField()
-
-    def validate(self, data):
-        doc_hash = hash_value(data['documentNumber'])
-        birth_hash = hash_value(str(data['birthDate']))
-        if not AttlasInsolvencyAuthModel.objects.filter(
-            document_number_hash=doc_hash,
-            birth_date_hash=birth_hash
-        ).exists():
-            raise serializers.ValidationError(
-                _('No se encontró un usuario con esa cédula y fecha de nacimiento.')
-            )
-        return data
-
-
-# ------------------------------------------------------------
 # Serializador de salida (lectura) de los datos del cliente
 # ------------------------------------------------------------
 class ClientDataSerializer(serializers.ModelSerializer):

@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
 from apps.common.utils.functions import generate_token, verify_token
-from apps.common.utils.models import hash_value
+from apps.common.utils.throttling import RateLimit
 
 from ..models import AttlasInsolvencyAuthModel
 from .serializers import (
@@ -18,8 +18,11 @@ from .serializers import (
     AttlasInsolvencyAuthRegisterSerializer,
     AttlasInsolvencyAuthSerializer,
     ClientSearchSerializer,
-    ClientResponseSerializer
 )
+
+
+clients_search_ip = RateLimit('clients_search_ip', limit=20, window=10*60)
+clients_search_doc = RateLimit('clients_search_doc', limit=5, window=10*60)
 
 
 @extend_schema(tags=['Clients'])
@@ -27,8 +30,8 @@ class ClientSearchView(APIView):
     """
     GET /api/v1/clients/search/?documentNumber=xxx&birthDate=yyyy-mm-dd
 
-    Busca por los campos _hash para no comparar texto cifrado.
-    Devuelve datos en claro + form_id del formulario de insolvencia.
+    Búsqueda deshabilitada hasta el flujo OTP: valida y limita solicitudes,
+    y responde 404 uniforme sin consultar ni revelar datos de clientes.
     """
     permission_classes = [HasServerKey]
 
@@ -37,25 +40,21 @@ class ClientSearchView(APIView):
         if not params.is_valid():
             return Response(params.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        dn_hash = hash_value(params.validated_data['documentNumber'])
-        bd_hash = hash_value(
-            params.validated_data['birthDate'].strftime('%Y-%m-%d')
-        )
-
-        try:
-            user = AttlasInsolvencyAuthModel.objects.select_related(
-                'insolvency_form'
-            ).get(
-                document_number_hash=dn_hash,
-                birth_date_hash=bd_hash,
-            )
-        except AttlasInsolvencyAuthModel.DoesNotExist:
+        document_number = params.validated_data['documentNumber'].strip().lower()
+        ip_allowed = clients_search_ip.consume(request)
+        doc_allowed = clients_search_doc.consume(request, scope=document_number)
+        if not ip_allowed or not doc_allowed:
             return Response(
-                {'detail': 'No encontrado'},
-                status=status.HTTP_404_NOT_FOUND,
+                {'detail': 'Demasiadas solicitudes. Intente más tarde.'},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
-        return Response(ClientResponseSerializer().to_representation(user))
+        # Deshabilitado de facto hasta OTP: cédula + fecha no son credenciales.
+        # El 404 uniforme evita un oráculo que revele quién es cliente.
+        return Response(
+            {'detail': 'No encontrado'},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
 
 @extend_schema(tags=['Auth Attlas'])
