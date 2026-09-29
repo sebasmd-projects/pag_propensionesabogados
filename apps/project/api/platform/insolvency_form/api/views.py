@@ -7,8 +7,7 @@ import logging
 
 from django.db import transaction
 from rest_framework import status
-from rest_framework.exceptions import (AuthenticationFailed,
-                                       NotFound)
+from rest_framework.exceptions import NotFound
 
 from drf_spectacular.utils import extend_schema
 
@@ -16,9 +15,7 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.common.utils.functions import verify_token
-from apps.project.api.platform.auth_platform.api.views import \
-    AttlasInsolvencyAuthModel
+from apps.project.api.platform.auth_platform.authentication import BearerTokenAuthentication
 
 from ..functions import ChatGPTAPI
 from ..models import AttlasInsolvencyFormModel, AttlasInsolvencySignatureModel
@@ -44,24 +41,6 @@ STEP_SERIALIZERS = {
 }
 
 
-class BearerTokenAuthentication:
-    def authenticate(self, request):
-        auth_header = request.headers.get('Authorization', '')
-        if not auth_header.startswith('Bearer '):
-            return None
-
-        token = auth_header.split(' ')[1]
-        try:
-            user_id = verify_token(token)
-            user = AttlasInsolvencyAuthModel.objects.get(id=user_id)
-            return (user, None)
-        except Exception as e:
-            raise AuthenticationFailed(str(e))
-
-    def authenticate_header(self, request):
-        return 'Bearer'
-
-
 @extend_schema(tags=['Insolvency Forms Attlas'])
 class InsolvencyFormWizardView(RetrieveUpdateAPIView):
     """
@@ -78,6 +57,9 @@ class InsolvencyFormWizardView(RetrieveUpdateAPIView):
     authentication_classes = [BearerTokenAuthentication]
     permission_classes = [HasServerKey, IsAuthenticated]
     lookup_field = 'id'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
 
     def get_serializer_class(self):
         step = self.request.query_params.get('step', '1')
@@ -250,7 +232,9 @@ class SignatureUpdateView(RetrieveUpdateAPIView):
     def get_object(self):
         # 1. Verificar que el formulario existe y está completado
         try:
-            form = AttlasInsolvencyFormModel.objects.get(id=self.kwargs['id'])
+            form = AttlasInsolvencyFormModel.objects.get(
+                id=self.kwargs['id'], user=self.request.user
+            )
         except AttlasInsolvencyFormModel.DoesNotExist:
             raise NotFound("El formulario no existe.")
 
@@ -265,12 +249,12 @@ class SignatureCreateAPIView(CreateAPIView):
     """
     POST /api/platform/signature/
     {
-      "cedula": "0000000000",
       "signature": "<base64string>"
     }
     """
     serializer_class = SignatureCreateSerializer
-    permission_classes = [HasServerKey]
+    authentication_classes = [BearerTokenAuthentication]
+    permission_classes = [HasServerKey, IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         # Validar y guardar

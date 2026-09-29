@@ -4,9 +4,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from apps.common.utils.models import hash_value
-
-from ..models import (AttlasInsolvencyAssetModel, AttlasInsolvencyAuthModel,
+from ..models import (AttlasInsolvencyAssetModel,
                       AttlasInsolvencyCreditorsModel,
                       AttlasInsolvencyFormModel, AttlasInsolvencyIncomeModel,
                       AttlasInsolvencyIncomeOtherModel,
@@ -340,10 +338,17 @@ class Step11Serializer(serializers.Serializer):
     signature = serializers.CharField(write_only=True, required=False)
 
     def get_signed(self, obj: AttlasInsolvencyFormModel) -> bool:
+        if isinstance(obj, AttlasInsolvencySignatureModel):
+            return True
         # True si ya existe una firma asociada al formulario
         return AttlasInsolvencySignatureModel.objects.filter(form=obj).exists()
 
     def update(self, instance: AttlasInsolvencyFormModel, validated_data):
+        if isinstance(instance, AttlasInsolvencySignatureModel):
+            if validated_data.get('signature'):
+                instance.signature = validated_data['signature']
+                instance.save()
+            return instance
         sig_data = validated_data.get('signature', None)
         if sig_data:
             # crea o actualiza la firma
@@ -355,7 +360,6 @@ class Step11Serializer(serializers.Serializer):
 
 
 class SignatureCreateSerializer(serializers.Serializer):
-    cedula = serializers.CharField(write_only=True)
     signature = serializers.CharField(write_only=True)
     signed = serializers.SerializerMethodField(read_only=True)
 
@@ -363,21 +367,8 @@ class SignatureCreateSerializer(serializers.Serializer):
         # Siempre devolvemos true si llegamos aquí
         return True
 
-    def validate(self, data):
-        cedula_hash = hash_value(data['cedula'])
-        try:
-            auth = AttlasInsolvencyAuthModel.objects.get(
-                document_number_hash=cedula_hash
-            )
-        except AttlasInsolvencyAuthModel.DoesNotExist:
-            raise serializers.ValidationError({
-                'cedula': 'No se encontró un usuario con esta cédula'
-            })
-        data['auth_user'] = auth
-        return data
-
     def create(self, validated_data):
-        auth_user = validated_data.pop('auth_user')
+        auth_user = self.context['request'].user
         sig_b64 = validated_data['signature']
 
         # Obtener o crear el formulario del usuario

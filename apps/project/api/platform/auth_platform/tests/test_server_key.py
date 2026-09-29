@@ -63,12 +63,15 @@ class ServerKeyAPITests(APITestCase):
         self.assertEqual(set(response.data), {'document_number', 'birth_date', 'password', 'user'})
 
     def test_correct_key_does_not_replace_bearer_authentication(self):
-        for name, kwargs, _ in ROUTES:
-            if name.startswith('insolvency_form_api:') and name != 'insolvency_form_api:signature-create':
+        for name, kwargs, methods in ROUTES:
+            if name.startswith('insolvency_form_api:'):
                 with self.subTest(route=name):
                     url = reverse(name, kwargs=kwargs)
                     self.assertEqual(resolve(url).func.cls.permission_classes, [HasServerKey, IsAuthenticated])
-                    self.assertEqual(self.client.get(url, HTTP_X_SERVER_KEY=SERVER_KEY).status_code, 401)
+                    for method in methods:
+                        with self.subTest(method=method):
+                            response = getattr(self.client, method)(url, HTTP_X_SERVER_KEY=SERVER_KEY)
+                            self.assertEqual(response.status_code, 401)
 
     def test_duplicate_calculator_search_is_removed(self):
         self.assertFalse(hasattr(ClientViewSet, 'search'))

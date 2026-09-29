@@ -2,6 +2,8 @@
 from rest_framework import viewsets, mixins, status
 from apps.common.utils.api_keys import HasServerKey
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from apps.project.api.platform.auth_platform.authentication import BearerTokenAuthentication
 
 from drf_spectacular.utils import extend_schema
 
@@ -25,6 +27,25 @@ class ClientViewSet(mixins.CreateModelMixin,
     """
     queryset = AttlasInsolvencyFormModel.objects.all()
     permission_classes = [HasServerKey]
+
+    def get_authenticators(self):
+        # DRF assigns self.action after initializing authenticators.
+        action = self.action_map.get(self.request.method.lower())
+        if action in ('retrieve', 'update', 'partial_update'):
+            return [BearerTokenAuthentication()]
+        return super().get_authenticators()
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action in ('retrieve', 'update', 'partial_update'):
+            permissions.append(IsAuthenticated())
+        return permissions
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action in ('retrieve', 'update', 'partial_update'):
+            return queryset.filter(user=self.request.user)
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'create':
