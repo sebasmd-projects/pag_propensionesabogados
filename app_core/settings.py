@@ -353,6 +353,34 @@ MEDIA_ROOT = str(os.getenv('DJANGO_MEDIA_ROOT'))
 
 STATICFILES_DIRS = [str(BASE_DIR / 'public' / 'staticfiles')]
 
+# --- Paz y salvo certificado por gea ---------------------------------------
+#: Base de la API de certificacion de gea, sin barra final (p. ej.
+#: `https://gea.propensionesabogados.com`). Vacia = no certifica: los paz y
+#: salvo quedan PENDING hasta que se configure (y se corra
+#: `certify_pending_paz_y_salvo`).
+GEA_CERT_API_BASE = os.getenv('GEA_CERT_API_BASE', '').strip().rstrip('/')
+#: El slug con que gea conoce a este emisor.
+GEA_ISSUER_SLUG = os.getenv('GEA_ISSUER_SLUG', 'propensiones').strip()
+#: Clave compartida con gea (`GEA_ISSUER_KEY_PROPENSIONES` en el `.env` de
+#: gea). Es una credencial de produccion: nunca va al codigo ni a los logs.
+GEA_ISSUER_KEY = os.getenv('GEA_ISSUER_KEY_PROPENSIONES', '')
+#: Segundos de espera (conexion, lectura) de cada llamada a gea.
+GEA_CERT_TIMEOUT = (
+    float(os.getenv('GEA_CERT_CONNECT_TIMEOUT', 5)),
+    float(os.getenv('GEA_CERT_READ_TIMEOUT', 60)),
+)
+#: Intentos maximos de certificacion por documento antes de rendirse.
+PAZ_Y_SALVO_MAX_ATTEMPTS = int(os.getenv('PAZ_Y_SALVO_MAX_ATTEMPTS', 5))
+#: Base publica de la URL que lleva el QR del paz y salvo. gea exige https.
+PAZ_Y_SALVO_PUBLIC_BASE = os.getenv(
+    'PAZ_Y_SALVO_PUBLIC_BASE', ''
+).strip().rstrip('/') or PUBLIC_BASE_URL.rstrip('/')
+#: Donde se guardan los PDF del paz y salvo. Va FUERA de `MEDIA_ROOT` a
+#: proposito: el servidor web sirve `MEDIA_URL` sin pasar por Django, y el
+#: original y la copia solo deben salir por sus vistas con permiso.
+PRIVATE_MEDIA_ROOT = (
+    os.getenv('PRIVATE_MEDIA_ROOT') or str(BASE_DIR / 'private_media'))
+
 if bool(os.getenv('DJANGO_EMAIL_USE_SSL')):
     EMAIL_USE_SSL = True
     EMAIL_USE_TLS = False

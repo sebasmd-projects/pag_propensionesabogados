@@ -23,15 +23,17 @@ que no tiene sesion, y el resultado seria el mismo con una pieza mas.
 import logging
 
 from django.core.exceptions import ValidationError
-from django.http import Http404
+from django.http import FileResponse, Http404
 from django.utils import timezone
+from django.utils.cache import patch_cache_control
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 
 from . import attempts, portal_otp
+from .access import can_use_case_manager
 from .forms import (NO_EMAIL_ON_FILE, INVALID_CODE, PublicAccessCodeForm,
                     PublicCaseQueryForm, UNKNOWN_IDENTIFICATION)
-from .models import CaseModel, ClientModel
+from .models import CaseModel, ClientModel, PazYSalvoDocumentModel
 
 #: Donde se apunta a quien acaba de identificarse con su clave.
 #:
@@ -365,42 +367,140 @@ class PazYSalvoView(TemplateView):
     datos que tuviera `localStorage` delante. O sea: lo expedia quien lo leia,
     con el nombre que quisiera.
 
-    Ahora hacen falta las tres cosas a la vez, y las tres las comprueba esta
-    vista:
+    Esta direccion es tambien la que lleva el QR del documento certificado, asi
+    que la abre quien lo escanea y esa persona no es, en general, el cliente.
+    De ahi dos respuestas segun quien pregunte:
 
-    1. que el despacho lo haya autorizado en ese caso concreto;
-    2. que el caso este vigente y el cliente tambien;
-    3. que quien lo pide sea **ese** cliente, identificado con su clave en
-       esta misma sesion.
+    * **El cliente**, identificado con su clave en esta sesion y con el paz y
+      salvo autorizado y el caso vigente: el documento, con la fecha en que se
+      autorizo (no la de hoy) y, si ya esta certificado, el boton de la copia.
+    * **Cualquier otro**: una verificacion minima --valido o revocado, fecha,
+      caso, referencia y quien lo emite--, **sin nombre ni documento de
+      identidad**.
 
-    Falla con 404 en los tres casos, y a proposito: un 403 confirmaria que ese
-    caso existe, que es justo lo que no tiene por que saber quien teclea
-    identificadores a ver que sale.
+    Para todo lo demas es un 404, y el mismo 404: un UUID que no existe, un
+    caso que nunca tuvo paz y salvo y un caso ajeno son indistinguibles. Un 403
+    confirmaria que ese caso existe, que es justo lo que no tiene por que saber
+    quien teclea identificadores a ver que sale.
     """
 
     template_name = 'case_manager/paz_y_salvo.html'
+    verification_template_name = 'case_manager/paz_y_salvo_verificacion.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         session_client = authorized_client_pk(self.request)
-        if not session_client:
-            raise Http404
-
-        case = (
-            CaseModel.objects.visible_to_client()
-            .filter(
-                pk=kwargs['pk'],
-                client_id=session_client,
-                paz_y_salvo_authorized=True,
+        case = None
+        if session_client:
+            case = (
+                CaseModel.objects.visible_to_client()
+                .filter(
+                    pk=kwargs['pk'],
+                    client_id=session_client,
+                    paz_y_salvo_authorized=True,
+                )
+                .select_related('client')
+                .first()
             )
-            .select_related('client')
-            .first()
-        )
 
-        if case is None:
+        if case is not None:
+            document = (
+                case.paz_y_salvo_documents
+                .exclude(status=PazYSalvoDocumentModel.Status.REVOKED)
+                .order_by('-authorized_at').first()
+            )
+            context['case'] = case
+            context['document'] = document
+            # Un documento anterior a la certificacion no tiene fecha
+            # congelada: se cae a la de la autorizacion y, si tampoco la hay,
+            # a hoy, que es lo que siempre hizo.
+            context['issued_at'] = timezone.localtime(
+                document.authorized_at if document
+                else case.paz_y_salvo_authorized_at or timezone.now()
+            )
+            context['short_case_id'] = str(case.pk)[:8]
+            context['reference'] = (
+                document.reference_snapshot if document
+                else case.public_reference
+            )
+            return context
+
+        document = (
+            PazYSalvoDocumentModel.objects.filter(case_id=kwargs['pk'])
+            .order_by('-authorized_at').first()
+        )
+        if document is None:
             raise Http404
 
-        context['case'] = case
-        context['issued_at'] = timezone.localtime()
+        self.template_name = self.verification_template_name
+        context['document'] = document
+        context['is_valid'] = (
+            not document.is_revoked
+            and CaseModel.objects.filter(
+                pk=kwargs['pk'], paz_y_salvo_authorized=True).exists()
+        )
+        context['issued_at'] = timezone.localtime(document.authorized_at)
+        context['short_case_id'] = document.short_case_id
+        context['reference'] = document.reference_snapshot
+        # El enlace de gea solo si esta certificado y vigente: no se manda a
+        # verificar un documento que gea no conoce.
+        context['verification_url'] = (
+            document.verification_url
+            if document.is_certified and context['is_valid'] else ''
+        )
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        patch_cache_control(response, private=True, no_store=True)
+        response['X-Robots-Tag'] = 'noindex, nofollow'
+        return response
+
+
+class PazYSalvoDownloadView(View):
+    """
+    La copia distribuible del paz y salvo, como descarga.
+
+    Solo la baja el cliente de ese caso (identificado en esta sesion, con el
+    paz y salvo autorizado y el caso vigente) o alguien del gestor. Todo lo
+    demas --sin sesion, otro cliente, sin certificar, revocado, sin caso-- es
+    el mismo 404. El fichero vive fuera de `MEDIA_ROOT` y solo sale por aqui.
+    """
+
+    http_method_names = ['get']
+
+    def get(self, request, pk):
+        documents = PazYSalvoDocumentModel.objects.filter(
+            case_id=pk,
+            status=PazYSalvoDocumentModel.Status.CERTIFIED,
+            case__paz_y_salvo_authorized=True,
+        ).exclude(public_copy_file='')
+
+        if not can_use_case_manager(request.user):
+            client_pk = authorized_client_pk(request)
+            if not client_pk:
+                raise Http404
+            documents = documents.filter(
+                case__client_id=client_pk,
+                case__is_active=True,
+                case__client__is_active=True,
+            )
+
+        document = documents.order_by('-authorized_at').first()
+        if document is None:
+            raise Http404
+
+        try:
+            handle = document.public_copy_file.open('rb')
+        except (FileNotFoundError, OSError, ValueError):
+            logger.error('Paz y salvo %s: falta el fichero.', document.pk)
+            raise Http404
+
+        response = FileResponse(
+            handle, as_attachment=True, content_type='application/pdf',
+            filename=f'paz-y-salvo-{document.short_case_id}.pdf',
+        )
+        patch_cache_control(response, private=True, no_store=True)
+        response['X-Content-Type-Options'] = 'nosniff'
+        return response

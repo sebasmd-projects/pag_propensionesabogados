@@ -40,13 +40,15 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView, View
 from django.views.generic.edit import CreateView, UpdateView
 
+from . import gea_client, paz_y_salvo
 from .access import GestorRequiredMixin
 from .choices import Mandate, NoteKind
 from .dashboard_boxes import build_boxes
 from .emails import send_case_note
 from .financial_chart import build_financial_chart
 from .forms import CaseFinanceFormSet, CaseForm, CaseNoteForm, ClientForm
-from .models import (CaseFinanceModel, CaseModel, CaseNoteModel, ClientModel)
+from .models import (CaseFinanceModel, CaseModel, CaseNoteModel, ClientModel,
+                     PazYSalvoDocumentModel)
 from .reports import client_report, crm_report
 
 #: Paginar, buscar y ordenar los listados lo hace ahora DataTables en el
@@ -420,6 +422,10 @@ class CaseFormMixin:
         context = super().get_context_data(**kwargs)
 
         if self.object and self.object.pk:
+            context['paz_y_salvo_document'] = (
+                self.object.paz_y_salvo_documents
+                .order_by('-authorized_at').first()
+            )
             context['notes'] = _case_notes(self.object)
             context.setdefault('note_form', CaseNoteForm())
 
@@ -508,10 +514,20 @@ class CaseFormMixin:
             else None
         )
 
+        paz_antes = bool(
+            form.instance.pk
+            and CaseModel.objects.filter(
+                pk=form.instance.pk, paz_y_salvo_authorized=True).exists()
+        )
+
         with transaction.atomic():
             self.object = form.save()
             formset.instance = self.object
             formset.save()
+            # Marcar o desmarcar la casilla es autorizar o retirar el paz y
+            # salvo, igual que el boton del listado: mismo documento, mismo
+            # certificado.
+            paz_y_salvo.sync_authorization(self.object, paz_antes)
 
         messages.success(self.request, _('Case saved.'))
         self._notify_stage_change(form, etapa_anterior)
@@ -615,11 +631,16 @@ class CaseToggleSettlementView(GestorRequiredMixin, View):
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        asunto = get_object_or_404(
-            CaseModel.objects.select_related('client'), pk=kwargs['pk']
-        )
-        asunto.paz_y_salvo_authorized = not asunto.paz_y_salvo_authorized
-        asunto.save(update_fields=['paz_y_salvo_authorized', 'updated'])
+        with transaction.atomic():
+            asunto = get_object_or_404(
+                CaseModel.objects.select_related('client')
+                .select_for_update(of=('self',)),
+                pk=kwargs['pk'],
+            )
+            if asunto.paz_y_salvo_authorized:
+                paz_y_salvo.revoke(asunto)
+            else:
+                paz_y_salvo.authorize(asunto)
 
         plantilla = (
             _('Settlement letter enabled for %(name)s.')
@@ -630,6 +651,41 @@ class CaseToggleSettlementView(GestorRequiredMixin, View):
             request, plantilla % {'name': asunto.client.full_name}
         )
         return redirect('case_manager:gestor_case_list')
+
+
+class CaseRetryCertificationView(GestorRequiredMixin, View):
+    """
+    Reintenta la certificacion de un paz y salvo que no llego a gea.
+
+    `POST` con CSRF y el mismo permiso que el resto del gestor. Lanza el
+    reintento en segundo plano --gea puede tardar-- y vuelve a la ficha; el
+    resultado se ve en el estado del documento. Ignora el tope de intentos: si
+    alguien pulsa el boton es que quiere que se intente.
+    """
+
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        asunto = get_object_or_404(CaseModel, pk=kwargs['pk'])
+        documento = (
+            asunto.paz_y_salvo_documents
+            .exclude(status=PazYSalvoDocumentModel.Status.REVOKED)
+            .order_by('-authorized_at').first()
+        )
+
+        if documento is None or not documento.can_retry:
+            messages.info(request, _('There is nothing to retry.'))
+        elif not gea_client.is_configured():
+            messages.error(
+                request,
+                _('gea is not configured: the settlement letter cannot be '
+                  'certified yet.'))
+        else:
+            paz_y_salvo.start_certification(documento.pk, force=True)
+            messages.success(
+                request, _('Certification retry started. Reload in a moment '
+                           'to see the result.'))
+        return redirect('case_manager:gestor_case_update', pk=asunto.pk)
 
 
 class CaseNoteVisibilityView(GestorRequiredMixin, View):

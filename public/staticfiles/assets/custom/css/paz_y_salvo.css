@@ -24,6 +24,10 @@ body{font-family:Arial,Helvetica,sans-serif}
 .empresaPS{font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:19pt;margin:0 0 1mm}
 .nitPS{font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:14pt;margin:0}
 .entidadPS{font-family:Georgia,'Times New Roman',serif;font-size:12.5pt;line-height:1.18;margin:6mm auto 0;max-width:160mm}
+.refPS{font-size:9.5pt;text-align:center;color:#4b5b6b;margin:-6mm 0 8mm}
+.accionesPS{width:210mm;margin:0 auto;padding:4mm 18mm 0;text-align:right}
+.botonPS{display:inline-block;padding:2mm 4mm;background:#12263a;color:#fff;text-decoration:none;font-size:10pt;border-radius:1mm}
+.avisoPS{font-size:9.5pt;color:#4b5b6b}
 .tituloPS{font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:15pt;text-align:center;margin:12mm 0 10mm;text-transform:uppercase;line-height:1.15}
 .textoPS{font-size:11pt;line-height:1.35;text-align:justify;margin:0 0 6mm}
 .fechaPS{font-size:11pt;line-height:1.35;margin-top:8mm}
@@ -38,3 +42,12 @@ body{font-family:Arial,Helvetica,sans-serif}
   .noPrint{display:none!important}
   .paginaPS{margin:0;min-height:0;height:297mm;overflow:hidden;page-break-after:avoid;break-after:avoid}
 }
+
+.verificacionPS{max-width:120mm;margin:10mm auto;padding:0 6mm;text-align:center}
+.verificacionPS .logoPS{width:28mm}
+.verificacionTituloPS{font-family:Georgia,'Times New Roman',serif;font-size:18pt;margin:4mm 0 6mm}
+.esValidoPS{color:#1b6e3c}
+.esRevocadoPS{color:#a12a2a}
+.verificacionDatosPS{display:grid;grid-template-columns:auto 1fr;gap:2mm 5mm;text-align:left;font-size:11pt;margin:0 0 8mm}
+.verificacionDatosPS dt{font-weight:700}
+.verificacionDatosPS dd{margin:0}

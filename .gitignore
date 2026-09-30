@@ -443,3 +443,6 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,django,node,nextjs
+
+# Paz y salvo: PDF privados (no se sirven por MEDIA_URL)
+private_media/

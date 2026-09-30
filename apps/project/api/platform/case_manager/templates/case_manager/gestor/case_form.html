@@ -151,6 +151,46 @@
       </div>
     </div>
 
+    {% if paz_y_salvo_document %}
+    {% with doc=paz_y_salvo_document %}
+    <div class="card border-0 shadow-sm mb-4" data-paz-y-salvo-status>
+      <div class="card-body">
+        <h2 class="h6 mb-3">{% trans "Certified settlement letter" %}</h2>
+        <dl class="row mb-0 small">
+          <dt class="col-sm-3">{% trans "Status" %}</dt>
+          <dd class="col-sm-9">
+            <span class="badge {% if doc.status == 'CERTIFIED' %}text-bg-success{% elif doc.status == 'FAILED' %}text-bg-danger{% elif doc.status == 'REVOKED' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">{{ doc.get_status_display }}</span>
+            {% if doc.status == 'FAILED' and doc.last_error %}<span class="text-danger ms-2">{{ doc.last_error|truncatechars:160 }}</span>{% endif %}
+            {% if doc.status == 'PENDING' and doc.last_error %}<span class="text-muted ms-2">{{ doc.last_error|truncatechars:160 }}</span>{% endif %}
+          </dd>
+          <dt class="col-sm-3">{% trans "Authorized on" %}</dt>
+          <dd class="col-sm-9">{{ doc.authorized_at|date:"d/m/Y H:i" }}</dd>
+          {% if doc.gea_code %}
+            <dt class="col-sm-3">{% trans "gea code" %}</dt>
+            <dd class="col-sm-9">{{ doc.gea_code }}</dd>
+          {% endif %}
+          {% if doc.verification_url %}
+            <dt class="col-sm-3">{% trans "Verification link" %}</dt>
+            <dd class="col-sm-9"><a href="{{ doc.verification_url }}" target="_blank" rel="noopener noreferrer" data-unsaved-skip>{{ doc.verification_url }}</a></dd>
+          {% endif %}
+        </dl>
+        <div class="d-flex gap-2 mt-3">
+          {% if doc.is_certified and doc.public_copy_file %}
+            <a class="btn btn-outline-primary btn-sm" data-unsaved-skip href="{% url 'case_manager:paz_y_salvo_download' object.pk %}">
+              <i class="bi bi-download me-1"></i>{% trans "Download distributable copy" %}
+            </a>
+          {% endif %}
+          {% if doc.can_retry %}
+            <button type="submit" form="retry-certification-form" class="btn btn-outline-warning btn-sm" data-unsaved-skip>
+              <i class="bi bi-arrow-repeat me-1"></i>{% trans "Retry certification" %}
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endwith %}
+    {% endif %}
+
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
         <div class="row g-3">
@@ -170,6 +210,13 @@
     </section>
     </div>
   </form>
+
+  {% if paz_y_salvo_document and paz_y_salvo_document.can_retry %}
+    <form id="retry-certification-form" method="post"
+          action="{% url 'case_manager:gestor_case_retry_certification' object.pk %}">
+      {% csrf_token %}
+    </form>
+  {% endif %}
 
   {% comment %}
     Las notas van **fuera** del formulario de arriba: tienen el suyo, y

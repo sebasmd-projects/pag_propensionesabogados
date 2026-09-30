@@ -123,10 +123,12 @@ class PazYSalvoAccessTests(TestCase):
 
         self.assertContains(self.client.get(self.url), '16.484.186')
 
-    def test_el_asunto_es_el_subtipo_y_no_el_radicado(self):
+    def test_el_asunto_es_el_subtipo_y_el_radicado_va_como_referencia(self):
         """
-        Regla que venia escrita en el JavaScript original: el paz y salvo
-        **no** lleva numero de radicado, solo el tipo de tramite.
+        El texto del paz y salvo nombra el tipo de tramite, como en el
+        JavaScript original. El radicado ya no se omite --el documento
+        certificado lleva la referencia del caso--, pero va solo en su linea de
+        referencia, no dentro de la frase.
         """
         CaseModel.objects.filter(pk=self.case.pk).update(
             case_number='2024-00123-00'
@@ -136,7 +138,7 @@ class PazYSalvoAccessTests(TestCase):
         response = self.client.get(self.url)
 
         self.assertContains(response, 'Pensión de invalidez')
-        self.assertNotContains(response, '2024-00123-00')
+        self.assertContains(response, '<strong>2024-00123-00</strong>')
 
     def test_el_enlace_solo_aparece_si_esta_autorizado(self):
         response = self._identificarse()

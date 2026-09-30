@@ -1,0 +1,47 @@
+{% extends 'raw.html' %}
+{% load i18n static %}
+
+{% comment %}
+  Verificacion publica del paz y salvo: lo que ve quien escanea el QR.
+
+  No lleva el nombre del cliente ni su documento de identidad, ni nada que
+  permita saber quien es: solo si el documento es valido, cuando se emitio, a
+  que caso pertenece y quien lo emite.
+{% endcomment %}
+
+{% block title %}{% trans "Settlement letter verification" %} | Propensiones&reg;{% endblock title %}
+
+{% block meta_basic %}
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta name="robots" content="noindex, nofollow">
+{% endblock meta_basic %}
+
+{% block custom_css %}
+  <link href="{% static 'assets/custom/css/paz_y_salvo.css' %}" rel="stylesheet">
+{% endblock custom_css %}
+
+{% block body_css %}class="paz-y-salvo"{% endblock body_css %}
+
+{% block content %}
+  <main class="verificacionPS">
+    <img class="logoPS" src="{% static 'assets/imgs/consultar_proceso/membrete-paz-y-salvo.jpg' %}"
+         alt="Propensiones Abogados Internacional">
+    <h1 class="verificacionTituloPS {% if is_valid %}esValidoPS{% else %}esRevocadoPS{% endif %}">
+      {% if is_valid %}{% trans "Valid settlement letter" %}{% else %}{% trans "Revoked settlement letter" %}{% endif %}
+    </h1>
+    <dl class="verificacionDatosPS">
+      <dt>{% trans "Issued on" %}</dt>
+      <dd>{{ issued_at|date:"d/m/Y" }}</dd>
+      <dt>{% trans "Case" %}</dt>
+      <dd>{{ short_case_id }}</dd>
+      <dt>{% trans "Reference" %}</dt>
+      <dd>{{ reference }}</dd>
+      <dt>{% trans "Issued by" %}</dt>
+      <dd>Propensiones Abogados</dd>
+    </dl>
+    {% if verification_url %}
+      <p><a class="botonPS" href="{{ verification_url }}" rel="noopener noreferrer">{% trans "Verify the certificate" %}</a></p>
+    {% endif %}
+  </main>
+{% endblock content %}

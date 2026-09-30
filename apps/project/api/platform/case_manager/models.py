@@ -26,10 +26,13 @@ Tres cosas que conviene entender antes de tocar nada:
    vistas.
 """
 
+import os
 import uuid
 
 from auditlog.registry import auditlog
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import F, Q, Sum, Value
@@ -565,6 +568,17 @@ class CaseModel(TimeStampedModel):
         help_text=_(
             'The client can print the settlement letter only when the firm '
             'authorizes it here.'
+        )
+    )
+
+    paz_y_salvo_authorized_at = models.DateTimeField(
+        _('paz y salvo authorized at'),
+        null=True,
+        blank=True,
+        editable=False,
+        help_text=_(
+            'Set when the settlement letter is authorized and cleared when '
+            'it is withdrawn. It is the date printed on the document.'
         )
     )
 
@@ -1434,7 +1448,149 @@ class CaseNoteModel(TimeStampedModel):
         ]
 
 
+class PrivateMediaStorage(FileSystemStorage):
+    """
+    Disco fuera de `MEDIA_ROOT`, sin URL.
+
+    El servidor web sirve `MEDIA_URL` sin pasar por Django: cualquier PDF que
+    caiga ahi lo baja quien conozca o adivine la ruta. Los del paz y salvo
+    --el original sin codigos y la copia-- solo deben salir por sus vistas, asi
+    que viven en `PRIVATE_MEDIA_ROOT`, que no se publica, y este almacen no
+    sabe construir una URL. Lee el ajuste en cada uso (no al importar) para
+    que las pruebas puedan apuntarlo a una carpeta temporal.
+    """
+
+    @property
+    def base_location(self):
+        return settings.PRIVATE_MEDIA_ROOT
+
+    @property
+    def location(self):
+        return os.path.abspath(self.base_location)
+
+    def url(self, name):
+        raise ValueError('Private files have no public URL.')
+
+
+def paz_y_salvo_source_path(instance, filename):
+    return f'paz_y_salvo/{instance.case_id}/{instance.pk}-source.pdf'
+
+
+def paz_y_salvo_public_path(instance, filename):
+    return f'paz_y_salvo/{instance.case_id}/{instance.pk}-public.pdf'
+
+
+class PazYSalvoDocumentModel(TimeStampedModel):
+    """
+    Un paz y salvo emitido: **uno por autorizacion**.
+
+    Se crea (PENDING) cuando el despacho autoriza el paz y salvo de un asunto y
+    ya no cambia de fecha: `authorized_at` es la que va impresa. Lo certifica
+    gea; aqui se guarda la copia distribuible y los datos de verificacion.
+    Volver a autorizar tras revocar crea un documento nuevo.
+
+    Solo puede haber uno vigente (no revocado) por asunto. Sin restricciones
+    condicionales --MySQL no las tiene--: `active_slot` vale 1 mientras el
+    documento esta vigente y NULL cuando se revoca, y una unicidad sobre
+    (asunto, active_slot) deja repetir NULL pero no repetir 1.
+    """
+
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', _('Pending')
+        CERTIFIED = 'CERTIFIED', _('Certified')
+        FAILED = 'FAILED', _('Failed')
+        REVOKED = 'REVOKED', _('Revoked')
+
+    id = models.UUIDField(
+        'ID',
+        default=uuid.uuid4,
+        unique=True,
+        primary_key=True,
+        serialize=False,
+        editable=False
+    )
+    case = models.ForeignKey(
+        CaseModel,
+        on_delete=models.CASCADE,
+        related_name='paz_y_salvo_documents',
+        verbose_name=_('case'),
+    )
+    authorized_at = models.DateTimeField(_('authorized at'))
+    reference_snapshot = models.CharField(
+        _('reference'), max_length=255, blank=True)
+    status = models.CharField(
+        _('status'), max_length=12, choices=Status.choices,
+        default=Status.PENDING, db_index=True)
+    active_slot = models.PositiveSmallIntegerField(
+        null=True, blank=True, editable=False)
+    idempotency_key = models.CharField(
+        _('idempotency key'), max_length=64, unique=True, editable=False)
+
+    source_file = models.FileField(
+        _('source file'), upload_to=paz_y_salvo_source_path,
+        storage=PrivateMediaStorage(), max_length=255, blank=True)
+    public_copy_file = models.FileField(
+        _('distributable copy'), upload_to=paz_y_salvo_public_path,
+        storage=PrivateMediaStorage(), max_length=255, blank=True)
+
+    gea_document_id = models.CharField(
+        _('gea document id'), max_length=64, blank=True)
+    gea_code = models.CharField(_('gea code'), max_length=64, blank=True)
+    verification_url = models.URLField(
+        _('verification URL'), max_length=500, blank=True)
+    source_hash = models.CharField(max_length=128, blank=True)
+    public_copy_hash = models.CharField(max_length=128, blank=True)
+
+    attempts = models.PositiveSmallIntegerField(_('attempts'), default=0)
+    last_error = models.TextField(_('last error'), blank=True)
+    certified_at = models.DateTimeField(
+        _('certified at'), null=True, blank=True)
+    revoked_at = models.DateTimeField(_('revoked at'), null=True, blank=True)
+    gea_revoked = models.BooleanField(
+        _('revocation sent to gea'), default=False)
+
+    @property
+    def short_case_id(self) -> str:
+        return str(self.case_id)[:8]
+
+    @property
+    def is_certified(self) -> bool:
+        return self.status == self.Status.CERTIFIED
+
+    @property
+    def is_revoked(self) -> bool:
+        return self.status == self.Status.REVOKED
+
+    @property
+    def can_retry(self) -> bool:
+        return self.status in (self.Status.PENDING, self.Status.FAILED)
+
+    def save(self, *args, **kwargs):
+        # El hueco de "vigente" sigue al estado; nadie lo toca a mano.
+        self.active_slot = None if self.status == self.Status.REVOKED else 1
+        update_fields = kwargs.get('update_fields')
+        if update_fields is not None:
+            kwargs['update_fields'] = set(update_fields) | {'active_slot'}
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f'{self.short_case_id} - {self.get_status_display()}'
+
+    class Meta:
+        db_table = 'apps_project_case_manager_paz_y_salvo'
+        verbose_name = _('Settlement letter document')
+        verbose_name_plural = _('Settlement letter documents')
+        ordering = ['-authorized_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['case', 'active_slot'],
+                name='case_manager_one_active_paz_y_salvo',
+            ),
+        ]
+
+
 auditlog.register(ClientModel, serialize_data=True)
 auditlog.register(CaseModel, serialize_data=True)
 auditlog.register(CaseFinanceModel, serialize_data=True)
 auditlog.register(CaseNoteModel, serialize_data=True)
+auditlog.register(PazYSalvoDocumentModel)

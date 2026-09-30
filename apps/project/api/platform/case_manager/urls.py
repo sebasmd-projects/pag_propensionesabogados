@@ -15,12 +15,13 @@ from django.urls import path
 from django.utils.translation import gettext_lazy as _
 
 from .gestor import (CaseCreateView, CaseListView, CaseNoteCreateView,
-                     CaseNoteVisibilityView,
+                     CaseNoteVisibilityView, CaseRetryCertificationView,
                      CaseToggleSettlementView, CaseUpdateView, CaseReportView,
                      ClientCreateView, ClientDetailView, ClientListView,
                      ClientReportView, ClientUpdateView, CrmReportView,
                      GestorDashboardView)
-from .views import PazYSalvoView, PublicCaseQueryView
+from .views import (PazYSalvoDownloadView, PazYSalvoView,
+                    PublicCaseQueryView)
 
 app_name = 'case_manager'
 
@@ -35,6 +36,11 @@ public_urls = [
         'consultar/proceso/<uuid:pk>/paz-y-salvo/',
         PazYSalvoView.as_view(),
         name='paz_y_salvo'
+    ),
+    path(
+        'consultar/proceso/<uuid:pk>/paz-y-salvo/descargar/',
+        PazYSalvoDownloadView.as_view(),
+        name='paz_y_salvo_download'
     ),
 ]
 
@@ -148,6 +154,11 @@ gestor_urls = [
         'gestor/asuntos/<uuid:pk>/paz-y-salvo/',
         CaseToggleSettlementView.as_view(),
         name='gestor_case_toggle_settlement'
+    ),
+    path(
+        'gestor/asuntos/<uuid:pk>/paz-y-salvo/reintentar/',
+        CaseRetryCertificationView.as_view(),
+        name='gestor_case_retry_certification'
     ),
 ]
 

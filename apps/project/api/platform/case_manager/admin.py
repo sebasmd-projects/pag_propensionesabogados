@@ -20,11 +20,14 @@ responsable y reportes gerenciales historicos.
 """
 
 from django.contrib import admin
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .access import can_use_case_manager
-from .models import CaseFinanceModel, CaseModel, ClientModel
+from . import paz_y_salvo
+from .models import (CaseFinanceModel, CaseModel, ClientModel,
+                     PazYSalvoDocumentModel)
 
 
 class CaseManagerAdminMixin:
@@ -160,6 +163,44 @@ class CaseAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+
+    def save_model(self, request, obj, form, change):
+        """
+        Marcar o desmarcar el paz y salvo aqui es autorizarlo o retirarlo
+        igual que en el gestor: crea o revoca su documento certificado.
+        """
+        was_authorized = bool(
+            change and CaseModel.objects.filter(
+                pk=obj.pk, paz_y_salvo_authorized=True).exists()
+        )
+        with transaction.atomic():
+            super().save_model(request, obj, form, change)
+            paz_y_salvo.sync_authorization(obj, was_authorized)
+
+
+@admin.register(PazYSalvoDocumentModel)
+class PazYSalvoDocumentAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
+    """Solo lectura: el estado lo llevan los hilos y el comando, no una mano."""
+
+    list_display = (
+        'short_case_id', 'status', 'authorized_at', 'gea_code', 'attempts',
+        'certified_at',
+    )
+    list_filter = ('status',)
+    search_fields = ('case__id', 'gea_code', 'gea_document_id')
+    ordering = ('-authorized_at',)
+
+    def get_readonly_fields(self, request, obj=None):
+        return [field.name for field in self.model._meta.fields]
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(ClientModel)

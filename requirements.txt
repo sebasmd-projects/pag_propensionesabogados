@@ -63,6 +63,7 @@ openpyxl==3.1.2
 packaging==24.1
 polib==1.2.0
 pycparser==2.22
+pypdf==6.18.1
 pydantic==2.11.3
 pydantic_core==2.33.1
 pypng==0.20220715.0
@@ -74,6 +75,7 @@ python-monkey-business==1.1.0
 pytz==2024.1
 qrcode==7.4.2
 referencing==0.36.2
+reportlab==5.0.1
 requests==2.32.3
 rosetta==0.3
 rpds-py==0.24.0
