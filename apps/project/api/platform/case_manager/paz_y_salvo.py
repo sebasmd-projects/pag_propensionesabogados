@@ -22,6 +22,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import close_old_connections, transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _, override
 
 from . import gea_client, paz_y_salvo_pdf
 from .models import CaseModel, PazYSalvoDocumentModel
@@ -174,6 +175,7 @@ def _fail(document, message, *, status=Status.FAILED):
              updated=timezone.now())
 
 
+@override('es')
 def certify(document_id, *, force=False):
     """
     Genera el PDF, lo manda a gea y guarda la copia distribuible.
@@ -189,8 +191,7 @@ def certify(document_id, *, force=False):
         return document
 
     if not gea_client.is_configured():
-        _fail(document, 'gea is not configured (GEA_CERT_API_BASE / '
-                        'SERVER_KEY).',
+        _fail(document, _('gea is not configured (GEA_CERT_API_BASE / SERVER_KEY).'),
               status=document.status)
         return _reload(document)
 
@@ -230,7 +231,7 @@ def certify(document_id, *, force=False):
         return _reload(document)
     except Exception as error:
         logger.exception('Paz y salvo %s: fallo inesperado.', document.pk)
-        _fail(document, f'Unexpected error ({type(error).__name__}).')
+        _fail(document, _('Unexpected error (%(error)s).') % {'error': type(error).__name__})
         return _reload(document)
 
     with transaction.atomic():
@@ -277,6 +278,7 @@ def _reload(document):
     return PazYSalvoDocumentModel.objects.get(pk=document.pk)
 
 
+@override('es')
 def revoke_in_gea(document_id):
     """Pide a gea revocar un documento retirado. Tolera fallos."""
     document = PazYSalvoDocumentModel.objects.get(pk=document_id)
@@ -285,12 +287,12 @@ def revoke_in_gea(document_id):
         return document
 
     try:
-        gea_client.revoke(document.gea_document_id, 'Withdrawn by the firm.')
+        gea_client.revoke(document.gea_document_id, _('Withdrawn by the firm.'))
     except gea_client.GeaError as error:
         logger.warning('Paz y salvo %s: revocar en gea fallo: %s',
                        document.pk, error)
         PazYSalvoDocumentModel.objects.filter(pk=document.pk).update(
-            last_error=_short_error(f'Revocation pending: {error}'))
+            last_error=_short_error(_('Revocation pending: %(error)s') % {'error': error}))
         return _reload(document)
 
     PazYSalvoDocumentModel.objects.filter(pk=document.pk).update(

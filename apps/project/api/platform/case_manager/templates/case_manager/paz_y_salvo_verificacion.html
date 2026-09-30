@@ -9,7 +9,7 @@
   que caso pertenece y quien lo emite.
 {% endcomment %}
 
-{% block title %}{% trans "Settlement letter verification" %} | Propensiones&reg;{% endblock title %}
+{% block title %}{% language "es" %}{% trans "Settlement letter verification" %} | Propensiones&reg;{% endlanguage %}{% endblock title %}
 
 {% block meta_basic %}
   <meta charset="utf-8">
@@ -23,7 +23,7 @@
 
 {% block body_css %}class="paz-y-salvo"{% endblock body_css %}
 
-{% block content %}
+{% block content %}{% language "es" %}
   <main class="verificacionPS">
     <img class="logoPS" src="{% static 'assets/imgs/consultar_proceso/membrete-paz-y-salvo.jpg' %}"
          alt="Propensiones Abogados Internacional">
@@ -44,4 +44,4 @@
       <p><a class="botonPS" href="{{ verification_url }}" rel="noopener noreferrer">{% trans "Verify the certificate" %}</a></p>
     {% endif %}
   </main>
-{% endblock content %}
+{% endlanguage %}{% endblock content %}

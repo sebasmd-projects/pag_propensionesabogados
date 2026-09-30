@@ -402,10 +402,10 @@ STATICFILES_DIRS = [str(BASE_DIR / 'public' / 'staticfiles')]
 
 # --- Paz y salvo certificado por gea ---------------------------------------
 #: Base de la API de certificacion de gea, sin barra final (p. ej.
-#: `https://gea.propensionesabogados.com`). Vacia = no certifica: los paz y
+#: `https://geausa.propensionesabogados.com`). Vacia = no certifica: los paz y
 #: salvo quedan PENDING hasta que se configure (y se corra
 #: `certify_pending_paz_y_salvo`).
-GEA_CERT_API_BASE_DEFAULT = 'https://gea.propensionesabogados.com'
+GEA_CERT_API_BASE_DEFAULT = 'https://geausa.propensionesabogados.com'
 GEA_CERT_API_BASE = os.getenv('GEA_CERT_API_BASE', GEA_CERT_API_BASE_DEFAULT).strip().rstrip('/')
 #: El slug con que gea conoce a este emisor.
 GEA_ISSUER_SLUG = os.getenv('GEA_ISSUER_SLUG', 'propensiones').strip()

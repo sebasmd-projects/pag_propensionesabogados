@@ -281,3 +281,23 @@ class EnvExampleTests(SimpleTestCase):
             f'{env.ENV_EXAMPLE} no declara: {faltan}. Quien copie la '
             'plantilla se llevara el error que esto pretende evitar.'
         )
+
+
+class GeaDefaultTests(SimpleTestCase):
+    def test_base_predeterminada_y_override_del_entorno(self):
+        import ast
+        import os
+        from unittest.mock import patch
+        tree = ast.parse(read_settings())
+        assignments = [node for node in tree.body if isinstance(node, ast.Assign)
+                       and any(isinstance(t, ast.Name) and t.id in
+                               ('GEA_CERT_API_BASE_DEFAULT', 'GEA_CERT_API_BASE')
+                               for t in node.targets)]
+        code = compile(ast.Module(body=assignments, type_ignores=[]), str(SETTINGS), 'exec')
+        for environ, expected in (({}, 'https://geausa.propensionesabogados.com'),
+                                  ({'GEA_CERT_API_BASE': ' https://custom.test/ '}, 'https://custom.test'),
+                                  ({'GEA_CERT_API_BASE': ''}, '')):
+            with self.subTest(environ=environ), patch.dict(os.environ, environ, clear=True):
+                namespace = {'os': os}
+                exec(code, namespace)
+                self.assertEqual(namespace['GEA_CERT_API_BASE'], expected)

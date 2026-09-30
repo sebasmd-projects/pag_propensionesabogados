@@ -1950,3 +1950,172 @@ msgid_plural "%(total)s notes"
 msgstr[0] "%(total)s nota"
 msgstr[1] "%(total)s notas"
 msgstr[2] "%(total)s notas"
+
+msgid "Pending"
+msgstr "Pendiente"
+
+msgid "Certified"
+msgstr "Certificado"
+
+msgid "Failed"
+msgstr "Fallido"
+
+msgid "Revoked"
+msgstr "Revocado"
+
+msgid "Certified settlement letter"
+msgstr "Paz y salvo certificado"
+
+msgid "Authorized on"
+msgstr "Autorizado el"
+
+msgid "gea code"
+msgstr "Código de gea"
+
+msgid "Verification link"
+msgstr "Enlace de verificación"
+
+msgid "Download distributable copy"
+msgstr "Descargar copia distribuible"
+
+msgid "Retry certification"
+msgstr "Reintentar certificación"
+
+msgid "Settlement letter verification"
+msgstr "Verificación del paz y salvo"
+
+msgid "Valid settlement letter"
+msgstr "Paz y salvo válido"
+
+msgid "Revoked settlement letter"
+msgstr "Paz y salvo revocado"
+
+msgid "Issued on"
+msgstr "Emitido el"
+
+msgid "Issued by"
+msgstr "Emitido por"
+
+msgid "Verify the certificate"
+msgstr "Verificar el certificado"
+
+msgid "gea is not configured (GEA_CERT_API_BASE / SERVER_KEY)."
+msgstr "gea no está configurado (GEA_CERT_API_BASE / SERVER_KEY)."
+
+#, python-format
+msgid "gea unreachable (%(error)s)."
+msgstr "No se pudo conectar con gea (%(error)s)."
+
+#, python-format
+msgid "gea rejected the request (400, field %(field)s)."
+msgstr "gea rechazó la solicitud (400, campo %(field)s)."
+
+msgid "gea refused the issuer key (403)."
+msgstr "gea rechazó la clave del emisor (403)."
+
+msgid "gea could not certify the document (422)."
+msgstr "gea no pudo certificar el documento (422)."
+
+msgid "gea rate limit reached (429)."
+msgstr "Se alcanzó el límite de solicitudes de gea (429)."
+
+#, python-format
+msgid "gea answered HTTP %(status)s."
+msgstr "gea respondió con HTTP %(status)s."
+
+msgid "gea answered with invalid JSON."
+msgstr "gea respondió con un JSON no válido."
+
+msgid "gea answered with an unexpected body."
+msgstr "gea respondió con un contenido inesperado."
+
+#, python-format
+msgid "gea response is missing \"%(name)s\"."
+msgstr "Falta \"%(name)s\" en la respuesta de gea."
+
+#, python-format
+msgid "gea response has an invalid \"%(name)s\"."
+msgstr "La respuesta de gea contiene un \"%(name)s\" no válido."
+
+msgid "gea response has an invalid \"document_id\"."
+msgstr "La respuesta de gea contiene un \"document_id\" no válido."
+
+msgid "gea response has an invalid \"verification_url\"."
+msgstr "La respuesta de gea contiene una \"verification_url\" no válida."
+
+msgid "Invalid gea document id."
+msgstr "El identificador del documento de gea no es válido."
+
+msgid "gea public copy is too large."
+msgstr "La copia pública de gea es demasiado grande."
+
+#, python-format
+msgid "gea download failed (%(error)s)."
+msgstr "Falló la descarga de gea (%(error)s)."
+
+msgid "gea public copy is not a PDF."
+msgstr "La copia pública de gea no es un PDF."
+
+msgid "gea public copy does not match its hash."
+msgstr "La copia pública de gea no coincide con su hash."
+
+#, python-format
+msgid "gea redirects to %(location)s: check GEA_CERT_API_BASE"
+msgstr "gea redirige a %(location)s: revisa GEA_CERT_API_BASE"
+
+#, python-format
+msgid ""
+"gea returned a redirect without Location (HTTP %(status)s): check "
+"GEA_CERT_API_BASE"
+msgstr ""
+"gea respondió con una redirección sin destino Location (HTTP %(status)s): "
+"revisa GEA_CERT_API_BASE"
+
+#, python-format
+msgid "Unexpected error (%(error)s)."
+msgstr "Error inesperado (%(error)s)."
+
+msgid "Withdrawn by the firm."
+msgstr "Retirado por el despacho."
+
+#, python-format
+msgid "Revocation pending: %(error)s"
+msgstr "Revocación pendiente: %(error)s"
+
+msgid "gea is not configured: the settlement letter cannot be certified yet."
+msgstr "gea no está configurado: el paz y salvo aún no se puede certificar."
+
+msgid "Certification retry started. Reload in a moment to see the result."
+msgstr ""
+"Se inició el reintento de certificación. Recargue en un momento para ver el "
+"resultado."
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+msgid "There is nothing to retry."
+msgstr "No hay nada que reintentar."
+
+msgid ""
+"The certified copy is being prepared. Reload in a few minutes to download "
+"it."
+msgstr ""
+"La copia certificada se está preparando. Recargue en unos minutos para "
+"descargarla."
+
+msgid "Reference"
+msgstr "Referencia"

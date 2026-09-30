@@ -28,6 +28,7 @@ from urllib.parse import urlparse
 
 import requests
 from django.conf import settings
+from django.utils.translation import gettext as _, override
 
 logger = logging.getLogger(__name__)
 
@@ -53,11 +54,11 @@ def is_configured() -> bool:
     return bool(settings.GEA_CERT_API_BASE and _key())
 
 
+@override('es')
 def _require_config():
     if not is_configured():
         raise GeaNotConfigured(
-            'gea is not configured (GEA_CERT_API_BASE / '
-            'SERVER_KEY).'
+            _('gea is not configured (GEA_CERT_API_BASE / SERVER_KEY).')
         )
 
 
@@ -79,6 +80,7 @@ def _safe(text) -> str:
     return text.replace(key, '***') if key else text
 
 
+@override('es')
 def _request(method, url, **kwargs):
     try:
         return requests.request(
@@ -92,12 +94,22 @@ def _request(method, url, **kwargs):
     except requests.RequestException as error:
         # No se incluye `error`: su texto puede llevar la URL completa.
         logger.warning('gea request failed: %s', type(error).__name__)
-        raise GeaError(f'gea unreachable ({type(error).__name__}).') from None
+        raise GeaError(_('gea unreachable (%(error)s).') % {'error': type(error).__name__}) from None
 
 
+@override('es')
 def _error_from(response) -> GeaError:
     """Traduce una respuesta de error de gea a un mensaje corto."""
     status = response.status_code
+    if 300 <= status < 400:
+        location = response.headers.get('Location')
+        if location:
+            return GeaError(
+                _('gea redirects to %(location)s: check GEA_CERT_API_BASE')
+                % {'location': _safe(location)})
+        return GeaError(
+            _('gea returned a redirect without Location (HTTP %(status)s): '
+              'check GEA_CERT_API_BASE') % {'status': status})
     try:
         body = response.json()
     except ValueError:
@@ -107,40 +119,43 @@ def _error_from(response) -> GeaError:
 
     if status == 400 and body.get('error') == 'invalid_request':
         return GeaError(
-            _safe(f'gea rejected the request (400, field '
-                  f'{body.get("field")}): {body.get("detail")}'))
+            _('gea rejected the request (400, field %(field)s).')
+            % {'field': _safe(body.get('field', ''))})
     if status == 403:
-        return GeaError('gea refused the issuer key (403).')
+        return GeaError(_('gea refused the issuer key (403).'))
     if status == 422:
-        return GeaError('gea could not certify the document (422).')
+        return GeaError(_('gea could not certify the document (422).'))
     if status == 429:
-        return GeaError('gea rate limit reached (429).')
-    return GeaError(f'gea answered HTTP {status}.')
+        return GeaError(_('gea rate limit reached (429).'))
+    return GeaError(_('gea answered HTTP %(status)s.') % {'status': status})
 
 
+@override('es')
 def _json_ok(response, allowed=(200, 201)) -> dict:
     if response.status_code not in allowed:
         raise _error_from(response)
     try:
         body = response.json()
     except ValueError:
-        raise GeaError('gea answered with invalid JSON.') from None
+        raise GeaError(_('gea answered with invalid JSON.')) from None
     if not isinstance(body, dict):
-        raise GeaError('gea answered with an unexpected body.')
+        raise GeaError(_('gea answered with an unexpected body.'))
     return body
 
 
+@override('es')
 def _text(body, name, *, required=True, maxlen=500) -> str:
     value = body.get(name)
     if value is None or value == '':
         if required:
-            raise GeaError(f'gea response is missing "{name}".')
+            raise GeaError(_('gea response is missing "%(name)s".') % {'name': name})
         return ''
     if not isinstance(value, str) or len(value) > maxlen:
-        raise GeaError(f'gea response has an invalid "{name}".')
+        raise GeaError(_('gea response has an invalid "%(name)s".') % {'name': name})
     return value
 
 
+@override('es')
 def issue(*, pdf: bytes, filename: str, reference: str, title: str,
           qr_payload: str, barcode_text: str, idempotency_key: str,
           placement: dict) -> dict:
@@ -170,19 +185,19 @@ def issue(*, pdf: bytes, filename: str, reference: str, title: str,
     try:
         uuid.UUID(document_id)
     except ValueError:
-        raise GeaError('gea response has an invalid "document_id".') from None
+        raise GeaError(_('gea response has an invalid "document_id".')) from None
 
     verification_url = _text(body, 'verification_url', required=False)
     if verification_url and urlparse(verification_url).scheme not in (
             'http', 'https'):
-        raise GeaError('gea response has an invalid "verification_url".')
+        raise GeaError(_('gea response has an invalid "verification_url".'))
 
     source_hash = _text(body, 'source_hash', maxlen=128)
     public_copy_hash = _text(body, 'public_copy_hash', maxlen=128)
     for name, value in (('source_hash', source_hash),
                         ('public_copy_hash', public_copy_hash)):
         if not re.fullmatch(r'[0-9a-fA-F]{64}', value):
-            raise GeaError(f'gea response has an invalid "{name}".')
+            raise GeaError(_('gea response has an invalid "%(name)s".') % {'name': name})
 
     return {
         'document_id': document_id,
@@ -194,6 +209,7 @@ def issue(*, pdf: bytes, filename: str, reference: str, title: str,
     }
 
 
+@override('es')
 def download_public_copy(document_id: str, expected_hash: str = '') -> bytes:
     """
     Baja la copia distribuible. Comprueba que es un PDF, que no es enorme y,
@@ -203,7 +219,7 @@ def download_public_copy(document_id: str, expected_hash: str = '') -> bytes:
     try:
         uuid.UUID(str(document_id))
     except ValueError:
-        raise GeaError('Invalid gea document id.') from None
+        raise GeaError(_('Invalid gea document id.')) from None
 
     response = _request(
         'GET', _url(f'{document_id}/public-copy/'), stream=True)
@@ -215,30 +231,31 @@ def download_public_copy(document_id: str, expected_hash: str = '') -> bytes:
         for chunk in response.iter_content(64 * 1024):
             size += len(chunk)
             if size > MAX_COPY_BYTES:
-                raise GeaError('gea public copy is too large.')
+                raise GeaError(_('gea public copy is too large.'))
             chunks.append(chunk)
     except requests.RequestException as error:
         raise GeaError(
-            f'gea download failed ({type(error).__name__}).') from None
+            _('gea download failed (%(error)s).') % {'error': type(error).__name__}) from None
     finally:
         response.close()
 
     data = b''.join(chunks)
     if not data.startswith(b'%PDF'):
-        raise GeaError('gea public copy is not a PDF.')
+        raise GeaError(_('gea public copy is not a PDF.'))
     if expected_hash and (
             hashlib.sha256(data).hexdigest() != expected_hash.lower()):
-        raise GeaError('gea public copy does not match its hash.')
+        raise GeaError(_('gea public copy does not match its hash.'))
     return data
 
 
+@override('es')
 def revoke(document_id: str, reason: str = '') -> dict:
     """Pide la revocacion (idempotente en gea)."""
     _require_config()
     try:
         uuid.UUID(str(document_id))
     except ValueError:
-        raise GeaError('Invalid gea document id.') from None
+        raise GeaError(_('Invalid gea document id.')) from None
 
     response = _request(
         'POST', _url(f'{document_id}/revoke/'), data={'reason': reason[:1000]})

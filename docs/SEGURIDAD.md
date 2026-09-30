@@ -606,3 +606,10 @@ Para no leer solo la lista de defectos:
 - Las cookies de sesión y CSRF van `Secure` y `HttpOnly`.
 - El sitio ya publica `/.well-known/security.txt`.
 - Los sitios Next.js traen CSP y `Permissions-Policy`.
+
+### API de certificación del paz y salvo
+
+`GEA_CERT_API_BASE` usa por defecto `https://geausa.propensionesabogados.com`.
+Configure directamente ese destino: el cliente no sigue redirecciones para
+proteger la clave del emisor. Ante un HTTP 3xx, el error muestra el destino
+`Location` y pide revisar `GEA_CERT_API_BASE`.

@@ -43,6 +43,7 @@ PUBLIC = 'https://propensionesabogados.com'
 class FakeResponse:
     def __init__(self, status_code, body=None, content=None):
         self.status_code = status_code
+        self.headers = {}
         self._body = body
         self._content = content
 
@@ -83,6 +84,11 @@ class FakeGea:
             # El texto lleva la URL y la clave a proposito: no debe salir.
             raise requests.ConnectionError(
                 f'boom {url} {(headers or {}).get("X-Issuer-Key")}')
+
+        if self.mode == 'redirect':
+            response = FakeResponse(301)
+            response.headers['Location'] = 'https://geausa.propensionesabogados.com/api/certificates/external/'
+            return response
 
         if headers.get('X-Issuer-Key') != KEY:
             return FakeResponse(403, {'error': 'forbidden'})
@@ -412,6 +418,28 @@ class AuthorizeAndCertifyTests(CertifiedBase):
 
 
 class FailureAndRetryTests(CertifiedBase):
+    def test_redireccion_guarda_destino_en_espanol_sin_seguirla(self):
+        self.gea.mode = 'redirect'
+        self.toggle()
+        doc = self.document()
+        self.assertEqual(doc.status, Status.FAILED)
+        self.assertEqual(doc.last_error,
+            'gea redirige a https://geausa.propensionesabogados.com/api/certificates/external/: revisa GEA_CERT_API_BASE')
+        self.assertEqual(len(self.gea.calls), 1)
+        self.assertIs(self.gea.calls[0]['allow_redirects'], False)
+
+    def test_todos_los_3xx_y_destinos_sin_clave(self):
+        from .. import gea_client
+        for status in (301, 302, 303, 307, 308):
+            with self.subTest(status=status):
+                response = FakeResponse(status)
+                response.headers['Location'] = 'https://gea.test/' + KEY
+                error = str(gea_client._error_from(response))
+                self.assertIn('gea redirige a https://gea.test/***', error)
+                self.assertNotIn(KEY, error)
+                response.headers.clear()
+                self.assertIn('sin destino Location', str(gea_client._error_from(response)))
+
     def test_gea_caido_deja_failed_y_la_autorizacion_sigue(self):
         self.gea.mode = 'down'
         with self.assertLogs(level='WARNING') as logs:
@@ -421,7 +449,7 @@ class FailureAndRetryTests(CertifiedBase):
         self.assertTrue(self.case.paz_y_salvo_authorized)
         doc = self.document()
         self.assertEqual(doc.status, Status.FAILED)
-        self.assertIn('unreachable', doc.last_error)
+        self.assertIn('No se pudo conectar con gea', doc.last_error)
         self.assertEqual(doc.attempts, 1)
         # Ni el error guardado ni los logs llevan la clave.
         self.assertNotIn(KEY, doc.last_error)
@@ -505,7 +533,7 @@ class FailureAndRetryTests(CertifiedBase):
 
         doc = self.document()
         self.assertEqual(doc.status, Status.PENDING)
-        self.assertIn('not configured', doc.last_error)
+        self.assertIn('no está configurado', doc.last_error)
         self.assertEqual(doc.attempts, 0)
         self.assertEqual(self.gea.calls, [])
         self.case.refresh_from_db()
@@ -520,7 +548,7 @@ class FailureAndRetryTests(CertifiedBase):
         doc.refresh_from_db()
         self.assertEqual(doc.status, Status.REVOKED)
         self.assertFalse(doc.gea_revoked)
-        self.assertIn('Revocation pending', doc.last_error)
+        self.assertIn('Revocación pendiente', doc.last_error)
         self.assertNotIn(KEY, doc.last_error)
 
         self.gea.mode = 'ok'
@@ -591,6 +619,8 @@ class PublicViewTests(CertifiedBase):
 
         self.assertEqual(respuesta.status_code, 200)
         self.assertIn('esValidoPS', html)
+        for text in ('Paz y salvo válido', 'Emitido el', 'Emitido por', 'Verificar el certificado'):
+            self.assertIn(text, html)
         self.assertIn('05/03/2026', html)
         self.assertIn(str(self.case.pk)[:8], html)
         self.assertIn('2024-00123-00', html)
@@ -608,6 +638,7 @@ class PublicViewTests(CertifiedBase):
         html = Client().get(self.url).content.decode()
 
         self.assertIn('esRevocadoPS', html)
+        self.assertIn('Paz y salvo revocado', html)
         self.assertNotIn('esValidoPS', html)
         self.assertNotIn(self.doc.verification_url, html)
         self.assertNotIn('Carlos Giraldo', html)
@@ -619,6 +650,8 @@ class PublicViewTests(CertifiedBase):
         html = ajeno.get(self.url).content.decode()
 
         self.assertIn('esValidoPS', html)
+        for text in ('Paz y salvo válido', 'Emitido el', 'Emitido por', 'Verificar el certificado'):
+            self.assertIn(text, html)
         self.assertNotIn('Carlos Giraldo', html)
 
     def test_sin_paz_y_salvo_o_inexistente_es_el_mismo_404(self):
@@ -730,7 +763,10 @@ class GestorTests(CertifiedBase):
         respuesta = self.ficha()
 
         self.assertContains(respuesta, 'data-paz-y-salvo-status')
-        self.assertContains(respuesta, 'Certified')
+        self.assertContains(respuesta, 'Certificado')
+        for text in ('Paz y salvo certificado', 'Estado', 'Autorizado el', 'Descargar copia distribuible'):
+            self.assertContains(respuesta, text)
+        self.assertNotContains(respuesta, 'Certified settlement letter')
         self.assertContains(respuesta, doc.gea_code)
         self.assertContains(respuesta, doc.verification_url)
         self.assertContains(
@@ -745,8 +781,9 @@ class GestorTests(CertifiedBase):
 
         respuesta = self.ficha()
 
-        self.assertContains(respuesta, 'Failed')
-        self.assertContains(respuesta, 'unreachable')
+        self.assertContains(respuesta, 'Fallido')
+        self.assertContains(respuesta, 'Reintentar certificación')
+        self.assertContains(respuesta, 'No se pudo conectar con gea')
         self.assertContains(respuesta, 'retry-certification-form')
         self.assertContains(respuesta, reverse(
             'case_manager:gestor_case_retry_certification',
@@ -802,3 +839,14 @@ class GestorTests(CertifiedBase):
 
         self.assertEqual(self.document().status, Status.FAILED)
         self.assertEqual(len(self.gea.issue_calls()), 1)
+
+
+class SpanishStatusTests(TestCase):
+    def test_estados_en_espanol(self):
+        from django.utils.translation import override
+        with override('es'):
+            for status, label in ((Status.PENDING, 'Pendiente'),
+                                  (Status.CERTIFIED, 'Certificado'),
+                                  (Status.FAILED, 'Fallido'),
+                                  (Status.REVOKED, 'Revocado')):
+                self.assertEqual(PazYSalvoDocumentModel(status=status).get_status_display(), label)

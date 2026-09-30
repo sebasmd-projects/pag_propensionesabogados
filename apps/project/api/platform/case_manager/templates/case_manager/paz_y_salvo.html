@@ -19,7 +19,7 @@
   este vigente, y que lo pida quien se identifico con su clave en esta sesion.
 {% endcomment %}
 
-{% block title %}{% trans "Settlement letter" %} | Propensiones&reg;{% endblock title %}
+{% block title %}{% language "es" %}{% trans "Settlement letter" %} | Propensiones&reg;{% endlanguage %}{% endblock title %}
 
 {% block meta_basic %}
   <meta charset="utf-8">
@@ -33,7 +33,7 @@
 
 {% block body_css %}class="paz-y-salvo"{% endblock body_css %}
 
-{% block content %}
+{% block content %}{% language "es" %}
   {% if document %}
     <div class="noPrint accionesPS">
       {% if document.is_certified and document.public_copy_file %}
@@ -83,4 +83,4 @@
       <strong>Firmado por:</strong> Jorge Uriel Vega Londo&ntilde;o &ndash; Representante legal.
     </div>
   </div>
-{% endblock content %}
+{% endlanguage %}{% endblock content %}
