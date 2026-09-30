@@ -68,3 +68,25 @@ def login_with_otp(client, user, *, device_name='test'):
     session.save()
 
     return device
+
+
+def dead_cache():
+    """
+    Redis caido, tal y como se ve desde `django-redis` con IGNORE_EXCEPTIONS.
+
+    `add` no guarda nada y `incr` devuelve `None` en lugar de reventar. Es
+    exactamente lo que hace `omit_exception`, y por eso el detector de
+    `throttling.RateLimit` mira el valor de `incr` y no una excepcion.
+
+    Se usa como gestor de contexto::
+
+        with dead_cache():
+            ...
+    """
+    from unittest.mock import patch
+
+    return patch.multiple(
+        'apps.common.utils.throttling.cache',
+        add=lambda *a, **k: False,
+        incr=lambda *a, **k: None,
+    )

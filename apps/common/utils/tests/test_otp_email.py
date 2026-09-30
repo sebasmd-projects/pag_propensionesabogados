@@ -58,30 +58,40 @@ class TheLogosTravelInsideTests(TestCase):
     una entrada. Y de paso un logo remoto delata cuando se abrio el mensaje.
     """
 
-    def test_they_are_referenced_by_cid(self):
+    def test_it_is_referenced_by_cid(self):
         sent = send()
 
-        self.assertIn('cid:propensiones', sent.html)
-        self.assertIn('cid:gea', sent.html)
+        self.assertIn('cid:membrete', sent.html)
+
+    def test_it_is_the_firms_letterhead_and_not_the_gea_logo(self):
+        """
+        Aqui el membrete es el de Propensiones, el mismo de los demas correos
+        de la casa. El logo de GEA venia con el codigo traido de alli.
+        """
+        sent = send()
+
+        self.assertNotIn('cid:gea', sent.html)
+        self.assertNotIn('cid:propensiones', sent.html)
+        self.assertNotIn('GEA', sent.html)
 
     def test_nothing_is_loaded_from_the_network(self):
         sent = send()
 
         self.assertNotIn('<img src="http', sent.html)
 
-    def test_they_are_attached_as_png(self):
+    def test_it_is_attached_as_png(self):
         """
         En PNG y no en WebP: los logos del proyecto estan en WebP porque es lo
         que conviene en la web, y Outlook de escritorio no lo pinta.
         """
         sent = send()
 
-        self.assertEqual(sent.types.count('image/png'), 2)
+        self.assertEqual(sent.types.count('image/png'), 1)
 
     def test_the_images_are_part_of_the_body(self):
         """
-        `related` y no `mixed`: si fueran adjuntos, el destinatario veria dos
-        ficheros colgando del mensaje y el cuerpo con dos huecos.
+        `related` y no `mixed`: si fuera un adjunto, el destinatario veria un
+        fichero colgando del mensaje y el cuerpo con un hueco.
         """
         sent = send()
 
@@ -126,6 +136,20 @@ class TheMessageSaysWhatItHasToTests(TestCase):
         sent = send(instruction='Para validar las certificaciones.')
 
         self.assertIn('Para validar las certificaciones.', sent.html)
+
+
+class TheReplyToTests(TestCase):
+
+    def test_it_answers_where_the_caller_says(self):
+        sent = send(reply_to='info@propensionesabogados.com')
+
+        self.assertEqual(
+            sent.message.reply_to, ['info@propensionesabogados.com'])
+
+    def test_without_one_the_client_answers_the_sender(self):
+        sent = send()
+
+        self.assertEqual(sent.message.reply_to, [])
 
 
 class TheGreetingTests(TestCase):

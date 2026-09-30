@@ -273,6 +273,21 @@ OTP_CONTACT_EMAIL = os.getenv(
 ACCOUNT_REPLY_TO = os.getenv(
     'ACCOUNT_REPLY_TO', 'info@propensionesabogados.com')
 
+#: Cuanto vive el enlace para fijar una clave nueva, en segundos. Es el ajuste
+#: que lee el generador de enlaces de Django. Su valor por defecto son tres
+#: dias, demasiado para un enlace que da acceso a la cuenta.
+PASSWORD_RESET_TIMEOUT = int(os.getenv('PASSWORD_RESET_TIMEOUT_MINUTES', 30)) * 60
+
+#: La direccion publica del sitio, para los enlaces que salen por correo. Nunca
+#: se construyen con la cabecera `Host` de la peticion: la pone el cliente, y
+#: un enlace de cambio de clave que apunte donde el atacante diga llegaria al
+#: buzon de la victima desde nuestro propio servidor. `django.contrib.sites`
+#: no esta instalado, asi que `get_current_site()` haria justo eso.
+PUBLIC_BASE_URL = os.getenv(
+    'PUBLIC_BASE_URL',
+    'http://localhost:8000' if DEBUG else 'https://propensionesabogados.com',
+)
+
 #: Lo que sale como emisor en la aplicacion de codigos.
 TWO_FACTOR_TOTP_DIGITS = 6
 TWO_FACTOR_REMEMBER_COOKIE_AGE = None

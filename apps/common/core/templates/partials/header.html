@@ -89,12 +89,22 @@
                   </a>
                 </li>
                 <li>
+                  <a href="{% url 'account:change_password' %}">
+                    <i class="bi bi-key"></i> <span>{% trans 'Change password' %}</span>
+                  </a>
+                </li>
+                <li>
                   <a href="{% url 'account:logout' %}">
                     <i class="bi bi-box-arrow-right"></i> <span>{% trans 'Sign out' %}</span>
                   </a>
                 </li>
               {% else %}
                 <li class="platforms-divider">
+                  <a href="{% url 'account:change_password' %}">
+                    <i class="bi bi-key"></i> <span>{% trans 'Change password' %}</span>
+                  </a>
+                </li>
+                <li>
                   <a href="{% url 'account:logout' %}">
                     <i class="bi bi-box-arrow-right"></i> <span>{% trans 'Sign out' %}</span>
                   </a>

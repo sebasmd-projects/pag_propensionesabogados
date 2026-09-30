@@ -232,3 +232,33 @@ msgstr "Error del servidor"
 
 #~ msgid "Legal Department"
 #~ msgstr "Departamento Legal"
+
+#: apps/common/utils/templates/email/otp_email.html
+#, python-format
+msgid "Hi %(usuario)s:"
+msgstr "Hola %(usuario)s:"
+
+#: apps/common/utils/templates/email/otp_email.html
+msgid "Hi:"
+msgstr "Hola:"
+
+#: apps/common/utils/templates/email/otp_email.html
+#, python-format
+msgid "This code expires in %(tiempo)s minutes."
+msgstr "Este código caduca en %(tiempo)s minutos."
+
+#: apps/common/utils/templates/email/otp_email.html
+msgid "Did not request this code? Get in touch with us."
+msgstr "¿No has pedido este código? Escríbenos."
+
+#: apps/common/utils/templates/email/otp_email.html
+msgid ""
+"This is an automated message. <strong>Nobody from the firm will ever ask you\n"
+"            for this code</strong> by phone, WhatsApp or email."
+msgstr ""
+"Este es un mensaje automático. <strong>Nadie del despacho te pedirá nunca "
+"este código</strong> por teléfono, WhatsApp o correo."
+
+#: apps/common/utils/templates/email/otp_email.html
+msgid "Made, Design by"
+msgstr "Creado y diseñado por"

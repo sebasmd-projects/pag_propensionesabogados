@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 19:29-0500\n"
+"POT-Creation-Date: 2026-09-29 23:12-0500\n"
 "PO-Revision-Date: 2024-08-23 00:18-0500\n"
 "Last-Translator: Sebastian Morales <sebasmoralesd@gmail.com>\n"
 "Language-Team: Propensiones Abogados\n"
@@ -19,67 +19,112 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.10.0\n"
 
-#: apps/project/common/account/emails.py:63
+#: .\emails.py:65
 msgid "Your access code for Propensiones® Abogados"
 msgstr "Tu código de acceso a Propensiones® Abogados"
 
-#: apps/project/common/account/forms.py:14
-#: apps/project/common/account/templates/two_factor/core/login.html:84
-#: apps/project/common/account/templates/two_factor/core/login.html:131
+#: .\emails.py:66
+msgid "Use the following code to sign in to your account."
+msgstr "Usa el siguiente código para entrar en tu cuenta."
+
+#: .\emails.py:95
+#| msgid "Your access code for Propensiones® Abogados"
+msgid "Reset your password for Propensiones® Abogados"
+msgstr "Restablece tu contraseña de Propensiones® Abogados"
+
+#: .\forms\change_password_form.py:16
+#: .\templates\account\change_password.html:33
+#| msgid "Confirm Password"
+msgid "Current Password"
+msgstr "Contraseña actual"
+
+#: .\forms\change_password_form.py:27 .\forms\forgot_password_form.py:82
+#: .\templates\account\change_password.html:41
+#: .\templates\account\forgot_password.html:79
+#| msgid "Password"
+msgid "New Password"
+msgstr "Contraseña nueva"
+
+#: .\forms\change_password_form.py:38 .\forms\forgot_password_form.py:89
+#: .\templates\account\change_password.html:49
+#: .\templates\account\forgot_password.html:87
+#| msgid "Confirm Password"
+msgid "Confirm New Password"
+msgstr "Confirmar contraseña nueva"
+
+#: .\forms\change_password_form.py:57
+msgid "Your current password was entered incorrectly."
+msgstr "La contraseña actual no es correcta."
+
+#: .\forms\change_password_form.py:70
+#| msgid "Passwords do not match"
+msgid "The two password fields didn't match."
+msgstr "Las dos contraseñas no coinciden."
+
+#: .\forms\change_password_form.py:75
+msgid "New password cannot be the same as current password."
+msgstr "La contraseña nueva no puede ser igual a la actual."
+
+#: .\forms\forgot_password_form.py:25
+#: .\templates\account\forgot_password.html:49
+msgid "Email or Username"
+msgstr "Correo o usuario"
+
+#: .\forms\forgot_password_form.py:41
+msgid "This field is required."
+msgstr "Este campo es obligatorio."
+
+#: .\forms\login_otp_form.py:12 .\templates\two_factor\core\login.html:84
+#: .\templates\two_factor\core\login.html:136
 msgid "User or Email"
 msgstr "Usuario o Correo"
 
-#: apps/project/common/account/forms.py:15
-#: apps/project/common/account/templates/two_factor/core/login.html:96
-msgid "Password"
-msgstr "Contraseña"
-
-#: apps/project/common/account/forms.py:16
-msgid "User"
-msgstr "Usuario"
-
-#: apps/project/common/account/forms.py:17
-msgid "Email"
-msgstr "Correo"
-
-#: apps/project/common/account/forms.py:71
-#: apps/project/common/account/forms.py:77
-#: apps/project/common/account/forms.py:79
-msgid "Confirm Password"
-msgstr "Confirmar Contraseña"
-
-#: apps/project/common/account/forms.py:86
-#: apps/project/common/account/forms.py:93
-#: apps/project/common/account/forms.py:95
-msgid "Names"
-msgstr "Nombres"
-
-#: apps/project/common/account/forms.py:102
-#: apps/project/common/account/forms.py:109
-#: apps/project/common/account/forms.py:111
-msgid "Last names"
-msgstr "Apellidos"
-
-#: apps/project/common/account/forms.py:127
-msgid "Passwords do not match"
-msgstr "Las contraseñas no coinciden"
-
-#: apps/project/common/account/forms.py:176
-#: apps/project/common/account/forms.py:192
-#: apps/project/common/account/templates/two_factor/core/login.html:182
+#: .\forms\login_otp_form.py:48 .\forms\login_otp_form.py:64
+#: .\templates\two_factor\core\login.html:187
 msgid "Verification code"
 msgstr "Código de verificación"
 
-#: apps/project/common/account/forms.py:225
+#: .\forms\login_otp_form.py:97 .\views.py:360
 msgid "Too many failed attempts. Please wait before trying again."
 msgstr ""
 "Demasiados intentos fallidos. Espera un poco antes de volver a intentarlo."
 
-#: apps/project/common/account/forms.py:239
+#: .\forms\login_otp_form.py:111
 msgid "The code is not valid or has expired. Request a new one."
 msgstr "El código no es válido o ha caducado. Pide uno nuevo."
 
-#: apps/project/common/account/login_view.py:364
+#: .\forms\register_form.py:14 .\templates\two_factor\core\login.html:96
+msgid "Password"
+msgstr "Contraseña"
+
+#: .\forms\register_form.py:15
+msgid "User"
+msgstr "Usuario"
+
+#: .\forms\register_form.py:16
+msgid "Email"
+msgstr "Correo"
+
+#: .\forms\register_form.py:71 .\forms\register_form.py:77
+#: .\forms\register_form.py:79
+msgid "Confirm Password"
+msgstr "Confirmar Contraseña"
+
+#: .\forms\register_form.py:86 .\forms\register_form.py:93
+#: .\forms\register_form.py:95
+msgid "Names"
+msgstr "Nombres"
+
+#: .\forms\register_form.py:102 .\forms\register_form.py:109
+#: .\forms\register_form.py:111
+msgid "Last names"
+msgstr "Apellidos"
+
+#: .\forms\register_form.py:127
+msgid "Passwords do not match"
+msgstr "Las contraseñas no coinciden"
+
+#: .\login_view.py:449
 msgid ""
 "Your sign-in could not be completed because the session was lost. Please "
 "sign in again."
@@ -87,28 +132,27 @@ msgstr ""
 "No se pudo completar el acceso porque se perdió la sesión. Vuelve a iniciar "
 "sesión."
 
-#: apps/project/common/account/login_view.py:465
-#: apps/project/common/account/templates/two_factor/core/login.html:123
+#: .\login_view.py:557 .\templates\two_factor\core\login.html:128
 msgid "Sign in with a code"
 msgstr "Entrar con un código"
 
-#: apps/project/common/account/login_view.py:466
+#: .\login_view.py:558
 msgid "We send a six-digit code to the email on your account."
 msgstr "Te enviamos un código de seis cifras al correo de tu cuenta."
 
-#: apps/project/common/account/login_view.py:471
+#: .\login_view.py:563
 msgid "Two-step verification"
 msgstr "Verificación en dos pasos"
 
-#: apps/project/common/account/login_view.py:472
+#: .\login_view.py:564
 msgid "Enter the code from your authentication app."
 msgstr "Escribe el código de tu aplicación de autenticación."
 
-#: apps/project/common/account/login_view.py:477
+#: .\login_view.py:569
 msgid "Backup token"
 msgstr "Código de respaldo"
 
-#: apps/project/common/account/login_view.py:478
+#: .\login_view.py:570
 msgid ""
 "Enter one of the backup tokens you saved when you set up two-step "
 "verification."
@@ -116,63 +160,85 @@ msgstr ""
 "Escribe uno de los códigos de respaldo que guardaste al activar la "
 "verificación en dos pasos."
 
-#: apps/project/common/account/login_view.py:483
-#: apps/project/common/account/templates/two_factor/core/login.html:32
-#: apps/project/common/account/templates/two_factor/core/login.html:116
-#: apps/project/common/account/templates/two_factor/core/login.html:200
+#: .\login_view.py:575 .\templates\two_factor\core\login.html:32
+#: .\templates\two_factor\core\login.html:121
+#: .\templates\two_factor\core\login.html:205
 msgid "Sign in"
 msgstr "Iniciar sesión"
 
-#: apps/project/common/account/login_view.py:484
+#: .\login_view.py:576
 msgid "Enter your credentials to access your account."
 msgstr "Escribe tus datos para entrar en tu cuenta."
 
-#: apps/project/common/account/models.py:18
+#: .\models.py:18
 msgid "User Login Attempt"
 msgstr "Intento de Inicio de Sesión de Usuario"
 
-#: apps/project/common/account/models.py:19
+#: .\models.py:19
 msgid "User Login Attempts"
 msgstr "Intentos de Inicio de Sesión de Usuario"
 
-#: apps/project/common/account/templates/account/email/login_otp.html:23
-msgid "Your access code"
-msgstr "Tu código de acceso"
+#: .\templates\account\change_password.html:18
+msgid "Enter your current password and choose a new one."
+msgstr "Escribe tu contraseña actual y elige una nueva."
 
-#: apps/project/common/account/templates/account/email/login_otp.html:48
-msgid "Access code"
-msgstr "Código de acceso"
+#: .\templates\account\change_password.html:57
+#: .\templates\account\forgot_password.html:95
+#| msgid "Confirm Password"
+msgid "Change My Password"
+msgstr "Cambiar mi contraseña"
 
-#: apps/project/common/account/templates/account/email/login_otp.html:51
-msgid "Sign in to your account"
-msgstr "Entra en tu cuenta"
+#: .\templates\account\change_password.html:67
+#| msgid "Go to the home page"
+msgid "Go to Homepage"
+msgstr "Ir a la página de inicio"
 
-#: apps/project/common/account/templates/account/email/login_otp.html:59
+#: .\templates\account\email\password_reset.html:17
+#: .\templates\account\email\password_reset.html:42
+msgid "Reset your password"
+msgstr "Restablece tu contraseña"
+
+#: .\templates\account\email\password_reset.html:50
 #, python-format
 msgid "Dear %(name)s,"
 msgstr "Hola, %(name)s:"
 
-#: apps/project/common/account/templates/account/email/login_otp.html:62
-msgid "Use the following code to sign in to your account."
-msgstr "Usa el siguiente código para entrar en tu cuenta."
+#: .\templates\account\email\password_reset.html:53
+msgid ""
+"We received a request to set a new password for your account. Use the button"
+" below to choose it."
+msgstr ""
+"Hemos recibido una solicitud para fijar una contraseña nueva en tu cuenta. "
+"Usa el botón para elegirla."
 
-#: apps/project/common/account/templates/account/email/login_otp.html:78
+#: .\templates\account\email\password_reset.html:63
+#| msgid "Show or hide the password"
+msgid "Choose a new password"
+msgstr "Elegir una contraseña nueva"
+
+#: .\templates\account\email\password_reset.html:71
 #, python-format
-msgid "The code expires in %(minutes)s minutes and can only be used once."
-msgstr "El código caduca en %(minutes)s minutos y solo se puede usar una vez."
+#| msgid ""
+#| "The code expires in %(minutes)s minutes and can only be used once."
+msgid "The link expires in %(minutes)s minutes and can only be used once."
+msgstr "El enlace caduca en %(minutes)s minutos y solo se puede usar una vez."
 
-#: apps/project/common/account/templates/account/email/login_otp.html:87
+#: .\templates\account\email\password_reset.html:74
+msgid "If the button does not work, copy this address into your browser:"
+msgstr "Si el botón no funciona, copia esta dirección en tu navegador:"
+
+#: .\templates\account\email\password_reset.html:84
 #, python-format
 msgid ""
-"Nobody at Propensiones® will ever ask you for this code. If you did not "
-"request it, someone may be trying to access your account: write to "
-"%(contact_email)s."
+"If you did not ask for this, ignore this message: your password will not "
+"change. Nobody at Propensiones® will ever ask you for this link. If you are "
+"worried, write to %(contact_email)s."
 msgstr ""
-"Nadie de Propensiones® te pedirá nunca este código. Si no lo has pedido tú, "
-"puede que alguien esté intentando entrar en tu cuenta: escribe a "
-"%(contact_email)s."
+"Si no lo has pedido tú, ignora este mensaje: tu contraseña no cambiará. "
+"Nadie de Propensiones® te pedirá nunca este enlace. Si te preocupa, escribe "
+"a %(contact_email)s."
 
-#: apps/project/common/account/templates/account/email/login_otp.html:98
+#: .\templates\account\email\password_reset.html:95
 msgid ""
 "This message was sent automatically. If you reply, it will reach our "
 "management office."
@@ -180,33 +246,55 @@ msgstr ""
 "Este mensaje se envió automáticamente. Si respondes, tu correo llegará a "
 "nuestra dirección."
 
-#: apps/project/common/account/templates/account/layout/account.html:55
-#: apps/project/common/account/templates/account/layout/account.html:56
+#: .\templates\account\forgot_password.html:35
+msgid "Enter your email or username to receive password reset instructions."
+msgstr ""
+"Escribe tu correo o tu usuario para recibir las instrucciones para "
+"restablecer tu contraseña."
+
+#: .\templates\account\forgot_password.html:57
+msgid "Send Reset Instructions"
+msgstr "Enviar instrucciones"
+
+#: .\templates\account\forgot_password.html:65
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+"Escribe tu contraseña nueva dos veces para comprobar que la has tecleado "
+"bien."
+
+#: .\templates\account\forgot_password.html:116
+#| msgid "Backup token"
+msgid "Back to Login"
+msgstr "Volver al acceso"
+
+#: .\templates\account\layout\account.html:55
+#: .\templates\account\layout\account.html:56
 msgid "Switch between light and dark mode"
 msgstr "Cambiar entre modo claro y oscuro"
 
-#: apps/project/common/account/templates/account/layout/account.html:63
+#: .\templates\account\layout\account.html:63
 msgid "Go to the home page"
 msgstr "Ir a la página de inicio"
 
-#: apps/project/common/account/templates/account/login.html:19
-#: apps/project/common/account/templates/account/register.html:20
+#: .\templates\account\login.html:19 .\templates\account\register.html:20
 msgid "Control of historical activos"
 msgstr "Control de bonos históricos"
 
-#: apps/project/common/account/templates/two_factor/_wizard_actions.html:13
+#: .\templates\two_factor\_wizard_actions.html:13
 msgid "Next"
 msgstr "Siguiente"
 
-#: apps/project/common/account/templates/two_factor/_wizard_actions.html:19
+#: .\templates\two_factor\_wizard_actions.html:19
 msgid "Back"
 msgstr "Atrás"
 
-#: apps/project/common/account/templates/two_factor/_wizard_actions.html:23
+#: .\templates\two_factor\_wizard_actions.html:23
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:59
+#: .\templates\two_factor\core\login.html:59
 msgid ""
 "Too many failed attempts from this connection. Please wait a few minutes "
 "before trying again."
@@ -214,31 +302,35 @@ msgstr ""
 "Demasiados intentos fallidos desde esta conexión. Espera unos minutos antes "
 "de volver a intentarlo."
 
-#: apps/project/common/account/templates/two_factor/core/login.html:106
+#: .\templates\two_factor\core\login.html:106
 msgid "Show or hide the password"
 msgstr "Mostrar u ocultar la contraseña"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:145
+#: .\templates\two_factor\core\login.html:116
+msgid "Forgot your password?"
+msgstr "¿Olvidaste tu contraseña?"
+
+#: .\templates\two_factor\core\login.html:150
 msgid "Resend"
 msgstr "Reenviar"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:145
+#: .\templates\two_factor\core\login.html:150
 msgid "Send code"
 msgstr "Enviar código"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:162
+#: .\templates\two_factor\core\login.html:167
 msgid "A one-time code has been sent to your email"
 msgstr "Hemos enviado un código de un solo uso a tu correo"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:165
+#: .\templates\two_factor\core\login.html:170
 msgid ""
-"After several failed password attempts we sent you a code so you can sign in "
-"without getting locked out."
+"After several failed password attempts we sent you a code so you can sign in"
+" without getting locked out."
 msgstr ""
 "Tras varios intentos fallidos con la contraseña te hemos enviado un código "
 "para que puedas entrar sin quedarte bloqueado."
 
-#: apps/project/common/account/templates/two_factor/core/login.html:175
+#: .\templates\two_factor\core\login.html:180
 msgid ""
 "Enter your username or email and press «Send code». The code will arrive at "
 "the email address on your account."
@@ -246,31 +338,102 @@ msgstr ""
 "Escribe tu usuario o tu correo y pulsa «Enviar código». El código llegará a "
 "la dirección de correo de tu cuenta."
 
-#: apps/project/common/account/templates/two_factor/core/login.html:193
+#: .\templates\two_factor\core\login.html:198
 #, python-format
 msgid "The code expires in %(minutes)s minutes."
 msgstr "El código caduca en %(minutes)s minutos."
 
-#: apps/project/common/account/templates/two_factor/core/login.html:207
+#: .\templates\two_factor\core\login.html:212
 msgid "Sign in with my password instead"
 msgstr "Prefiero entrar con mi contraseña"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:223
+#: .\templates\two_factor\core\login.html:228
 msgid "Verify"
 msgstr "Verificar"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:229
+#: .\templates\two_factor\core\login.html:234
 msgid "Or, alternatively, use one of your other authentication methods:"
 msgstr "O bien usa otro de tus métodos de autenticación:"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:245
+#: .\templates\two_factor\core\login.html:250
 msgid "Use a backup token"
 msgstr "Usar un código de respaldo"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:263
+#: .\templates\two_factor\core\login.html:268
 msgid "New user?"
 msgstr "¿Eres nuevo?"
 
-#: apps/project/common/account/templates/two_factor/core/login.html:265
+#: .\templates\two_factor\core\login.html:270
 msgid "Create an account"
 msgstr "Crea una cuenta"
+
+#: .\views.py:172 .\views.py:200
+#| msgid "Confirm Password"
+msgid "Reset Your Password"
+msgstr "Restablece tu contraseña"
+
+#: .\views.py:185
+#| msgid "User or Email"
+msgid "Check Your Email"
+msgstr "Revisa tu correo"
+
+#: .\views.py:187
+msgid ""
+"If an account exists with the provided email/username, you will receive "
+"password reset instructions shortly."
+msgstr ""
+"Si existe una cuenta con el correo o usuario indicado, recibirás en breve "
+"las instrucciones para restablecer tu contraseña."
+
+#: .\views.py:285
+#| msgid "The code is not valid or has expired. Request a new one."
+msgid ""
+"The password reset link is invalid or has expired. Please request a new "
+"password reset."
+msgstr ""
+"El enlace para restablecer la contraseña no es válido o ha caducado. "
+"Solicita uno nuevo."
+
+#: .\views.py:302 .\views.py:317
+#| msgid "Password"
+msgid "Set New Password"
+msgstr "Fijar una contraseña nueva"
+
+#: .\views.py:330
+msgid ""
+"Your password has been reset successfully. You can now log in with your new "
+"password."
+msgstr ""
+"Tu contraseña se ha restablecido. Ya puedes iniciar sesión con la nueva."
+
+#: .\views.py:352
+msgid "You must be logged in to change your password."
+msgstr "Debes iniciar sesión para cambiar tu contraseña."
+
+#: .\views.py:378
+msgid "Your password has been changed successfully!"
+msgstr "Tu contraseña se ha cambiado correctamente."
+
+#: .\views.py:393
+#| msgid "Confirm Password"
+msgid "Change Password"
+msgstr "Cambiar contraseña"
+
+#~ msgid "Your access code"
+#~ msgstr "Tu código de acceso"
+
+#~ msgid "Access code"
+#~ msgstr "Código de acceso"
+
+#~ msgid "Sign in to your account"
+#~ msgstr "Entra en tu cuenta"
+
+#, python-format
+#~ msgid ""
+#~ "Nobody at Propensiones® will ever ask you for this code. If you did not "
+#~ "request it, someone may be trying to access your account: write to "
+#~ "%(contact_email)s."
+#~ msgstr ""
+#~ "Nadie de Propensiones® te pedirá nunca este código. Si no lo has pedido tú, "
+#~ "puede que alguien esté intentando entrar en tu cuenta: escribe a "
+#~ "%(contact_email)s."

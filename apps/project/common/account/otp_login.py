@@ -51,6 +51,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 
+from apps.common.utils.otp_email import contact_email as shared_contact_email
 from apps.common.utils.throttling import RateLimit
 
 logger = logging.getLogger(__name__)
@@ -218,11 +219,10 @@ def issue(request, identifier: str) -> bool:
     return True
 
 
-def contact_email() -> str:
-    """A quien escribir si llega un codigo que no se pidio."""
-    from .emails import CONTACT_EMAIL
-
-    return CONTACT_EMAIL
+#: La direccion de contacto la decide un solo sitio, el del correo, para que
+#: el aviso de la pantalla y el del mensaje no puedan acabar diciendo cosas
+#: distintas.
+contact_email = shared_contact_email
 
 
 def remember_identifier(request, identifier: str) -> None:
@@ -268,6 +268,25 @@ def verify(request, code: str):
     stored = data.get('code_hash')
 
     if not stored:
+        if not data:
+            # **En el log, no en la pantalla.** Quien entra ve siempre el mismo
+            # mensaje --distinguir «no habia codigo» de «el codigo no es ese»
+            # convertiria la pantalla en un comprobador de cuentas-- pero
+            # quien mantiene esto necesita saber cual de las dos cosas paso.
+            #
+            # Este caso casi nunca es un codigo equivocado: significa que la
+            # sesion llego **vacia** a la peticion que trae el codigo, cuando
+            # la anterior escribio el estado en ella. O sea, la sesion no se
+            # esta conservando entre peticiones: una cookie que no vuelve,
+            # otra que la pisa, o un almacen de sesion que no guarda.
+            logger.warning(
+                'Acceso con codigo: la sesion no trae ningun codigo. La '
+                'peticion que lo pidio escribio el estado y esta no lo ve: '
+                'la sesion no se esta conservando entre peticiones '
+                '(sesion=%s, claves=%s)',
+                request.session.session_key,
+                sorted(request.session.keys()),
+            )
         return None
 
     expires = data.get('expires')

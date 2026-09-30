@@ -11,7 +11,12 @@ Se cuelgan del raiz, que es donde esperan encontrarlas.
 from django.urls import path
 
 from .login_view import PropensionesLoginView
-from .views import UserLogoutView, UserRegisterView
+from .views import (
+    ChangePasswordFormView,
+    ForgotPasswordFormView,
+    UserLogoutView,
+    UserRegisterView,
+)
 
 app_name = "account"
 
@@ -30,5 +35,17 @@ urlpatterns = [
         'accounts/logout/',
         UserLogoutView.as_view(),
         name='logout'
+    ),
+    # Los nombres son los de GEA; el camino cuelga de `accounts/`, como el
+    # resto de la cuenta aqui.
+    path(
+        'accounts/change/password/',
+        ChangePasswordFormView.as_view(),
+        name='change_password'
+    ),
+    path(
+        'accounts/forgot/password/',
+        ForgotPasswordFormView.as_view(),
+        name='forgot_password'
     ),
 ]

@@ -2,13 +2,14 @@
 """
 El correo que lleva un código de seis cifras, escrito una vez.
 
-Hay dos sitios que mandan uno --entrar en la plataforma y consultar un
-certificado-- y hasta ahora eran dos correos distintos: el del acceso llevaba
-logos, aviso de caducidad y el recordatorio de que nadie del despacho pide el
-código; el de la verificación era ``send_mail`` con tres líneas de texto
-plano. El segundo llega a gente que no es usuaria de la plataforma y que acaba
-de escanear un QR de un papel, o sea justo a quien más falta le hace reconocer
-de quién viene el mensaje.
+Es el correo de quien entra con un código en vez de con la contraseña
+(`account.emails`) y el que puede usar cualquier otra pantalla que mande uno,
+como la verificación pública de certificados si algún día se trae. Lleva el
+membrete de la casa, el aviso de caducidad y el recordatorio de que nadie del
+despacho pide el código. El destinatario de una verificación pública acaba de
+escanear un QR de un papel, no es usuario de la plataforma y no tiene por qué
+reconocer el remitente: justo a quien más falta le hace que el mensaje se
+parezca a algo.
 
 Aquí vive la parte que no cambia --la maqueta, los logos, la caja del código,
 el pie-- y cada sitio pone lo suyo: el asunto y la frase que dice para qué es
@@ -22,13 +23,13 @@ externa, Outlook ignora la mayor parte del CSS moderno y Gmail recorta lo que
 hay dentro de una etiqueta ``<style>``. Lo que aquí parece de hace veinte años
 es lo único que se ve igual en todos.
 
-**Los logos van dentro del mensaje** (``cid:``), no enlazados. Un
+**El membrete va dentro del mensaje** (``cid:``), no enlazados. Un
 ``<img src="https://…">`` lo bloquean Gmail y Outlook hasta que el destinatario
 da permiso: el mensaje llegaría con dos huecos rotos justo encima del código,
 que es lo que menos conviene en el correo que autoriza una entrada. Y de paso
 un logo remoto delata cuándo se abrió el mensaje.
 
-**Y en PNG, no en WebP.** Los logos del proyecto están en WebP porque es lo que
+**Y en PNG, no en WebP.** Los logos del proyecto pueden estar en WebP porque es lo que
 conviene en la web; en correo, Outlook de escritorio no lo pinta. La conversión
 se hace una vez y se queda en memoria.
 """
@@ -46,11 +47,12 @@ from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
 
-#: Los logos de la cabecera, con el identificador con el que la plantilla los
-#: referencia.
+#: El membrete de la cabecera, con el identificador con el que la plantilla lo
+#: referencia. Es el mismo que llevan los demas correos de la casa
+#: (`case_manager.emails`, `auth_platform.emails`), para que quien recibe uno
+#: reconozca el remitente en todos.
 LOGOS = (
-    ('propensiones', 'assets/imgs/sections/logoHorizontalAttlas.webp'),
-    ('gea', 'assets/imgs/GEA/gea logo gold.webp'),
+    ('membrete', 'assets/imgs/consultar_proceso/membrete-paz-y-salvo.jpg'),
 )
 
 #: Ancho al que se reducen antes de mandarlos. Un logo de 2000 px en un correo
@@ -121,6 +123,7 @@ def send_otp_email(
     code: str,
     minutes: int,
     greeting_name: str = '',
+    reply_to: str = '',
     fail_silently: bool = False,
 ) -> None:
     """
@@ -137,6 +140,8 @@ def send_otp_email(
         greeting_name: a quién se saluda. Vacío cuando no se sabe --la
             verificación pública no pide el nombre de nadie-- y entonces el
             saludo va a secas.
+        reply_to: a donde contesta quien le da a «responder». Vacio, el
+            cliente contesta al remitente.
         fail_silently: por defecto **no**. Si el correo no sale, quien lo
             espera se quedaría mirando una pantalla que promete un código que
             no va a llegar; es mejor que la pantalla lo diga.
@@ -162,6 +167,7 @@ def send_otp_email(
         body=unescape(strip_tags(html.replace('</p>', '</p>\n'))),
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[to],
+        reply_to=[reply_to] if reply_to else None,
     )
 
     # `related` y no `mixed`: los logos son parte del cuerpo, no adjuntos que

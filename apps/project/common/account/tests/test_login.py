@@ -359,3 +359,77 @@ class OfferAfterFailuresTests(TestCase):
 
         self.assertTrue(response.context['user'].is_authenticated)
         self.assertIsNone(self.client.session.get(MODE_KEY))
+
+
+# ---------------------------------------------------------------------------
+# Lo que trae de GEA la version fusionada de este fichero: quedarse fuera, las
+# mayusculas del correo y salir. Lo demas de su `test_login` ya lo cubren las
+# clases de arriba, con los nombres de aqui.
+# ---------------------------------------------------------------------------
+class GettingInTests(TestCase):
+
+    def setUp(self):
+        cache.clear()
+        self.url = reverse('two_factor:login')
+        self.user = make_user()
+
+    def submit(self, username, password=PASSWORD):
+        return self.client.post(self.url, {
+            # El prefijo lo pone el asistente. Si algun dia cambia, hay que
+            # actualizar tambien `axes_hooks.USERNAME_FIELDS`, o los bloqueos
+            # por pareja (IP, usuario) dejan de funcionar sin avisar.
+            'login_view-current_step': 'auth',
+            'auth-username': username,
+            'auth-password': password,
+        })
+
+    def test_con_el_correo_en_otras_mayusculas(self):
+        response = self.submit('Ana@PropensionesAbogados.COM')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('_auth_user_id', self.client.session)
+
+    def test_una_contrasena_equivocada_no_entra(self):
+        self.submit('ana', 'no-es-la-clave')
+
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_una_cuenta_que_no_existe_no_entra(self):
+        self.submit('nadie@propensionesabogados.com')
+
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_una_cuenta_desactivada_no_entra(self):
+        """
+        Dar de baja es poner `is_active = False`. Si eso no cortara el acceso,
+        dar de baja no serviria de nada.
+        """
+        self.user.is_active = False
+        self.user.save(update_fields=['is_active'])
+
+        self.submit('ana')
+
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_la_respuesta_no_dice_que_mitad_fallo(self):
+        """
+        Un mensaje distinto para «no existe» y para «la clave no es» convierte
+        el formulario en un comprobador de cuentas.
+        """
+        desconocida = self.submit('nadie@propensionesabogados.com')
+        equivocada = self.submit('ana', 'no-es-la-clave')
+
+        self.assertEqual(desconocida.status_code, equivocada.status_code)
+
+    def test_salir_cierra_la_sesion(self):
+        self.submit('ana')
+        self.assertIn('_auth_user_id', self.client.session)
+
+        self.client.get(reverse('account:logout'))
+
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_la_pantalla_ofrece_recuperar_la_contrasena(self):
+        response = self.client.get(self.url)
+
+        self.assertContains(response, reverse('account:forgot_password'))

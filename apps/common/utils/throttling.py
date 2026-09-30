@@ -49,12 +49,25 @@ class RateLimit:
         name: identifica al formulario. Dos con el mismo nombre comparten cupo.
         limit: intentos por ventana.
         window: duracion de la ventana, en segundos.
+        fail_open: que hacer si la cache no responde. Por defecto `False`:
+            se rechaza. Ponerlo en `True` es decir «prefiero aguantar el abuso
+            a cortar el servicio», y solo vale cuando lo que se evita es una
+            molestia pasajera y no un control de seguridad.
+        reason: por que se eligio `fail_open`. Obligatorio cuando se pone: sin
+            razon escrita, la siguiente persona no sabe si fue deliberado o un
+            descuido. Ninguno de los limites de aqui lo usa hoy.
     """
 
-    def __init__(self, name: str, *, limit: int, window: int):
+    def __init__(self, name: str, *, limit: int, window: int,
+                 fail_open: bool = False, reason: str = ''):
+        if fail_open and not reason:
+            raise ValueError(f'{name}: fail_open needs a written reason')
+
         self.name = name
         self.limit = limit
         self.window = window
+        self.fail_open = fail_open
+        self.reason = reason
 
     def key_for(self, request, scope=None) -> str:
         """
@@ -99,6 +112,14 @@ class RateLimit:
             used = None
 
         if used is None:
+            if self.fail_open:
+                logger.error(
+                    'La cache no responde: el limite «%s» NO se esta aplicando '
+                    'y la peticion pasa, por decision expresa (%s).',
+                    self.name, self.reason,
+                )
+                return True
+
             logger.error(
                 'La cache no responde: no se puede aplicar el limite «%s», '
                 'asi que la peticion de %s se rechaza en vez de dejarla pasar.',

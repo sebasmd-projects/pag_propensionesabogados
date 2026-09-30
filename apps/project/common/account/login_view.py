@@ -45,6 +45,7 @@ barato para quien ataca es justo el que no deja rastro.
 import logging
 import time
 
+from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
@@ -327,6 +328,86 @@ class PropensionesLoginView(TwoFactorLoginView):
 
         return super().done(form_list, **kwargs)
 
+    def _why_there_is_no_user(self) -> str:
+        """
+        Por que el almacen no devuelve usuario, para el log.
+
+        El lector del almacen devuelve `False` por motivos que no se parecen en
+        nada --la sesion se perdio, el backend anotado no sabe cargar usuarios,
+        la cuenta ya no existe o esta desactivada-- y no dice cual. Cada uno se
+        busca en un sitio distinto, y confundirlos manda a mirar al equivocado.
+
+        Nunca escribe credenciales: ni la contrasena de la base ni nada que
+        salga del almacen que no sea la clave y el backend.
+        """
+        data = self.storage.data
+        pk = data.get('user_pk')
+        path = data.get('user_backend')
+
+        if not pk or not path:
+            return (
+                f'el almacen no tiene al usuario (user_pk='
+                f'{"si" if pk else "no"}, user_backend={path or "no"}): se '
+                f'perdio la sesion entre la peticion que identifico y esta'
+            )
+
+        try:
+            from django.contrib.auth import load_backend
+            backend = load_backend(path)
+        except Exception as error:                          # noqa: BLE001
+            return f'no se pudo cargar el backend {path}: {error!r}'
+
+        if not hasattr(backend, 'get_user'):
+            return (
+                f'el backend anotado ({path}) no sabe cargar usuarios: no '
+                f'tiene `get_user`. Ese no puede ser el backend de la sesion'
+            )
+
+        try:
+            loaded = backend.get_user(pk)
+        except Exception as error:                          # noqa: BLE001
+            return f'{path}.get_user({pk!r}) levanto {error!r}'
+
+        if loaded is not None:
+            return (
+                f'el backend si carga a {pk}, asi que el almacen cambio entre '
+                f'la comprobacion y esta'
+            )
+
+        from django.contrib.auth import get_user_model
+
+        exists = get_user_model()._default_manager.filter(pk=pk).first()
+
+        if exists is None:
+            return (
+                f'no hay ninguna cuenta con pk={pk} en '
+                f'{self._which_database()}, pero acaba de identificarse con '
+                f'esa clave: la sesion del navegador puede venir de otra base '
+                f'de datos (un asistente a medias sobrevive al cambio)'
+            )
+
+        return (
+            f'la cuenta {pk} existe pero el backend la rechaza: '
+            f'is_active={getattr(exists, "is_active", None)!r}'
+        )
+
+    def _which_database(self) -> str:
+        """Contra que base se esta hablando, sin credenciales."""
+        try:
+            from django.db import connection
+
+            ajustes = connection.settings_dict
+            nombre = ajustes.get('NAME') or '(sin nombre)'
+            host = ajustes.get('HOST') or 'local'
+            puerto = ajustes.get('PORT') or ''
+
+            return (
+                f'{nombre} en {host}:{puerto}' if puerto
+                else f'{nombre} en {host}'
+            )
+        except Exception:                                   # noqa: BLE001
+            return '(no se pudo saber que base)'
+
     def _restart_without_user(self):
         """
         Vacia el asistente y devuelve a la primera pantalla, con aviso.
@@ -348,22 +429,33 @@ class PropensionesLoginView(TwoFactorLoginView):
         empezar, diciendolo. Se registra porque un reinicio silencioso es
         indistinguible de un boton que no hace nada.
         """
+        # Antes de vaciar el almacen: despues no quedaria nada que explicar.
+        motivo = self._why_there_is_no_user()
+
         logger.warning(
             'Acceso: se llego al final del asistente sin usuario en el '
-            'almacen. paso=%s pasos=%s modo=%s',
+            'almacen. paso=%s pasos=%s modo=%s. Motivo: %s',
             self.storage.current_step,
             list(self.get_form_list()),
             self._mode(),
+            motivo,
         )
 
         self.storage.reset()
         self.storage.current_step = self.AUTH_STEP
         self._set_mode(MODE_PASSWORD)
 
-        messages.error(self.request, _(
+        aviso = _(
             'Your sign-in could not be completed because the session was '
             'lost. Please sign in again.'
-        ))
+        )
+
+        # En desarrollo el motivo sale tambien en pantalla; en produccion, solo
+        # en el log, que es donde lo lee quien lo mantiene.
+        if settings.DEBUG:
+            aviso = f'{aviso} [DEBUG] {motivo}'
+
+        messages.error(self.request, aviso)
 
         # Se responde con una redireccion y no repintando la pantalla: asi el
         # navegador queda en un GET y recargar no reenvia el formulario a un

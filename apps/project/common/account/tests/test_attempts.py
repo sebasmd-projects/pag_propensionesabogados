@@ -241,3 +241,22 @@ class RateLimitTests(TestCase):
         with patch('apps.common.utils.throttling.cache.incr',
                    side_effect=ConnectionError('sin cache')):
             self.assertFalse(limite.consume(peticion))
+
+    def test_dejar_pasar_sin_cache_exige_escribir_el_motivo(self):
+        """
+        `fail_open` existe para los limites que solo evitan una molestia
+        pasajera, y sin motivo escrito nadie sabria luego si fue deliberado.
+        """
+        with self.assertRaises(ValueError):
+            RateLimit('prueba', limit=3, window=60, fail_open=True)
+
+    def test_con_motivo_y_sin_cache_deja_pasar(self):
+        limite = RateLimit(
+            'prueba', limit=3, window=60,
+            fail_open=True, reason='solo evita una molestia pasajera',
+        )
+        peticion = self.client.request().wsgi_request
+
+        with patch('apps.common.utils.throttling.cache.incr',
+                   side_effect=ConnectionError('sin cache')):
+            self.assertTrue(limite.consume(peticion))

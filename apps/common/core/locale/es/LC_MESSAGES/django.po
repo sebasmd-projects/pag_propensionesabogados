@@ -1147,3 +1147,7 @@ msgstr "Mensaje Recibido | PROPENSIONES ABOGADOS"
 #, python-format
 msgid "Thank you %(name)s for contacting us."
 msgstr "Gracias %(name)s por contactarnos."
+
+#: apps/common/core/templates/partials/header.html
+msgid "Change password"
+msgstr "Cambiar contraseña"
