@@ -56,8 +56,25 @@
     // filas, que es lo que ocupa la tarjeta sin crecer.
     const estrecha = tabla.hasAttribute('data-dt-compact');
 
+    // El texto de tabla vacia es propio de cada tabla (`data-dt-empty`, que
+    // pinta Django traducido) y no una fila con `colspan` en el tbody, que
+    // DataTables no admite: falla con «Requested unknown parameter». Solo
+    // sustituye a `emptyTable`; `zeroRecords` (filtrar sin resultados) sigue
+    // siendo el generico de `dt-i18n`, porque ahi la tabla no esta vacia.
+    // Sin atributo tambien se queda el generico.
+    const vacio = tabla.dataset.dtEmpty;
+    const idioma = vacio
+      ? { ...language, emptyTable: vacio }
+      : language;
+
+    // Sin JS, la tabla vacia lo dice con un `<p data-dt-fallback>` tras ella.
+    // Con DataTables ya lo dice la propia tabla, asi que se oculta.
+    tabla.parentElement
+      .querySelectorAll(':scope > [data-dt-fallback]')
+      .forEach(p => { p.hidden = true; });
+
     new DataTable(tabla, {
-      language,
+      language: idioma,
       order,
       columnDefs,
       pageLength: estrecha ? 10 : 25,

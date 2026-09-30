@@ -1187,3 +1187,61 @@ class TablasTests(TestCase):
         self.assertEqual(respuesta.status_code, 200)
         self.assertContains(respuesta, 'data-datatable')
         self.assertFalse(respuesta.context['is_paginated'])
+
+
+class TablasVaciasTests(TestCase):
+    """
+    DataTables no admite filas con `colspan` en el tbody: con la tabla vacia
+    avisa «Requested unknown parameter '1' for row 0, column 1». El texto de
+    tabla vacia viaja en `data-dt-empty` y lo pinta DataTables; sin JS, un
+    `<p data-dt-fallback>` tras la tabla dice lo mismo.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('setup_case_manager_group', stdout=StringIO())
+        make_user('gestora_vacia', gestor=True)
+
+    def setUp(self):
+        login_as(self.client, 'gestora_vacia')
+
+    def _tablas(self, url):
+        import re
+        html = self.client.get(url).content.decode()
+        tablas = re.findall(r'<table\b[^>]*\bdata-datatable\b[^>]*>.*?</table>', html, re.S)
+        self.assertTrue(tablas, url)
+        return html, tablas
+
+    def test_ninguna_tabla_vacia_tiene_colspan_y_todas_llevan_su_texto(self):
+        urls = {
+            'dashboard': reverse('case_manager:gestor_dashboard'),
+            'clientes': reverse('case_manager:gestor_client_list'),
+            'asuntos': reverse('case_manager:gestor_case_list'),
+            'ficha': None,
+        }
+        # La ficha necesita un cliente; se crea al llegar a ella para no
+        # ensuciar el listado de clientes, que tambien debe verse vacio.
+        for nombre, url in urls.items():
+            with self.subTest(nombre):
+                if nombre == 'ficha':
+                    cliente = ClientModel.objects.create(
+                        identification='800000001', full_name='Cliente sin asuntos',
+                    )
+                    url = reverse('case_manager:gestor_client_detail', args=[cliente.pk])
+                html, tablas = self._tablas(url)
+                for tabla in tablas:
+                    self.assertNotIn('colspan', tabla)
+                    self.assertRegex(tabla, r'<table\b[^>]*\bdata-dt-empty="[^"]+"')
+                    self.assertRegex(tabla, r'<tbody>\s*</tbody>')
+                self.assertEqual(html.count('data-dt-fallback'), len(tablas))
+
+    def test_el_dashboard_tiene_sus_tres_tablas_del_panel(self):
+        _, tablas = self._tablas(reverse('case_manager:gestor_dashboard'))
+        ids = ''.join(tablas)
+        for tabla_id in ('tablaProximosPagos', 'tablaDeudores', 'tablaExpectativas'):
+            self.assertIn(tabla_id, ids)
+
+    def test_el_guion_usa_el_texto_de_cada_tabla_como_tabla_vacia(self):
+        js = (Path(settings.BASE_DIR) / 'public/staticfiles/assets/custom/js/gestor_tables.js').read_text(encoding='utf-8')
+        self.assertIn('dataset.dtEmpty', js)
+        self.assertIn('emptyTable', js)

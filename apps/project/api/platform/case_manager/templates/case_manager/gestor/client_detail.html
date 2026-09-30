@@ -78,7 +78,8 @@
     </div>
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0 w-100" id="tablaFicha"
-             data-datatable data-dt-order="0 asc">
+             data-datatable data-dt-order="0 asc"
+             data-dt-empty="{% trans 'This client has no cases yet.' %}">
         <thead>
           <tr class="text-uppercase small">
             <th scope="col">{% trans "Service" %}</th>
@@ -143,15 +144,12 @@
                 </a>
               </td>
             </tr>
-          {% empty %}
-            <tr>
-              <td colspan="9" class="text-muted text-center py-4">
-                {% trans "This client has no cases yet." %}
-              </td>
-            </tr>
           {% endfor %}
         </tbody>
       </table>
+      {% if not cases %}
+        <p class="text-muted text-center py-4 mb-0" data-dt-fallback>{% trans "This client has no cases yet." %}</p>
+      {% endif %}
     </div>
   </div>
 

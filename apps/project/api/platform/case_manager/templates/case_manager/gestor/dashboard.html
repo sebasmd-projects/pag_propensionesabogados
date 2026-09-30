@@ -75,14 +75,14 @@
     <div class="card border-0 shadow-sm"><div class="card-body p-4">
       <h2 class="h5" id="upcoming-title">Próximos pagos</h2>
       <p class="text-muted">Valor esperado total: <strong>${{ upcoming_total|intcomma }}</strong>. Registre el estado «Pago recibido» cuando ingrese el dinero.</p>
-      <div class="table-responsive"><table class="table align-middle" data-datatable data-dt-compact id="tablaProximosPagos">
+      <div class="table-responsive"><table class="table align-middle" data-datatable data-dt-compact id="tablaProximosPagos" data-dt-empty="No hay pagos próximos registrados.">
         <thead><tr><th>Cliente / caso</th><th>Valor esperado</th><th>Fecha esperada de recepción</th></tr></thead>
         <tbody>{% for payment in upcoming_payments %}<tr>
           <td><a href="{% url 'case_manager:gestor_case_update' payment.case.pk %}">{{ payment.case.client.full_name }}</a><div class="small text-muted">{{ payment.case.service_display }} · {{ payment.case.case_number|default:payment.case.pk }}</div></td>
           <td data-order="{{ payment.amount }}">${{ payment.amount|intcomma }}</td>
           <td data-order="{{ payment.date|default:'9999-12-31' }}">{{ payment.date|default:'Sin fecha definida' }}</td>
         </tr>{% endfor %}</tbody>
-      </table></div>
+      </table>{% if not upcoming_payments %}<p class="text-muted text-center py-3 mb-0" data-dt-fallback>No hay pagos próximos registrados.</p>{% endif %}</div>
     </div></div>
   </section>
   <section class="gestor-stage" data-gestor-section aria-label="Cartera y expectativas">
@@ -99,7 +99,8 @@
         <div class="card-body pt-2">
           <div class="table-responsive">
             <table class="table table-sm align-middle mb-0 w-100" id="tablaDeudores"
-                   data-datatable data-dt-compact data-dt-order="3 desc">
+                   data-datatable data-dt-compact data-dt-order="3 desc"
+                   data-dt-empty="{% trans 'No outstanding balances recorded.' %}">
               <thead>
                 <tr class="text-uppercase small text-muted">
                   <th scope="col">{% trans "Client" %}</th>
@@ -120,15 +121,12 @@
                     <td class="text-end" data-order="{{ row.paid }}">${{ row.paid|intcomma }}</td>
                     <td class="text-end fw-semibold" data-order="{{ row.balance }}">${{ row.balance|intcomma }}</td>
                   </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="4" class="text-muted text-center py-3">
-                      {% trans "No outstanding balances recorded." %}
-                    </td>
-                  </tr>
                 {% endfor %}
               </tbody>
             </table>
+            {% if not debtors %}
+              <p class="text-muted text-center py-3 mb-0" data-dt-fallback>{% trans "No outstanding balances recorded." %}</p>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -144,7 +142,8 @@
         <div class="card-body pt-2">
           <div class="table-responsive">
             <table class="table table-sm align-middle mb-0 w-100" id="tablaExpectativas"
-                   data-datatable data-dt-compact data-dt-order="2 desc">
+                   data-datatable data-dt-compact data-dt-order="2 desc"
+                   data-dt-empty="{% trans 'No contingency expectations recorded.' %}">
               <thead>
                 <tr class="text-uppercase small text-muted">
                   <th scope="col">{% trans "Client" %}</th>
@@ -163,15 +162,12 @@
                     <td class="text-end" data-order="{{ row.contingency_percentage }}">{{ row.contingency_percentage }} %</td>
                     <td class="text-end fw-semibold" data-order="{{ row.expectation }}">${{ row.expectation|intcomma }}</td>
                   </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="3" class="text-muted text-center py-3">
-                      {% trans "No contingency expectations recorded." %}
-                    </td>
-                  </tr>
                 {% endfor %}
               </tbody>
             </table>
+            {% if not expectations %}
+              <p class="text-muted text-center py-3 mb-0" data-dt-fallback>{% trans "No contingency expectations recorded." %}</p>
+            {% endif %}
           </div>
         </div>
       </div>
