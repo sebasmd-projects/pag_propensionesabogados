@@ -6,6 +6,12 @@
   padding-bottom: 2rem;
 }
 
+.gestor-stage--compact {
+  min-height: 0;
+  scroll-margin-top: 110px;
+  padding-bottom: 2rem;
+}
+
 .gestor-next-section {
   position: fixed;
   right: 140px;

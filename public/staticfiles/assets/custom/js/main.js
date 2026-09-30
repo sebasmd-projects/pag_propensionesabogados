@@ -166,6 +166,7 @@
   // menu movil, el scrollspy y la medida de la cabecera. La funcion de arriba
   // ya comprobaba `if (scrollTop)`; aqui faltaba.
   scrollTop?.addEventListener("click", (e) => {
+    if (scrollTop.dataset.sectionNavigation === "true") return;
     e.preventDefault();
     window.scrollTo({
       top: 0,

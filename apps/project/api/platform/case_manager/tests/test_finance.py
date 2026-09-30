@@ -43,6 +43,11 @@ class FreeModalityFormTests(TestCase):
         self.assertNotIn('/static/assets/custom/js/case_form.js', html)
         self.assertIn("mandate.addEventListener('change'", html)
         self.assertIn('servicio gratuito', html)
+        self.assertIn('data-case-overview', html)
+        self.assertIn('data-payment-flow', html)
+        self.assertIn('data-payment-main', html)
+        self.assertIn('data-payment-followups', html)
+        self.assertEqual(html.count(' data-gestor-section'), 1)
 
     def test_free_modalities_save_without_amounts(self):
         for mandate in (Mandate.PRO_BONO, Mandate.GUARDIANSHIP):
