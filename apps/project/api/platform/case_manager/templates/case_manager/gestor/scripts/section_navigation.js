@@ -57,43 +57,8 @@
     update();
   };
 
-  const paymentFlow = document.querySelector('[data-payment-flow]');
-  const configurePaymentFlow = () => {
-    if (!paymentFlow) return;
-    const payment = paymentFlow.querySelector('[data-payment-main]');
-    const followups = paymentFlow.querySelector('[data-payment-followups]');
-    paymentFlow.classList.remove('gestor-stage');
-    paymentFlow.removeAttribute('data-gestor-section');
-    payment.classList.remove('gestor-stage');
-    payment.removeAttribute('data-gestor-section');
-    followups.classList.remove('gestor-stage--compact');
-    followups.removeAttribute('data-gestor-section');
-
-    if (payment.getBoundingClientRect().height >= window.innerHeight * .85) {
-      payment.classList.add('gestor-stage');
-      payment.setAttribute('data-gestor-section', '');
-      followups.classList.add('gestor-stage--compact');
-      followups.setAttribute('data-gestor-section', '');
-    } else {
-      paymentFlow.classList.add('gestor-stage');
-      paymentFlow.setAttribute('data-gestor-section', '');
-    }
-    update();
-  };
-
-  if (paymentFlow) {
-    const body = paymentFlow.querySelector('[data-payment-main] .card-body');
-    new MutationObserver(() => requestAnimationFrame(configurePaymentFlow)).observe(body, {
-      subtree: true, childList: true, attributes: true,
-      attributeFilter: ['class', 'hidden', 'style'],
-    });
-    configurePaymentFlow();
-  }
   window.addEventListener('scroll', update, {passive: true});
-  window.addEventListener('resize', () => {
-    configurePaymentFlow();
-    update();
-  });
+  window.addEventListener('resize', update);
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bindScrollTop, {once: true});
   } else {

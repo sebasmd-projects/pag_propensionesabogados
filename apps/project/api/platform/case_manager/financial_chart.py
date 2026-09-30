@@ -183,6 +183,16 @@ def build_financial_chart(request, finances, today=None):
             })
         buckets.append({'label': _label(key, granularity), 'values': bucket_values})
 
+    totals = [
+        {
+            'key': series,
+            'label': label,
+            'tone': tone,
+            'value': sum(values[key][series] for key in keys),
+        }
+        for series, label, tone in SERIES
+    ]
+
     return {
         'start': start.isoformat(),
         'end': end.isoformat(),
@@ -190,6 +200,7 @@ def build_financial_chart(request, finances, today=None):
         'granularity': granularity,
         'granularity_label': granularity_label,
         'buckets': buckets,
+        'totals': totals,
         'legend': [
             {'key': key, 'label': label, 'tone': tone}
             for key, label, tone in SERIES

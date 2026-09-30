@@ -26,7 +26,7 @@
         row.querySelector('[data-payment-next-date]').closest('.col-12').hidden = expected;
         if (expected) {
           row.querySelector('[data-payment-title]').textContent = 'Próximo a pago';
-          row.querySelector('[data-payment-next-date]').value = '';
+          if (row.querySelector('[data-payment-next-date]').value) row.querySelector('[data-payment-next-date]').value = '';
         }
         if (kind === 'payment') {
           number += 1;
@@ -37,7 +37,10 @@
         // Ningun campo del pago es obligatorio: se registra el importe cuando
         // se sabe y la fecha cuando llega el comprobante.
         date.required = false;
-        row.querySelector('[data-payment-next-date]').min = date.value;
+        // Asignar `min` en cada pulsación reinicia la edición del campo de fecha
+        // y corta el año a medio teclear: solo se escribe si cambia.
+        const nextDate = row.querySelector('[data-payment-next-date]');
+        if (nextDate.min !== date.value) nextDate.min = date.value;
         return {kind, amount, date: date.value,
           next_date: row.querySelector('[data-payment-next-date]').value,
           legacy: row.dataset.legacy === 'true'};
@@ -90,7 +93,9 @@
     };
     history.querySelector('[data-add-payment]').addEventListener('click', () => addRow('payment'));
     history.querySelector('[data-add-expected]').addEventListener('click', () => addRow('expected'));
-    rows.addEventListener('input', () => updateFinance());
+    // Las fechas no se procesan mientras se teclean: se validan al confirmarse
+    // el valor (change) o al enviar, cuando el año ya está completo.
+    rows.addEventListener('input', event => { if (event.target.type !== 'date') updateFinance(); });
     rows.addEventListener('change', () => updateFinance());
     rows.addEventListener('click', event => {
       const button = event.target.closest('[data-remove-payment]');

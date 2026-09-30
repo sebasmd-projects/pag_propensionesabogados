@@ -503,6 +503,11 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
             'payment_history',
         )
         widgets = {
+            # `data-money` solo pide formato visual COP en el navegador; el
+            # valor enviado sigue siendo el entero sin puntos ni simbolo.
+            'contingency_value': forms.NumberInput(attrs={'data-money': ''}),
+            'agreed_fee': forms.NumberInput(attrs={'data-money': ''}),
+            'paid_amount': forms.NumberInput(attrs={'data-money': ''}),
             'payment_history': forms.HiddenInput(),
             'start_date': forms.DateInput(
                 attrs={'type': 'date'}, format='%Y-%m-%d'

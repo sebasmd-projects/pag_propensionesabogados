@@ -13,7 +13,7 @@
   {% endif %}
   <div class="row g-3">
     <div class="col-12 col-md-4"><label class="form-label d-block"><span data-amount-label>Valor del pago</span>
-      <input class="form-control" type="number" min="0" step="1" max="9000000000000" value="{{ payment.amount|default:0 }}" data-payment-amount>
+      <input class="form-control" type="number" min="0" step="1" max="9000000000000" value="{{ payment.amount|default:0 }}" data-payment-amount data-money>
     </label></div>
     <div class="col-12 col-md-4"><label class="form-label d-block"><span data-date-label>Fecha de pago</span>
       <input class="form-control" type="date" value="{{ payment.date|default:'' }}" data-payment-date>

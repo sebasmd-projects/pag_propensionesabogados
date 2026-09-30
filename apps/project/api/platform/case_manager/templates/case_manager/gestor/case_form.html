@@ -5,7 +5,7 @@
 
 {% block gestor_actions %}
   {% if object %}
-    <a class="btn btn-outline-secondary" href="{% url 'case_manager:gestor_case_report' object.pk %}">
+    <a class="btn btn-outline-secondary" data-unsaved-skip href="{% url 'case_manager:gestor_case_report' object.pk %}">
       <i class="bi bi-download me-1"></i>Imprimir ficha
     </a>
     <span class="small text-muted">Descarga el estado guardado del proceso (Word).</span>
@@ -13,7 +13,7 @@
 {% endblock gestor_actions %}
 
 {% block gestor_content %}
-  <form method="post" novalidate>
+  <form method="post" novalidate data-unsaved-guard>
     {% csrf_token %}
 
     {# Los errores que no son de un campo salen como aviso flotante, desde la #}
@@ -105,7 +105,7 @@
     </section>
 
     <div data-payment-flow>
-    <section class="card border-0 shadow-sm mb-4" data-payment-main>
+    <section class="card border-0 shadow-sm mb-4" data-payment-main data-gestor-section aria-label="Gestión de Pagos">
       <div class="card-header bg-transparent border-0 pt-3">
         <h2 class="h6 fw-bold mb-0">Gestión de Pagos</h2>
         <p class="text-muted small mb-0" data-contingency-help hidden>
@@ -142,7 +142,7 @@
       </div>
     </section>
 
-    <section data-payment-followups>
+    <section data-payment-followups data-gestor-section class="gestor-stage--compact" aria-label="Paz y salvo y avisos al cliente">
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
         <div class="row g-3">
@@ -181,6 +181,26 @@
     {% include 'case_manager/gestor/partials/notes.html' %}
   {% endif %}
   {{ form.classification_catalog|json_script:"case-classification" }}
+
+  <div class="modal fade" id="cambiosSinGuardar" tabindex="-1" aria-labelledby="cambiosSinGuardarTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cambiosSinGuardarTitulo">Hay cambios sin guardar</h5>
+          <button type="button" class="btn-close" data-unsaved-cancel aria-label="Cerrar y seguir editando"></button>
+        </div>
+        <div class="modal-body">
+          El formulario no se guarda solo. Si continúa, los cambios que no ha guardado se perderán.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-unsaved-continue>Continuar</button>
+          <button type="button" class="btn btn-primary" data-unsaved-save>Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>{% include "case_manager/gestor/scripts/case_form.js" %}</script>
+  <script>{% include "case_manager/gestor/scripts/money_input.js" %}</script>
   <script>{% include "case_manager/gestor/scripts/payment_form.js" %}</script>
+  <script>{% include "case_manager/gestor/scripts/unsaved_changes.js" %}</script>
 {% endblock gestor_content %}

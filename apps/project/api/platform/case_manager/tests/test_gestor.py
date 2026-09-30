@@ -16,9 +16,11 @@ Lo que mas se cuida aqui son dos cosas:
 """
 
 from io import StringIO
+from pathlib import Path
 import json
 from datetime import date, timedelta
 
+from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
@@ -173,6 +175,20 @@ class GestorDashboardTests(TestCase):
         self.assertContains(respuesta, 'bi-graph-up-arrow')
         self.assertNotContains(respuesta, 'Portfolio financial status')
         self.assertNotContains(respuesta, 'bi-pie-chart')
+
+    def test_las_cinco_series_son_filtros_y_hay_torta_con_los_mismos_datos(self):
+        respuesta = self.client.get(self.url)
+
+        for key in ('agreed', 'paid', 'balance', 'expectation', 'upcoming'):
+            self.assertContains(respuesta, f'data-series-toggle="{key}"')
+            self.assertContains(respuesta, f'data-pie-item="{key}"')
+        self.assertContains(respuesta, 'type="checkbox" checked data-series-toggle')
+        self.assertContains(respuesta, 'data-financial-pie')
+        totals = {row['key']: row['value'] for row in respuesta.context['financial_chart']['totals']}
+        self.assertEqual(totals['agreed'], 5_000_000)
+        self.assertEqual(totals['expectation'], 9_000_000)
+        css = (Path(settings.BASE_DIR) / 'public/staticfiles/assets/custom/css/gestor.css').read_text(encoding='utf-8')
+        self.assertIn('overflow-x: hidden', css)
 
     def test_el_comparativo_abre_en_el_mes_actual_agrupado_por_dias(self):
         respuesta = self.client.get(self.url)
@@ -460,6 +476,32 @@ class CaseCrudTests(TestCase):
         caso = CaseModel.objects.get()
         self.assertEqual(caso.case_number, '2026-00145-00')
         self.assertEqual(caso.finance.balance, 4_000_000)
+
+    def test_el_formulario_de_edicion_encadena_las_secciones_y_avisa_de_cambios(self):
+        caso = CaseModel.objects.create(client=self.cliente, service=Service.JUDICIAL)
+        html = self.client.get(reverse('case_manager:gestor_case_update', args=[caso.pk])).content.decode()
+
+        # Asunto -> pagos -> paz y salvo/avisos -> notas: cada una menos la ultima con su siguiente.
+        for marker in ('data-case-overview', 'data-payment-main', 'data-payment-followups', 'aria-label="Notas y avisos"'):
+            self.assertRegex(html, r'<section[^>]*' + marker + r'[^>]*data-gestor-section|<section[^>]*data-gestor-section[^>]*' + marker)
+        self.assertEqual(html.count('<section'), html.count('data-gestor-section'))
+        self.assertLess(html.index('data-payment-main'), html.index('data-payment-followups'))
+        self.assertLess(html.index('data-payment-followups'), html.index('aria-label="Notas y avisos"'))
+        self.assertIn('gestor-next-section', html)
+        self.assertIn('id="cambiosSinGuardar"', html)
+        self.assertIn('data-unsaved-continue', html)
+        self.assertIn('data-unsaved-save', html)
+        self.assertIn('data-unsaved-guard', html)
+        self.assertGreaterEqual(html.count('data-money'), 4)  # 3 importes + el de cada pago
+
+    def test_los_importes_limpios_se_siguen_guardando_igual(self):
+        respuesta = self.client.post(
+            reverse('case_manager:gestor_case_create'),
+            self.datos(**{'finance-0-agreed_fee': '9000000000000', 'finance-0-paid_amount': '1234567'}),
+        )
+        self.assertEqual(respuesta.status_code, 302)
+        finanzas = CaseModel.objects.get().finance
+        self.assertEqual((finanzas.agreed_fee, finanzas.paid_amount), (9_000_000_000_000, 1_234_567))
 
     def test_payment_history_round_trips_and_drives_totals(self):
         rows = [
@@ -788,6 +830,14 @@ class ClientToCasesTests(TestCase):
         respuesta = self.client.get(reverse('case_manager:gestor_case_create'))
 
         self.assertIsNone(respuesta.context['form'].initial.get('client'))
+
+
+class ListadosAlturaTests(TestCase):
+    def test_los_dos_listados_reservan_55vh_de_cuerpo(self):
+        css = (Path(settings.BASE_DIR) / 'public/staticfiles/assets/custom/css/gestor.css').read_text(encoding='utf-8')
+        for table in ('tablaAsuntos', 'tablaClientes'):
+            self.assertRegex(css, r'#%s[^{]*\{[^}]*min-height: 55vh' % table)
+        self.assertNotIn('tablaDeudores', css)
 
 
 class TablasTests(TestCase):

@@ -47,7 +47,9 @@ class FreeModalityFormTests(TestCase):
         self.assertIn('data-payment-flow', html)
         self.assertIn('data-payment-main', html)
         self.assertIn('data-payment-followups', html)
-        self.assertEqual(html.count(' data-gestor-section'), 1)
+        self.assertEqual(html.count(' data-gestor-section'), 3)
+        self.assertIn('data-money', html)
+        self.assertIn('data-unsaved-guard', html)
 
     def test_free_modalities_save_without_amounts(self):
         for mandate in (Mandate.PRO_BONO, Mandate.GUARDIANSHIP):

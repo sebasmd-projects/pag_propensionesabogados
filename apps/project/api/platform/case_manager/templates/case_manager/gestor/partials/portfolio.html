@@ -39,9 +39,15 @@
           </div>
         </form>
 
-        <ul class="gestor-chart-legend" aria-label="Series de la gráfica">
+        <div data-financial-chart>
+        <ul class="gestor-chart-legend" aria-label="Series de la gráfica (filtros)">
           {% for item in financial_chart.legend %}
-            <li><i class="bg-{{ item.tone }}"></i>{{ item.label }}</li>
+            <li>
+              <label class="gestor-series-toggle">
+                <input type="checkbox" checked data-series-toggle="{{ item.key }}">
+                <i class="bg-{{ item.tone }}" data-series-swatch aria-hidden="true"></i>{{ item.label }}
+              </label>
+            </li>
           {% endfor %}
         </ul>
 
@@ -54,6 +60,7 @@
               <div class="gestor-time-bars">
                 {% for bar in bucket.values %}
                   <div class="gestor-time-bar bg-{{ bar.tone }}{% if not bar.value %} is-zero{% endif %}"
+                       data-series="{{ bar.key }}" data-value="{{ bar.value }}"
                        style="--bar-height: {{ bar.height }}%"
                        title="{{ bucket.label }} · {{ bar.label }}: ${{ bar.value|intcomma }}"
                        aria-label="{{ bucket.label }}, {{ bar.label }}: {{ bar.value }} pesos"></div>
@@ -63,6 +70,23 @@
             </div>
           {% endfor %}
         </div>
+
+        <div class="d-flex align-items-center flex-wrap gap-4 mt-4" data-financial-pie-box>
+          <div class="gestor-pie" data-financial-pie role="img"
+               aria-label="Distribución del comparativo por serie"></div>
+          <ul class="list-unstyled mb-0 flex-grow-1" data-financial-pie-legend aria-live="polite">
+            {% for item in financial_chart.totals %}
+              <li class="d-flex justify-content-between align-items-center gap-3 py-1"
+                  data-pie-item="{{ item.key }}" data-value="{{ item.value }}" data-tone="{{ item.tone }}">
+                <span><i class="d-inline-block rounded-1 me-2 bg-{{ item.tone }}" style="width:.65rem;height:.65rem" aria-hidden="true"></i>{{ item.label }}</span>
+                <b>${{ item.value|intcomma }} · <span data-pie-share>0</span> %</b>
+              </li>
+            {% endfor %}
+          </ul>
+          <p class="gestor-pie-empty small mb-0 w-100" data-pie-empty hidden>Ninguna serie seleccionada o sin valores en el rango.</p>
+        </div>
+        </div>
+        <script>{% include 'case_manager/gestor/scripts/financial_chart.js' %}</script>
 
         <p class="text-muted small mb-0 mt-3">
           Lo pactado, el saldo por cobrar y la cuota litis se ubican en la fecha de inicio del caso. Los pagos usan su fecha real y los próximos pagos su fecha esperada; los registros sin fecha usan la fecha de inicio o el día actual, según corresponda.
