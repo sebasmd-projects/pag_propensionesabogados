@@ -27,7 +27,6 @@ superusuario. A quien ha entrado pero no tiene el grupo se le responde 404, no
 
 import uuid
 
-from auditlog.context import set_actor
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse
@@ -717,12 +716,9 @@ class CaseNoteVisibilityView(GestorRequiredMixin, View):
 
         if note.visible_to_client != visible:
             note.visible_to_client = visible
-            # El actor se fija a mano: `AuditlogMiddleware` esta antes que
-            # `AuthenticationMiddleware` en `MIDDLEWARE` y, cuando lee
-            # `request.user`, todavia no existe, asi que el rastro saldria
-            # sin usuario.
-            with set_actor(request.user):
-                note.save(update_fields=['visible_to_client', 'updated'])
+            # El actor lo fija `AuditlogMiddleware` (va detras de la
+            # autenticacion en `MIDDLEWARE`): no hace falta `set_actor` aqui.
+            note.save(update_fields=['visible_to_client', 'updated'])
 
         if request.headers.get('X-Requested-With') == 'fetch':
             return JsonResponse({

@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.urls import path
 
 from .attack_patterns import common_attack_paths
+from .csp_report import csp_report
 from .views import set_language
 
 
@@ -41,6 +42,9 @@ def robots_txt(request):
 utils_path = [
     path('robots.txt', robots_txt),
     path('set_language/', set_language, name='set_language'),
+    # Destino de `report-uri` de la CSP en modo solo informe. Sin barra
+    # inicial: el prefijo de la app lo pone `app_core/urls.py`.
+    path('csp-report/', csp_report, name='csp_report'),
 ]
 
 urlpatterns = common_attack_paths + utils_path

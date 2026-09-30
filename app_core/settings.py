@@ -9,8 +9,12 @@ from dotenv import load_dotenv
 from import_export.formats.base_formats import CSV, HTML, JSON, TSV, XLS, XLSX
 
 from app_core.db import engine_for
+from app_core.env import check_environment, env_int, env_list
 
 load_dotenv()
+
+# Antes de leer nada: si faltan variables, el error las nombra todas juntas.
+check_environment()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,10 +40,7 @@ else:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-if ',' in os.getenv('DJANGO_ALLOWED_HOSTS'):
-    ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS').split(',')
-else:
-    ALLOWED_HOSTS = [os.getenv('DJANGO_ALLOWED_HOSTS')]
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS')
 
 
 DJANGO_APPS = [
@@ -56,6 +57,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'axes',
     'corsheaders',
+    'csp',
     'nested_admin',
     'rest_framework',
     'drf_spectacular',
@@ -147,17 +149,25 @@ MIDDLEWARE = [
     # resolverle el idioma, comprobarle el CSRF y anotarla en la auditoria
     # antes de mandarla a la direccion buena.
     'apps.common.utils.middleware.RedirectWWWMiddleware',
+    # Solo pone la cabecera `Content-Security-Policy-Report-Only` en la
+    # respuesta ya formada, asi que le da igual quien va detras. Despues del
+    # `www`: un 301 no lleva politica.
+    'csp.middleware.CSPMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'auditlog.middleware.AuditlogMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     # Justo detras del de autenticacion, que es de donde saca el usuario: es
     # quien pone `request.user.is_verified()` para las vistas que exigen
     # segundo factor.
     'django_otp.middleware.OTPMiddleware',
+    # **Detras** de la autenticacion y del segundo factor, nunca antes: al
+    # entrar mira `request.user` una sola vez para fijar el actor de todo lo
+    # que se guarde durante la peticion. Puesto antes, `request.user` todavia
+    # no existe y el rastro de auditoria queda sin usuario.
+    'auditlog.middleware.AuditlogMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Los tres siguientes van juntos y despues de la autenticacion: los dos
@@ -216,13 +226,13 @@ DB_ENGINE = engine_for(DECLARED_DB_ENGINE)
 if DECLARED_DB_ENGINE != "django.db.backends.sqlite3":
     DATABASES = {
         'default': {
-            'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE')),
+            'CONN_MAX_AGE': env_int('DB_CONN_MAX_AGE'),
             'ENGINE': DB_ENGINE,
             'NAME': os.getenv('DB_NAME'),
             'USER': os.getenv('DB_USER'),
             'PASSWORD': os.getenv('DB_PASSWORD'),
             'HOST': os.getenv('DB_HOST'),
-            'PORT': int(os.getenv('DB_PORT')),
+            'PORT': env_int('DB_PORT'),
             'CHARSET': os.getenv('DB_CHARSET'),
             'ATOMIC_REQUESTS': True
         }
@@ -263,7 +273,7 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 #: Cuanto vive un codigo de seis cifras.
-LOGIN_OTP_TTL_MINUTES = int(os.getenv('LOGIN_OTP_TTL_MINUTES', 15))
+LOGIN_OTP_TTL_MINUTES = env_int('LOGIN_OTP_TTL_MINUTES', 15)
 
 #: A quien escribir si a alguien le llega un codigo que no ha pedido.
 OTP_CONTACT_EMAIL = os.getenv(
@@ -276,7 +286,7 @@ ACCOUNT_REPLY_TO = os.getenv(
 #: Cuanto vive el enlace para fijar una clave nueva, en segundos. Es el ajuste
 #: que lee el generador de enlaces de Django. Su valor por defecto son tres
 #: dias, demasiado para un enlace que da acceso a la cuenta.
-PASSWORD_RESET_TIMEOUT = int(os.getenv('PASSWORD_RESET_TIMEOUT_MINUTES', 30)) * 60
+PASSWORD_RESET_TIMEOUT = env_int('PASSWORD_RESET_TIMEOUT_MINUTES', 30) * 60
 
 #: La direccion publica del sitio, para los enlaces que salen por correo. Nunca
 #: se construyen con la cabecera `Host` de la peticion: la pone el cliente, y
@@ -299,9 +309,9 @@ TWO_FACTOR_REMEMBER_COOKIE_AGE = None
 # alguien entre a la base a mano. El porque de cada linea esta en
 # `apps/common/utils/axes_hooks.py`.
 AXES_LOCKOUT_PARAMETERS = [['ip_address', 'username']]
-AXES_FAILURE_LIMIT = int(os.getenv('AXES_FAILURE_LIMIT', 6))
+AXES_FAILURE_LIMIT = env_int('AXES_FAILURE_LIMIT', 6)
 AXES_COOLOFF_TIME = timedelta(
-    minutes=int(os.getenv('AXES_COOLOFF_MINUTES', 30))
+    minutes=env_int('AXES_COOLOFF_MINUTES', 30)
 )
 AXES_RESET_ON_SUCCESS = True
 AXES_USERNAME_CALLABLE = f'{UTILS_PATH}.axes_hooks.username'
@@ -318,6 +328,31 @@ PASSWORD_HASHERS = [
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SESSION_COOKIE_AGE = 7200
+
+# --- Cookies y subidas: explicito, no por defecto de Django ----------------
+# Los tres primeros valen lo mismo que el defecto de Django; se escriben para
+# que un cambio de version o un descuido no los mueva sin que nadie lo vea.
+#: La cookie de sesion no la lee JavaScript: un XSS no puede robar la sesion.
+SESSION_COOKIE_HTTPONLY = True
+#: `Lax` y no `Strict`: `Strict` no manda la cookie al llegar desde un enlace
+#: de otro sitio (el correo del codigo de acceso, el QR del paz y salvo) y esa
+#: persona parecera no haber iniciado sesion. `Lax` frena igual el POST
+#: cruzado, que es lo que importa.
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+#: Tope del cuerpo de una peticion SIN contar los ficheros (que van en partes
+#: `multipart` y tienen su propio flujo). Lo que mas pesa hoy es la firma del
+#: formulario de insolvencia de Attlas: un PNG de canvas en base64, medido en
+#: 40-75 KB aun con un garabato denso a 3000 px de ancho. 5 MiB deja ~70 veces
+#: de margen sin que un cuerpo desmedido se cargue entero en memoria (el
+#: defecto de Django es 2,5 MiB). Los adjuntos del admin y la importacion son
+#: ficheros en `multipart`: no cuentan aqui.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+#: Cuantos ficheros admite un solo envio. El gestor y el admin suben uno o dos
+#: a la vez; el defecto de Django es 100, que abre cien descriptores antes de
+#: que nadie valide nada.
+DATA_UPLOAD_MAX_NUMBER_FILES = 20
 
 # Clave servidor a servidor compartida por pag, fundacionattlas.org y gea:
 # `X-Server-Key` de la API de Attlas, confianza en `X-Client-IP` y clave del
@@ -341,10 +376,10 @@ ATTLAS_CONSULTANT_EMAIL_DOMAINS = (
     'propensionesabogados.com', 'fundacionattlas.com', 'fundacionattlas.org',
 )
 
-ATTLAS_TOKEN_TIMEOUT = int(os.getenv('ATTLAS_TOKEN_TIMEOUT'))*60*60
+ATTLAS_TOKEN_TIMEOUT = env_int('ATTLAS_TOKEN_TIMEOUT') * 60 * 60
 
 # Lifetime in seconds for calculator-only tokens.
-ATTLAS_LOOKUP_TOKEN_TIMEOUT = int(os.getenv("ATTLAS_LOOKUP_TOKEN_TIMEOUT", 30 * 60))
+ATTLAS_LOOKUP_TOKEN_TIMEOUT = env_int("ATTLAS_LOOKUP_TOKEN_TIMEOUT", 30 * 60)
 
 # Bootstrap llama `danger` a lo que Django llama `error`, y sin esto un
 # mensaje de error se pinta con la clase `alert-error`, que no existe: el
@@ -387,7 +422,7 @@ GEA_CERT_TIMEOUT = (
     float(os.getenv('GEA_CERT_READ_TIMEOUT', 60)),
 )
 #: Intentos maximos de certificacion por documento antes de rendirse.
-PAZ_Y_SALVO_MAX_ATTEMPTS = int(os.getenv('PAZ_Y_SALVO_MAX_ATTEMPTS', 5))
+PAZ_Y_SALVO_MAX_ATTEMPTS = env_int('PAZ_Y_SALVO_MAX_ATTEMPTS', 5)
 #: Base publica de la URL que lleva el QR del paz y salvo. gea exige https.
 PAZ_Y_SALVO_PUBLIC_BASE = os.getenv(
     'PAZ_Y_SALVO_PUBLIC_BASE', ''
@@ -410,7 +445,7 @@ EMAIL_BACKEND = os.getenv('DJANGO_EMAIL_BACKEND')
 EMAIL_HOST = os.getenv('DJANGO_EMAIL_HOST')
 EMAIL_HOST_PASSWORD = os.getenv('DJANGO_EMAIL_HOST_PASSWORD')
 EMAIL_HOST_USER = os.getenv('DJANGO_EMAIL_HOST_USER')
-EMAIL_PORT = int(os.getenv('DJANGO_EMAIL_PORT'))
+EMAIL_PORT = env_int('DJANGO_EMAIL_PORT')
 
 
 # CKEditor
@@ -479,7 +514,7 @@ SOCRATA_API_KEY_SECRET = os.getenv('SOCRATA_API_KEY_SECRET')
 
 HONEYPOT_FIELD_NAME = os.getenv('HONEYPOT_FIELD_NAME')
 
-IP_BLOCKED_TIME_IN_MINUTES = int(os.getenv('IP_BLOCKED_TIME_IN_MINUTES'))
+IP_BLOCKED_TIME_IN_MINUTES = env_int('IP_BLOCKED_TIME_IN_MINUTES')
 
 # Django Rest Framework
 REST_FRAMEWORK = {
@@ -509,28 +544,103 @@ SPECTACULAR_SETTINGS = {
     'SORT_OPERATION_PARAMETERS': True,
 }
 
+# --- CORS: origenes enumerados, sin comodin de subdominio -------------------
+# Un `*.propensionesabogados.com` deja hablar con la API a cualquier subdominio,
+# presente o futuro: basta uno abandonado apuntando a un servicio de terceros.
+# Se enumeran los sitios que de verdad llaman a la API desde el navegador,
+# con y sin `www`. Cambiable con `CORS_ALLOWED_ORIGINS` (lista separada por
+# comas; vacia o ausente = esta lista).
+CORS_ALLOWED_ORIGINS_DEFAULT = [
+    'https://geausa.propensionesabogados.com',
+    'https://www.geausa.propensionesabogados.com',
+    'https://fundacionattlas.com',
+    'https://www.fundacionattlas.com',
+    'https://fundacionattlas.org',
+    'https://www.fundacionattlas.org',
+]
+
 if DEBUG:
-    CORS_ALLOWED_ORIGIN_REGEXES = [
+    CORS_ALLOWED_ORIGINS = [
         'http://localhost:3000',
         'http://0.0.0.0:3000',
     ]
 else:
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        r'^https://[A-Za-z0-9-]+\.propensionesabogados\.com$',
-        r'^https://[A-Za-z0-9-]+\.fundacionattlas\.com$',
-        r'^https://[A-Za-z0-9-]+\.fundacionattlas\.org$',
-    ]
+    CORS_ALLOWED_ORIGINS = env_list(
+        'CORS_ALLOWED_ORIGINS', CORS_ALLOWED_ORIGINS_DEFAULT)
+
+# --- CSP en modo solo informe ----------------------------------------------
+# `Content-Security-Policy-Report-Only`: el navegador NO bloquea nada, solo
+# avisa a `CSP_REPORT_PATH` de lo que bloquearia. Es para ver que romperia
+# antes de hacerla efectiva; el siguiente paso esta en `docs/SEGURIDAD.md`.
+#
+# Los origenes salen de recorrer las plantillas: Google Fonts (`base.html`),
+# DataTables y pdfmake (gestor), reCAPTCHA (formulario de contacto), el icono
+# de Trace en la cabecera y Swagger/ReDoc (jsdelivr, solo el personal).
+# Bootstrap, iconos, Swiper y AOS son locales (`public/staticfiles`).
+#
+# `script-src` NO lleva `'unsafe-inline'` a proposito: hay scripts en linea en
+# las plantillas y se quiere que salgan en los informes. `style-src` si, porque
+# hay atributos `style=` por todas partes y no admiten nonce.
+CSP_REPORT_PATH = '/csp-report/'
+
+_CSP_SELF = "'self'"
+_CSP_RECAPTCHA_SCRIPTS = (
+    'https://www.google.com/recaptcha/',
+    'https://www.gstatic.com/recaptcha/',
+)
+
+CONTENT_SECURITY_POLICY_REPORT_ONLY = {
+    'DIRECTIVES': {
+        'default-src': [_CSP_SELF],
+        'script-src': [
+            _CSP_SELF,
+            'https://cdn.jsdelivr.net',
+            'https://cdn.datatables.net',
+            *_CSP_RECAPTCHA_SCRIPTS,
+        ],
+        'style-src': [
+            _CSP_SELF,
+            "'unsafe-inline'",
+            'https://fonts.googleapis.com',
+            'https://cdn.datatables.net',
+            'https://cdn.jsdelivr.net',
+        ],
+        'font-src': [
+            _CSP_SELF,
+            'data:',
+            'https://fonts.gstatic.com',
+            'https://cdn.jsdelivr.net',
+        ],
+        'img-src': [
+            _CSP_SELF,
+            'data:',
+            'blob:',
+            'https://tracecertificates.com',
+            'https://cdn.jsdelivr.net',
+        ],
+        'connect-src': [_CSP_SELF, 'https://www.google.com/recaptcha/'],
+        'frame-src': [
+            'https://www.google.com/recaptcha/',
+            'https://recaptcha.google.com/recaptcha/',
+        ],
+        'media-src': [_CSP_SELF],
+        'object-src': [_CSP_SELF],
+        'worker-src': [_CSP_SELF, 'blob:'],
+        'base-uri': [_CSP_SELF],
+        'form-action': [_CSP_SELF],
+        'frame-ancestors': [_CSP_SELF],
+        'report-uri': [CSP_REPORT_PATH],
+    },
+}
 
 
-COMMON_ATTACK_TERMS = [
-    term.strip() for term in os.getenv('COMMON_ATTACK_TERMS').split(',')
-]
+COMMON_ATTACK_TERMS = env_list('COMMON_ATTACK_TERMS')
 
 # Detector de rafagas de 404 (`apps/common/utils/scanning.py`). Lo lee con
 # `getattr(settings, ...)` y su propio defecto: sin estas lineas poner la
 # variable en el `.env` no haria nada.
-SCAN_404_THRESHOLD = int(os.getenv('SCAN_404_THRESHOLD', 20))
-SCAN_404_WINDOW_SECONDS = int(os.getenv('SCAN_404_WINDOW_SECONDS', 300))
+SCAN_404_THRESHOLD = env_int('SCAN_404_THRESHOLD', 20)
+SCAN_404_WINDOW_SECONDS = env_int('SCAN_404_WINDOW_SECONDS', 300)
 
 # Base GeoLite2 para el pais de una IP (`apps/common/utils/netintel.py`).
 # Opcional: vacia, el campo se queda sin pais y todo lo demas sigue igual.

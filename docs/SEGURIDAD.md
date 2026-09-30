@@ -2,8 +2,9 @@
 
 Hallazgos de la revisión del **25 de septiembre de 2026**. La Fase 1 queda
 cerrada el **29 de septiembre de 2026**: los puntos 1, 2 y 3 están corregidos.
-Se conserva el diagnóstico original como referencia; los hallazgos 4 a 8
-siguen pendientes.
+El **30 de septiembre de 2026** se corrige el 4 (CORS) y el 5 queda en su
+primera etapa (CSP en modo solo informe). Se conserva el diagnóstico original
+como referencia; los hallazgos 6 a 8 siguen pendientes.
 
 Cada punto trae el fichero y la línea, por qué importa y cómo comprobar que
 quedó bien. Las líneas son de `7c35a5c`; si el fichero cambió, busca por el
@@ -124,49 +125,112 @@ la contraseña sea la correcta.
 - **Firma por cédula:** ahora exige login; conocer la cédula no autoriza a firmar.
 - **IP detrás del proxy de Vercel:** `X-Client-IP` solo se acepta con clave
   de servidor válida, para aplicar los cupos a la IP real.
+- **Auditoría sin actor (2026-09-30):** `AuditlogMiddleware` iba *antes* que
+  `AuthenticationMiddleware`, así que leía `request.user` cuando aún no existía
+  y todo cambio quedaba en `LogEntry` sin usuario (solo la visibilidad de las
+  notas lo esquivaba con un `set_actor` a mano). Ahora va detrás de la
+  autenticación y del segundo factor (`OTPMiddleware`), el `set_actor` manual
+  sobra y se quitó, y un test (`case_manager/tests/test_audit_actor.py`) fija
+  el orden y comprueba el actor en un alta y una edición del gestor.
+  **Los registros anteriores al cambio siguen sin actor**; no hay forma fiable
+  de reconstruirlo.
 
 ---
 
 ## 4 · 🟡 MEDIO — CORS con comodín de subdominio
 
-**`app_core/settings.py:455`**
+**Corregido — 2026-09-30.** `CORS_ALLOWED_ORIGINS` enumerado, sin regex.
 
-```python
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r'^https://[A-Za-z0-9-]+\.propensionesabogados\.com$',
-    ...
-]
+Antes, `CORS_ALLOWED_ORIGIN_REGEXES` admitía cualquier subdominio de
+`propensionesabogados.com`, `fundacionattlas.com` y `fundacionattlas.org`:
+bastaba un subdominio abandonado apuntando a un servicio de terceros para que
+alguien lo reclamase y hablase con la API desde un origen autorizado.
+
+Ahora, en producción, solo estos seis (con y sin `www`):
+
+```
+https://geausa.propensionesabogados.com   https://www.geausa.propensionesabogados.com
+https://fundacionattlas.com               https://www.fundacionattlas.com
+https://fundacionattlas.org               https://www.fundacionattlas.org
 ```
 
-Cualquier subdominio, presente o futuro, puede llamar a la API desde el
-navegador. Hay nueve subdominios; basta que uno quede abandonado apuntando a
-un servicio de terceros para que alguien lo reclame y hable con la API desde
-un origen que tú autorizas.
+Se puede cambiar sin tocar código con `CORS_ALLOWED_ORIGINS` en el `.env`
+(lista separada por comas, con esquema y sin barra final; vacía o ausente =
+la lista de arriba). En `DEBUG` son `http://localhost:3000` y
+`http://0.0.0.0:3000`, ahora como orígenes normales (antes estaban puestos
+como regex, que no era lo que se quería).
 
-**Qué hacer.** Enumerar los orígenes reales en `CORS_ALLOWED_ORIGINS`. Son
-pocos y cambian poco.
+**Ojo al desplegar:** cualquier otro sitio que llame a la API desde el
+navegador dejará de poder hacerlo. Si aparece uno legítimo, se añade a la
+variable, no se vuelve al comodín.
+
+Comprobado en `app_core/tests/test_security_headers.py`: un origen de la
+lista recibe `Access-Control-Allow-Origin`; un subdominio cualquiera, un
+`fundacionattlas.org.evil.com` y el mismo dominio en `http` no.
 
 ---
 
 ## 5 · 🟡 MEDIO — Sin CSP en los sitios Django
 
+**Etapa 1 hecha — 2026-09-30: `Content-Security-Policy-Report-Only`.** Falta
+la etapa 2 (hacerla efectiva).
+
 Medido en las cabeceras de respuesta:
 
 | Sitio | CSP |
 |---|---|
-| `propensionesabogados.com`, `geausa`, `atlas` (Django) | ❌ ninguna |
+| `propensionesabogados.com`, `geausa`, `atlas` (Django) | ⚠️ solo informe (pag); gea pendiente |
 | `fundacionattlas.*`, `attlasconciliacion` (Next.js) | ✅ tienen |
 | `fa.`, `correo.` | ❌ **ninguna cabecera de seguridad** |
 | `sebasmd.com` | ❌ ninguna |
 
-Lo llamativo es el contraste: los Next.js ya traen una CSP decente y los
-Django no traen ninguna. Es `django-csp`, media tarde.
+**Qué hay ahora (pag).** `django-csp` 4.0 (`csp.middleware.CSPMiddleware`),
+con `CONTENT_SECURITY_POLICY_REPORT_ONLY` en `app_core/settings.py`. El
+navegador **no bloquea nada**: manda un informe por cada cosa que bloquearía a
+`POST /csp-report/` (`apps/common/utils/csp_report.py`), que lo apunta como
+una línea de `WARNING` en `stderr.log` (logger `csp_report`), **sin guardar
+nada en base de datos**, con un cupo de 60 informes por minuto y por IP, un
+cuerpo máximo de 8 KiB, y sin apuntar query ni tokens de ruta.
 
-Empezar en `Content-Security-Policy-Report-Only` para ver qué rompería antes
-de hacerla efectiva. La del proyecto tiene CDN de por medio —DataTables,
-pdfmake— así que la política tiene que contemplarlos.
+La política se armó recorriendo las plantillas: Google Fonts, DataTables y
+pdfmake (gestor, desde `cdn.datatables.net` y `cdn.jsdelivr.net`), reCAPTCHA
+(formulario de contacto), el icono de Trace de la cabecera y Swagger/ReDoc
+(`jsdelivr`, solo personal). Bootstrap, Bootstrap Icons, Swiper y AOS son
+locales.
 
-**`fa.` y `correo.` no son Django**: esos se arreglan en el servidor web.
+**Cómo ver qué rompería.** Dejarla unos días en producción y leer los
+informes: `grep "CSP report-only" stderr.log`. Los que importan son los de
+`script-src`/`script-src-elem` (scripts en línea) y cualquier origen que no
+esté en la lista.
+
+**Etapa 2: pasar a modo efectivo.** No se ha hecho y no es cambiar una
+cabecera. Lo que hace falta:
+
+1. **Nonces para los scripts en línea.** Hay 11 `<script>` sin `src`
+   repartidos en 7 plantillas (`raw.html`, `partials/banner.html`, gestor:
+   `base.html`, `case_form.html` —5—, `client_form.html`,
+   `partials/portfolio.html`, y `signature/signature_widget.html`) y la política **no** lleva
+   `'unsafe-inline'` en `script-src` a propósito: cada uno sale hoy en los
+   informes. Para cada uno: o se mueve a un fichero estático, o se marca con
+   `nonce="{{ request.csp_nonce }}"` (`django-csp` lo trae) y se añade
+   `csp.constants.NONCE` a `script-src`. Con nonce, `'unsafe-inline'` deja de
+   hacer falta y no debe añadirse nunca.
+2. **Manejadores en línea** (`onclick="..."`, etc.): no llevan nonce y habría
+   que pasarlos a `addEventListener`. En las plantillas no hay ninguno (se
+   comprobó con búsqueda); si el JS los inyecta, aparecerían en los informes
+   como `script-src-attr`.
+3. **`style-src` con `'unsafe-inline'`.** Se dejó así porque hay atributos
+   `style=` por todas partes y no admiten nonce. Quitarlo es una segunda
+   limpieza, opcional.
+4. **Los CDN con SRI** (`integrity=` + `crossorigin`) para DataTables y
+   pdfmake, o traerlos a `public/staticfiles` y quitar los dos orígenes.
+5. Cuando los informes salgan limpios una semana: mover la configuración de
+   `CONTENT_SECURITY_POLICY_REPORT_ONLY` a `CONTENT_SECURITY_POLICY` (la
+   cabecera que bloquea). Se pueden tener las dos a la vez durante la
+   transición.
+
+**Pendiente:** el mismo trabajo en gea (Django), y `fa.`/`correo.`, que no son
+Django y se arreglan en el servidor web.
 
 ---
 
