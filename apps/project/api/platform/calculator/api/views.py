@@ -25,6 +25,8 @@ class ClientViewSet(mixins.CreateModelMixin,
     - create (POST) -> /clients/
     - retrieve (GET), update (PUT), partial_update (PATCH) -> /clients/{id}/
     """
+    # Los identificadores son UUID; no absorber rutas retiradas como search/.
+    lookup_value_regex = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
     queryset = AttlasInsolvencyFormModel.objects.all()
     permission_classes = [HasServerKey]
 

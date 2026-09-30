@@ -15,7 +15,8 @@ OBJECT_ID = UUID('00000000-0000-0000-0000-000000000001')
 ROUTES = [
     ('api-insolvency-login', {}, ('post',)),
     ('api-insolvency-register', {}, ('post',)),
-    ('api-calc-client-search', {}, ('get',)),
+    ('api-clients-lookup', {}, ('post',)),
+    ('api-clients-lookup-verify', {}, ('post',)),
     ('api-insolvency-consultants-register', {}, ('post',)),
     ('token-info', {}, ('get',)),
     ('calculator_api:client-list', {}, ('post',)),
@@ -50,12 +51,11 @@ class ServerKeyAPITests(APITestCase):
     def test_empty_configuration_denies_all_routes(self):
         self.assert_routes_denied({'HTTP_X_SERVER_KEY': ''})
 
-    def test_correct_key_preserves_search_not_found(self):
-        response = self.client.get(reverse('api-calc-client-search'),
-            {'documentNumber': 'nonexistent', 'birthDate': '1990-01-01'},
-            HTTP_X_SERVER_KEY=SERVER_KEY)
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.data, {'detail': 'No encontrado'})
+    def test_legacy_search_route_is_removed(self):
+        with self.assertRaises(NoReverseMatch):
+            reverse('api-calc-client-search')
+        for headers in ({}, {'HTTP_X_SERVER_KEY': SERVER_KEY}):
+            self.assertEqual(self.client.get('/api/v1/clients/search/', **headers).status_code, 404)
 
     def test_correct_key_preserves_login_validation(self):
         response = self.client.post(reverse('api-insolvency-login'), {}, HTTP_X_SERVER_KEY=SERVER_KEY)

@@ -46,7 +46,12 @@ class ClientLookupTests(APITestCase):
         self.verify_url = reverse('api-clients-lookup-verify')
 
     def lookup(self, document=None, birth=None, **headers):
-        with self.captureOnCommitCallbacks(execute=True):
+        module = 'apps.project.api.platform.auth_platform.api.views'
+        with patch(module + '.threading.Thread') as thread, patch(
+            module + '.close_old_connections',
+        ), self.captureOnCommitCallbacks(execute=True):
+            thread.return_value.start.side_effect = lambda: thread.call_args.kwargs['target'](
+                *thread.call_args.kwargs['args'])
             return self.client.post(self.lookup_url, {
                 'documentNumber': document or self.user.document_number,
                 'birthDate': birth or self.user.birth_date.isoformat(),
@@ -200,6 +205,31 @@ class ClientLookupTests(APITestCase):
             response = self.lookup()
         self.assertEqual(response.status_code, 202)
         self.assertEqual(set(response.data), {'challenge_id'})
+
+    def test_worker_exception_is_logged_and_response_is_202(self):
+        module = 'apps.project.api.platform.auth_platform.api.views'
+        with patch(module + '.send_lookup_code', side_effect=RuntimeError('failed')), self.assertLogs(
+            module, level='ERROR',
+        ):
+            self.assertEqual(self.lookup().status_code, 202)
+
+    def test_email_is_scheduled_only_after_commit_without_waiting_for_worker(self):
+        module = 'apps.project.api.platform.auth_platform.api.views'
+        with patch(module + '.threading.Thread') as thread, patch(module + '.send_lookup_code') as send:
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.post(self.lookup_url, {
+                    'documentNumber': self.user.document_number,
+                    'birthDate': self.user.birth_date.isoformat(),
+                }, **self.headers)
+                self.assertEqual(response.status_code, 202)
+                thread.assert_not_called()
+            self.assertTrue(thread.call_args.kwargs['daemon'])
+            thread.return_value.start.assert_called_once_with()
+            send.assert_not_called()
+            with patch(module + '.close_old_connections') as close:
+                thread.call_args.kwargs['target'](*thread.call_args.kwargs['args'])
+                close.assert_called_once_with()
+            send.assert_called_once_with('ana@example.com', thread.call_args.kwargs['args'][1])
 
     def test_lookup_token_can_read_and_update_only_own_calculator_form(self):
         headers = self.lookup_headers()

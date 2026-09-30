@@ -6,7 +6,6 @@ from .views import (
     AttlasInsolvencyAuthRegisterAPIView,
     TokenInfoAPIView,
     AttlasInsolvencyAuthConsultantsRegisterAPIView,
-    ClientSearchView,
     ClientLookupView,
     ClientLookupVerifyView,
 )
@@ -25,11 +24,6 @@ urlpatterns = [
         name='api-insolvency-register'
     ),
 
-    path(
-        'clients/search/',
-        ClientSearchView.as_view(),
-        name='api-calc-client-search'
-    ),
     path(
         'register-consultants/',
         AttlasInsolvencyAuthConsultantsRegisterAPIView.as_view(),

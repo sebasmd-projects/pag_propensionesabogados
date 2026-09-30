@@ -7,6 +7,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.common.utils.client_ip import get_client_ip
 from apps.common.utils.models import IPBlockedModel
 from apps.common.utils.forms import KeyForm
 
@@ -55,7 +56,7 @@ class EncryptedPermissionsMixin(UserPassesTestMixin):
                             settings, 'IP_BLOCKED_TIME_IN_MINUTES', 30
                         )
                         IPBlockedModel.objects.create(
-                            current_ip=self.request.META['REMOTE_ADDR'],
+                            current_ip=get_client_ip(self.request),
                             reason=IPBlockedModel.ReasonsChoices.SECURITY_KEY_ATTEMPTS,
                             blocked_until=timezone.now() + timedelta(
                                 minutes=minutes

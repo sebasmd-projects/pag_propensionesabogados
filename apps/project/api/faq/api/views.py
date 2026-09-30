@@ -1,3 +1,4 @@
+from rest_framework.permissions import AllowAny
 from rest_framework.generics import ListAPIView
 
 from ..models import MainFAQModel, OtherFAQModel
@@ -8,11 +9,17 @@ from drf_spectacular.utils import extend_schema
 
 @extend_schema(tags=['FAQ'])
 class MainFAQListAPIView(ListAPIView):
+    # Las preguntas frecuentes son contenido público del sitio.
+    permission_classes = [AllowAny]
+
     serializer_class = MainFAQModelSerializer
     queryset = MainFAQModel.objects.all()
 
 
 @extend_schema(tags=['FAQ'])
 class OtherFAQListAPIView(ListAPIView):
+    # Las preguntas frecuentes adicionales son contenido público del sitio.
+    permission_classes = [AllowAny]
+
     serializer_class = OtherFAQModelSerializer
     queryset = OtherFAQModel.objects.all()

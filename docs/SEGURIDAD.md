@@ -1,9 +1,9 @@
-# Plan de seguridad — pendiente de aplicar
+# Plan de seguridad — seguimiento
 
-Hallazgos de la revisión del **25 de septiembre de 2026**. **Nada de esto
-está aplicado todavía**: se aparca hasta terminar la integración de
-`gea_module_0`, para no mezclar cambios de seguridad con una migración a
-medias y quedarse sin saber qué rompió qué.
+Hallazgos de la revisión del **25 de septiembre de 2026**. La Fase 1 queda
+cerrada el **29 de septiembre de 2026**: los puntos 1, 2 y 3 están corregidos.
+Se conserva el diagnóstico original como referencia; los hallazgos 4 a 8
+siguen pendientes.
 
 Cada punto trae el fichero y la línea, por qué importa y cómo comprobar que
 quedó bien. Las líneas son de `7c35a5c`; si el fichero cambió, busca por el
@@ -19,6 +19,9 @@ limitaciones del entorno, y están al final.
 ---
 
 ## 1 · 🔴 CRÍTICO — El buscador de clientes es público
+
+**Corregido — 2026-09-29.** Clave de servidor + OTP al correo registrado;
+se retira la búsqueda antigua y el envío se inicia en un hilo daemon después del commit.
 
 **`apps/project/api/platform/auth_platform/api/views.py:33`**
 
@@ -57,6 +60,10 @@ número N dentro del minuto devuelve 429.
 
 ## 2 · 🔴 ALTO — La API es pública por defecto
 
+**Corregido — 2026-09-29.** `IsAuthenticated` por defecto y `AllowAny` explícito
+para formularios y contenido públicos, con lista blanca comprobada por un test
+de todas las rutas API que exige 401/403 fuera de ella, también ante cuerpos vacíos.
+
 **`app_core/settings.py:423`**
 
 ```python
@@ -87,6 +94,9 @@ escrita a mano. Así el próximo endpoint que nazca abierto rompe la prueba.
 
 ## 3 · 🟠 ALTO — El login de asesores no tiene freno
 
+**Corregido — 2026-09-29.** Error único sin enumeración, fallos registrados
+en django-axes y cupo de intentos por IP.
+
 **`apps/project/api/platform/auth_platform/api/serializers.py:112`**
 
 `AttlasInsolvencyAuthSerializer` sí verifica la contraseña del asesor. Pero
@@ -102,6 +112,18 @@ autenticación por `authenticate()`. Añadir throttling al endpoint.
 
 **Cómo comprobarlo.** N intentos fallidos seguidos y el N+1 rebota, aunque
 la contraseña sea la correcta.
+
+---
+
+## Encontrados y corregidos durante la Fase 1
+
+**Corregidos — 2026-09-29.**
+
+- **IDOR del formulario/firma y `/clients/{id}`:** autenticación y comprobación
+  de pertenencia al usuario antes de leer o modificar datos.
+- **Firma por cédula:** ahora exige login; conocer la cédula no autoriza a firmar.
+- **IP detrás del proxy de Vercel:** `X-Client-IP` solo se acepta con clave
+  de servidor válida, para aplicar los cupos a la IP real.
 
 ---
 
