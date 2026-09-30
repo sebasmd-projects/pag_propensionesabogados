@@ -29,6 +29,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 
+from apps.common.utils.client_ip import get_client_ip
 from apps.common.utils.models import IPBlockedModel
 
 logger = logging.getLogger(__name__)
@@ -61,20 +62,8 @@ def attempt_window() -> int:
 
 
 def client_ip(request) -> str:
-    """
-    De que IP viene la peticion.
-
-    Detras de un proxy, `REMOTE_ADDR` es el proxy y todo el mundo comparte
-    cuenta. Se mira `X-Forwarded-For` **solo** si el despliegue declara que
-    hay un proxy de confianza delante (`USE_X_FORWARDED_FOR`); confiar en esa
-    cabecera sin proxy es dejar que quien llama elija su propia identidad y se
-    salte el contador cambiandola en cada intento.
-    """
-    if getattr(settings, 'USE_X_FORWARDED_FOR', False):
-        forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
-        if forwarded:
-            return forwarded.split(',')[0].strip()
-    return request.META.get('REMOTE_ADDR', '')
+    """IP del cliente segun la politica comun de proxies de confianza."""
+    return get_client_ip(request)
 
 
 def _key(ip: str) -> str:

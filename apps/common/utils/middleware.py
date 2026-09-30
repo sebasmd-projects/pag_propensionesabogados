@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
+from apps.common.utils.client_ip import get_client_ip
 from apps.common.utils.models import IPBlockedModel
 
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ class DetectSuspiciousRequestMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        client_ip = request.META.get('REMOTE_ADDR')
+        client_ip = get_client_ip(request)
 
         blocked_entry = IPBlockedModel.objects.filter(
             current_ip=client_ip,

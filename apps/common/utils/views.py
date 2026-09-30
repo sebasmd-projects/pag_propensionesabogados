@@ -7,6 +7,7 @@ from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import View
 
+from apps.common.utils.client_ip import get_client_ip
 from .models import IPBlockedModel, WhiteListedIPModel
 
 logger = logging.getLogger(__name__)
@@ -102,7 +103,7 @@ class HttpRequestAttakView(View):
     )
 
     def get(self, request, *args, **kwargs):
-        client_ip = request.META.get('REMOTE_ADDR')
+        client_ip = get_client_ip(request)
 
         # Skip if IP is whitelisted
         if WhiteListedIPModel.objects.filter(current_ip=client_ip).exists():

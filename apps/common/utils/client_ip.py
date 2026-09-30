@@ -13,6 +13,11 @@ que cuenta una cosa y castiga otra no frena nada.
 Con `django-axes` el problema se multiplica: la biblioteca trae **su propia**
 deteccion de IP, asi que sin enchufarle esta habria tres.
 
+El proxy Next.js comparte su IP de salida entre todos los usuarios. Se cree
+`X-Client-IP` solo cuando la misma peticion acredita una clave de servidor
+valida (`X-Server-Key`); sin ella cualquiera podria falsear su IP y eludir
+los limites. La IP declarada se valida y normaliza antes de usarla.
+
 Por que no se cree `X-Forwarded-For` por defecto
 ------------------------------------------------
 Esa cabecera la pone quien llama. Sin un proxy propio delante que la
@@ -22,6 +27,7 @@ despliegue declara que hay un proxy de confianza (`USE_X_FORWARDED_FOR`), y
 entonces se toma el **primer** valor, que es el cliente original.
 """
 
+import ipaddress
 import logging
 
 from django.conf import settings
@@ -39,15 +45,25 @@ def get_client_ip(request) -> str:
     if request is None:
         return ''
 
-    meta = getattr(request, 'META', None) or {}
+    from .api_keys import server_key_is_valid
 
-    if getattr(settings, 'USE_X_FORWARDED_FOR', False):
-        forwarded = meta.get('HTTP_X_FORWARDED_FOR', '')
+    try:
+        meta = getattr(request, 'META', None) or {}
+        if server_key_is_valid(request):
+            try:
+                declared = meta.get('HTTP_X_CLIENT_IP', '')
+                return str(ipaddress.ip_address(declared.split(',')[0].strip()))
+            except (ValueError, TypeError, AttributeError):
+                pass
 
-        if forwarded:
-            return forwarded.split(',')[0].strip()
+        if getattr(settings, 'USE_X_FORWARDED_FOR', False):
+            forwarded = meta.get('HTTP_X_FORWARDED_FOR', '')
+            if forwarded:
+                return forwarded.split(',')[0].strip()
 
-    return meta.get('REMOTE_ADDR', '') or ''
+        return meta.get('REMOTE_ADDR', '') or ''
+    except Exception:
+        return ''
 
 
 def is_whitelisted(ip: str) -> bool:
