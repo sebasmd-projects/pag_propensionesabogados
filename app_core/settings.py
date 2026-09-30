@@ -457,3 +457,17 @@ else:
 COMMON_ATTACK_TERMS = [
     term.strip() for term in os.getenv('COMMON_ATTACK_TERMS').split(',')
 ]
+
+# Detector de rafagas de 404 (`apps/common/utils/scanning.py`). Lo lee con
+# `getattr(settings, ...)` y su propio defecto: sin estas lineas poner la
+# variable en el `.env` no haria nada.
+SCAN_404_THRESHOLD = int(os.getenv('SCAN_404_THRESHOLD', 20))
+SCAN_404_WINDOW_SECONDS = int(os.getenv('SCAN_404_WINDOW_SECONDS', 300))
+
+# Base GeoLite2 para el pais de una IP (`apps/common/utils/netintel.py`).
+# Opcional: vacia, el campo se queda sin pais y todo lo demas sigue igual.
+GEOIP_PATH = os.getenv('GEOIP_PATH', '')
+
+# Fichero de log que rotan y leen `apps/common/utils/logs.py`. Es el mismo
+# `stderr.log` que ya usa `logging.basicConfig` mas arriba.
+LOG_FILE = Path(os.getenv('DJANGO_LOG_FILE') or (BASE_DIR / 'stderr.log'))
