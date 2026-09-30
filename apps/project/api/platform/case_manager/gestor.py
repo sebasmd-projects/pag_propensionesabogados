@@ -34,6 +34,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
+from django.utils.cache import patch_vary_headers
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView, View
 from django.views.generic.edit import CreateView, UpdateView
@@ -96,6 +97,26 @@ class GestorDashboardView(GestorRequiredMixin, TemplateView):
     """
 
     template_name = 'case_manager/gestor/dashboard.html'
+    chart_partial_template = 'case_manager/gestor/partials/financial_chart_block.html'
+
+    def get(self, request, *args, **kwargs):
+        # Cambio de periodo sin recargar: el JS pide la misma URL con esta
+        # marca y recibe solo el bloque del gráfico. Los permisos ya se
+        # comprobaron en `dispatch` (GestorRequiredMixin).
+        if request.headers.get('X-Requested-With') == 'fetch':
+            finances = list(
+                CaseFinanceModel.objects.in_dashboard().select_related('case', 'case__client')
+            )
+            response = render(request, self.chart_partial_template, {
+                'financial_chart': build_financial_chart(request, finances),
+            })
+            # Misma URL, dos contenidos: que el navegador no mezcle el
+            # fragmento con la página completa (botón atrás).
+            patch_vary_headers(response, ('X-Requested-With',))
+            return response
+        response = super().get(request, *args, **kwargs)
+        patch_vary_headers(response, ('X-Requested-With',))
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

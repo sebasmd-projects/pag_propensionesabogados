@@ -7,109 +7,13 @@
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body p-4">
         <div class="mb-3">
-          <h2 class="h6 fw-bold mb-1">
+          <h2 class="h6 fw-bold mb-0">
             <i class="bi bi-graph-up-arrow me-1"></i>Comparativo financiero
           </h2>
-          <p class="text-muted small mb-0">
-            Agrupado por {{ financial_chart.granularity_label|lower }} · valores en COP
-          </p>
         </div>
 
-        <div class="gestor-range-bar mb-4">
-          <div class="btn-group btn-group-sm" role="group" aria-label="Periodo rápido" data-financial-periods>
-            {% for period in financial_chart.periods %}
-              <a class="btn btn-outline-secondary{% if period.active %} active{% endif %}"
-                 href="{{ period.url }}" data-period="{{ period.key }}"
-                 {% if period.active %}aria-current="true"{% endif %}>{{ period.label }}</a>
-            {% endfor %}
-          </div>
-
-          <form method="get" class="row g-2 align-items-end flex-grow-1" data-financial-range>
-            <div class="col-12 col-sm-5">
-              <label class="form-label small mb-1" for="financial-start">Desde</label>
-              <input class="form-control form-control-sm" id="financial-start" name="start"
-                     type="date" value="{{ financial_chart.start }}" required>
-            </div>
-            <div class="col-12 col-sm-5">
-              <label class="form-label small mb-1" for="financial-end">Hasta</label>
-              <input class="form-control form-control-sm" id="financial-end" name="end"
-                     type="date" value="{{ financial_chart.end }}" required>
-            </div>
-            <div class="col-12 col-sm-2 d-grid">
-              <button class="btn btn-primary btn-sm" type="submit">Aplicar</button>
-            </div>
-          </form>
-        </div>
-
-        <div data-financial-chart>
-        {# Filtro propio de las barras. La torta tiene el suyo, más abajo. #}
-        <ul class="gestor-chart-legend" role="group" aria-label="Filtro de series de las barras" data-bars-filter>
-          {% for item in financial_chart.legend %}
-            <li>
-              <label class="gestor-series-toggle">
-                <input type="checkbox" checked data-series-toggle="{{ item.key }}">
-                <i class="bg-{{ item.tone }}" data-series-swatch aria-hidden="true"></i>{{ item.label }}
-              </label>
-            </li>
-          {% endfor %}
-        </ul>
-
-        <div class="gestor-time-chart" data-time-chart
-             style="--chart-columns: {{ financial_chart.buckets|length }}">
-          <div class="gestor-time-axis" data-chart-axis aria-hidden="true">
-            {% for tick in financial_chart.axis %}
-              <span style="--pos: {{ tick.position|stringformat:'.2f' }}%" data-value="{{ tick.value }}">{{ tick.label }}</span>
-            {% endfor %}
-          </div>
-          <div class="gestor-time-plot">
-            <div class="gestor-time-grid" data-chart-grid aria-hidden="true">
-              {% for tick in financial_chart.axis %}
-                <span style="--pos: {{ tick.position|stringformat:'.2f' }}%"></span>
-              {% endfor %}
-            </div>
-            <div class="gestor-time-buckets" role="list"
-                 aria-label="Comparativo financiero agrupado por {{ financial_chart.granularity_label|lower }}">
-              {% for bucket in financial_chart.buckets %}
-                <div class="gestor-time-bucket" role="listitem" tabindex="0" data-bucket
-                     data-title="{{ bucket.title }}"
-                     aria-label="{{ bucket.title }}: {% for bar in bucket.values %}{{ bar.label }} {{ bar.value }} pesos{% if not forloop.last %}, {% endif %}{% endfor %}">
-                  <div class="gestor-time-bars">
-                    {% for bar in bucket.values %}
-                      <div class="gestor-time-bar bg-{{ bar.tone }}{% if not bar.value %} is-zero{% endif %}"
-                           data-series="{{ bar.key }}" data-name="{{ bar.label }}" data-tone="{{ bar.tone }}"
-                           data-value="{{ bar.value }}"
-                           style="--bar-height: {{ bar.height|stringformat:'.2f' }}%"></div>
-                    {% endfor %}
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-          <div class="gestor-time-labels" data-chart-labels aria-hidden="true">
-            {% for bucket in financial_chart.buckets %}
-              <span class="gestor-time-label"><span>{{ bucket.label }}</span></span>
-            {% endfor %}
-          </div>
-          <div class="gestor-tooltip" data-chart-tooltip role="tooltip" hidden></div>
-        </div>
-
-        <div class="d-flex align-items-center flex-wrap gap-4 mt-4" data-financial-pie-box>
-          <div class="gestor-pie" data-financial-pie role="img"
-               aria-label="Distribución del comparativo por serie"></div>
-          {# Filtro propio de la torta: cada fila muestra u oculta su sector. #}
-          <ul class="list-unstyled mb-0 flex-grow-1 gestor-pie-legend" role="group"
-              aria-label="Filtro de series de la torta" data-financial-pie-legend aria-live="polite">
-            {% for item in financial_chart.totals %}
-              <li data-pie-item="{{ item.key }}" data-value="{{ item.value }}" data-tone="{{ item.tone }}">
-                <button type="button" class="gestor-pie-row" aria-pressed="true" data-pie-toggle="{{ item.key }}">
-                  <span><i class="d-inline-block rounded-1 me-2 bg-{{ item.tone }}" style="width:.65rem;height:.65rem" aria-hidden="true"></i>{{ item.label }}</span>
-                  <b>${{ item.value|intcomma }} · <span data-pie-share>0</span> %</b>
-                </button>
-              </li>
-            {% endfor %}
-          </ul>
-          <p class="gestor-pie-empty small mb-0 w-100" data-pie-empty hidden>Ninguna serie seleccionada o sin valores en el rango.</p>
-        </div>
+        <div data-financial-panel>
+          {% include 'case_manager/gestor/partials/financial_chart_block.html' %}
         </div>
         <script>{% include 'case_manager/gestor/scripts/financial_chart.js' %}</script>
 

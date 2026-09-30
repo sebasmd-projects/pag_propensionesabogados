@@ -2,7 +2,8 @@
 // Requiere jsdom y el HTML de edicion exportado por test_dynamic_flow:
 //   CASE_FLOW_HTML_DIR=<dir> python manage.py test ...tests.test_dynamic_flow
 //   node gestor_ui.cjs <dir>
-// (el mismo directorio trae dashboard.html si se ejecuta test_gestor: filtros y tooltip)
+// (el mismo directorio trae dashboard.html y chart_partial.html si se ejecuta test_gestor:
+//  filtros, tooltip y refresco parcial del periodo, con fetch simulado)
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -275,5 +276,119 @@ const type = (w, input, text) => {
     assert(tip.hidden, 'tocar fuera lo cierra');
   }
 
-  console.log('Formato COP, copia limpia, fechas sin truncar, aviso de cambios, filtros independientes y tooltip verificados.');
+  // ---- Comparativo del panel: cambio de periodo sin recargar ----
+  const partialFile = path.join(process.argv[2], 'chart_partial.html');
+  if (fs.existsSync(dashFile) && fs.existsSync(partialFile)) {
+    const partialHtml = fs.readFileSync(partialFile, 'utf8');
+    const boot2 = (fetchImpl, navigations = []) => {
+      const virtualConsole = new (require('jsdom').VirtualConsole)();
+      virtualConsole.on('jsdomError', e => { if (/navigation/i.test(e.message)) navigations.push(e.message); });
+      const d = new JSDOM(fs.readFileSync(dashFile, 'utf8'), {runScripts: 'outside-only', pretendToBeVisual: true, virtualConsole, url: 'http://localhost/gestor/?start=2026-09-01&end=2026-09-30'});
+      d.window.fetch = fetchImpl;
+      d.window.scrollTo = () => {};
+      for (const script of d.window.document.querySelectorAll('script:not([src])')) {
+        if (script.textContent.includes('data-financial-chart')) d.window.eval(script.textContent);
+      }
+      return d.window;
+    };
+    const calls = [];
+    const okFetch = async (url, options) => {
+      calls.push({url, options});
+      return {ok: true, redirected: false, text: async () => partialHtml};
+    };
+    const pw = boot2(okFetch), pd = pw.document;
+    const panel = () => pd.querySelector('[data-financial-panel]');
+    const rowsNow = () => [...pd.querySelectorAll('[data-pie-toggle]')];
+    const chipsNow = () => [...pd.querySelectorAll('[data-series-toggle]')];
+    const oldChart = pd.querySelector('[data-financial-chart]');
+
+    // El usuario desactiva una serie en las barras y otra en la torta.
+    const chip = chipsNow().find(c => c.dataset.seriesToggle === 'expectation');
+    chip.checked = false;
+    chip.dispatchEvent(new pw.Event('change', {bubbles: true}));
+    rowsNow().find(r => r.dataset.pieToggle === 'paid').click();
+
+    const link = pd.querySelector('[data-financial-periods] a[data-period="all"]');
+    const click = new pw.MouseEvent('click', {bubbles: true, cancelable: true, button: 0});
+    link.dispatchEvent(click);
+    assert(click.defaultPrevented, 'el clic no navega');
+    assert.equal(panel().getAttribute('aria-busy'), 'true', 'estado de carga');
+    await tick(pw, 20);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].options.headers['X-Requested-With'], 'fetch');
+    assert(calls[0].url.endsWith('?range=all'), calls[0].url);
+    assert.equal(pw.location.search, '?range=all', 'la URL se actualiza');
+    assert.equal(panel().hasAttribute('aria-busy'), false);
+    assert.equal(panel().style.opacity, '');
+    assert(pd.querySelector('[data-financial-chart]') !== oldChart, 'el bloque se reemplazó');
+    assert.equal(pd.querySelectorAll('[data-financial-chart]').length, 1);
+    assert(pd.querySelector('[data-financial-periods] a[data-period="all"]').classList.contains('active'));
+
+    // Filtros desactivados conservados en barras y torta.
+    assert.equal(chipsNow().find(c => c.dataset.seriesToggle === 'expectation').checked, false);
+    const expectationBars = [...pd.querySelectorAll('.gestor-time-bar[data-series="expectation"]')];
+    assert(expectationBars.length > 0 && expectationBars.every(b => b.hidden));
+    const paidRow = rowsNow().find(r => r.dataset.pieToggle === 'paid');
+    assert.equal(paidRow.getAttribute('aria-pressed'), 'false');
+    assert(paidRow.closest('[data-pie-item]').classList.contains('is-off'));
+    assert.equal(rowsNow().filter(r => r.getAttribute('aria-pressed') === 'true').length, 4);
+
+    // Filtros y tooltip re-enganchados sobre el contenido nuevo.
+    const tip2 = pd.querySelector('[data-chart-tooltip]');
+    const bucket2 = pd.querySelector('[data-bucket]');
+    bucket2.dispatchEvent(new pw.MouseEvent('mouseenter', {bubbles: false, clientX: 5, clientY: 5}));
+    assert(!tip2.hidden);
+    assert(!tip2.textContent.includes('Expectativa'), 'respeta el filtro conservado');
+    pd.body.click();
+    assert(tip2.hidden, 'un solo listener global funciona con el bloque nuevo');
+    const paidChip = chipsNow().find(c => c.dataset.seriesToggle === 'paid');
+    paidChip.checked = false;
+    paidChip.dispatchEvent(new pw.Event('change', {bubbles: true}));
+    assert([...pd.querySelectorAll('.gestor-time-bar[data-series="paid"]')].every(b => b.hidden));
+    // Sin listeners duplicados: un clic en la fila alterna una sola vez.
+    paidRow.click();
+    assert.equal(paidRow.getAttribute('aria-pressed'), 'true');
+
+    // Envío del formulario de fechas: fetch con los parámetros, sin navegar.
+    pd.getElementById('financial-start').value = '2026-01-01';
+    pd.getElementById('financial-end').value = '2026-03-31';
+    const submit = new pw.Event('submit', {bubbles: true, cancelable: true});
+    pd.querySelector('form[data-financial-range]').dispatchEvent(submit);
+    assert(submit.defaultPrevented);
+    await tick(pw, 20);
+    assert.equal(calls.length, 2);
+    assert(calls[1].url.includes('start=2026-01-01') && calls[1].url.includes('end=2026-03-31'), calls[1].url);
+    assert(pw.location.search.includes('start=2026-01-01'));
+
+    // Clic con modificador: se deja al navegador (nueva pestaña).
+    const mod = new pw.MouseEvent('click', {bubbles: true, cancelable: true, button: 0, ctrlKey: true});
+    pd.querySelector('[data-financial-periods] a').dispatchEvent(mod);
+    assert(!mod.defaultPrevented);
+    assert.equal(calls.length, 2);
+
+    // Atrás: carga el rango de la URL sin apilar historial.
+    pw.history.back();
+    await tick(pw, 30);
+    assert.equal(calls.length, 3);
+    assert(calls[2].url.includes('range=all'), calls[2].url);
+    assert.equal(pw.location.search, '?range=all');
+
+    // Fallo del fetch (red, error HTTP, redirección al login): navegación normal.
+    for (const failing of [
+      async () => { throw new Error('red caída'); },
+      async () => ({ok: false, redirected: false, text: async () => 'x'}),
+      async () => ({ok: true, redirected: true, text: async () => '<html>login</html>'}),
+    ]) {
+      const navigations = [];
+      const fw = boot2(failing, navigations);
+      const untouched = fw.document.querySelector('[data-financial-chart]');
+      const ev = new fw.MouseEvent('click', {bubbles: true, cancelable: true, button: 0});
+      fw.document.querySelector('a[data-period="all"]').dispatchEvent(ev);
+      await tick(fw, 20);
+      assert.equal(navigations.length, 1, 'cae a la navegación normal ');
+      assert(fw.document.querySelector('[data-financial-chart]') === untouched);
+    }
+  }
+
+  console.log('Formato COP, copia limpia, fechas sin truncar, aviso de cambios, filtros independientes, tooltip y refresco parcial verificados.');
 })().catch(error => { console.error(error); process.exit(1); });

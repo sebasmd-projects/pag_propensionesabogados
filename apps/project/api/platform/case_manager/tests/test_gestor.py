@@ -449,6 +449,84 @@ class GestorDashboardTests(TestCase):
         target = Path(directory)
         target.mkdir(parents=True, exist_ok=True)
         (target / 'dashboard.html').write_bytes(response.content)
+        partial = self.client.get(
+            self.url, {'range': 'all'}, HTTP_X_REQUESTED_WITH='fetch'
+        )
+        (target / 'chart_partial.html').write_bytes(partial.content)
+
+    def test_marca_de_parcial_devuelve_solo_el_bloque_del_grafico(self):
+        response = self.client.get(
+            self.url, {'start': '2026-09-01', 'end': '2026-09-30'},
+            HTTP_X_REQUESTED_WITH='fetch',
+        )
+        html = response.content.decode()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('X-Requested-With', response.headers['Vary'])
+        self.assertNotIn('<html', html)
+        self.assertNotIn('Próximos pagos', html)
+        self.assertTemplateNotUsed(response, 'case_manager/gestor/dashboard.html')
+        self.assertTemplateUsed(response, 'case_manager/gestor/partials/financial_chart_block.html')
+        for marker in ('data-financial-chart', 'data-time-chart', 'data-financial-pie',
+                       'data-financial-periods', 'data-financial-range'):
+            self.assertIn(marker, html)
+        self.assertNotIn('<script', html)
+        self.assertIn('value="2026-09-01"', html)
+        self.assertIn('value="2026-09-30"', html)
+        self.assertIn('Agrupado por semanas', html)
+
+    def test_parcial_marca_el_periodo_activo_del_rango_pedido(self):
+        hoy = timezone.localdate()
+        response = self.client.get(self.url, {'range': 'all'}, HTTP_X_REQUESTED_WITH='fetch')
+        html = response.content.decode()
+        self.assertIn('Agrupado por años', html)
+        marca = html.index('data-period="all"')
+        completo = html[html.rindex('<a', 0, marca):html.index('>', marca)]
+        self.assertIn('active', completo)
+        self.assertEqual(html.count('aria-current="true"'), 1)
+
+        fin_de_mes = (hoy.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+        response = self.client.get(
+            self.url, {'start': hoy.replace(day=1).isoformat(), 'end': fin_de_mes.isoformat()},
+            HTTP_X_REQUESTED_WITH='fetch',
+        )
+        activos = [p['key'] for p in response.context['financial_chart']['periods'] if p['active']]
+        self.assertEqual(activos, ['month'])
+        html = response.content.decode()
+        marca = html.index('data-period="month"')
+        mes = html[html.rindex('<a', 0, marca):html.index('>', marca)]
+        self.assertIn('active', mes)
+        self.assertEqual(html.count('aria-current="true"'), 1)
+
+    def test_parcial_y_pagina_completa_comparten_los_datos_del_grafico(self):
+        params = {'start': '2026-01-01', 'end': '2026-12-31'}
+        full = self.client.get(self.url, params)
+        partial = self.client.get(self.url, params, HTTP_X_REQUESTED_WITH='fetch')
+        self.assertEqual(
+            full.context['financial_chart']['buckets'],
+            partial.context['financial_chart']['buckets'],
+        )
+        self.assertEqual(
+            full.context['financial_chart']['totals'],
+            partial.context['financial_chart']['totals'],
+        )
+        self.assertIn(partial.content.decode().strip()[:200], full.content.decode())
+
+    def test_sin_marca_la_pagina_completa_sigue_igual(self):
+        response = self.client.get(self.url)
+        html = response.content.decode()
+
+        self.assertTemplateUsed(response, 'case_manager/gestor/dashboard.html')
+        self.assertIn('<html', html)
+        self.assertIn('Próximos pagos', html)
+        self.assertIn('data-financial-panel', html)
+        self.assertIn('X-Requested-With', response.headers['Vary'])
+
+    def test_parcial_sin_sesion_redirige_al_login(self):
+        self.client.logout()
+        response = self.client.get(self.url, HTTP_X_REQUESTED_WITH='fetch')
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn('data-financial-chart', response.content.decode())
 
     def test_tabla_de_proximos_pagos_vacia_tiene_columnas_validas(self):
         respuesta = self.client.get(self.url)

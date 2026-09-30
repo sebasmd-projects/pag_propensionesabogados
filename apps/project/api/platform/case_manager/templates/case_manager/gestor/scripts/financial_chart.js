@@ -2,10 +2,22 @@
    - chips de arriba ([data-series-toggle]): solo las barras (y su eje Y);
    - filas de la torta ([data-pie-toggle]): solo la torta.
    Además: eje Y abreviado, etiquetas del eje X en diagonal si no caben y
-   tooltip por grupo (hover, foco de teclado y toque). */
+   tooltip por grupo (hover, foco de teclado y toque).
+   Cambiar de periodo o de rango de fechas reemplaza solo el bloque
+   [data-financial-panel] (fetch al mismo URL con X-Requested-With: fetch) y
+   vuelve a montar el gráfico; los filtros desactivados se conservan. Si el
+   fetch falla, se navega como siempre. */
 (() => {
-  const root = document.querySelector('[data-financial-chart]');
+  const panel = document.querySelector('[data-financial-panel]');
+  if (!panel) return;
+  // Series desactivadas por el usuario; sobreviven al cambio de periodo.
+  const off = {bars: new Set(), pie: new Set()};
+  let current = null;   // gráfico montado: {hideTip, fitLabels, observer}
+
+  const mount = () => {
+  const root = panel.querySelector('[data-financial-chart]');
   if (!root) return;
+  if (current && current.observer) current.observer.disconnect();
   const toggles = [...root.querySelectorAll('[data-series-toggle]')];
   const chart = root.querySelector('[data-time-chart]');
   const bars = [...root.querySelectorAll('.gestor-time-bar[data-series]')];
@@ -131,8 +143,6 @@
       showTip(bucket, {x: e.clientX, y: e.clientY});
     });
   });
-  document.addEventListener('click', e => { if (!chart.contains(e.target)) hideTip(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') hideTip(); });
 
   // ---- Torta: filtro propio, los porcentajes salen de lo visible ----
   const pieOn = () => new Set(pieToggles.filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.dataset.pieToggle));
@@ -167,14 +177,82 @@
     empty.hidden = total > 0;
   };
 
-  toggles.forEach(t => t.addEventListener('change', renderBars));
+  toggles.forEach(t => t.addEventListener('change', () => {
+    if (t.checked) off.bars.delete(t.dataset.seriesToggle); else off.bars.add(t.dataset.seriesToggle);
+    renderBars();
+  }));
   pieToggles.forEach(b => b.addEventListener('click', () => {
-    b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    const on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (on) off.pie.delete(b.dataset.pieToggle); else off.pie.add(b.dataset.pieToggle);
     renderPie();
   }));
-  window.addEventListener('resize', fitLabels);
-  if (window.ResizeObserver) new ResizeObserver(fitLabels).observe(chart);
+  // Filtros que el usuario había desactivado antes de cambiar de periodo.
+  toggles.forEach(t => { if (off.bars.has(t.dataset.seriesToggle)) t.checked = false; });
+  pieToggles.forEach(b => { if (off.pie.has(b.dataset.pieToggle)) b.setAttribute('aria-pressed', 'false'); });
+  const observer = window.ResizeObserver ? new ResizeObserver(fitLabels) : null;
+  if (observer) observer.observe(chart);
+  current = {hideTip, fitLabels, chart, observer};
   renderBars();
   renderPie();
   fitLabels();
+  };
+
+  // Listeners globales: uno solo, apuntan al gráfico montado.
+  document.addEventListener('click', e => { if (current && !current.chart.contains(e.target)) current.hideTip(); });
+  document.addEventListener('keydown', e => { if (current && e.key === 'Escape') current.hideTip(); });
+  window.addEventListener('resize', () => { if (current) current.fitLabels(); });
+
+  // ---- Refresco parcial ----
+  let request = 0;
+  const load = async (url, push) => {
+    const id = ++request;
+    const fetchUrl = new URL(url, location.href);
+    const scrollX = window.scrollX, scrollY = window.scrollY;
+    // Conserva la altura mientras carga para que la página no salte.
+    panel.style.minHeight = panel.offsetHeight + 'px';
+    panel.style.transition = 'opacity .15s';
+    panel.style.opacity = '.5';
+    panel.setAttribute('aria-busy', 'true');
+    try {
+      const response = await fetch(fetchUrl.href, {
+        headers: {'X-Requested-With': 'fetch'},
+        credentials: 'same-origin',
+      });
+      // Una redirección (p. ej. al login) o un error: navegación normal.
+      if (!response.ok || response.redirected) throw new Error('fragmento no disponible');
+      const html = await response.text();
+      if (id !== request) return;   // llegó otra petición después
+      if (!html.includes('data-financial-chart')) throw new Error('respuesta inesperada');
+      if (current && current.hideTip) current.hideTip();
+      panel.innerHTML = html;
+      if (push) history.pushState({financial: true}, '', fetchUrl.pathname + fetchUrl.search + fetchUrl.hash);
+      mount();
+      window.scrollTo(scrollX, scrollY);
+    } catch (error) {
+      if (id !== request) return;
+      window.location.assign(fetchUrl.href);
+      return;
+    }
+    panel.style.minHeight = '';
+    panel.style.opacity = '';
+    panel.removeAttribute('aria-busy');
+  };
+
+  panel.addEventListener('click', e => {
+    const link = e.target.closest && e.target.closest('[data-financial-periods] a[href]');
+    if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    load(link.getAttribute('href'), true);
+  });
+  panel.addEventListener('submit', e => {
+    const form = e.target.closest && e.target.closest('form[data-financial-range]');
+    if (!form || e.defaultPrevented) return;
+    e.preventDefault();
+    const params = new URLSearchParams(new FormData(form));
+    load('?' + params.toString(), true);
+  });
+  window.addEventListener('popstate', () => load(location.href, false));
+
+  mount();
 })();
