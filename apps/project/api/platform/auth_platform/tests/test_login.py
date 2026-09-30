@@ -15,7 +15,7 @@ from ..api import serializers as login_serializers
 from ..models import AttlasInsolvencyAuthConsultantsModel, AttlasInsolvencyAuthModel
 
 
-@override_settings(ATTLAS_SERVER_KEY='x' * 40, SECURE_SSL_REDIRECT=False,
+@override_settings(SERVER_KEY='x' * 40, SECURE_SSL_REDIRECT=False,
                    AXES_ENABLED=True)
 class AttlasLoginTests(APITestCase):
     def setUp(self):

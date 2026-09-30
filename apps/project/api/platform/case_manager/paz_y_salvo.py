@@ -190,7 +190,7 @@ def certify(document_id, *, force=False):
 
     if not gea_client.is_configured():
         _fail(document, 'gea is not configured (GEA_CERT_API_BASE / '
-                        'GEA_ISSUER_KEY_PROPENSIONES).',
+                        'SERVER_KEY).',
               status=document.status)
         return _reload(document)
 

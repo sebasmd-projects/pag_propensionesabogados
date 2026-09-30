@@ -8,7 +8,7 @@ from rest_framework.permissions import BasePermission
 def server_key_is_valid(request) -> bool:
     """Comprueba la clave del proxy en Django y DRF sin propagar errores."""
     try:
-        expected = getattr(settings, 'ATTLAS_SERVER_KEY', '')
+        expected = getattr(settings, 'SERVER_KEY', '')
         headers = getattr(request, 'headers', None) or {}
         meta = getattr(request, 'META', None) or {}
         provided = headers.get('X-Server-Key') or meta.get('HTTP_X_SERVER_KEY', '')

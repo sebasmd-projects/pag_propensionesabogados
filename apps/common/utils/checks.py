@@ -3,16 +3,25 @@ from django.core import checks
 
 
 @checks.register(checks.Tags.security)
-def check_attlas_server_key(app_configs, **kwargs):
-    key = settings.ATTLAS_SERVER_KEY
+def check_server_key(app_configs, **kwargs):
+    key = settings.SERVER_KEY
+    problems = []
     if not settings.DEBUG and len(key) < 32:
-        return [checks.Error(
-            'ATTLAS_SERVER_KEY debe tener al menos 32 caracteres en producción.',
+        problems.append(checks.Error(
+            'SERVER_KEY debe tener al menos 32 caracteres en producción.',
             id='utils.E001',
-        )]
-    if settings.DEBUG and not key:
-        return [checks.Warning(
-            'ATTLAS_SERVER_KEY está vacía; la API de Attlas denegará el acceso.',
+        ))
+    elif settings.DEBUG and not key:
+        problems.append(checks.Warning(
+            'SERVER_KEY está vacía; la API de Attlas denegará el acceso.',
             id='utils.W001',
-        )]
-    return []
+        ))
+    legacy = getattr(settings, 'SERVER_KEY_LEGACY_VARS_IN_USE', None) or []
+    if legacy:
+        problems.append(checks.Warning(
+            'Se usa la variable de entorno vieja %s; define SERVER_KEY '
+            '(la misma clave en pag, gea y Vercel) y retira la vieja.'
+            % ', '.join(legacy),
+            id='utils.W002',
+        ))
+    return problems

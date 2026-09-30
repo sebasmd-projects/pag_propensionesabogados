@@ -319,7 +319,24 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SESSION_COOKIE_AGE = 7200
 
-ATTLAS_SERVER_KEY = os.getenv('ATTLAS_SERVER_KEY', '')
+# Clave servidor a servidor compartida por pag, fundacionattlas.org y gea:
+# `X-Server-Key` de la API de Attlas, confianza en `X-Client-IP` y clave del
+# emisor `propensiones` ante gea. Un solo nombre: `SERVER_KEY`.
+# Transicion: si falta, se leen las variables viejas y un system check avisa
+# (`utils.W002`). Retirar el fallback cuando produccion ya use `SERVER_KEY`.
+SERVER_KEY = os.getenv('SERVER_KEY', '')
+SERVER_KEY_LEGACY_VARS_IN_USE = []
+#: Valor de la variable vieja de gea, solo mientras dure la transicion: hasta
+#: hoy la clave de Attlas y la de gea podian ser distintas.
+SERVER_KEY_LEGACY_GEA = ''
+if not SERVER_KEY:
+    for _legacy in ('ATTLAS_SERVER_KEY', 'GEA_ISSUER_KEY_PROPENSIONES'):
+        _value = os.getenv(_legacy, '')
+        if _value:
+            SERVER_KEY_LEGACY_VARS_IN_USE.append(_legacy)
+            SERVER_KEY = SERVER_KEY or _value
+            if _legacy == 'GEA_ISSUER_KEY_PROPENSIONES':
+                SERVER_KEY_LEGACY_GEA = _value
 ATTLAS_CONSULTANT_EMAIL_DOMAINS = (
     'propensionesabogados.com', 'fundacionattlas.com', 'fundacionattlas.org',
 )
@@ -358,15 +375,15 @@ STATICFILES_DIRS = [str(BASE_DIR / 'public' / 'staticfiles')]
 #: `https://gea.propensionesabogados.com`). Vacia = no certifica: los paz y
 #: salvo quedan PENDING hasta que se configure (y se corra
 #: `certify_pending_paz_y_salvo`).
-GEA_CERT_API_BASE = os.getenv('GEA_CERT_API_BASE', '').strip().rstrip('/')
+GEA_CERT_API_BASE_DEFAULT = 'https://gea.propensionesabogados.com'
+GEA_CERT_API_BASE = os.getenv('GEA_CERT_API_BASE', GEA_CERT_API_BASE_DEFAULT).strip().rstrip('/')
 #: El slug con que gea conoce a este emisor.
 GEA_ISSUER_SLUG = os.getenv('GEA_ISSUER_SLUG', 'propensiones').strip()
-#: Clave compartida con gea (`GEA_ISSUER_KEY_PROPENSIONES` en el `.env` de
-#: gea). Es una credencial de produccion: nunca va al codigo ni a los logs.
-GEA_ISSUER_KEY = os.getenv('GEA_ISSUER_KEY_PROPENSIONES', '')
+#: La clave ante gea es `SERVER_KEY` (la misma que en el `.env` de gea): es
+#: una credencial de produccion, nunca va al codigo ni a los logs.
 #: Segundos de espera (conexion, lectura) de cada llamada a gea.
 GEA_CERT_TIMEOUT = (
-    float(os.getenv('GEA_CERT_CONNECT_TIMEOUT', 5)),
+    float(os.getenv('GEA_CERT_CONNECT_TIMEOUT', 10)),
     float(os.getenv('GEA_CERT_READ_TIMEOUT', 60)),
 )
 #: Intentos maximos de certificacion por documento antes de rendirse.

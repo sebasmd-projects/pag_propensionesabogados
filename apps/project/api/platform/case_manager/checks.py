@@ -3,6 +3,8 @@
 from django.conf import settings
 from django.core import checks
 
+from . import gea_client
+
 
 @checks.register(checks.Tags.compatibility)
 def check_gea_certification(app_configs, **kwargs):
@@ -14,9 +16,9 @@ def check_gea_certification(app_configs, **kwargs):
             'no se certifican (quedan PENDING).',
             id='case_manager.W001',
         ))
-    if not settings.GEA_ISSUER_KEY:
+    if not gea_client._key():
         problems.append(checks.Warning(
-            'GEA_ISSUER_KEY_PROPENSIONES esta vacia: no se puede certificar '
+            'SERVER_KEY esta vacia: no se puede certificar '
             'con gea.',
             id='case_manager.W002',
         ))

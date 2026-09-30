@@ -20,7 +20,7 @@ from apps.project.api.platform.insolvency_form.models import AttlasInsolvencyFor
 
 
 @override_settings(
-    ATTLAS_SERVER_KEY='x' * 40, SECURE_SSL_REDIRECT=False,
+    SERVER_KEY='x' * 40, SECURE_SSL_REDIRECT=False,
     EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
 )
 class ClientLookupTests(APITestCase):

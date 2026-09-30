@@ -42,7 +42,7 @@ django-two-factor-auth==1.18.1
 djangorestframework-api-key==3.0.0
 djangorestframework-simplejwt==5.5.1
 djangorestframework==3.16.1
-docxcompose==1.4.0
+docxcompose==2.2.0
 docxtpl==0.19.1
 drf-spectacular==0.29.0
 et_xmlfile==2.0.0

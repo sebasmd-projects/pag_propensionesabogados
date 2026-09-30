@@ -62,7 +62,7 @@ class ExportsTests(SimpleTestCase):
         self.assertEqual(order[-1], 'axes.middleware.AxesMiddleware')
 
 
-@override_settings(ATTLAS_SERVER_KEY=KEY, USE_X_FORWARDED_FOR=False)
+@override_settings(SERVER_KEY=KEY, USE_X_FORWARDED_FOR=False)
 class ScannerAndBrowserTests(TestCase):
     def setUp(self):
         cache.clear()
@@ -223,7 +223,7 @@ class BlockedRequestTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    @override_settings(ATTLAS_SERVER_KEY=KEY)
+    @override_settings(SERVER_KEY=KEY)
     def test_the_proxy_ip_is_not_blocked_when_a_visitor_is(self):
         self.block(ip=VISITOR)
 

@@ -12,7 +12,7 @@ from apps.project.api.platform.insolvency_form.models import (
 )
 
 
-@override_settings(ATTLAS_SERVER_KEY='x' * 40, SECURE_SSL_REDIRECT=False)
+@override_settings(SERVER_KEY='x' * 40, SECURE_SSL_REDIRECT=False)
 class OwnershipTests(APITestCase):
     @classmethod
     def setUpTestData(cls):

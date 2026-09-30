@@ -12,7 +12,7 @@ Reglas que se cumplen aqui y no en quien llama:
 * TLS verificado (`verify=True`), timeouts siempre, **sin reintentos**: reintentar
   es cosa de `certify_pending_paz_y_salvo`, acotado por intentos, y no duplica
   porque `idempotency_key` es la del documento.
-* La clave (`GEA_ISSUER_KEY`) solo viaja en la cabecera `X-Issuer-Key`. Nunca
+* La clave (`SERVER_KEY`) solo viaja en la cabecera `X-Issuer-Key`. Nunca
   se registra, ni se incluye en un mensaje de error.
 * Sin redirecciones: una redireccion mandaria la clave a otro sitio.
 * La respuesta se valida; no se confia en la URL de descarga que devuelve gea,
@@ -44,22 +44,27 @@ class GeaNotConfigured(GeaError):
     """Falta la base o la clave: no se intenta nada."""
 
 
+def _key() -> str:
+    """`SERVER_KEY`; en la transicion, la variable vieja de gea si aun manda."""
+    return getattr(settings, 'SERVER_KEY_LEGACY_GEA', '') or settings.SERVER_KEY
+
+
 def is_configured() -> bool:
-    return bool(settings.GEA_CERT_API_BASE and settings.GEA_ISSUER_KEY)
+    return bool(settings.GEA_CERT_API_BASE and _key())
 
 
 def _require_config():
     if not is_configured():
         raise GeaNotConfigured(
             'gea is not configured (GEA_CERT_API_BASE / '
-            'GEA_ISSUER_KEY_PROPENSIONES).'
+            'SERVER_KEY).'
         )
 
 
 def _headers() -> dict:
     return {
         'X-Issuer': settings.GEA_ISSUER_SLUG,
-        'X-Issuer-Key': settings.GEA_ISSUER_KEY,
+        'X-Issuer-Key': _key(),
     }
 
 
@@ -70,7 +75,7 @@ def _url(suffix: str = '') -> str:
 def _safe(text) -> str:
     """Recorta un texto ajeno y le quita la clave, por si la devolvieran."""
     text = str(text)[:ERROR_DETAIL_MAX]
-    key = settings.GEA_ISSUER_KEY
+    key = _key()
     return text.replace(key, '***') if key else text
 
 

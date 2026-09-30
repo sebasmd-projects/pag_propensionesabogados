@@ -35,7 +35,7 @@ class Command(BaseCommand):
         if not gea_client.is_configured():
             self.stderr.write(
                 'gea no esta configurado (GEA_CERT_API_BASE y '
-                'GEA_ISSUER_KEY_PROPENSIONES): nada que hacer.')
+                'SERVER_KEY): nada que hacer.')
             return
 
         documents = PazYSalvoDocumentModel.objects.all()

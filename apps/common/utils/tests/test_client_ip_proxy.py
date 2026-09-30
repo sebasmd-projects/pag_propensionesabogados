@@ -12,7 +12,7 @@ from apps.common.utils.api_keys import server_key_is_valid
 from apps.common.utils.client_ip import get_client_ip
 
 
-@override_settings(ATTLAS_SERVER_KEY='x' * 40, USE_X_FORWARDED_FOR=False)
+@override_settings(SERVER_KEY='x' * 40, USE_X_FORWARDED_FOR=False)
 class ClientIPProxyTests(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -51,7 +51,7 @@ class ClientIPProxyTests(TestCase):
                     HTTP_X_SERVER_KEY='x' * 40, HTTP_X_CLIENT_IP=value,
                 )), expected)
 
-    @override_settings(ATTLAS_SERVER_KEY='')
+    @override_settings(SERVER_KEY='')
     def test_empty_configured_key_never_trusts_header(self):
         for key in ('', 'x' * 40):
             self.assertEqual(get_client_ip(self.request(
@@ -81,7 +81,7 @@ class ClientIPProxyTests(TestCase):
         self.assertEqual(get_client_ip(SimpleNamespace(META=42)), '')
 
 
-@override_settings(ATTLAS_SERVER_KEY='x' * 40, SECURE_SSL_REDIRECT=False,
+@override_settings(SERVER_KEY='x' * 40, SECURE_SSL_REDIRECT=False,
                    AXES_ENABLED=True, USE_X_FORWARDED_FOR=False)
 class ClientIPProxyLoginTests(APITestCase):
     def setUp(self):

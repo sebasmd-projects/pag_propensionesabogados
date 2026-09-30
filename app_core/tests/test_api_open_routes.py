@@ -58,7 +58,7 @@ def api_routes(patterns=None, parents=(), namespaces=()):
             yield '/' + path, name, entry.callback
 
 
-@override_settings(SECURE_SSL_REDIRECT=False, ATTLAS_SERVER_KEY='x' * 40)
+@override_settings(SECURE_SSL_REDIRECT=False, SERVER_KEY='x' * 40)
 class APIOpenRoutesTests(APITestCase):
     def test_anonymous_routes_require_explicit_allowlist(self):
         routes = list(api_routes())

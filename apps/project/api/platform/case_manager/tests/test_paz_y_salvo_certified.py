@@ -142,7 +142,7 @@ class InlineThread:
 
 @override_settings(
     GEA_CERT_API_BASE=BASE, GEA_ISSUER_SLUG='propensiones',
-    GEA_ISSUER_KEY=KEY, PAZ_Y_SALVO_PUBLIC_BASE=PUBLIC,
+    SERVER_KEY=KEY, PAZ_Y_SALVO_PUBLIC_BASE=PUBLIC,
     PAZ_Y_SALVO_MAX_ATTEMPTS=3,
 )
 class CertifiedBase(TestCase):
@@ -499,7 +499,7 @@ class FailureAndRetryTests(CertifiedBase):
                      '--case', str(self.case.pk), stdout=StringIO())
         self.assertEqual(self.document().status, Status.CERTIFIED)
 
-    @override_settings(GEA_CERT_API_BASE='', GEA_ISSUER_KEY='')
+    @override_settings(GEA_CERT_API_BASE='', SERVER_KEY='')
     def test_sin_configurar_queda_pending_sin_llamar_a_nadie(self):
         self.toggle()
 

@@ -237,6 +237,24 @@ El proyecto está pausado, así que sale gratis nacer con esto puesto.
 
 ---
 
+## Clave servidor a servidor: `SERVER_KEY`
+
+Un solo nombre de variable en los tres sistemas: **`SERVER_KEY`**. Protege la
+API de Attlas (cabecera `X-Server-Key`), decide si se cree `X-Client-IP` y es
+la clave del emisor `propensiones` ante gea (cabecera `X-Issuer-Key`). Mínimo
+32 caracteres sin `DEBUG` (system check `utils.E001`). Las cabeceras HTTP no
+cambian.
+
+Las variables viejas `ATTLAS_SERVER_KEY` y `GEA_ISSUER_KEY_PROPENSIONES` se
+siguen leyendo solo si falta `SERVER_KEY`, y `manage.py check` avisa
+(`utils.W002`). Se retirarán.
+
+**Despliegue:** poner `SERVER_KEY` con el mismo valor en el `.env` de pag, el
+`.env` de gea y Vercel (fundacionattlas.org); reiniciar/redesplegar los tres y
+comprobar que `check` ya no avisa; después borrar las variables viejas.
+
+---
+
 ## Lo que no se pudo comprobar
 
 Tres cosas quedaron fuera por el entorno desde el que se revisó, no porque
