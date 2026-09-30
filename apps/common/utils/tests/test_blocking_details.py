@@ -21,7 +21,6 @@ Lo que se fija aqui:
 """
 
 from datetime import timedelta
-from unittest import skip
 
 from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.utils import timezone
@@ -38,7 +37,6 @@ def a_request(path='/wp-login.php', agent='curl/8.4.0'):
     return request
 
 
-@skip('Depende de los campos nuevos de IPBlockedModel de gea (first_seen, is_datacenter, network_owner, is_currently_blocked, time_remaining), que llegan con la version de gea de utils/models.py.')
 class TheColumnsComeFromTheJsonTests(TestCase):
     """
     Son datos duplicados a proposito, y esa duplicacion solo se sostiene si
@@ -119,7 +117,6 @@ class TheColumnsComeFromTheJsonTests(TestCase):
         self.assertEqual(len(entry.user_agent), 500)
 
 
-@skip('Depende de los campos nuevos de IPBlockedModel de gea (first_seen, is_datacenter, network_owner, is_currently_blocked, time_remaining), que llegan con la version de gea de utils/models.py.')
 class TheBlockStateIsCalculatedNotStoredTests(TestCase):
     """
     `is_active` decia «bloqueada» para siempre: nadie la baja cuando el reloj
@@ -224,14 +221,12 @@ class TheOriginIsResolvedOfflineTests(TestCase):
     quien visita el sitio.
     """
 
-    @skip('Depende de los campos nuevos de IPBlockedModel de gea (first_seen, is_datacenter, network_owner, is_currently_blocked, time_remaining), que llegan con la version de gea de utils/models.py.')
     def test_a_cloud_address_is_labelled(self):
         entry = IPBlockedModel.objects.create(current_ip='3.15.20.30')
 
         self.assertTrue(entry.is_datacenter)
         self.assertEqual(entry.network_owner, 'Amazon AWS')
 
-    @skip('Depende de los campos nuevos de IPBlockedModel de gea (first_seen, is_datacenter, network_owner, is_currently_blocked, time_remaining), que llegan con la version de gea de utils/models.py.')
     def test_an_address_outside_the_table_is_not_called_residential(self):
         """
         No saber no es lo mismo que saber que no. La tabla cubre a los
@@ -253,13 +248,11 @@ class TheOriginIsResolvedOfflineTests(TestCase):
 
         self.assertEqual(lengths, sorted(lengths, reverse=True))
 
-    @skip('Depende de los campos nuevos de IPBlockedModel de gea (first_seen, is_datacenter, network_owner, is_currently_blocked, time_remaining), que llegan con la version de gea de utils/models.py.')
     def test_a_broken_address_does_not_raise(self):
         entry = IPBlockedModel.objects.create(current_ip='no-es-una-ip')
 
         self.assertFalse(entry.is_datacenter)
 
-    @skip('Depende de los campos nuevos de IPBlockedModel de gea (first_seen, is_datacenter, network_owner, is_currently_blocked, time_remaining), que llegan con la version de gea de utils/models.py.')
     def test_a_row_made_by_hand_also_gets_its_origin(self):
         """
         Las filas se crean por cuatro sitios distintos, y una fila sin origen

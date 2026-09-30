@@ -43,8 +43,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from apps.common.utils.blocking import (DERIVED_FIELDS, apply_to_entry,
-                                        block_until, has_derived_columns,
-                                        note_attempt, reason_for)
+                                        block_until, note_attempt)
 from apps.common.utils import scanning
 from apps.common.utils.client_ip import get_client_ip, is_exempt
 from apps.common.utils.models import IPBlockedModel
@@ -214,7 +213,7 @@ class DetectSuspiciousRequestMiddleware:
             entry, created = IPBlockedModel.objects.get_or_create(
                 current_ip=client_ip,
                 defaults={
-                    'reason': reason_for('PATH_ENUMERATION'),
+                    'reason': IPBlockedModel.ReasonsChoices.PATH_ENUMERATION,
                     'blocked_until': block_until(1, self.block_base),
                     'session_info': info,
                 },
@@ -266,13 +265,11 @@ class DetectSuspiciousRequestMiddleware:
                 # sostiene si la escribe una sola funcion.
                 apply_to_entry(blocked_entry, info, request)
 
-                # Las columnas derivadas llegan con la fusion del modelo (T3.4);
-                # hasta entonces solo se guarda lo que el modelo tiene.
-                fields = ['session_info', 'blocked_until']
-                if has_derived_columns():
-                    fields += DERIVED_FIELDS
-
-                blocked_entry.save(update_fields=fields)
+                blocked_entry.save(
+                    update_fields=[
+                        'session_info', 'blocked_until', *DERIVED_FIELDS,
+                    ]
+                )
         except Exception as error:
             # Que no se pueda anotar el intento no cambia la decision.
             logger.exception('Could not record the blocked attempt: %s', error)

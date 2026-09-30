@@ -173,7 +173,7 @@ class BlockBadBotsMiddleware:
         from django.utils import timezone
 
         from apps.common.utils.blocking import (apply_to_entry, block_until,
-                                                note_attempt, reason_for)
+                                                note_attempt)
         from apps.common.utils.models import IPBlockedModel
 
         if not client_ip:
@@ -204,7 +204,7 @@ class BlockBadBotsMiddleware:
             entry, created = IPBlockedModel.objects.get_or_create(
                 current_ip=client_ip,
                 defaults={
-                    'reason': reason_for('SCANNER_SIGNATURE'),
+                    'reason': IPBlockedModel.ReasonsChoices.SCANNER_SIGNATURE,
                     'blocked_until': block_until(1, base),
                     'session_info': info,
                 },

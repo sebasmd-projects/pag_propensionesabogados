@@ -152,14 +152,9 @@ class ScannerSignatureTests(TestCase):
 
         entry = IPBlockedModel.objects.get(current_ip=IP)
 
-        # `SCANNER_SIGNATURE` y `matched_pattern` llegan con la fusion del
-        # modelo (T3.4): hasta entonces el motivo cae en el generico y la
-        # firma queda en `session_info`.
         self.assertEqual(
-            entry.reason,
-            getattr(IPBlockedModel.ReasonsChoices, 'SCANNER_SIGNATURE',
-                    IPBlockedModel.ReasonsChoices.SERVER_HTTP_REQUEST))
-        self.assertEqual(entry.session_info['scanner_signature'], 'sqlmap')
+            entry.reason, IPBlockedModel.ReasonsChoices.SCANNER_SIGNATURE)
+        self.assertEqual(entry.matched_pattern, 'sqlmap')
 
     def test_a_policy_crawler_still_gets_a_plain_403(self):
         """
@@ -204,4 +199,4 @@ class ScannerSignatureTests(TestCase):
 
         entry = IPBlockedModel.objects.get(current_ip=IP)
 
-        self.assertEqual(entry.session_info['attempt_count'], 3)
+        self.assertEqual(entry.attempt_count, 3)
