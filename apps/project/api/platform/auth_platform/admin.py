@@ -5,7 +5,8 @@ from django.contrib import admin
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 
-from .models import AttlasInsolvencyAuthModel, AttlasInsolvencyAuthConsultantsModel, hash_value
+from .models import (AttlasInsolvencyAuthModel, AttlasInsolvencyAuthConsultantsModel,
+                     ClientLookupChallenge, hash_value)
 
 
 CEDULA_PATTERN = re.compile(r'^\d{5,}$')
@@ -62,3 +63,21 @@ class AttlasInsolvencyAuthConsultantsAdminModel(admin.ModelAdmin):
     list_display_links = list_display[:3]
     search_fields = ['first_name', 'last_name', 'user']
     readonly_fields = ['updated', 'created', 'user']
+
+
+
+@admin.register(ClientLookupChallenge)
+class ClientLookupChallengeAdmin(admin.ModelAdmin):
+    fields = readonly_fields = (
+        'id', 'auth_user', 'attempts', 'expires_at', 'used_at', 'created', 'updated',
+    )
+    list_display = ('id', 'attempts', 'expires_at', 'used_at')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

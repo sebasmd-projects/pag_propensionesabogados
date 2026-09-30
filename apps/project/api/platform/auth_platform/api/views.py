@@ -1,23 +1,31 @@
 # apps/project/api/platform/auth_platform/api/views.py
 
+from datetime import timedelta
+
 from django.conf import settings
+from django.db import transaction
+from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
-from apps.common.utils.api_keys import HasServerKey
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from drf_spectacular.utils import extend_schema
-
+from apps.common.utils.api_keys import HasServerKey
 from apps.common.utils.functions import generate_token, verify_token
-from apps.common.utils.throttling import RateLimit
 from apps.common.utils.login_attempts import is_locked_out
+from apps.common.utils.models import hash_value
+from apps.common.utils.otp_codes import codes_match, generate_code, hash_code
+from apps.common.utils.throttling import RateLimit
 
-from ..models import AttlasInsolvencyAuthModel
+from ..emails import send_lookup_code
+from ..models import AttlasInsolvencyAuthModel, ClientLookupChallenge
 from .serializers import (
     AttlasInsolvencyAuthConsultantsRegisterSerializer,
     AttlasInsolvencyAuthRegisterSerializer,
     AttlasInsolvencyAuthSerializer,
+    ClientLookupVerifySerializer,
+    ClientResponseSerializer,
     ClientSearchSerializer,
 )
 
@@ -132,3 +140,74 @@ class TokenInfoAPIView(APIView):
             })
         except (ValueError, AttlasInsolvencyAuthModel.DoesNotExist):
             return Response({'detail': 'Token inválido o expirado.'}, status=401)
+
+
+# Separate buckets prevent the public calculator from spending login quotas.
+clients_lookup_ip = RateLimit('clients_lookup_ip', limit=10, window=10 * 60)
+clients_lookup_doc = RateLimit('clients_lookup_doc', limit=3, window=60 * 60)
+clients_lookup_verify_ip = RateLimit('clients_lookup_verify_ip', limit=30, window=10 * 60)
+LOOKUP_LIMIT_DETAIL = {'detail': 'Demasiadas solicitudes. Intente más tarde.'}
+LOOKUP_INVALID_DETAIL = {'detail': 'Código inválido o caducado.'}
+
+
+@extend_schema(tags=['Clients'])
+class ClientLookupView(APIView):
+    permission_classes = [HasServerKey]
+
+    def post(self, request):
+        params = ClientSearchSerializer(data=request.data)
+        params.is_valid(raise_exception=True)
+        document = params.validated_data['documentNumber']
+        ip_allowed = clients_lookup_ip.consume(request)
+        doc_allowed = clients_lookup_doc.consume(request, scope=document.strip().lower())
+        if not ip_allowed or not doc_allowed:
+            return Response(LOOKUP_LIMIT_DETAIL, status=429)
+
+        user = AttlasInsolvencyAuthModel.objects.select_related('insolvency_form').filter(
+            document_number_hash=hash_value(document),
+            birth_date_hash=hash_value(params.validated_data['birthDate'].strftime('%Y-%m-%d')),
+        ).first()
+        form = getattr(user, 'insolvency_form', None)
+        email = (form.debtor_email or '').strip() if form else ''
+        code = generate_code()
+        with transaction.atomic():
+            challenge = ClientLookupChallenge.objects.create(
+                auth_user=user if email else None,
+                code_hash=hash_code(code),
+                expires_at=timezone.now() + timedelta(minutes=10),
+            )
+            if email:
+                transaction.on_commit(lambda: send_lookup_code(email, code, request=request))
+        return Response({'challenge_id': str(challenge.id)}, status=202)
+
+
+@extend_schema(tags=['Clients'])
+class ClientLookupVerifyView(APIView):
+    permission_classes = [HasServerKey]
+
+    def post(self, request):
+        if not clients_lookup_verify_ip.consume(request):
+            return Response(LOOKUP_LIMIT_DETAIL, status=429)
+        params = ClientLookupVerifySerializer(data=request.data)
+        if not params.is_valid():
+            return Response(LOOKUP_INVALID_DETAIL, status=400)
+        with transaction.atomic():
+            challenge = ClientLookupChallenge.objects.select_for_update().filter(
+                pk=params.validated_data['challenge_id'],
+            ).first()
+            now = timezone.now()
+            if (challenge is None or challenge.expires_at <= now
+                    or challenge.used_at is not None or challenge.attempts >= 5):
+                return Response(LOOKUP_INVALID_DETAIL, status=400)
+            challenge.attempts += 1
+            challenge.save(update_fields=['attempts', 'updated'])
+            if (not codes_match(params.validated_data['code'], challenge.code_hash)
+                    or challenge.auth_user_id is None):
+                return Response(LOOKUP_INVALID_DETAIL, status=400)
+            challenge.used_at = now
+            challenge.save(update_fields=['used_at', 'updated'])
+            user = challenge.auth_user
+            data = ClientResponseSerializer(user).data
+            data['token'] = generate_token(str(user.id), scope='lookup')
+            data['expires_in'] = settings.ATTLAS_LOOKUP_TOKEN_TIMEOUT
+        return Response(data)

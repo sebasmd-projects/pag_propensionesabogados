@@ -300,6 +300,9 @@ ATTLAS_SERVER_KEY = os.getenv('ATTLAS_SERVER_KEY', '')
 
 ATTLAS_TOKEN_TIMEOUT = int(os.getenv('ATTLAS_TOKEN_TIMEOUT'))*60*60
 
+# Lifetime in seconds for calculator-only tokens.
+ATTLAS_LOOKUP_TOKEN_TIMEOUT = int(os.getenv("ATTLAS_LOOKUP_TOKEN_TIMEOUT", 30 * 60))
+
 # Bootstrap llama `danger` a lo que Django llama `error`, y sin esto un
 # mensaje de error se pinta con la clase `alert-error`, que no existe: el
 # aviso sale sin color, o sea que el unico mensaje que importa es el que no se

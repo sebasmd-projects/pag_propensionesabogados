@@ -126,3 +126,14 @@ auditlog.register(
     AttlasInsolvencyAuthConsultantsModel,
     serialize_data=True
 )
+
+
+class ClientLookupChallenge(TimeStampedModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    auth_user = models.ForeignKey(
+        AttlasInsolvencyAuthModel, null=True, blank=True, on_delete=models.CASCADE,
+    )
+    code_hash = models.CharField(max_length=64)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)

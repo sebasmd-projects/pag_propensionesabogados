@@ -50,15 +50,14 @@ necesita es llamar al despacho, que es lo que le dice la pantalla-- o no es
 el titular.
 """
 
-import hmac
 import logging
-import secrets
 from datetime import timedelta
-from hashlib import sha256
 
 from django.conf import settings
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
+
+from apps.common.utils.otp_codes import generate_code, hash_code
 
 logger = logging.getLogger(__name__)
 
@@ -120,24 +119,6 @@ def ttl_minutes() -> int:
     return int(
         getattr(settings, 'CASE_MANAGER_OTP_TTL_MINUTES', DEFAULT_TTL_MINUTES)
     )
-
-
-def generate_code() -> str:
-    """Seis cifras, del generador criptografico y no de `random`."""
-    return f'{secrets.randbelow(1_000_000):06d}'
-
-
-def hash_code(code: str) -> str:
-    """
-    El codigo tal y como se guarda: HMAC-SHA256 con la clave del proyecto.
-
-    Con HMAC y no con un `sha256` a secas porque un hash pelado de seis cifras
-    se rompe con una tabla de un millon de entradas, que cabe en memoria. La
-    clave es lo que hace que esa tabla no se pueda construir de antemano.
-    """
-    return hmac.new(
-        settings.SECRET_KEY.encode(), code.encode(), sha256
-    ).hexdigest()
 
 
 # ---------------------------------------------------------------------------

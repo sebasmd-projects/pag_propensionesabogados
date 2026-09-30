@@ -6,10 +6,14 @@ from .views import (
     AttlasInsolvencyAuthRegisterAPIView,
     TokenInfoAPIView,
     AttlasInsolvencyAuthConsultantsRegisterAPIView,
-    ClientSearchView
+    ClientSearchView,
+    ClientLookupView,
+    ClientLookupVerifyView,
 )
 
 urlpatterns = [
+    path("clients/lookup/", ClientLookupView.as_view(), name="api-clients-lookup"),
+    path("clients/lookup/verify/", ClientLookupVerifyView.as_view(), name="api-clients-lookup-verify"),
     path(
         'login/',
         AttlasInsolvencyAuthLoginAPIView.as_view(),

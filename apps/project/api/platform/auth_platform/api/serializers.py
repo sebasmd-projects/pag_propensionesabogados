@@ -157,3 +157,34 @@ class AttlasInsolvencyAuthConsultantsRegisterSerializer(serializers.ModelSeriali
     class Meta:
         model = AttlasInsolvencyAuthConsultantsModel
         fields = ['first_name', 'last_name', 'password']
+
+
+class ClientResponseSerializer(serializers.Serializer):
+    """
+    Forma la respuesta de búsqueda leyendo los campos cifrados del modelo
+    y completando con los datos del formulario de insolvencia (step 2).
+    """
+
+    def to_representation(self, instance: AttlasInsolvencyAuthModel):
+        form: AttlasInsolvencyFormModel | None = getattr(
+            instance, 'insolvency_form', None
+        )
+        return {
+            'id':         str(instance.id),
+            'form_id':    str(form.id) if form else None,
+            # Datos cifrados — se leen en claro desde la instancia ORM
+            'documentNumber': instance.document_number,
+            'birthDate':      instance.birth_date.isoformat()
+            if instance.birth_date else None,
+            # Datos personales guardados en el formulario de insolvencia (step 2)
+            'firstName': form.debtor_first_name if form else '',
+            'lastName':  form.debtor_last_name if form else '',
+            'email':     form.debtor_email if form else '',
+            'phone':     form.debtor_cell_phone if form else '',
+            'address':   form.debtor_address if form else '',
+        }
+
+
+class ClientLookupVerifySerializer(serializers.Serializer):
+    challenge_id = serializers.UUIDField()
+    code = serializers.RegexField(r'^[0-9]{6}$', trim_whitespace=False)

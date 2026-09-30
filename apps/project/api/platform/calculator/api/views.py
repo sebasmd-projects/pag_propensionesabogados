@@ -3,7 +3,7 @@ from rest_framework import viewsets, mixins, status
 from apps.common.utils.api_keys import HasServerKey
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from apps.project.api.platform.auth_platform.authentication import BearerTokenAuthentication
+from apps.project.api.platform.auth_platform.authentication import LookupOrPlatformTokenAuthentication
 
 from drf_spectacular.utils import extend_schema
 
@@ -32,7 +32,7 @@ class ClientViewSet(mixins.CreateModelMixin,
         # DRF assigns self.action after initializing authenticators.
         action = self.action_map.get(self.request.method.lower())
         if action in ('retrieve', 'update', 'partial_update'):
-            return [BearerTokenAuthentication()]
+            return [LookupOrPlatformTokenAuthentication()]
         return super().get_authenticators()
 
     def get_permissions(self):
