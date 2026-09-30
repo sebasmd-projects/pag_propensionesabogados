@@ -123,7 +123,7 @@ class GestorDashboardView(GestorRequiredMixin, TemplateView):
         maximum = max((value for _, value, _ in comparisons), default=0) or 1
         context['financial_bars'] = [
             {'label': label, 'value': value, 'tone': tone,
-             'width': round(value * 100 / maximum)}
+             'height': round(value * 100 / maximum)}
             for label, value, tone in comparisons
         ]
 

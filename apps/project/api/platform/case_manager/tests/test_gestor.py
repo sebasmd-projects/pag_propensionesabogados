@@ -164,6 +164,22 @@ class GestorDashboardTests(TestCase):
         self.assertEqual(totals['expectation'], 9_000_000)
         self.assertEqual(totals['potential_pending'], 13_000_000)
 
+    def test_el_comparativo_se_renderiza_como_grafica_de_columnas(self):
+        respuesta = self.client.get(self.url)
+
+        self.assertContains(respuesta, 'gestor-bar-chart')
+        self.assertContains(respuesta, '--bar-height: 100%')
+
+    def test_tabla_de_proximos_pagos_vacia_tiene_columnas_validas(self):
+        respuesta = self.client.get(self.url)
+        html = respuesta.content.decode()
+        inicio = html.index('id="tablaProximosPagos"')
+        fin = html.index('</table>', inicio)
+        tabla = html[inicio:fin]
+
+        self.assertNotIn('colspan=', tabla)
+        self.assertIn('<tbody></tbody>', tabla.replace('\n', '').replace(' ', ''))
+
     def test_el_deudor_sale_en_su_lista_y_no_en_la_otra(self):
         respuesta = self.client.get(self.url)
 
