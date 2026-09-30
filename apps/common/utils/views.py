@@ -1,5 +1,7 @@
 import logging
+import re
 from datetime import timedelta
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.shortcuts import redirect, render
@@ -21,6 +23,86 @@ except SystemExit:
 except Exception as e:
     logger.error(f"An unexpected error occurred: {e}")
     template_name = 'errors_template.html'
+
+
+SAFE_PATH_PREFIXES = [
+    'static',
+    'media',
+    'favicon.ico',
+    'api',
+]
+
+# OJO: estos se buscan con `search`, o sea en cualquier posicion de la ruta.
+# Aqui solo van patrones que de verdad identifiquen una ruta inocua.
+#
+# Habia un `r'^(?!api/).*'` en esta lista. Con `search`, eso casa con **toda**
+# ruta que no empiece por `api/` -- es decir, con casi todas -- asi que
+# `is_safe_path` devolvia True para `/wp-admin/`, `/phpmyadmin/` y `/.env`.
+# Consecuencia: el middleware se saltaba cada peticion sin mirar los bloqueos,
+# y la propia vista trampa se iba por su primera linea sin crear ninguno. La
+# mitigacion anti-escaneo llevaba sin hacer absolutamente nada.
+SAFE_PATH_REGEXES = [
+    # Las URL de verificacion de certificados llevan un UUID: son legitimas.
+    r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-'
+    r'[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
+]
+
+SAFE_PATH_EXTENSIONS = [
+    '.css', '.js', '.png',
+    '.jpg', '.jpeg', '.gif',
+    '.svg', '.ico', '.woff',
+    '.woff2', '.ttf', '.eot',
+    '.otf', '.mp4', '.webm',
+    '.ogg', '.mp3', '.wav'
+]
+
+_COMPILED_SAFE_REGEXES = [re.compile(r) for r in SAFE_PATH_REGEXES]
+
+
+def _normalize_request_path(path: str) -> str:
+    """
+    Extrae y normaliza la parte de path sin query ni slash inicial.
+    Ej: '/static/img/foo.png?x=1' -> 'static/img/foo.png'
+    """
+    if not path:
+        return ''
+    parsed = urlparse(path)
+    p = parsed.path or ''
+    # quitar slash inicial si existe
+    if p.startswith('/'):
+        p = p[1:]
+    return p
+
+
+def is_safe_path(path: str) -> bool:
+    """
+    True si la ruta debe considerarse 'safe' (recursos estáticos, extensiones, uuid, etc).
+    Usar desde vistas y middleware.
+    """
+    if not path:
+        return False
+
+    p = _normalize_request_path(path)  # sin leading slash, sin query
+
+    # 1) prefijos (ej. static/, media/, favicon.ico)
+    for pref in SAFE_PATH_PREFIXES:
+        # Segmento completo o coincidencia exacta. El `startswith(pref)` que
+        # habia aqui daba por buena `/apiXYZ/` por culpa del prefijo `api`.
+        if p == pref or p.startswith(pref + '/'):
+            return True
+
+    # 2) extensiones
+    lower = p.lower()
+    for ext in SAFE_PATH_EXTENSIONS:
+        if lower.endswith(ext):
+            return True
+
+    # 3) regexes (buscar en todo el path)
+    for cre in _COMPILED_SAFE_REGEXES:
+        if cre.search(p):
+            return True
+
+    return False
 
 
 def handler400(request, exception, *args, **argv):

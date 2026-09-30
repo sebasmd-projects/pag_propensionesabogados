@@ -83,3 +83,33 @@ def is_whitelisted(ip: str) -> bool:
     return WhiteListedIPModel.objects.filter(
         current_ip=ip, is_active=True
     ).exists()
+
+
+def is_exempt(request) -> bool:
+    """
+    Si esta peticion no debe bloquearse pase lo que pase.
+
+    Dos casos, y los dos son de disponibilidad, no de seguridad:
+
+    * **La lista blanca.** Es el remedio documentado cuando alguien queda
+      bloqueado por error; tiene que funcionar en los dos lados.
+    * **El personal interno autenticado.** Que un administrador se quede
+      fuera de su propio panel por teclear mal una URL es exactamente el
+      autobloqueo que hay que evitar.
+
+    Ante un fallo de base de datos se falla ABIERTO (se exime): esto solo es
+    mitigacion de ruido.
+    """
+    from django.db.utils import OperationalError, ProgrammingError
+
+    user = getattr(request, 'user', None)
+
+    if user is not None and getattr(user, 'is_authenticated', False):
+        if user.is_active and (user.is_staff or user.is_superuser):
+            return True
+
+    try:
+        return is_whitelisted(get_client_ip(request))
+    except (ProgrammingError, OperationalError):
+        logger.warning('Whitelist unavailable; letting the request through')
+        return True

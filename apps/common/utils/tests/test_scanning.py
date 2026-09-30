@@ -23,16 +23,13 @@ mitad que cuesta cara: un falso positivo aqui deja fuera a alguien de verdad.
         --settings=app_core.settings_test
 """
 
-from unittest import mock, skip
+from unittest import mock
 
 from django.core.cache import cache
 from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 
 from .. import scanning
-try:
-    from ..middleware.block_bots import BlockBadBotsMiddleware
-except ImportError:  # el paquete middleware/ de gea llega en una tarea posterior
-    BlockBadBotsMiddleware = None
+from ..middleware.block_bots import BlockBadBotsMiddleware
 from ..models import IPBlockedModel, WhiteListedIPModel
 
 IP = '203.0.113.5'
@@ -124,7 +121,6 @@ class WithoutCacheNothingIsBlockedTests(SimpleTestCase):
         self.assertTrue(state['degraded'])
 
 
-@skip('Depende del paquete middleware/ de gea (block_bots), que llega en una tarea posterior.')
 class ScannerSignatureTests(TestCase):
     """
     Un escaner que anuncia su nombre es la senal mas limpia que hay. Y la
@@ -156,9 +152,14 @@ class ScannerSignatureTests(TestCase):
 
         entry = IPBlockedModel.objects.get(current_ip=IP)
 
+        # `SCANNER_SIGNATURE` y `matched_pattern` llegan con la fusion del
+        # modelo (T3.4): hasta entonces el motivo cae en el generico y la
+        # firma queda en `session_info`.
         self.assertEqual(
-            entry.reason, IPBlockedModel.ReasonsChoices.SCANNER_SIGNATURE)
-        self.assertEqual(entry.matched_pattern, 'sqlmap')
+            entry.reason,
+            getattr(IPBlockedModel.ReasonsChoices, 'SCANNER_SIGNATURE',
+                    IPBlockedModel.ReasonsChoices.SERVER_HTTP_REQUEST))
+        self.assertEqual(entry.session_info['scanner_signature'], 'sqlmap')
 
     def test_a_policy_crawler_still_gets_a_plain_403(self):
         """
@@ -203,4 +204,4 @@ class ScannerSignatureTests(TestCase):
 
         entry = IPBlockedModel.objects.get(current_ip=IP)
 
-        self.assertEqual(entry.attempt_count, 3)
+        self.assertEqual(entry.session_info['attempt_count'], 3)

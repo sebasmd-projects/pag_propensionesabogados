@@ -160,6 +160,14 @@ MIDDLEWARE = [
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Los tres siguientes van juntos y despues de la autenticacion: los dos
+    # ultimos miran `request.user` para eximir al personal interno. El primero
+    # saca del acceso y del registro a quien ya tiene sesion; el segundo corta
+    # rastreadores por politica y escaneres que se anuncian en el
+    # `User-Agent`; el tercero aplica los bloqueos por IP y cuenta las rafagas
+    # de 404. Los tres fallan abiertos.
+    'apps.common.utils.middleware.RedirectAuthenticatedUserMiddleware',
+    'apps.common.utils.middleware.BlockBadBotsMiddleware',
     'apps.common.utils.middleware.DetectSuspiciousRequestMiddleware',
     # El ultimo, como pide su documentacion: solo asi ve la respuesta ya
     # formada y puede convertir un intento fallido en un bloqueo.

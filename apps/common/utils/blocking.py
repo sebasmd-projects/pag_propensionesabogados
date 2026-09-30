@@ -146,6 +146,34 @@ def note_attempt(info: dict, request) -> dict:
 # De un `session_info` a las columnas de la fila
 # ==========================================================
 
+def has_derived_columns() -> bool:
+    """
+    Si ``IPBlockedModel`` ya tiene las columnas derivadas del ``session_info``.
+
+    En pag llegan con la fusion del modelo (T3.4). Mientras no esten, los
+    middlewares funcionan solo con ``session_info`` y esto devuelve False.
+    """
+    from apps.common.utils.models import IPBlockedModel
+
+    names = {field.name for field in IPBlockedModel._meta.get_fields()}
+
+    return all(name in names for name in DERIVED_FIELDS)
+
+
+def reason_for(name: str):
+    """
+    El motivo de bloqueo ``name`` (p. ej. ``SCANNER_SIGNATURE``).
+
+    Si el modelo aun no lo define --llega con la T3.4-- cae en el motivo
+    generico ``SERVER_HTTP_REQUEST``; la causa exacta queda en ``session_info``.
+    """
+    from apps.common.utils.models import IPBlockedModel
+
+    choices = IPBlockedModel.ReasonsChoices
+
+    return getattr(choices, name, choices.SERVER_HTTP_REQUEST)
+
+
 def apply_to_entry(entry, info: dict, request=None, *, pattern=None) -> None:
     """
     Vuelca en las columnas de la fila lo que dice su ``session_info``.
@@ -165,6 +193,9 @@ def apply_to_entry(entry, info: dict, request=None, *, pattern=None) -> None:
         pattern: qué disparó el bloqueo, si quien llama lo sabe.
     """
     from apps.common.utils import netintel
+
+    if not has_derived_columns():
+        return
 
     info = info or {}
     now = timezone.now()
