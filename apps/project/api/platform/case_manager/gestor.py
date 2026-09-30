@@ -631,15 +631,18 @@ class CaseToggleSettlementView(GestorRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         with transaction.atomic():
+            # Bloqueo portable (PostgreSQL, MySQL/MariaDB, SQLite): sin `of=`
+            # y sin `select_related`, que en MySQL bloquearia tambien al cliente.
             asunto = get_object_or_404(
-                CaseModel.objects.select_related('client')
-                .select_for_update(of=('self',)),
-                pk=kwargs['pk'],
+                CaseModel.objects.select_for_update(), pk=kwargs['pk'],
             )
             if asunto.paz_y_salvo_authorized:
                 paz_y_salvo.revoke(asunto)
             else:
                 paz_y_salvo.authorize(asunto)
+
+        # Sin bloqueo: el cliente se carga aparte para el mensaje.
+        asunto.client = ClientModel.objects.get(pk=asunto.client_id)
 
         plantilla = (
             _('Settlement letter enabled for %(name)s.')

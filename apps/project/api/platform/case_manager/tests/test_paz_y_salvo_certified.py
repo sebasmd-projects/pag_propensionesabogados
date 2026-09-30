@@ -702,6 +702,23 @@ class DownloadTests(CertifiedBase):
 
 
 class GestorTests(CertifiedBase):
+    def test_autorizar_y_revocar_desde_la_vista(self):
+        # Produccion es MySQL/MariaDB: la vista no debe usar `FOR UPDATE OF`.
+        # (Simular el backend en SQLite no es realista: el compilador
+        # emitiria `FOR UPDATE` y SQLite lo rechazaria; ver test_db_portability.)
+        respuesta = self.toggle()
+        self.assertEqual(respuesta.status_code, 302)
+        self.case.refresh_from_db()
+        self.assertTrue(self.case.paz_y_salvo_authorized)
+        self.assertEqual(self.document().status, Status.CERTIFIED)
+
+        respuesta = self.toggle()
+        self.assertEqual(respuesta.status_code, 302)
+        self.case.refresh_from_db()
+        self.assertFalse(self.case.paz_y_salvo_authorized)
+        self.assertFalse(PazYSalvoDocumentModel.objects.filter(
+            case=self.case).exclude(status=Status.REVOKED).exists())
+
     def ficha(self):
         return self.gestor.get(
             reverse('case_manager:gestor_case_update', args=[self.case.pk]))
