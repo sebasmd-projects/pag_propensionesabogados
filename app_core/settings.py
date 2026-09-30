@@ -1,4 +1,3 @@
-import logging
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -17,10 +16,6 @@ load_dotenv()
 check_environment()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-logging.basicConfig(
-    filename='stderr.log', format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8'
-)
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
@@ -540,6 +535,17 @@ SPECTACULAR_SETTINGS = {
         'docExpansion': 'list',
     },
 
+    # Swagger UI y ReDoc se cargan desde jsDelivr. La biblioteca trae `@latest`
+    # por defecto, o sea codigo que cambia sin que nadie lo revise y sin
+    # `integrity`: aqui la version esta fijada y las plantillas de
+    # `templates/drf_spectacular/` llevan el hash de esa version exacta. Al
+    # subir de version, sacar los hashes de nuevo (ver `utils/tests/test_sri.py`).
+    'SWAGGER_UI_DIST': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.33.0',
+    'SWAGGER_UI_FAVICON_HREF': (
+        'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.33.0/favicon-32x32.png'
+    ),
+    'REDOC_DIST': 'https://cdn.jsdelivr.net/npm/redoc@2.5.4',
+
     'SORT_OPERATIONS': True,
     'SORT_OPERATION_PARAMETERS': True,
 }
@@ -646,6 +652,37 @@ SCAN_404_WINDOW_SECONDS = env_int('SCAN_404_WINDOW_SECONDS', 300)
 # Opcional: vacia, el campo se queda sin pais y todo lo demas sigue igual.
 GEOIP_PATH = os.getenv('GEOIP_PATH', '')
 
-# Fichero de log que rotan y leen `apps/common/utils/logs.py`. Es el mismo
-# `stderr.log` que ya usa `logging.basicConfig` mas arriba.
+# Fichero de log que rotan y leen `apps/common/utils/logs.py`
+# (`manage.py rotate_logs` / `show_log`). Antes lo abria un
+# `logging.basicConfig(filename='stderr.log')` relativo al directorio de
+# trabajo; ahora es siempre `BASE_DIR/stderr.log` (o `DJANGO_LOG_FILE`).
 LOG_FILE = Path(os.getenv('DJANGO_LOG_FILE') or (BASE_DIR / 'stderr.log'))
+
+#: El handler es `WatchedFileHandler` a proposito, y no `FileHandler`. Rotar es
+#: renombrar el fichero, y en Linux quien lo tiene abierto sigue escribiendo en
+#: el renombrado: con `FileHandler`, tras `rotate_logs` todos los workers
+#: seguirian escribiendo en `stderr_old_N.log` y el `stderr.log` nuevo no
+#: llegaria a existir. `WatchedFileHandler` reabre el fichero al detectar el
+#: cambio (ver `apps/common/utils/logs.py` y `tests/test_logs.py`). Formato y
+#: nivel son los que ya tenia el `basicConfig`: WARNING en la raiz.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'plain': {
+            'format': '%(asctime)s - %(levelname)s - %(message)s',
+        },
+    },
+    'handlers': {
+        'file': {
+            'class': 'logging.handlers.WatchedFileHandler',
+            'filename': str(LOG_FILE),
+            'encoding': 'utf-8',
+            'formatter': 'plain',
+        },
+    },
+    'root': {
+        'handlers': ['file'],
+        'level': 'WARNING',
+    },
+}

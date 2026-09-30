@@ -27,8 +27,8 @@ entera hasta el despliegue siguiente.
 **``safety`` se queda en local.** Su base es más rica y da contexto que la
 pública no tiene, pero Safety CLI 3 **siempre se autentica**: sin credencial
 abre un navegador o se queda esperando en el terminal. Eso, en un servidor
---donde esto corre por cron y desde la consola de operaciones, sin nadie que
-conteste-- es un cuelgue. Así que allí ni se intenta, y saltársela en
+--donde esto corre por cron o desde una sesión sin nadie que conteste-- es un
+cuelgue. Así que allí ni se intenta, y saltársela en
 producción **no se cuenta como un hueco**: es la configuración prevista, y un
 aviso que sale en cada despliegue por algo que está bien acaba ignorándose
 junto con los que no lo están.
@@ -37,9 +37,8 @@ Cuando sí se lanza (en local, con clave), va con ``--stage cicd`` y con la
 entrada estándar cerrada, para que no pueda pedir nada aunque una versión
 futura cambie de opinión. Y **la clave va por entorno, nunca como argumento**:
 un ``--key=...`` en la línea de comandos lo ve cualquiera que liste procesos, y
-además esta consola guarda la línea ejecutada y su salida en
-``CommandRunModel`` — un secreto que pase por ahí queda escrito en una tabla
-que se lee desde el propio panel.
+además queda en el historial del intérprete y en cualquier registro de la
+línea ejecutada.
 
 Todas son opcionales
 --------------------
@@ -53,8 +52,8 @@ no lo es.
 Lo que se da por bueno, y por qué
 ---------------------------------
 ``BANDIT_ACCEPTED`` es una lista de excepciones **razonadas**, igual que
-``INTENTIONALLY_PUBLIC`` en ``check_security`` o ``NEVER_EXPOSED`` en el
-registro de la consola: cada entrada dice por qué ese aviso no es un problema
+``INTENTIONALLY_PUBLIC`` y ``PUBLICLY_SERVABLE_MEDIA`` (``check_security``,
+``media_audit``): cada entrada dice por qué ese aviso no es un problema
 aquí. No es una lista para silenciar ruido.
 
 La clave es ``(regla, fichero)``, y conviene saber exactamente qué atrapa y
@@ -86,10 +85,9 @@ BANDIT_EXCLUDE = '*/tests/*,*/migrations/*'
 #: Tope de espera de cada escáner. Los de dependencias salen a la red; bandit
 #: no (tarda unos tres segundos sobre este proyecto).
 #:
-#: Los dos son **más cortos que el del comando en la consola de operaciones**
-#: (600 s en ``registry.py``), y a propósito: si el tope que salta primero es
-#: el de fuera, lo que se lee es «el comando se cortó» y hay que adivinar por
-#: dónde iba. Saltando el de dentro, el informe dice cuál de los dos no
+#: Topes propios y no el del proceso que lance el comando: si salta primero el
+#: de fuera, lo que se lee es «el comando se cortó» y hay que adivinar por
+#: dónde iba. Saltando el de dentro, el informe dice cuál de los escáneres no
 #: respondió y en cuánto tiempo.
 BANDIT_TIMEOUT = 120
 SAFETY_TIMEOUT = 240
@@ -97,16 +95,10 @@ PIP_AUDIT_TIMEOUT = 240
 
 #: Rutas que salen en más de una entrada, para que un fichero que se mueva se
 #: renombre en un sitio y no en cinco.
-_WORKERS = 'apps/common/utils/management/commands/check_workers.py'
-_REALTIME = 'apps/common/utils/management/commands/check_realtime.py'
 _CACHE = 'apps/common/utils/management/commands/check_cache.py'
-_CRON = 'apps/common/utils/management/commands/check_cron.py'
 _REPORT = 'apps/common/utils/management/commands/test_report.py'
-_FFMPEG = 'apps/project/specific/documents/video_masonry/utils.py'
-_RUNNER = 'apps/project/specific/internal/ops/runner.py'
 _ADMIN = 'apps/common/utils/admin.py'
 _FILTERS = 'apps/common/utils/templatetags/custom_filters.py'
-_CERT_VIEWS = 'apps/project/specific/documents/certificates/views.py'
 
 #: Las dos remisiones y el motivo que se repite. Se escriben una vez porque
 #: significan lo mismo en cada sitio: si cambia el razonamiento, cambia entero.
@@ -120,39 +112,11 @@ NO_SHELL = 'subprocess sin shell, con lista de argumentos.'
 #: por qué, que es la fricción que se busca: una lista de exclusión sin motivos
 #: es una forma cómoda de no mirar.
 BANDIT_ACCEPTED = {
-    # --- B308/B703: mark_safe ---
-    ('B308', 'apps/common/core/views.py'): (
-        'El cuerpo de un documento legal es HTML, y hay que marcarlo seguro '
-        'para que salga como HTML y no como codigo escapado. Lo que se marca '
-        'NO es lo que se guardo: es lo que devuelve '
-        'core.legal_html.sanitize_legal_html(), que solo emite las etiquetas '
-        'y atributos de su lista blanca y descarta cualquier href que no sea '
-        'http, https, mailto, tel o una ruta del propio sitio. Sin sanear '
-        'esto seria un <script> del admin en una pagina publica; con el '
-        'saneador, el peor caso de perder una cuenta de personal es un texto '
-        'equivocado.'
-    ),
-    ('B703', 'apps/common/core/views.py'): (
-        'La misma llamada que B308, que bandit cuenta dos veces con dos '
-        'reglas distintas. Mismo motivo.'
-    ),
-    # --- B104: "bind a todas las interfaces" ---
-    ('B104', 'apps/common/utils/client_ip.py'): (
-        'No es una direccion de escucha: es el centinela UNKNOWN_IP para '
-        'cuando no se puede determinar de donde viene la peticion. La cadena '
-        'coincide, el significado no.'
-    ),
-    ('B104', 'apps/common/utils/management/commands/runserver.py'): (
-        'Es el servidor de desarrollo, y sirve en 0.0.0.0 a proposito, para '
-        'poder abrirlo desde el movil en la misma red. En produccion no se '
-        'ejecuta: alli sirve el WSGI de cPanel.'
-    ),
-
     # --- B105: "contrasena en el codigo" ---
     ('B105', 'apps/common/utils/backup_crypto.py'): (
-        'Es el NOMBRE de la variable de entorno (GEA_BACKUP_PASSPHRASE), no '
-        'su valor. El valor no esta en el repositorio y el comando se niega a '
-        'escribir PII sin el.'
+        'Son los NOMBRES de las variables de entorno (BACKUP_PASSPHRASE y la '
+        'heredada de gea), no su valor. El valor no esta en el repositorio y '
+        'el comando db_backup se niega a escribir PII sin el.'
     ),
     ('B105', 'apps/common/utils/management/commands/check_security.py'): (
         'Son claves del diccionario de vistas publicas a proposito '
@@ -171,49 +135,12 @@ BANDIT_ACCEPTED = {
         'MODE_PASSWORD es el identificador del modo del asistente de acceso, '
         'el que distingue entrar con contrasena de entrar con codigo.'
     ),
-    ('B105', 'apps/project/specific/internal/code_gen/services/watermark.py'): (
-        'TOKEN_SEPARATOR es el caracter que separa los campos de la marca de '
-        'agua. Se llama token y no es un secreto.'
-    ),
-
-    # --- B110: try/except/pass ---
-    ('B110', _WORKERS): (
-        'Un diagnostico no puede fallar por lo que esta diagnosticando: si '
-        'leer /proc o el estado de un proceso revienta, se informa de lo que '
-        'si se pudo leer en vez de abortar el informe entero.'
-    ),
-    ('B110', _REALTIME): (
-        'Es el cierre de las conexiones de prueba, y no puede tener otra '
-        'forma: se cierra lo que se abrio para medir, y si una ya estaba rota '
-        '--que es justo lo que a veces se acaba de medir-- cerrarla vuelve a '
-        'fallar. Dejar que eso suba taparia el resultado con la excepcion de '
-        'recoger la mesa. Lo que se diagnostica se cuenta antes, con su tipo '
-        'de error y su explicacion; aqui ya no queda nada que informar.'
-    ),
-    ('B110', 'apps/project/specific/assets_management/buyers/form.py'): (
-        'Formateo de un valor para mostrarlo. Si no se puede formatear se '
-        'ensena en crudo; que un formulario no se pinte seria peor que un '
-        'numero sin separador de miles.'
-    ),
-    ('B110', 'apps/project/specific/internal/code_gen/services/hashing.py'): (
-        'La huella canonica ignora deliberadamente la marca de agua; si el '
-        'PDF no se deja leer por esa via se cae a la huella exacta, que es la '
-        'que hace fe. El fallo esta contemplado, no tragado.'
-    ),
-    ('B110', 'apps/project/specific/internal/code_gen/services/tsa.py'): (
-        'El sellado de tiempo sale a la red y NUNCA puede propagar su fallo: '
-        'con ATOMIC_REQUESTS puesto, una excepcion aqui desharia el sellado '
-        'que ya se escribio. Se degrada a aviso, que es el diseno (ver '
-        'docs/ANCLAJE.md).'
-    ),
 
     # --- B308 / B703: mark_safe ---
     # Son la misma llamada contada por dos reglas. Se aceptan por fichero
-    # porque en los tres el contenido es seguro por construccion; el caso que
-    # NO lo era --una URL de fichero subido interpolada en un <img>-- se
-    # arreglo con format_html en vez de aceptarse.
+    # porque en los dos el contenido es seguro por construccion.
     ('B308', _ADMIN): (
-        'Etiquetas y colores fijos; los dos valores que vienen de la fila '
+        'Etiquetas y colores fijos; los valores que vienen de la fila '
         '(user_agent, network_owner, country) pasan por escape() o '
         'format_html().'
     ),
@@ -222,26 +149,15 @@ BANDIT_ACCEPTED = {
         'que Django genera escapado; currency interpola dos trozos de '
         'f"{float(x):,.2f}", o sea digitos, comas y un punto.'
     ),
-    ('B308', _CERT_VIEWS): (
-        'El QR y el codigo de barras son imagenes que genera este mismo '
-        'proyecto en functions.py; lo que se marca como seguro es el markup '
-        'que produce la libreria, no texto de nadie.'
-    ),
     ('B703', _ADMIN): SEE_B308,
-    ('B703', _FILTERS):
-        SEE_B308,
-    ('B703', _CERT_VIEWS):
-        SEE_B308,
+    ('B703', _FILTERS): SEE_B308,
 
     # --- B310: urlopen admite file:// ---
-    # La regla es sintactica: mira la llamada, no lo que se hizo antes. En los
-    # dos sitios se comprueba el esquema justo encima, con require_http_url().
-    ('B310', 'apps/common/utils/cron.py'): (
-        'El esquema se valida con outbound.require_http_url() antes de abrir. '
-        'Bandit no puede verlo porque solo mira la llamada.'
-    ),
+    # La regla es sintactica: mira la llamada, no lo que se hizo antes.
     ('B310', 'apps/common/utils/management/commands/check_health.py'): (
-        'Idem: require_http_url() en la linea de encima.'
+        'El esquema se valida con outbound.require_http_url() antes de abrir '
+        '(la URL sale de PUBLIC_BASE_URL). Bandit no puede verlo porque solo '
+        'mira la llamada.'
     ),
 
     # --- B311: random no criptografico ---
@@ -250,45 +166,29 @@ BANDIT_ACCEPTED = {
         'migraciones. No protege nada; solo evita una colision de nombres.'
     ),
 
+    # --- B406: xml.sax ---
+    ('B406', 'apps/project/api/platform/case_manager/paz_y_salvo_pdf.py'): (
+        'Solo importa xml.sax.saxutils.escape, que ESCAPA texto para el '
+        'marcado de los parrafos de reportlab; no parsea ningun XML. La regla '
+        'salta con cualquier import de xml.sax, y aqui no hay ninguna entrada '
+        'de fuera que se interprete como XML.'
+    ),
+
     # --- B404 / B603: subprocess ---
     # Aqui bandit avisa de lo que en este proyecto es precisamente la medida
-    # de seguridad. `runner.py` ejecuta SIN shell y con una lista de
-    # argumentos construida a mano justamente para que no haya nada que
-    # escapar; lo mismo hacen los comandos de diagnostico. Usar el shell seria
-    # el hallazgo, no evitarlo.
+    # de seguridad: los comandos de diagnostico ejecutan SIN shell y con una
+    # lista de argumentos construida a mano, justamente para que no haya nada
+    # que escapar. Usar el shell seria el hallazgo, no evitarlo.
     ('B404', 'apps/common/utils/scanners.py'): (
-        'Este mismo fichero: lanza bandit y safety en subproceso, sin shell. '
-        'Aparecio en la primera ejecucion despues de escribirlo, que es '
-        'exactamente lo que tiene que pasar con un fichero nuevo.'
+        'Este mismo fichero: lanza bandit, pip-audit y safety en subproceso, '
+        'sin shell. Aparecio en la primera ejecucion despues de escribirlo, '
+        'que es exactamente lo que tiene que pasar con un fichero nuevo.'
     ),
     ('B603', 'apps/common/utils/scanners.py'): SEE_B404,
-    ('B404', _CACHE):
-        NO_SHELL,
-    ('B404', _CRON):
-        NO_SHELL,
-    ('B404', _WORKERS):
-        NO_SHELL,
-    ('B404', _REPORT):
-        NO_SHELL,
-    ('B404', _FFMPEG):
-        'Llama a ffmpeg sin shell, con lista de argumentos.',
-    ('B404', _RUNNER): (
-        'Es el ejecutor de la consola de operaciones. Ejecutar en subproceso '
-        'y sin shell no es el riesgo: es el diseno (ver el docstring de '
-        'registry.py).'
-    ),
-    ('B603', _CACHE):
-        SEE_B404,
-    ('B603', _CRON):
-        SEE_B404,
-    ('B603', _WORKERS):
-        SEE_B404,
-    ('B603', _REPORT):
-        SEE_B404,
-    ('B603', _FFMPEG):
-        SEE_B404,
-    ('B603', _RUNNER):
-        SEE_B404,
+    ('B404', _CACHE): NO_SHELL,
+    ('B404', _REPORT): NO_SHELL,
+    ('B603', _CACHE): SEE_B404,
+    ('B603', _REPORT): SEE_B404,
 }
 
 
@@ -474,7 +374,7 @@ def run_pip_audit() -> ScanResult:
         _python(), '-m', 'pip_audit',
         '--format', 'json',
         # Sin la ruleta giratoria: escribe caracteres de control que en un log
-        # o en CommandRunModel son ruido.
+        # son ruido.
         '--progress-spinner', 'off',
     ]
 
@@ -607,7 +507,7 @@ def run_safety() -> ScanResult:
             cwd=str(settings.BASE_DIR), timeout=SAFETY_TIMEOUT,
             # La clave viaja en el entorno, que es como safety la busca. Nunca
             # como `--key=...`: eso la deja en la linea de comandos, visible a
-            # cualquiera que liste procesos y escrita en CommandRunModel.
+            # cualquiera que liste procesos y en el historial.
             env=dict(os.environ),
             stdin=subprocess.DEVNULL,
         )

@@ -30,9 +30,18 @@ class ClientViewSet(mixins.CreateModelMixin,
     queryset = AttlasInsolvencyFormModel.objects.all()
     permission_classes = [HasServerKey]
 
+    def initialize_request(self, request, *args, **kwargs):
+        # `get_authenticators()` no recibe la peticion y `self.request` puede
+        # ser `None` (asi lo deja drf-spectacular al generar el esquema, que era
+        # el `drf_spectacular.E001` de `check --deploy`). El metodo se toma de
+        # la peticion que llega aqui, que es la misma que usara DRF.
+        self._authenticator_method = (request.method or '').lower()
+        return super().initialize_request(request, *args, **kwargs)
+
     def get_authenticators(self):
         # DRF assigns self.action after initializing authenticators.
-        action = self.action_map.get(self.request.method.lower())
+        action = self.action_map.get(
+            getattr(self, '_authenticator_method', ''))
         if action in ('retrieve', 'update', 'partial_update'):
             return [LookupOrPlatformTokenAuthentication()]
         return super().get_authenticators()

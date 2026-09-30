@@ -21,7 +21,6 @@ detalle que alguien "simplifica" sin saber lo que sostiene.
 import logging
 import logging.handlers
 import tempfile
-from unittest import skip
 from io import StringIO
 from pathlib import Path
 
@@ -105,7 +104,6 @@ class TestWhenItRotates(LogDirectoryMixin, SimpleTestCase):
         """Puede que aun no se haya escrito nada. No hay nada que rotar."""
         self.assertFalse(should_rotate(self.current))
 
-    @skip('Depende del comando de gestion rotate_logs de gea, que aun no esta en pag.')
     def test_the_command_does_nothing_below_the_limit(self):
         self.write('corto\n')
 
@@ -114,7 +112,6 @@ class TestWhenItRotates(LogDirectoryMixin, SimpleTestCase):
         self.assertTrue(self.current.exists())
         self.assertEqual(rotated_files(self.current), [])
 
-    @skip('Depende del comando de gestion rotate_logs de gea, que aun no esta en pag.')
     def test_the_command_rotates_above_the_limit(self):
         self.write('x' * 2048)
 
@@ -123,7 +120,6 @@ class TestWhenItRotates(LogDirectoryMixin, SimpleTestCase):
         self.assertFalse(self.current.exists())
         self.assertEqual(len(rotated_files(self.current)), 1)
 
-    @skip('Depende del comando de gestion rotate_logs de gea, que aun no esta en pag.')
     def test_force_rotates_a_small_file(self):
         self.write('corto\n')
 
@@ -221,7 +217,6 @@ class TestARunningWorkerFollowsTheRotation(LogDirectoryMixin, SimpleTestCase):
         self.assertFalse(self.current.exists())
         self.assertIn('despues de rotar', target.read_text(encoding='utf-8'))
 
-    @skip('El LOGGING de gea con WatchedFileHandler es de una tarea posterior de settings.')
     def test_the_project_is_configured_with_the_handler_that_survives(self):
         """
         Se lee el fichero de ajustes, no ``settings.LOGGING``.
@@ -274,7 +269,6 @@ class TestTheDiskDoesNotFillUp(LogDirectoryMixin, SimpleTestCase):
         self.assertEqual(prune(self.current, keep=0), [])
         self.assertEqual(len(rotated_files(self.current)), 3)
 
-    @skip('Depende del comando de gestion rotate_logs de gea, que aun no esta en pag.')
     def test_rotating_repeatedly_does_not_pile_up(self):
         for _ in range(8):
             self.write('x' * 64)
@@ -285,7 +279,6 @@ class TestTheDiskDoesNotFillUp(LogDirectoryMixin, SimpleTestCase):
 
 class TestReadingTheLog(LogDirectoryMixin, SimpleTestCase):
 
-    @skip('Depende del comando de gestion show_log de gea, que aun no esta en pag.')
     def test_it_shows_the_last_lines(self):
         self.write(''.join(f'linea {n}\n' for n in range(1, 51)))
 
@@ -296,7 +289,6 @@ class TestReadingTheLog(LogDirectoryMixin, SimpleTestCase):
         self.assertIn('linea 50', body)
         self.assertNotIn('linea 1\n', body)
 
-    @skip('Depende del comando de gestion show_log de gea, que aun no esta en pag.')
     def test_it_can_filter_by_text(self):
         self.write('todo bien\nOperationalError: se cayo\notra cosa\n')
 
@@ -313,7 +305,6 @@ class TestReadingTheLog(LogDirectoryMixin, SimpleTestCase):
         with self.assertRaises(CommandError):
             call_command('show_log')
 
-    @skip('Depende del comando de gestion show_log de gea, que aun no esta en pag.')
     def test_the_number_of_lines_has_a_ceiling(self):
         """
         La salida se guarda en `CommandRunModel`. Sin tope, `--lines 999999`

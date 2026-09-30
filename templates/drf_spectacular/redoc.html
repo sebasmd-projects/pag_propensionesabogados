@@ -1,0 +1,49 @@
+{% comment %}
+  Sustituye a `drf_spectacular/redoc.html` (`TEMPLATES['DIRS']` va antes que las
+  plantillas de las aplicaciones).
+
+  El original carga ReDoc desde jsDelivr `@latest` y sin `integrity`. Aqui la
+  version esta fijada en `SPECTACULAR_SETTINGS['REDOC_DIST']` y el script lleva
+  el hash SHA-384 de esa version exacta (redoc@2.5.4, `bundles/
+  redoc.standalone.js`). Al subir de version hay que volver a sacarlo:
+  `utils/tests/test_sri.py` comprueba que la version esta fijada y que el
+  script conserva su hash.
+
+  Excepcion: el CSS de Google Fonts no admite `integrity` (su contenido cambia
+  segun el navegador que lo pide); ver `utils/tests/test_sri.py`.
+{% endcomment %}<!DOCTYPE html>
+<html>
+  <head>
+    {% block head %}
+    <title>{{ title|default:"Redoc" }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Roboto:wght@300;400;700&display=swap">
+    <style>
+      {# Redoc doesn't change outer page styles. #}
+      body { margin: 0; padding: 0; }
+    </style>
+    {% endblock head %}
+  </head>
+  <body>
+    {% block body %}
+    {% if settings %}
+    <div id="redoc-container"></div>
+    <script src="{{ redoc_standalone }}"
+            integrity="sha384-w447zOpYfw/1Tv/5AK9NfHTlQIqE3RVR6KY62jCyy9zNDgO64cMwGGP1Fj0zJVf5"
+            crossorigin="anonymous"></script>
+    <script>
+      const redocSettings = {{ settings|safe }};
+      Redoc.init("{{ schema_url }}", redocSettings, document.getElementById('redoc-container'))
+    </script>
+    {% else %}
+    <redoc spec-url="{{ schema_url }}"></redoc>
+    <script src="{{ redoc_standalone }}"
+            integrity="sha384-w447zOpYfw/1Tv/5AK9NfHTlQIqE3RVR6KY62jCyy9zNDgO64cMwGGP1Fj0zJVf5"
+            crossorigin="anonymous"></script>
+    {% endif %}
+    {% endblock body %}
+  </body>
+</html>

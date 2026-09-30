@@ -3,8 +3,267 @@
 Hallazgos de la revisión del **25 de septiembre de 2026**. La Fase 1 queda
 cerrada el **29 de septiembre de 2026**: los puntos 1, 2 y 3 están corregidos.
 El **30 de septiembre de 2026** se corrige el 4 (CORS) y el 5 queda en su
-primera etapa (CSP en modo solo informe). Se conserva el diagnóstico original
-como referencia; los hallazgos 6 a 8 siguen pendientes.
+primera etapa (CSP en modo solo informe). Ese mismo día se trae de gea el
+conjunto de comprobaciones y respaldos (`check_security`, `db_backup`…): ver el
+«Checklist antes de desplegar» y «Cerrado en la T3.7». Se conserva el
+diagnóstico original como referencia; los hallazgos 6 a 8 siguen pendientes.
+
+## Checklist antes de desplegar
+
+Cuatro comandos antes, uno después. Si salen limpios, adelante.
+
+```bash
+python manage.py check --deploy       # ajustes de Django: cero ERRORS
+python manage.py check_security       # la superficie propia de este proyecto
+python manage.py check_requirements   # que lo instalado sea lo de requirements.txt
+python manage.py check_attack_terms   # que la trampa anti-escaneo no se coma una ruta propia
+```
+
+Y **una vez desplegado**, para comprobar que responde de verdad y no solo por dentro:
+
+```bash
+python manage.py check_health --http  # pide PUBLIC_BASE_URL/health/
+python manage.py check_media --http   # un PDF privado, pedido por MEDIA_URL, no se entrega
+```
+
+Lanzarlos **donde corre la aplicación**, con el `.env` de producción
+(`DJANGO_DEBUG` distinto de `True`): con el de desarrollo salen avisos que no
+son de producción (`DEBUG`, cookies sin `Secure`) y se les acostumbra uno.
+`check_security` también está pensado para CI con `--strict` (sale con código
+distinto de cero si hay algún hallazgo). Otros comandos de apoyo:
+`check_cache` (¿la caché se comparte entre procesos?), `check_health` (dentro
+del proceso: base de datos, caché, correo y sesiones), `check_media` (¿están los
+ficheros donde dice `MEDIA_ROOT`?), `rotate_logs` / `show_log` (el log),
+`db_backup` / `db_restore_open` (respaldos, más abajo) y `test_report`.
+
+`check_security` incluye además tres escáneres de fuera:
+
+| | Qué mira | Dónde corre | Credencial |
+|---|---|---|---|
+| **bandit** | el código | servidor y local | ninguna |
+| **pip-audit** | las dependencias instaladas | servidor y local | **ninguna** |
+| **safety** | lo mismo, con una base más rica | **sólo local** | `SAFETY_API_KEY` |
+
+```bash
+pip install bandit pip-audit        # servidor o local
+uv add --dev bandit pip-audit safety  # local, con uv
+```
+
+**`pip-audit` es la de producción, y lo es precisamente porque no lleva
+credencial**: no hay clave que rotar ni que se pueda filtrar, y mira el
+**entorno instalado**, no `requirements.txt`. **`safety` se queda en local**:
+Safety CLI 3 siempre se autentica y en un servidor eso es un cuelgue; saltársela
+allí no cuenta como hueco. Los tres son opcionales y no están en
+`requirements.txt`: lo que falte **sin estar previsto** sale aparte, al final
+del informe (`SIN MIRAR`), porque un «sin hallazgos» que se ha saltado una
+sección entera es una media verdad. Los avisos de bandit que se dan por buenos
+están razonados uno a uno en `apps/common/utils/scanners.py` (`BANDIT_ACCEPTED`).
+
+### Y esto a ojo
+
+| | Qué mirar | Por qué |
+|---|---|---|
+| ☐ | `DJANGO_DEBUG` **no** es `True` | Con `DEBUG` cada error muestra la traza entera, con ajustes y consultas dentro; además apaga HSTS, `Secure` de las cookies y la redirección a HTTPS |
+| ☐ | `SERVER_KEY` de 32+ caracteres y **la misma** en pag, gea y Vercel | Protege la API de Attlas, decide si se cree `X-Client-IP` y es la clave del emisor ante gea. Cambiarla en un solo sitio corta el paz y salvo certificado (sección «Clave servidor a servidor») |
+| ☐ | `FIELD_ENCRYPTION_KEY` es la misma de siempre | Cambiarla **inutiliza la cédula y la fecha de nacimiento ya cifradas**. No se rota sin migrar los datos |
+| ☐ | `PRIVATE_MEDIA_ROOT` puesta y **fuera de `public_html`** | Ahí viven los PDF del paz y salvo. Si cae bajo el árbol que publica el servidor web, se reparten sin pasar por Django. Sin la variable, cae en `BASE_DIR/private_media`: en cPanel, comprueba que ese directorio no cuelga de `public_html` (`check_security` y `check_media` lo avisan) |
+| ☐ | `BACKUP_PASSPHRASE` puesta **antes** de respaldar, y guardada aparte | `dumpdata` serializa el valor **descifrado**: sin frase, `db_backup` no escribe el volcado con datos personales. Quien pierda la frase pierde los respaldos |
+| ☐ | `CORS_ALLOWED_ORIGINS` con los orígenes de verdad, sin comodines | Enumerados, con esquema y sin barra final. Un origen legítimo que falte se **añade** a la variable; no se vuelve al comodín |
+| ☐ | `COMMON_ATTACK_TERMS` pasa `check_attack_terms` | Un término que sea un segmento de una ruta propia (`setup` lo es de `accounts/two_factor/setup/`) bloquea a quien la visita |
+| ☐ | `DJANGO_ADMIN_URL` no es `admin/` | Es la primera ruta que prueba cualquier escáner |
+| ☐ | `pip install -r requirements.txt` ejecutado | `check_requirements` compara lo instalado con lo fijado; producción instala con `pip`, no con `uv` |
+| ☐ | `migrate` y `collectstatic` ejecutados | Una restricción sin migrar no existe; un JS sin recoger no llega |
+| ☐ | `.htaccess` en `DJANGO_MEDIA_ROOT` (ver «Media» más abajo) | No hay carpetas sensibles bajo `MEDIA_ROOT`, pero conviene apagar la ejecución de scripts y los listados |
+| ☐ | El correo sale de verdad | El acceso con código al buzón y la recuperación de clave dependen de él: `DJANGO_EMAIL_*` completas y una prueba de envío |
+| ☐ | Caché compartida (o asumir el límite por worker) | Sin `CACHES`, Django usa `LocMemCache`, que es por proceso: los cupos de intentos se multiplican por el número de workers. `check_cache` y `check_security` lo señalan |
+
+---
+
+## Cerrado en la T3.7 (integración de lo compartido con gea)
+
+### Recursos de terceros: versión fija e `integrity`
+
+Se recorrieron **todas las plantillas** (las de las apps y `templates/`) y los
+CSS propios buscando `<script src>`, `<link href>` y `@import` de terceros.
+Con `integrity="sha384-…"` + `crossorigin="anonymous"`, hash calculado sobre el
+fichero **exacto** descargado (y luego borrado):
+
+| Recurso | Dónde | Versión fijada |
+|---|---|---|
+| DataTables (CSS y JS, paquete a medida) | gestor, `case_manager/gestor/partials/datatables*.html` | `dt-3.1.1` … `sl-4.1.0` |
+| pdfmake + `vfs_fonts.js` | gestor, `datatables_js.html` | `pdfmake@0.3.11` |
+| Swagger UI (CSS, bundle, standalone) | `/api/swagger/` (solo personal) | `swagger-ui-dist@5.33.0` |
+| ReDoc | `/api/redoc/` (solo personal) | `redoc@2.5.4` |
+
+Las cuatro primeras ya venían firmadas y se **verificaron** contra el fichero
+del CDN (coinciden). Swagger UI y ReDoc **no**: `drf-spectacular` los carga de
+jsDelivr `@latest` y sin `integrity`. Se fijó la versión en
+`SPECTACULAR_SETTINGS` y se sustituyeron sus dos plantillas por las de
+`templates/drf_spectacular/`, que llevan los hashes. **Al subir de versión hay
+que volver a sacarlos**: si no, el navegador se niega a ejecutar el recurso
+(fallo visible, que es lo que se busca).
+
+**Excepciones**, todas mutables por diseño y declaradas con su motivo en
+`apps/common/utils/tests/test_sri.py`:
+
+| | Por qué no admite hash | Qué haría falta |
+|---|---|---|
+| `fonts.googleapis.com` (Google Fonts CSS, `base.html` y ReDoc) | Su contenido cambia según el navegador que lo pide y Google lo actualiza sin avisar | Alojar las fuentes en el propio sitio |
+| reCAPTCHA (`www.google.com`, `www.gstatic.com`, `www.recaptcha.net`) | `api.js` es un cargador sin versión que Google exige cargar de su URL; lo inserta el widget de `django-recaptcha`, no una plantilla nuestra | Nada: es la contrapartida de usar reCAPTCHA. Está acotado por la CSP |
+
+No son recursos ejecutables y no admiten `integrity`: el icono de Trace
+(`tracecertificates.com`, una imagen en la cabecera) y las etiquetas `<link>`
+que no cargan código (`preconnect`, `canonical`, `alternate`, iconos).
+
+`test_sri.py` **falla si aparece un tercero nuevo sin firmar** o sin estar en las
+excepciones, si una URL de jsDelivr no lleva versión, si un `integrity` no lleva
+`crossorigin`, o si Swagger/ReDoc pierden su hash.
+
+### `drf_spectacular.E001` en `check --deploy`
+
+**Causa:** `ClientViewSet.get_authenticators()`
+(`apps/project/api/platform/calculator/api/views.py`) leía
+`self.request.method` para elegir el autenticador. `drf-spectacular` construye
+la vista con `request = None` y llama a `initialize_request()` **antes** de
+asignarle la petición simulada, así que `self.request` era `None` y saltaba un
+`AttributeError`. En una petición real no pasa (Django deja `self.request`
+puesto antes de despachar), por eso nadie lo vio navegando: solo fallaba al
+generar el esquema, o sea en `check --deploy`, en `manage.py spectacular` y en
+`/api/schema/`, que daba 500 (comprobado con el código anterior): las páginas de
+Swagger y ReDoc cargaban, pero sin esquema que pintar.
+
+**Arreglo:** el método se toma de la petición que recibe `initialize_request()`
+(la misma que usa DRF). Ninguna ruta cambia de autenticador, y
+`app_core/tests/test_openapi_schema.py` lo comprueba para las cuatro acciones.
+El esquema **público** (rutas, métodos, permisos) no se toca: antes no se podía
+generar, ahora sí.
+
+**Avisos que quedan** en `check --deploy` con el `.env` de producción (0 errores),
+todos de calidad de la documentación generada y ninguno de seguridad:
+
+- `drf_spectacular.W001/W002` (16): serializadores sin adivinar en cinco vistas
+  `APIView` de `auth_platform` (falta `serializer_class` o `@extend_schema`),
+  tres `get_*` de serializador sin tipo (`get_category`, `get_category_en`,
+  `get_signed`), tres autenticadores propios sin `OpenApiAuthenticationExtension`
+  (`LookupOrPlatformTokenAuthentication`, `BearerTokenAuthentication`), un
+  choque de nombres de enumeración (`RequestTypeEnEnum`) y tres `operationId`
+  repetidos en `insolvency-form/`. Arreglarlos cambia el **esquema público**
+  (nombres de operaciones y componentes), que era lo que había que evitar en
+  esta tarea; quedan para una limpieza aparte.
+- `security.W019`: `X_FRAME_OPTIONS = 'SAMEORIGIN'` a propósito; la página de
+  documentos incrusta sus PDF (`<embed>`) desde el propio sitio.
+
+### Respaldos: que no deshagan el cifrado de campo
+
+`dumpdata` serializa el **valor de Python** de cada campo, y en los de
+`django-encrypted-model-fields` ese valor es el ya descifrado: la cédula y la
+fecha de nacimiento de los clientes de la plataforma salían **en claro** en el
+respaldo. `FIELD_ENCRYPTION_KEY` protege la base de datos contra un volcado
+robado, y el volcado de al lado era ese volcado robado ya servido.
+
+Ahora `manage.py db_backup` cifra con Fernet y una clave derivada por scrypt de
+`BACKUP_PASSPHRASE` (o, si falta, `GEA_BACKUP_PASSPHRASE`; el formato es el mismo
+que el de gea), escribe todo con permisos 600 —abriendo el fichero ya con
+ellos— y **sin frase no escribe la PII** (`--allow-plaintext` la pide a mano).
+Se abre con `manage.py db_restore_open`, que **no carga nada**: deja el JSON
+para `loaddata`, y ese JSON lleva datos personales en claro (bórralo al acabar).
+
+**Qué cubre.** Dos volcados, cada uno en versión legible (`h_*`) y compacta:
+
+- `backup.json`, **sin PII**: `core` (equipo, avisos modales; sin
+  `core.ContactModel`), `faq`, `financial_education`, `calculator`.
+- `pii_backup.json.enc`, **cifrado**: `users`, `account`, `auth_platform`
+  (clientes de la plataforma y asesores), `case_manager` (clientes, asuntos,
+  finanzas, notas y paz y salvo del gestor), `insolvency_form` (formulario de
+  insolvencia, con la firma en base64), `pqrs`, `core.ContactModel` y `utils`
+  (IP bloqueadas y de la lista blanca).
+
+**Qué no cubre**, y conviene saberlo: no es un respaldo completo de la
+plataforma.
+
+- Los **ficheros**: `MEDIA_ROOT` y sobre todo `PRIVATE_MEDIA_ROOT` (los PDF del
+  paz y salvo, original y copia) son disco, no filas. Hay que copiarlos aparte,
+  y los PDF llevan datos personales: cifrados también.
+- `auditlog.LogEntry` (lleva instantáneas de los registros con su PII),
+  `axes`, `sessions` y `admin.LogEntry`.
+- El **segundo factor** (`django_otp`, `two_factor`): tras restaurar, cada
+  usuario tiene que volver a enrolar el suyo.
+- `auth.Group` y `auth.Permission`: el grupo del gestor se recrea con
+  `manage.py setup_case_manager_group` **antes** de `loaddata`, y hay que
+  comprobar después la pertenencia de cada usuario.
+- El esquema: `dumpdata` guarda datos; el esquema lo crea `migrate`.
+
+El volcado general **se niega a escribirse** si una app con PII entra en su
+lista, o si algún modelo suyo tiene un campo cifrado
+(`utils/tests/test_backup.py`).
+
+### Log rotable
+
+`settings.LOGGING` usa `WatchedFileHandler` sobre `LOG_FILE`
+(`DJANGO_LOG_FILE` o `BASE_DIR/stderr.log`). Con el `FileHandler` de antes,
+rotar el fichero (`rotate_logs`) dejaba a todos los workers escribiendo en el
+renombrado y el nuevo se quedaba vacío. Formato y nivel son los mismos del
+`basicConfig` que sustituye (WARNING en la raíz); la ruta es ahora absoluta, no
+relativa al directorio de trabajo. En Windows rotar no funciona con la
+aplicación levantada (no se puede renombrar un fichero abierto): es cosa del
+servidor.
+
+### Media
+
+Bajo `MEDIA_ROOT` solo hay contenido del sitio (`team/`, `modal_banners/` y lo
+que sube CKEditor 5 a la raíz, solo imágenes y solo `is_staff`). Lo sensible
+—los PDF del paz y salvo— vive en `PRIVATE_MEDIA_ROOT`, sin URL. La firma y el
+DOCX de `insolvency_form` no tocan disco (base64 en la base de datos y
+`BytesIO`). `check_security` y `check_media` (`utils/media_audit.py`) exigen que
+cada carpeta bajo `MEDIA_ROOT` esté declarada servible con su razón, y que
+`PRIVATE_MEDIA_ROOT` quede fuera de `MEDIA_ROOT`, de `STATIC_ROOT` y de
+`public_html`.
+
+Pag **no tiene** `deploy/media.htaccess`, y hoy no hace falta para ocultar nada.
+Conviene uno de defensa en profundidad para `DJANGO_MEDIA_ROOT`
+(copiar a `MEDIA_ROOT/.htaccess`): que nada de lo subido se ejecute ni se liste,
+y que un directorio sensible que alguien cree mañana nazca cerrado.
+
+```apache
+# MEDIA_ROOT/.htaccess
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(paz_y_salvo|private_media|test_reports)(/|$) - [R=404,L]
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+Options -ExecCGI -Indexes
+AddType text/plain .php .phtml .php3 .php4 .php5 .php7 .php8 .pl .py .cgi .sh
+```
+
+### Trampa anti-escaneo
+
+`check_attack_terms` necesitaba el patrón de gea (el término tiene que ser un
+**segmento completo** de la ruta), así que se trajo `attack_patterns.py`: pag
+tenía todavía el original, que buscaba el término como **subcadena** suelta.
+Con los términos del `.env` de desarrollo (`old`, `env`, `wp`, `html`,
+`setup`…) cualquier ruta que los llevara dentro —un miembro del equipo cuyo
+enlace fuera `golden-team`— caía en la trampa y bloqueaba la IP del usuario.
+
+### Hallazgos abiertos de `check_security`
+
+Reales de pag, **sin arreglar** (no son triviales: hay que decidir el cupo):
+
+1. **Sin límite de intentos** en cuatro formularios públicos:
+   `POST /accounts/register/` (crea cuentas sin freno, aunque nacen sin
+   permisos), `POST /api/v1/contact/` y `POST /api/v1/pqrs/` (públicos, sin
+   captcha) y el formulario de contacto de la portada (`core:index`; este sí
+   lleva honeypot y reCAPTCHA, que lo mitigan, pero no hay cupo). Usar
+   `RateLimit` (`utils/throttling.py`), como el resto de puntos de entrada.
+2. **Caché no compartida** (`LocMemCache`): los cupos son por worker.
+3. Con el `.env` de **desarrollo**: `COMMON_ATTACK_TERMS` incluye `setup`, que
+   secuestra `accounts/two_factor/setup/` (`check_attack_terms`). El de
+   `docs/env.example` no lo tiene; revisar el de producción.
+
+---
+
+## Auditoría — lo que se encontró
 
 Cada punto trae el fichero y la línea, por qué importa y cómo comprobar que
 quedó bien. Las líneas son de `7c35a5c`; si el fichero cambió, busca por el
@@ -222,8 +481,9 @@ cabecera. Lo que hace falta:
 3. **`style-src` con `'unsafe-inline'`.** Se dejó así porque hay atributos
    `style=` por todas partes y no admiten nonce. Quitarlo es una segunda
    limpieza, opcional.
-4. **Los CDN con SRI** (`integrity=` + `crossorigin`) para DataTables y
-   pdfmake, o traerlos a `public/staticfiles` y quitar los dos orígenes.
+4. **Los CDN con SRI** (`integrity=` + `crossorigin`): hecho (T3.7) para
+   DataTables, pdfmake, Swagger UI y ReDoc, con versión fija; ver «Cerrado en la
+   T3.7». Quedan las excepciones mutables (Google Fonts, reCAPTCHA).
 5. Cuando los informes salgan limpios una semana: mover la configuración de
    `CONTENT_SECURITY_POLICY_REPORT_ONLY` a `CONTENT_SECURITY_POLICY` (la
    cabecera que bloquea). Se pueden tener las dos a la vez durante la

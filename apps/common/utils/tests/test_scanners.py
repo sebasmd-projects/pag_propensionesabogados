@@ -21,7 +21,7 @@ Tres familias de trampa, y las tres han costado algo en algun sitio:
 import json
 import os
 from pathlib import Path
-from unittest import mock, skip
+from unittest import mock
 
 from django.conf import settings
 from django.test import SimpleTestCase, override_settings
@@ -58,7 +58,6 @@ class TheAcceptedListIsHonestTests(SimpleTestCase):
                 f'{key} esta aceptado sin explicar por que',
             )
 
-    @skip('BANDIT_ACCEPTED lista ficheros de gea (management/commands, middleware/...) que llegan en tareas posteriores.')
     def test_every_entry_points_at_a_file_that_exists(self):
         """
         Una entrada que apunta a un fichero movido o borrado no protege nada y

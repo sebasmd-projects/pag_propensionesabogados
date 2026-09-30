@@ -1,5 +1,6 @@
 from apps.common.core.views import (CalendarView, DocumentsView,
-                                    IndexTemplateView, PrivacyPolicyView,
+                                    HealthCheckView, IndexTemplateView,
+                                    PrivacyPolicyView,
                                     TeamMemberDetailView,
                                     TermsAndConditionsView, security_txt_view)
 from django.urls import path
@@ -7,6 +8,11 @@ from django.urls import path
 app_name = 'core'
 
 urlpatterns = [
+    path(
+        'health/',
+        HealthCheckView.as_view(),
+        name='health_check'
+    ),
     path(
         '',
         IndexTemplateView.as_view(),

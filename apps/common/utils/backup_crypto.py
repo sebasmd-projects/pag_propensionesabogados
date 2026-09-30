@@ -56,7 +56,12 @@ SCRYPT_P = 1
 SALT_BYTES = 16
 
 #: De dónde sale la contraseña. Nunca de un argumento de la orden.
-PASSPHRASE_ENV = 'GEA_BACKUP_PASSPHRASE'
+PASSPHRASE_ENV = 'BACKUP_PASSPHRASE'
+
+#: El nombre que tiene en gea. Se sigue leyendo **solo si falta**
+#: ``BACKUP_PASSPHRASE``, para que un respaldo cifrado en un sistema se abra en
+#: el otro sin renombrar nada; el formato del fichero es el mismo.
+LEGACY_PASSPHRASE_ENV = 'GEA_BACKUP_PASSPHRASE'
 
 
 class BackupCryptoError(Exception):
@@ -143,4 +148,8 @@ def passphrase_from(path=None):
         with open(path, 'r', encoding='utf-8') as handle:
             return handle.read().strip()
 
-    return (os.environ.get(PASSPHRASE_ENV) or '').strip()
+    return (
+        os.environ.get(PASSPHRASE_ENV)
+        or os.environ.get(LEGACY_PASSPHRASE_ENV)
+        or ''
+    ).strip()
