@@ -1,4 +1,4 @@
-{% load i18n %}<!DOCTYPE html>
+{% load i18n case_manager_extras %}<!DOCTYPE html>
 {% comment %}
   El codigo con el que el cliente entra a ver su proceso.
 
@@ -82,7 +82,7 @@
                       {% trans "Identification" %}
                     </td>
                     <td style="padding:6px 0;font-size:15px;line-height:1.5;font-weight:bold;">
-                      {{ client.identification }}
+                      {{ client|client_identification }}
                     </td>
                   </tr>
                 </table>

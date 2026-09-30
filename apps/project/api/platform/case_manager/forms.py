@@ -21,6 +21,7 @@ from django.forms import inlineformset_factory
 from django.utils.translation import gettext_lazy as _
 
 from . import choices
+from .identification import nit_check_digit, normalize_number, split_lookup
 from .models import (CaseFinanceModel, CaseModel, CaseNoteModel,
                      ClientModel)
 
@@ -61,22 +62,26 @@ class PublicCaseQueryForm(forms.Form):
     """
 
     identification = forms.CharField(
-        label=_('identification number'),
-        max_length=20,
+        label=_('ID number, NIT or document'),
+        max_length=40,
     )
+
+    verification_digit = ''
 
     def clean_identification(self) -> str:
         """
-        Se queda solo con los digitos.
+        Normaliza: sin puntos, espacios ni `-DV`.
 
         Quien escribe su cedula con puntos esta escribiendo la misma cedula, y
-        el campo de la base esta normalizado.
+        el campo de la base esta normalizado. Un NIT se acepta con o sin
+        digito de verificacion (`900123456`, `900.123.456-7`); el DV, si viene,
+        se guarda aparte para comprobarlo en `get_client`.
         """
-        raw = self.cleaned_data['identification']
-        digits = ''.join(character for character in raw if character.isdigit())
-        if not digits:
+        number, dv = split_lookup(self.cleaned_data['identification'])
+        if not number:
             raise forms.ValidationError(UNKNOWN_IDENTIFICATION)
-        return digits
+        self.verification_digit = dv
+        return number
 
     def get_client(self) -> ClientModel | None:
         """
@@ -88,9 +93,23 @@ class PublicCaseQueryForm(forms.Form):
         numero. Se le manda su codigo igual y, cuando entra, la pantalla le
         dice que su proceso esta inactivo y a donde llamar.
         """
-        return ClientModel.objects.filter(
+        client = ClientModel.objects.filter(
             identification=self.cleaned_data['identification']
         ).first()
+        if client is None or not self.verification_digit:
+            return client
+
+        # Si vino con DV tiene que ser el de un NIT y cuadrar. Un DV que no
+        # cuadra responde exactamente lo mismo que un documento inexistente:
+        # de otro modo el portal diria «ese numero existe, pero el DV no».
+        if (
+            not client.is_nit
+            or client.verification_digit != self.verification_digit
+            or nit_check_digit(client.identification)
+            != self.verification_digit
+        ):
+            return None
+        return client
 
 
 class PublicAccessCodeForm(forms.Form):
@@ -172,29 +191,103 @@ class ClientForm(BootstrapFormMixin, forms.ModelForm):
 
     class Meta:
         model = ClientModel
-        fields = ('identification', 'full_name', 'email', 'phone', 'is_active')
+        fields = (
+            'identification_type', 'identification', 'verification_digit',
+            'full_name', 'email', 'phone',
+            'legal_rep_name', 'legal_rep_identification_type',
+            'legal_rep_identification', 'legal_rep_email', 'legal_rep_phone',
+            'is_active',
+        )
         widgets = {
             'identification': forms.TextInput(
-                attrs={'inputmode': 'numeric', 'autocomplete': 'off'}
+                attrs={'autocomplete': 'off', 'data-client-id-number': ''}
+            ),
+            'verification_digit': forms.TextInput(
+                attrs={'inputmode': 'numeric', 'maxlength': '1',
+                       'autocomplete': 'off'}
             ),
             'full_name': forms.TextInput(attrs={'autocomplete': 'off'}),
+            'legal_rep_name': forms.TextInput(attrs={'autocomplete': 'off'}),
+            'legal_rep_identification': forms.TextInput(
+                attrs={'autocomplete': 'off'}
+            ),
+            'legal_rep_phone': forms.TextInput(attrs={'autocomplete': 'off'}),
         }
+
+    #: Los campos que solo existen con NIT: el JS los oculta y deshabilita.
+    NIT_ONLY = (
+        'verification_digit', 'legal_rep_name',
+        'legal_rep_identification_type', 'legal_rep_identification',
+        'legal_rep_email', 'legal_rep_phone',
+    )
+
+    def configure_fields(self):
+        # Un envio sin tipo (un script, un formulario viejo) es un CC, que es
+        # lo que eran todos hasta ahora; el selector del gestor siempre lo manda.
+        self.fields['identification_type'].required = False
+        self.fields['identification'].label = _('Document number')
+        self.fields['verification_digit'].label = _('Check digit (DV)')
+        self.fields['full_name'].label = (
+            _('Company name') if self._is_nit() else _('Full name')
+        )
+        self.fields['full_name'].widget.attrs['data-label-person'] = _('Full name')
+        self.fields['full_name'].widget.attrs['data-label-company'] = _('Company name')
+        self.fields['legal_rep_name'].label = _('Name')
+        self.fields['legal_rep_identification_type'].label = _('Document type')
+        self.fields['legal_rep_identification'].label = _('Document number')
+        self.fields['legal_rep_email'].label = _('Email')
+        self.fields['legal_rep_phone'].label = _('Phone')
+
+    def _is_nit(self) -> bool:
+        if self.is_bound:
+            value = self.data.get(self.add_prefix('identification_type'))
+        else:
+            value = self.initial.get(
+                'identification_type', self.instance.identification_type
+            )
+        return value == choices.IdentificationType.NIT
+
+    @property
+    def show_nit_fields(self) -> bool:
+        """Se pintan visibles si es NIT o si hay un error en ellos."""
+        return self._is_nit() or any(
+            name in self.errors for name in self.NIT_ONLY
+        )
+
+    def clean_identification_type(self) -> str:
+        return (
+            self.cleaned_data.get('identification_type')
+            or self.instance.identification_type
+            or choices.IdentificationType.CC
+        )
 
     def clean_identification(self) -> str:
         """
-        Solo digitos, igual que en el portal.
+        Sin puntos, espacios ni guiones, igual que en el portal.
 
         El modelo tambien lo normaliza al guardar, pero si el formulario no lo
         hiciera, la comprobacion de «ya existe ese cliente» se haria contra el
-        texto con puntos y dejaria crear un duplicado.
+        texto con puntos y dejaria crear un duplicado. Que sean digitos (o
+        letras, en un pasaporte) lo decide `ClientModel.clean()` segun el
+        tipo.
         """
-        raw = self.cleaned_data['identification']
-        digits = ''.join(c for c in raw if c.isdigit())
-        if not digits:
+        id_type = self.cleaned_data.get('identification_type') or choices.IdentificationType.CC
+        number = normalize_number(self.cleaned_data['identification'], id_type)
+        if not number:
             raise forms.ValidationError(
                 _('The identification must contain digits only.')
             )
-        return digits
+        return number
+
+    def clean_verification_digit(self) -> str:
+        return (self.cleaned_data.get('verification_digit') or '').strip()
+
+    def clean_legal_rep_identification(self) -> str:
+        rep_type = self.cleaned_data.get('legal_rep_identification_type') or ''
+        return normalize_number(
+            self.cleaned_data.get('legal_rep_identification'),
+            rep_type or choices.IdentificationType.CC,
+        )
 
 
 class CaseForm(BootstrapFormMixin, forms.ModelForm):

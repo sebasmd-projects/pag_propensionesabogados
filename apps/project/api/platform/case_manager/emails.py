@@ -97,7 +97,7 @@ def send_case_note(note, *, request=None) -> bool:
     if not cliente.email:
         logger.info(
             'El cliente %s no tiene correo; la nota «%s» no se envia.',
-            cliente.identification, note.title,
+            cliente.display_identification, note.title,
         )
         return False
 
@@ -187,11 +187,11 @@ def send_access_code(
 
     if to_office:
         asunto = _(
-            'Access code for %(name)s (ID %(identification)s) — '
+            'Access code for %(name)s (%(identification)s) — '
             'Propensiones® Abogados'
         ) % {
             'name': client.full_name,
-            'identification': client.identification,
+            'identification': client.display_identification,
         }
     else:
         asunto = _('Your access code — Propensiones® Abogados')

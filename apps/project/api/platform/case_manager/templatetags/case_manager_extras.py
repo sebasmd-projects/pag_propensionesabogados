@@ -29,3 +29,37 @@ def grouped_identification(value) -> str:
         digits = digits[:-3]
     groups.insert(0, digits)
     return '.'.join(groups)
+
+
+@register.filter
+def client_identification(client) -> str:
+    """
+    El documento de un cliente con su tipo: `CC 1.152.225.004`,
+    `NIT 900.123.456-7`, `CE 1.234.567`, `PA AB123456`.
+    """
+    return getattr(client, 'display_identification', '') or ''
+
+
+@register.filter
+def client_identification_search(client) -> str:
+    """
+    Texto para la busqueda de DataTables (`data-search`): el numero sin
+    puntos, el numero con ellos y el tipo, para que `1152225004` y
+    `1.152.225` encuentren al mismo cliente.
+    """
+    if client is None:
+        return ''
+    number = getattr(client, 'identification', '') or ''
+    return f'{number} {client.display_identification}'.strip()
+
+
+@register.filter
+def client_number(client) -> str:
+    """El documento sin el tipo, con puntos y DV: `900.123.456-7`."""
+    if client is None:
+        return ''
+    from ..identification import format_identification
+    return format_identification(
+        client.identification_type, client.identification,
+        client.verification_digit, with_type=False,
+    )

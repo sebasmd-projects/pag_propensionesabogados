@@ -165,15 +165,25 @@ class CaseAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
 @admin.register(ClientModel)
 class ClientAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
     list_display = (
-        'identification', 'full_name', 'email', 'is_active', 'code_state',
+        'document', 'full_name', 'email', 'is_active', 'code_state',
     )
-    list_filter = ('is_active',)
-    search_fields = ('identification', 'full_name', 'email')
+    list_filter = ('identification_type', 'is_active')
+    search_fields = (
+        'identification', 'full_name', 'email', 'legal_rep_name',
+        'legal_rep_identification',
+    )
     readonly_fields = ('code_state', 'created', 'updated')
     fields = (
-        'identification', 'full_name', 'email', 'phone', 'is_active',
+        'identification_type', 'identification', 'verification_digit',
+        'full_name', 'email', 'phone', 'legal_rep_name',
+        'legal_rep_identification_type', 'legal_rep_identification',
+        'legal_rep_email', 'legal_rep_phone', 'is_active',
         'code_state', 'created', 'updated',
     )
+
+    @admin.display(description=_('identification'), ordering='identification')
+    def document(self, obj):
+        return obj.display_identification
 
     @admin.display(description=_('access codes'))
     def code_state(self, obj):

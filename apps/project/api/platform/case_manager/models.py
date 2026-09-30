@@ -29,6 +29,7 @@ Tres cosas que conviene entender antes de tocar nada:
 import uuid
 
 from auditlog.registry import auditlog
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import F, Q, Sum, Value
@@ -40,6 +41,7 @@ from django.utils.translation import ngettext
 from apps.common.utils.models import TimeStampedModel
 
 from . import choices
+from . import identification as ident
 
 #: Solo digitos: la identificacion se guarda normalizada, sin puntos ni
 #: espacios, porque es la clave por la que pregunta el portal publico y
@@ -47,6 +49,14 @@ from . import choices
 only_digits = RegexValidator(
     r'^\d+$',
     _('The identification must contain digits only.'),
+)
+
+
+#: El campo base admite letras (pasaportes); que sean solo digitos, o cuantos,
+#: lo decide `ClientModel.clean()` segun el tipo de documento.
+alphanumeric = RegexValidator(
+    r'^[0-9A-Za-z]+$',
+    _('The identification must contain letters and digits only.'),
 )
 
 
@@ -68,12 +78,30 @@ class ClientModel(TimeStampedModel):
         editable=False
     )
 
+    identification_type = models.CharField(
+        _('document type'),
+        max_length=3,
+        choices=choices.IdentificationType.choices,
+        default=choices.IdentificationType.CC,
+    )
+
     identification = models.CharField(
         _('identification'),
         max_length=20,
         unique=True,
-        validators=[only_digits],
-        help_text=_('Digits only, no dots or spaces.')
+        validators=[alphanumeric],
+        help_text=_(
+            'The number only, no dots, spaces or check digit. Passports may '
+            'include letters.'
+        )
+    )
+
+    verification_digit = models.CharField(
+        _('check digit'),
+        max_length=1,
+        blank=True,
+        default='',
+        help_text=_('Only for NIT: the digit after the hyphen.')
     )
 
     full_name = models.CharField(
@@ -93,6 +121,44 @@ class ClientModel(TimeStampedModel):
         max_length=30,
         blank=True,
         null=True
+    )
+
+    # -- Representante legal (solo NIT, todo opcional) ---------------------
+    legal_rep_name = models.CharField(
+        _('legal representative'),
+        max_length=255,
+        blank=True,
+        default='',
+    )
+
+    legal_rep_identification_type = models.CharField(
+        _('legal representative document type'),
+        max_length=3,
+        choices=choices.LegalRepIdentificationType.choices,
+        blank=True,
+        default='',
+    )
+
+    legal_rep_identification = models.CharField(
+        _('legal representative identification'),
+        max_length=20,
+        blank=True,
+        default='',
+        validators=[alphanumeric],
+    )
+
+    legal_rep_email = models.EmailField(
+        _('legal representative email'),
+        max_length=255,
+        blank=True,
+        default='',
+    )
+
+    legal_rep_phone = models.CharField(
+        _('legal representative phone'),
+        max_length=30,
+        blank=True,
+        default='',
     )
 
     is_active = models.BooleanField(
@@ -168,17 +234,124 @@ class ClientModel(TimeStampedModel):
 
         return f'{nombre[:3]}****{nombre[-3:]}@{dominio}'
 
-    def save(self, *args, **kwargs):
-        self.identification = ''.join(
-            character
-            for character in (self.identification or '')
-            if character.isdigit()
+    LEGAL_REP_FIELDS = (
+        'legal_rep_name', 'legal_rep_identification_type',
+        'legal_rep_identification', 'legal_rep_email', 'legal_rep_phone',
+    )
+
+    @property
+    def is_nit(self) -> bool:
+        return self.identification_type == choices.IdentificationType.NIT
+
+    @property
+    def display_identification(self) -> str:
+        """`CC 1.152.225.004`, `NIT 900.123.456-7`, `PA AB123456`..."""
+        return ident.format_identification(
+            self.identification_type, self.identification,
+            self.verification_digit,
         )
-        self.full_name = ' '.join((self.full_name or '').split()).title()
+
+    @property
+    def has_legal_rep(self) -> bool:
+        return any(getattr(self, name) for name in self.LEGAL_REP_FIELDS)
+
+    @property
+    def legal_rep_display_identification(self) -> str:
+        if not self.legal_rep_identification:
+            return ''
+        return ident.format_identification(
+            self.legal_rep_identification_type,
+            self.legal_rep_identification,
+        )
+
+    def clean(self):
+        """
+        Lo que depende del tipo de documento.
+
+        - CC y CE: solo digitos. NIT: solo digitos, hasta 15, y el DV es
+          obligatorio y tiene que cuadrar (modulo 11 de la DIAN).
+        - PA: letras y digitos, en mayusculas.
+        - Fuera del NIT no hay DV ni representante legal: se **rechaza**, no
+          se descarta en silencio, para no borrar datos que alguien escribio.
+        """
+        super().clean()
+        errors = {}
+        id_type = self.identification_type or choices.IdentificationType.CC
+        number = ident.normalize_number(self.identification, id_type)
+        self.identification = number
+
+        if number:
+            if id_type != ident.PA and not number.isdigit():
+                errors['identification'] = _(
+                    'The identification must contain digits only.'
+                )
+            elif id_type == ident.NIT and len(number) > ident.NIT_MAX_DIGITS:
+                errors['identification'] = _(
+                    'A NIT has at most %(max)s digits.'
+                ) % {'max': ident.NIT_MAX_DIGITS}
+
+        dv = (self.verification_digit or '').strip()
+        self.verification_digit = dv
+        if id_type == ident.NIT:
+            if 'identification' not in errors and number:
+                expected = ident.nit_check_digit(number)
+                if not dv:
+                    errors['verification_digit'] = _(
+                        'The check digit is required for a NIT.'
+                    )
+                elif dv != expected:
+                    errors['verification_digit'] = _(
+                        'The check digit does not match this NIT.'
+                    )
+        elif dv:
+            errors['verification_digit'] = _(
+                'Only a NIT has a check digit.'
+            )
+
+        rep_type = self.legal_rep_identification_type
+        rep_number = ident.normalize_number(
+            self.legal_rep_identification, rep_type or ident.CC
+        )
+        self.legal_rep_identification = rep_number
+        self.legal_rep_name = ' '.join((self.legal_rep_name or '').split())
+
+        if id_type != ident.NIT:
+            if self.has_legal_rep:
+                errors['legal_rep_name'] = _(
+                    'Only a NIT client can have a legal representative.'
+                )
+        else:
+            if rep_number and not rep_type:
+                errors['legal_rep_identification_type'] = _(
+                    'Choose the document type of the legal representative.'
+                )
+            elif rep_number and rep_type != ident.PA and not rep_number.isdigit():
+                errors['legal_rep_identification'] = _(
+                    'The identification must contain digits only.'
+                )
+            elif rep_type and not rep_number:
+                errors['legal_rep_identification'] = _(
+                    'Enter the document number of the legal representative.'
+                )
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        id_type = self.identification_type or choices.IdentificationType.CC
+        self.identification = ident.normalize_number(
+            self.identification, id_type
+        )
+        if id_type != ident.NIT:
+            self.verification_digit = ''
+        name = ' '.join((self.full_name or '').split())
+        # Una razon social ya viene escrita como se registro ("S.A.S.",
+        # "& CIA"): `.title()` la estropearia.
+        self.full_name = name if id_type == ident.NIT else name.title()
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f'{self.identification} - {self.full_name}'
+        return f'{self.display_identification} - {self.full_name}'
 
     class Meta:
         db_table = 'apps_project_case_manager_client'
@@ -628,7 +801,7 @@ class CaseModel(TimeStampedModel):
             raise ValidationError(errors)
 
     def __str__(self) -> str:
-        return f'{self.client.identification} - {self.service}'
+        return f'{self.client.display_identification} - {self.service}'
 
     class Meta:
         db_table = 'apps_project_case_manager_case'

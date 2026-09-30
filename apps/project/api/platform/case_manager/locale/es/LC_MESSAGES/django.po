@@ -318,9 +318,9 @@ msgstr "%(kind)s — su trámite con Propensiones® Abogados"
 #: apps/project/api/platform/case_manager/emails.py:190
 #, python-format
 msgid ""
-"Access code for %(name)s (ID %(identification)s) — Propensiones® Abogados"
+"Access code for %(name)s (%(identification)s) — Propensiones® Abogados"
 msgstr ""
-"Código de acceso de %(name)s (CC %(identification)s) — Propensiones® Abogados"
+"Código de acceso de %(name)s (%(identification)s) — Propensiones® Abogados"
 
 #: apps/project/api/platform/case_manager/emails.py:197
 msgid "Your access code — Propensiones® Abogados"
@@ -1706,6 +1706,94 @@ msgid ""
 msgstr ""
 "No pudimos enviar el código de acceso en este momento. Inténtelo de nuevo en "
 "unos minutos o comuníquese con nosotros."
+
+msgid "The identification must contain letters and digits only."
+msgstr "El documento solo puede contener letras y dígitos."
+
+msgid "document type"
+msgstr "tipo de documento"
+
+msgid "The number only, no dots, spaces or check digit. Passports may include letters."
+msgstr "Solo el número, sin puntos, espacios ni dígito de verificación. Los pasaportes pueden llevar letras."
+
+msgid "check digit"
+msgstr "dígito de verificación"
+
+msgid "Only for NIT: the digit after the hyphen."
+msgstr "Solo para NIT: el dígito tras el guion."
+
+msgid "legal representative"
+msgstr "representante legal"
+
+msgid "legal representative document type"
+msgstr "tipo de documento del representante legal"
+
+msgid "legal representative identification"
+msgstr "documento del representante legal"
+
+msgid "legal representative email"
+msgstr "correo del representante legal"
+
+msgid "legal representative phone"
+msgstr "teléfono del representante legal"
+
+#, python-format
+msgid "A NIT has at most %(max)s digits."
+msgstr "Un NIT tiene como máximo %(max)s dígitos."
+
+msgid "The check digit is required for a NIT."
+msgstr "El dígito de verificación es obligatorio para un NIT."
+
+msgid "The check digit does not match this NIT."
+msgstr "El dígito de verificación no corresponde a este NIT."
+
+msgid "Only a NIT has a check digit."
+msgstr "Solo un NIT lleva dígito de verificación."
+
+msgid "Only a NIT client can have a legal representative."
+msgstr "Solo un cliente con NIT puede tener representante legal."
+
+msgid "Choose the document type of the legal representative."
+msgstr "Elija el tipo de documento del representante legal."
+
+msgid "Enter the document number of the legal representative."
+msgstr "Escriba el número de documento del representante legal."
+
+msgid "ID number, NIT or document"
+msgstr "Cédula, NIT o documento"
+
+msgid "Use another ID, NIT or document"
+msgstr "Usar otra cédula, NIT o documento"
+
+msgid "Document number"
+msgstr "Número de documento"
+
+msgid "Check digit (DV)"
+msgstr "Dígito de verificación (DV)"
+
+msgid "Company name"
+msgstr "Razón social"
+
+msgid "Full name"
+msgstr "Nombre completo"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Document type"
+msgstr "Tipo de documento"
+
+msgid "Legal representative (optional)"
+msgstr "Representante legal (opcional)"
+
+msgid "Legal representative identification"
+msgstr "Documento del representante legal"
+
+msgid "Legal representative email"
+msgstr "Correo del representante legal"
+
+msgid "Legal representative phone"
+msgstr "Teléfono del representante legal"
 
 #~ msgid "Authorized. Click to withdraw."
 #~ msgstr "Autorizado. Pulse para retirarlo."

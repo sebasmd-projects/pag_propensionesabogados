@@ -202,14 +202,25 @@ def client_report(client: ClientModel, case: CaseModel | None = None) -> HttpRes
         _('Client file and financial summary.'),
     )
 
-    _pares(document, [
-        (_('Client'), client.full_name),
-        (_('Identification'), client.identification),
+    filas = [
+        (_('Company name') if client.is_nit else _('Client'), client.full_name),
+        (_('Identification'), client.display_identification),
         (_('Email'), client.email),
         (_('Phone'), client.phone),
+    ]
+    if client.has_legal_rep:
+        filas += [
+            (_('Legal representative'), client.legal_rep_name),
+            (_('Legal representative identification'),
+             client.legal_rep_display_identification),
+            (_('Legal representative email'), client.legal_rep_email),
+            (_('Legal representative phone'), client.legal_rep_phone),
+        ]
+    filas += [
         (_('Status'), _('ACTIVE') if client.is_active else _('INACTIVE')),
         (_('Cases'), cases.count()),
-    ])
+    ]
+    _pares(document, filas)
 
     document.add_heading(_('Financial summary'), level=2)
     _pares(document, [
@@ -322,7 +333,7 @@ def crm_report() -> HttpResponse:
         [
             [
                 finance.case.client.full_name,
-                finance.case.client.identification,
+                finance.case.client.display_identification,
                 finance.case.area or VACIO,
                 finance.start_date.strftime('%m/%Y')
                 if finance.start_date else VACIO,

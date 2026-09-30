@@ -46,9 +46,9 @@
 
     <div class="tituloPS">PAZ Y SALVO POR CONCEPTO DE MANDATO PROFESIONAL</div>
 
-    <p class="textoPS">Por medio del presente documento se deja constancia de que el(la) se&ntilde;or(a)
-      <strong>{{ case.client.full_name }}</strong>, identificado(a) con c&eacute;dula de ciudadan&iacute;a No.
-      <strong>{{ case.client.identification|grouped_identification }}</strong>, se encuentra
+    <p class="textoPS">Por medio del presente documento se deja constancia de que {% if case.client.is_nit %}la sociedad o persona jur&iacute;dica{% else %}el(la) se&ntilde;or(a){% endif %}
+      <strong>{{ case.client.full_name }}</strong>, identificado(a) con {% if case.client.is_nit %}NIT{% else %}{{ case.client.get_identification_type_display|lower }}{% endif %} No.
+      <strong>{{ case.client|client_number }}</strong>, se encuentra
       <strong>A PAZ Y SALVO</strong> por concepto de honorarios profesionales derivados del acompa&ntilde;amiento,
       asesor&iacute;a y gesti&oacute;n jur&iacute;dica prestada dentro del tr&aacute;mite
       <strong>{{ case.paz_y_salvo_subject }}</strong>.</p>

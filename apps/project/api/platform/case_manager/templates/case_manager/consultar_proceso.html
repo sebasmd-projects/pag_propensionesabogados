@@ -164,7 +164,7 @@
                       <div class="mt-2">
                         <a class="btn btn-link btn-sm p-0 text-decoration-none"
                            href="{% url 'case_manager:public_query' %}">
-                          <i class="bi bi-arrow-left me-1"></i>{% trans "Use another identification number" %}
+                          <i class="bi bi-arrow-left me-1"></i>{% trans "Use another ID, NIT or document" %}
                         </a>
                       </div>
                     </div>
@@ -173,10 +173,10 @@
                     <div class="row g-3 align-items-center justify-content-center">
                       <div class="col-12 col-md-7">
                         <label for="consulta" class="form-label small fw-semibold text-uppercase">
-                          {% trans "Identification number" %}
+                          {% trans "ID number, NIT or document" %}
                         </label>
                         <input type="text" name="identification" id="consulta" class="form-control form-control-lg"
-                               inputmode="numeric" maxlength="20" autocomplete="off" required
+                               inputmode="text" maxlength="40" autocomplete="off" required
                                value="{{ form.identification.value|default:'' }}">
                         {% if not request.user.is_authenticated %}
                           <div class="form-text">
@@ -234,7 +234,7 @@
                   <div>
                     <h2 class="h4 mb-1">{{ client.full_name }}</h2>
                     <p class="text-muted small mb-0">
-                      {% trans "Identification" %}: {{ client.identification|grouped_identification }}
+                      {% trans "Identification" %}: {{ client|client_identification }}
                     </p>
                   </div>
                   <div class="text-md-end">

@@ -499,7 +499,7 @@ class OfficeFallbackTests(TestCase):
         self._pedir()
 
         self.assertIn('Jose Arcesio Lopez Arias', mail.outbox[0].subject)
-        self.assertIn('13883170', mail.outbox[0].subject)
+        self.assertIn('CC 13.883.170', mail.outbox[0].subject)
 
     def test_el_cuerpo_lleva_al_cliente_y_pide_registrar_su_correo(self):
         """
@@ -510,7 +510,7 @@ class OfficeFallbackTests(TestCase):
         html = mail.outbox[0].alternatives[0][0]
 
         self.assertIn('Jose Arcesio Lopez Arias', html)
-        self.assertIn('13883170', html)
+        self.assertIn('CC 13.883.170', html)
         self.assertIn('register their email address', html)
         self.assertIn(CODIGO, html)
 

@@ -32,6 +32,7 @@ from django.utils import timezone
 
 from apps.project.api.platform.case_manager import choices
 from apps.project.api.platform.case_manager.access import GESTOR_GROUP
+from apps.project.api.platform.case_manager.identification import     nit_check_digit
 from apps.project.api.platform.case_manager.models import (CaseFinanceModel,
                                                            CaseModel,
                                                            CaseNoteModel,
@@ -420,6 +421,75 @@ def handmade_clients():
 
 
 # ---------------------------------------------------------------------------
+# Clientes con otro tipo de documento (NIT, CE, PA)
+#
+# Llevan su `identification` explicita, siempre con el marcador `9990`, y no
+# `n`: el numero se guarda tal cual. Los NIT (9 digitos) llevan el DV
+# calculado, no escrito a mano.
+# ---------------------------------------------------------------------------
+
+def document_clients():
+    return [
+        dict(identification='999012345', id_type='NIT',
+             name='Construcciones Andinas S.A.S.',
+             email='gerencia@andinas.example.com', phone='6015550201',
+             legal_rep=dict(name='Ricardo Alfonso Mejía Torres',
+                            id_type='CC', identification='79123456',
+                            email='ricardo.mejia@andinas.example.com',
+                            phone='3005550211'),
+             cases=[
+                 C(service=S.CONSULTING, subtype='Consultoría empresarial',
+                   area='Comercial / Empresarial', procedure='Privado',
+                   instance='Entregada', stage=5, start=d(2025, 3, 10),
+                   fee=12 * MILLION, paz=True,
+                   history=[P(6 * MILLION, d(2025, 4, 9)),
+                            P(6 * MILLION, d(2025, 6, 11))]),
+                 C(service=S.JUDICIAL, subtype='Civil', second_subtype='Ejecutivo',
+                   area='Comercial / Empresarial', procedure='Proceso ejecutivo',
+                   instance='Primera instancia', stage=2,
+                   court='Juzgado del Circuito', city='Medellín',
+                   start=d(2026, 2, 16), fee=30 * MILLION,
+                   history=[A(3 * MILLION, d(2026, 2, 18)),
+                            P(10 * MILLION, d(2026, 4, 20)),
+                            E(8 * MILLION, d(2026, 12, 15))]),
+             ]),
+        dict(identification='999054321', id_type='NIT',
+             name='Comercializadora del Valle Ltda.', email=None,
+             phone='6025550202',
+             cases=[
+                 C(service=S.ADMINISTRATIVE, subtype='PQR / Derecho de petición',
+                   area='Seguros', procedure='Administrativo',
+                   instance='Etapa inicial', stage=1, sector='Público',
+                   entity='Entidad Pública Demo NIT',
+                   administrative_case_number='ADM-2026-9001',
+                   administrative_city='Cali', start=d(2026, 5, 4),
+                   mandate=M.CONTINGENCY, pct=20, value=60 * MILLION),
+             ]),
+        dict(identification='99901234', id_type='CE',
+             name='Giovanni Rossi Bianchi', email='giovanni.rossi@example.com',
+             phone='3005550203',
+             cases=[
+                 C(service=S.CONCILIATION, subtype='Conciliación privada',
+                   area='Conciliación', procedure='Conciliación',
+                   instance='Audiencia programada', stage=2, start=d(2026, 3, 9),
+                   fee=4 * MILLION,
+                   history=[P(2 * MILLION, d(2026, 3, 12)),
+                            E(2 * MILLION, d(2026, 11, 10))]),
+             ]),
+        dict(identification='9990XY456', id_type='PA',
+             name='Emily Carter Johnson', email='emily.carter@example.com',
+             phone='3005550204',
+             cases=[
+                 C(service=S.FIELD_RESEARCH, subtype='Investigación judicial',
+                   area='Investigación de campo',
+                   procedure='Investigación de campo', instance='En investigación',
+                   stage=2, start=d(2026, 6, 1), fee=5 * MILLION,
+                   history=[P(5 * MILLION, d(2026, 6, 3))]),
+             ]),
+    ]
+
+
+# ---------------------------------------------------------------------------
 # Clientes generados: reparten inicios y pagos de enero de 2022 a hoy
 # ---------------------------------------------------------------------------
 
@@ -596,8 +666,11 @@ class Command(BaseCommand):
 
         today = timezone.localdate()
         created = skipped = 0
-        for spec in [*handmade_clients(), *generated_clients(today)]:
-            identification = f'{PREFIX}{spec["n"]:06d}'
+        specs = [*handmade_clients(), *generated_clients(today),
+                 *document_clients()]
+        for spec in specs:
+            identification = spec.get('identification') or (
+                f'{PREFIX}{spec["n"]:06d}')
             if ClientModel.objects.filter(identification=identification).exists():
                 skipped += 1
                 continue
@@ -617,9 +690,20 @@ class Command(BaseCommand):
 
     def _create_client(self, identification, spec):
         first_start = min(c['start'] for c in spec['cases'])
+        id_type = spec.get('id_type', 'CC')
+        rep = spec.get('legal_rep') or {}
         client = ClientModel(
-            identification=identification, full_name=spec['name'],
+            identification_type=id_type,
+            identification=identification,
+            verification_digit=(
+                nit_check_digit(identification) if id_type == 'NIT' else ''),
+            full_name=spec['name'],
             email=spec['email'], phone=spec['phone'],
+            legal_rep_name=rep.get('name', ''),
+            legal_rep_identification_type=rep.get('id_type', ''),
+            legal_rep_identification=rep.get('identification', ''),
+            legal_rep_email=rep.get('email', ''),
+            legal_rep_phone=rep.get('phone', ''),
             is_active=spec.get('active', True), created=at(first_start))
         client.full_clean()
         client.save()

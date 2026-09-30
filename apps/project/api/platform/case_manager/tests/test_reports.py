@@ -225,7 +225,7 @@ class WordReportTests(BaseReportes):
         texto = texto_del_docx(self.client.get(self.ficha).content)
 
         self.assertIn('Carlos Emiro Giraldo Lozada', texto)
-        self.assertIn('16484186', texto)
+        self.assertIn('CC 16.484.186', texto)
         self.assertIn('Civil', texto)
         self.assertIn('Familia', texto)
 

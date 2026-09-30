@@ -21,6 +21,23 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
+class IdentificationType(models.TextChoices):
+    """Tipo de documento del cliente. CC primero; el resto, alfabetico."""
+
+    CC = 'CC', _('Cédula de ciudadanía')
+    NIT = 'NIT', _('NIT')
+    CE = 'CE', _('Cédula de extranjería')
+    PA = 'PA', _('Pasaporte')
+
+
+class LegalRepIdentificationType(models.TextChoices):
+    """Documento del representante legal: una persona natural, no un NIT."""
+
+    CC = 'CC', _('Cédula de ciudadanía')
+    CE = 'CE', _('Cédula de extranjería')
+    PA = 'PA', _('Pasaporte')
+
+
 class Service(models.TextChoices):
     """Servicio contratado. El ``<select id="as">`` de la pantalla aprobada."""
 

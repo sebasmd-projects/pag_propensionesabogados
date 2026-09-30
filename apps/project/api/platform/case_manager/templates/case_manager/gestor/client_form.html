@@ -7,7 +7,7 @@
       <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
 
-          <form method="post" novalidate>
+          <form method="post" novalidate data-client-form>
             {% csrf_token %}
 
             {% if form.non_field_errors %}
@@ -15,10 +15,30 @@
             {% endif %}
 
             <div class="row g-3">
-              {% include 'case_manager/gestor/partials/field.html' with field=form.identification %}
-              {% include 'case_manager/gestor/partials/field.html' with field=form.full_name %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.identification_type cols='col-12 col-md-4' %}
+              {% include 'case_manager/gestor/partials/field.html' with field=form.identification cols='col-12 col-md-5' %}
+              <div class="col-12 col-md-3{% if not form.show_nit_fields %} d-none{% endif %}" data-nit-only{% if not form.show_nit_fields %} hidden{% endif %}>
+                <div class="row g-3">
+                  {% include 'case_manager/gestor/partials/field.html' with field=form.verification_digit cols='col-12' %}
+                </div>
+              </div>
+              {% include 'case_manager/gestor/partials/field.html' with field=form.full_name cols='col-12' %}
               {% include 'case_manager/gestor/partials/field.html' with field=form.email %}
               {% include 'case_manager/gestor/partials/field.html' with field=form.phone %}
+            </div>
+
+            <div class="mt-4{% if not form.show_nit_fields %} d-none{% endif %}" data-nit-only data-legal-rep-block{% if not form.show_nit_fields %} hidden{% endif %}>
+              <h2 class="h6 mb-3">{% trans "Legal representative (optional)" %}</h2>
+              <div class="row g-3">
+                {% include 'case_manager/gestor/partials/field.html' with field=form.legal_rep_name cols='col-12' %}
+                {% include 'case_manager/gestor/partials/field.html' with field=form.legal_rep_identification_type cols='col-12 col-md-4' %}
+                {% include 'case_manager/gestor/partials/field.html' with field=form.legal_rep_identification cols='col-12 col-md-8' %}
+                {% include 'case_manager/gestor/partials/field.html' with field=form.legal_rep_email %}
+                {% include 'case_manager/gestor/partials/field.html' with field=form.legal_rep_phone %}
+              </div>
+            </div>
+
+            <div class="row g-3 mt-1">
               {% include 'case_manager/gestor/partials/field.html' with field=form.is_active %}
             </div>
 
@@ -45,4 +65,5 @@
       </div>
     </div>
   </div>
+  <script>{% include "case_manager/gestor/scripts/client_form.js" %}</script>
 {% endblock gestor_content %}

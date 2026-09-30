@@ -52,7 +52,7 @@
         <tbody>
           {% for client in clients %}
             <tr>
-              <td class="font-monospace">{{ client.identification|grouped_identification }}</td>
+              <td class="font-monospace" data-search="{{ client|client_identification_search }}">{{ client|client_identification }}</td>
               <td>
                 {% comment %}
                   El nombre es el enlace a la ficha. Es donde uno pulsa cuando

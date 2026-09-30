@@ -69,10 +69,10 @@
         <tbody>
           {% for case in cases %}
             <tr>
-              <td>
+              <td data-search="{{ case.client.full_name }} {{ case.client|client_identification_search }}">
                 {{ case.client.full_name }}
                 <div class="text-muted small font-monospace">
-                  {{ case.client.identification|grouped_identification }}
+                  {{ case.client|client_identification }}
                 </div>
               </td>
               <td>
