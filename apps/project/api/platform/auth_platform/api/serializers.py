@@ -2,7 +2,10 @@
 
 import secrets
 
+from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from apps.common.utils.login_attempts import note_failure
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -96,7 +99,8 @@ class AttlasInsolvencyAuthSerializer(serializers.Serializer):
             else check_password(password, DUMMY_HASH)
         )
 
-        if auth_user is None or consultant is None or not password_valid:
+        if (auth_user is None or consultant is None or not password_valid
+                or not consultant.is_active):
             note_failure(request, username=user, reason='attlas_login')
             raise serializers.ValidationError({
                 'non_field_errors': [_('Invalid credentials.')]
@@ -152,11 +156,30 @@ class AttlasInsolvencyAuthRegisterSerializer(serializers.ModelSerializer):
         fields = ['document_number', 'birth_date']
 
 
-class AttlasInsolvencyAuthConsultantsRegisterSerializer(serializers.ModelSerializer):
+class AttlasInsolvencyAuthConsultantsRegisterSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=100)
+    last_name = serializers.CharField(max_length=100)
+    email = serializers.EmailField(max_length=254)
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+    password_confirm = serializers.CharField(write_only=True, trim_whitespace=False)
 
-    class Meta:
-        model = AttlasInsolvencyAuthConsultantsModel
-        fields = ['first_name', 'last_name', 'password']
+    def validate_email(self, value):
+        value = value.strip().lower()
+        if value.rsplit('@', 1)[1] not in settings.ATTLAS_CONSULTANT_EMAIL_DOMAINS:
+            raise serializers.ValidationError('Utilice un correo corporativo autorizado.')
+        return value
+
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except ValidationError as exc:
+            raise serializers.ValidationError(exc.messages)
+        return value
+
+    def validate(self, data):
+        if data['password'] != data['password_confirm']:
+            raise serializers.ValidationError({'password_confirm': ['Las claves no coinciden.']})
+        return data
 
 
 class ClientResponseSerializer(serializers.Serializer):

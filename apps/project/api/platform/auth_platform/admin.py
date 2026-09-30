@@ -59,10 +59,12 @@ class AttlasInsolvencyAuthAdminModel(admin.ModelAdmin):
 
 @admin.register(AttlasInsolvencyAuthConsultantsModel)
 class AttlasInsolvencyAuthConsultantsAdminModel(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'user', 'created', 'updated']
+    list_display = ['first_name', 'last_name', 'user', 'email', 'is_active',
+                    'email_verified_at', 'created', 'updated']
+    list_editable = ['is_active']
     list_display_links = list_display[:3]
-    search_fields = ['first_name', 'last_name', 'user']
-    readonly_fields = ['updated', 'created', 'user']
+    search_fields = ['first_name', 'last_name', 'user', 'email']
+    readonly_fields = ['updated', 'created', 'user', 'email_verified_at']
 
 
 

@@ -5,7 +5,8 @@ import threading
 from datetime import timedelta
 
 from django.conf import settings
-from django.db import close_old_connections, transaction
+from django.contrib.auth.hashers import make_password
+from django.db import IntegrityError, close_old_connections, transaction
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -20,8 +21,11 @@ from apps.common.utils.models import hash_value
 from apps.common.utils.otp_codes import codes_match, generate_code, hash_code
 from apps.common.utils.throttling import RateLimit
 
-from ..emails import send_lookup_code
-from ..models import AttlasInsolvencyAuthModel, ClientLookupChallenge
+from ..emails import send_consultant_registration_code, send_lookup_code
+from ..models import (
+    AttlasInsolvencyAuthConsultantsModel, AttlasInsolvencyAuthModel,
+    ClientLookupChallenge, ConsultantRegistrationChallenge,
+)
 from .serializers import (
     AttlasInsolvencyAuthConsultantsRegisterSerializer,
     AttlasInsolvencyAuthRegisterSerializer,
@@ -62,11 +66,59 @@ class AttlasInsolvencyAuthRegisterAPIView(CreateAPIView):
 
 
 @extend_schema(tags=['Auth Attlas'])
-class AttlasInsolvencyAuthConsultantsRegisterAPIView(CreateAPIView):
+class AttlasInsolvencyAuthConsultantsRegisterAPIView(APIView):
     permission_classes = [HasServerKey]
 
     serializer_class = AttlasInsolvencyAuthConsultantsRegisterSerializer
-    queryset = AttlasInsolvencyAuthModel.objects.all()
+
+    def post(self, request):
+        params = self.serializer_class(data=request.data)
+        params.is_valid(raise_exception=True)
+        data = params.validated_data
+        email = data['email']
+        ip_allowed = consultant_register_ip.consume(request)
+        email_allowed = consultant_register_email.consume(request, scope=email)
+        if not ip_allowed or not email_allowed:
+            return Response(LOOKUP_LIMIT_DETAIL, status=429)
+
+        code = generate_code()
+        # Hash raw input explicitly, even if it resembles an encoded password.
+        password = make_password(data['password'])
+        with transaction.atomic():
+            consultant = AttlasInsolvencyAuthConsultantsModel.objects.select_for_update().filter(
+                email=email,
+            ).first()
+            if consultant is None:
+                try:
+                    with transaction.atomic():
+                        consultant = AttlasInsolvencyAuthConsultantsModel.objects.create(
+                            email=email, first_name=data['first_name'],
+                            last_name=data['last_name'], password=password, is_active=False,
+                        )
+                except IntegrityError:
+                    # Another request may have registered this email meanwhile.
+                    consultant = AttlasInsolvencyAuthConsultantsModel.objects.select_for_update().get(
+                        email=email,
+                    )
+            if consultant.email_verified_at is not None:
+                consultant = None
+            else:
+                consultant.first_name = data['first_name']
+                consultant.last_name = data['last_name']
+                consultant.password = password
+                consultant.is_active = False
+                consultant.save()
+                # Older codes must not activate credentials replaced by this request.
+                ConsultantRegistrationChallenge.objects.filter(
+                    consultant=consultant, used_at__isnull=True,
+                ).update(used_at=timezone.now())
+            challenge = ConsultantRegistrationChallenge.objects.create(
+                consultant=consultant, code_hash=hash_code(code),
+                expires_at=timezone.now() + timedelta(minutes=10),
+            )
+            if consultant is not None:
+                transaction.on_commit(lambda: _start_consultant_registration_email(email, code))
+        return Response({'challenge_id': str(challenge.id)}, status=202)
 
 
 @extend_schema(tags=['Auth Attlas'])
@@ -133,6 +185,66 @@ clients_lookup_doc = RateLimit('clients_lookup_doc', limit=3, window=60 * 60)
 clients_lookup_verify_ip = RateLimit('clients_lookup_verify_ip', limit=30, window=10 * 60)
 LOOKUP_LIMIT_DETAIL = {'detail': 'Demasiadas solicitudes. Intente más tarde.'}
 LOOKUP_INVALID_DETAIL = {'detail': 'Código inválido o caducado.'}
+
+consultant_register_ip = RateLimit('consultant_register_ip', limit=10, window=60 * 60)
+consultant_register_email = RateLimit('consultant_register_email', limit=3, window=60 * 60)
+consultant_register_verify_ip = RateLimit('consultant_register_verify_ip', limit=30, window=10 * 60)
+
+
+def _send_consultant_registration_code(email, code):
+    try:
+        send_consultant_registration_code(email, code)
+    except Exception:
+        logger.exception('Fallo al enviar el código de registro de asesor.')
+    finally:
+        close_old_connections()
+
+
+def _start_consultant_registration_email(email, code):
+    try:
+        threading.Thread(
+            target=_send_consultant_registration_code, args=(email, code), daemon=True,
+        ).start()
+    except Exception:
+        logger.exception('No se pudo iniciar el envío del código de registro de asesor.')
+
+
+@extend_schema(tags=['Auth Attlas'])
+class AttlasInsolvencyAuthConsultantsRegisterVerifyAPIView(APIView):
+    permission_classes = [HasServerKey]
+
+    def post(self, request):
+        if not consultant_register_verify_ip.consume(request):
+            return Response(LOOKUP_LIMIT_DETAIL, status=429)
+        params = ClientLookupVerifySerializer(data=request.data)
+        if not params.is_valid():
+            return Response(LOOKUP_INVALID_DETAIL, status=400)
+        with transaction.atomic():
+            # Lock the consultant first, matching registration's lock order.
+            consultant_id = ConsultantRegistrationChallenge.objects.filter(
+                pk=params.validated_data['challenge_id'],
+            ).values_list('consultant_id', flat=True).first()
+            consultant = AttlasInsolvencyAuthConsultantsModel.objects.select_for_update().filter(
+                pk=consultant_id,
+            ).first()
+            challenge = ConsultantRegistrationChallenge.objects.select_for_update().filter(
+                pk=params.validated_data['challenge_id'],
+            ).first()
+            now = timezone.now()
+            if (challenge is None or challenge.expires_at <= now
+                    or challenge.used_at is not None or challenge.attempts >= 5):
+                return Response(LOOKUP_INVALID_DETAIL, status=400)
+            challenge.attempts += 1
+            challenge.save(update_fields=['attempts', 'updated'])
+            if (not codes_match(params.validated_data['code'], challenge.code_hash)
+                    or consultant is None or consultant.email_verified_at is not None):
+                return Response(LOOKUP_INVALID_DETAIL, status=400)
+            consultant.email_verified_at = now
+            consultant.is_active = True
+            consultant.save(update_fields=['email_verified_at', 'is_active', 'updated'])
+            challenge.used_at = now
+            challenge.save(update_fields=['used_at', 'updated'])
+        return Response({'user': consultant.user, 'email': consultant.email})
 
 
 @extend_schema(tags=['Clients'])

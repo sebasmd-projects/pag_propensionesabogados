@@ -11,6 +11,24 @@ from apps.common.utils.mail import attach_inline_images
 logger = logging.getLogger(__name__)
 
 
+def send_consultant_registration_code(email, code):
+    """Send only the registration code, with no client or consultant details."""
+    try:
+        html = render_to_string(
+            'auth_platform/email/consultant_registration_code.html', {'code': code},
+        )
+        message = EmailMultiAlternatives(
+            subject='Verifica tu correo',
+            body=strip_tags(html.replace('</p>', '</p>\n')),
+            from_email=settings.DEFAULT_FROM_EMAIL, to=[email],
+        )
+        message.attach_alternative(html, 'text/html')
+        if not message.send(fail_silently=False):
+            logger.error('No se pudo enviar el código de registro de asesor.')
+    except Exception:
+        logger.exception('Fallo al enviar el código de registro de asesor.')
+
+
 def send_lookup_code(email, code, *, request=None):
     """Send a code without exposing delivery failures to the public endpoint."""
     try:
