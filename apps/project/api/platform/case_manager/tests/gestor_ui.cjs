@@ -2,6 +2,7 @@
 // Requiere jsdom y el HTML de edicion exportado por test_dynamic_flow:
 //   CASE_FLOW_HTML_DIR=<dir> python manage.py test ...tests.test_dynamic_flow
 //   node gestor_ui.cjs <dir>
+// (el mismo directorio trae dashboard.html si se ejecuta test_gestor: filtros y tooltip)
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -181,5 +182,98 @@ const type = (w, input, text) => {
   w.document.querySelector('a.nav-link[href]').dispatchEvent(ev3);
   assert(!ev3.defaultPrevented);
 
-  console.log('Formato COP, copia limpia, fechas sin truncar y aviso de cambios verificados.');
+
+  // ---- Comparativo del panel: filtros independientes y tooltip ----
+  const dashFile = path.join(process.argv[2], 'dashboard.html');
+  if (fs.existsSync(dashFile)) {
+    const dash = new JSDOM(fs.readFileSync(dashFile, 'utf8'), {runScripts: 'outside-only', pretendToBeVisual: true, url: 'http://localhost/gestor/'});
+    const dw = dash.window, dd = dw.document;
+    for (const script of dd.querySelectorAll('script:not([src])')) {
+      if (script.textContent.includes('data-financial-chart')) dw.eval(script.textContent);
+    }
+    const chips = [...dd.querySelectorAll('[data-series-toggle]')];
+    const rows = [...dd.querySelectorAll('[data-pie-toggle]')];
+    const bar = (key) => [...dd.querySelectorAll('.gestor-time-bar[data-series="' + key + '"]')];
+    const shares = () => rows.map(r => Number(r.querySelector('[data-pie-share]').textContent));
+    const pieFill = () => dd.querySelector('[data-financial-pie]').style.getPropertyValue('--pie-fill');
+    const axisLabels = () => [...dd.querySelectorAll('[data-chart-axis] span')].map(x => x.textContent);
+    const tip = dd.querySelector('[data-chart-tooltip]');
+    assert.equal(chips.length, 5);
+    assert.equal(rows.length, 5);
+    // Accesibles con teclado: casillas y botones reales.
+    assert(chips.every(c => c.type === 'checkbox'));
+    assert(rows.every(r => r.tagName === 'BUTTON' && r.type === 'button'));
+    assert(rows.every(r => r.getAttribute('aria-pressed') === 'true'));
+    assert.equal(shares().reduce((a, b) => a + b, 0), 100);
+    assert(axisLabels().length >= 3 && axisLabels()[0] === '$0 M', 'eje Y abreviado');
+    const pieBefore = pieFill(), sharesBefore = shares(), axisBefore = axisLabels().join('|');
+
+    // Chip de las barras: oculta solo las barras; la torta queda igual.
+    const chip = key => chips.find(c => c.dataset.seriesToggle === key);
+    chip('expectation').checked = false;
+    chip('expectation').dispatchEvent(new dw.Event('change', {bubbles: true}));
+    assert(bar('expectation').every(b => b.hidden));
+    assert(bar('paid').every(b => !b.hidden));
+    assert.deepEqual(shares(), sharesBefore);
+    assert.equal(pieFill(), pieBefore);
+    assert(rows.every(r => r.getAttribute('aria-pressed') === 'true'));
+    assert.notEqual(axisLabels().join('|'), axisBefore, 'la escala se recalcula con lo visible');
+    chip('expectation').checked = true;
+    chip('expectation').dispatchEvent(new dw.Event('change', {bubbles: true}));
+    assert(bar('expectation').every(b => !b.hidden));
+
+    // Fila de la torta: oculta solo su sector y recalcula porcentajes.
+    const row = key => rows.find(r => r.dataset.pieToggle === key);
+    row('expectation').click();
+    assert.equal(row('expectation').getAttribute('aria-pressed'), 'false');
+    assert(row('expectation').closest('[data-pie-item]').classList.contains('is-off'));
+    assert.equal(Number(row('expectation').querySelector('[data-pie-share]').textContent), 0);
+    const after = shares();
+    assert.equal(after.reduce((a, b) => a + b, 0), 100);
+    assert(after[0] > sharesBefore[0], 'los demás porcentajes suben');
+    assert.notEqual(pieFill(), pieBefore);
+    assert(bar('expectation').every(b => !b.hidden), 'las barras no cambian');
+    assert(chips.every(c => c.checked));
+    // Se puede volver a activar (la fila sigue visible).
+    row('expectation').click();
+    assert.equal(row('expectation').getAttribute('aria-pressed'), 'true');
+    assert.deepEqual(shares(), sharesBefore);
+    // Sin sectores visibles aparece el aviso.
+    rows.forEach(r => r.click());
+    assert.equal(dd.querySelector('[data-pie-empty]').hidden, false);
+    rows.forEach(r => r.click());
+    assert.equal(dd.querySelector('[data-pie-empty]').hidden, true);
+
+    // Tooltip: periodo y valor de cada serie visible, en formato COP.
+    const bucket = [...dd.querySelectorAll('[data-bucket]')].find(b => b.querySelector('.gestor-time-bar[data-series="agreed"]').dataset.value === '5000000');
+    assert(bucket, 'hay un grupo con lo pactado');
+    assert(tip.hidden);
+    bucket.dispatchEvent(new dw.MouseEvent('mouseenter', {bubbles: false, clientX: 10, clientY: 10}));
+    assert(!tip.hidden);
+    assert.equal(tip.querySelector('b').textContent, bucket.dataset.title);
+    assert(tip.textContent.includes('Pactado: $ 5.000.000'), tip.textContent);
+    assert.equal(tip.querySelectorAll('div').length, 5);
+    // Respeta el filtro de barras.
+    chip('paid').checked = false;
+    chip('paid').dispatchEvent(new dw.Event('change', {bubbles: true}));
+    bucket.dispatchEvent(new dw.MouseEvent('mouseenter', {bubbles: false}));
+    assert(!tip.textContent.includes('Pagado'));
+    assert.equal(tip.querySelectorAll('div').length, 4);
+    // Salir, tocar (abre y cierra con otro toque), foco de teclado y Escape.
+    bucket.dispatchEvent(new dw.MouseEvent('mouseleave'));
+    assert(tip.hidden);
+    bucket.click();
+    assert(!tip.hidden);
+    bucket.click();
+    assert(tip.hidden);
+    bucket.focus();
+    assert(!tip.hidden, 'el foco de teclado también lo muestra');
+    dd.dispatchEvent(new dw.KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+    assert(tip.hidden);
+    bucket.click();
+    dd.body.click();
+    assert(tip.hidden, 'tocar fuera lo cierra');
+  }
+
+  console.log('Formato COP, copia limpia, fechas sin truncar, aviso de cambios, filtros independientes y tooltip verificados.');
 })().catch(error => { console.error(error); process.exit(1); });

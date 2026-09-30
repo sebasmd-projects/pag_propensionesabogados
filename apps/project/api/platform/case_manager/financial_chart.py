@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import calendar
+import math
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 
@@ -103,15 +104,25 @@ def _range(request, events, today):
     return start, end, False
 
 
-def _granularity(start, end):
+def _granularity(start, end, is_all=False):
+    """Unidad de agrupación según la duración del rango.
+
+    Hasta 7 días: días. Hasta 31: semanas de lunes a domingo. Hasta 366:
+    meses. Más (o "Completo"): años.
+    """
     days = (end - start).days + 1
-    if days <= 31:
+    if is_all or days > 366:
+        return 'year', 'Años'
+    if days <= 7:
         return 'day', 'Días'
-    if days <= 120:
+    if days <= 31:
         return 'week', 'Semanas'
-    if days <= 730:
-        return 'month', 'Meses'
-    return 'year', 'Años'
+    return 'month', 'Meses'
+
+
+MONTHS = ('ene', 'feb', 'mar', 'abr', 'may', 'jun',
+          'jul', 'ago', 'sep', 'oct', 'nov', 'dic')
+WEEKDAYS = ('lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom')
 
 
 def _bucket_start(value, granularity):
@@ -134,15 +145,94 @@ def _next_bucket(value, granularity):
     return value.replace(year=value.year + 1)
 
 
-def _label(value, granularity):
+def _span(first, last, with_year=False):
+    """'01–07 sep', '28 sep–04 oct' o '30 sep' (con año si se pide)."""
+    year = f' {last.year}' if with_year else ''
+    if first == last:
+        return f'{first.day:02d} {MONTHS[first.month - 1]}{year}'
+    if (first.year, first.month) == (last.year, last.month):
+        return f'{first.day:02d}–{last.day:02d} {MONTHS[last.month - 1]}{year}'
+    first_year = f' {first.year}' if with_year and first.year != last.year else ''
+    return (f'{first.day:02d} {MONTHS[first.month - 1]}{first_year}–'
+            f'{last.day:02d} {MONTHS[last.month - 1]}{year}')
+
+
+def _labels(first, last, granularity):
+    """Etiqueta corta del eje y título completo del tooltip."""
     if granularity == 'day':
-        return value.strftime('%d/%m')
+        return (first.strftime('%d/%m'),
+                f'{WEEKDAYS[first.weekday()]} {first:%d/%m/%Y}')
     if granularity == 'week':
-        end = value + timedelta(days=6)
-        return f'{value:%d/%m}–{end:%d/%m}'
+        return _span(first, last), _span(first, last, with_year=True)
     if granularity == 'month':
-        return value.strftime('%m/%Y')
-    return str(value.year)
+        return (f'{MONTHS[first.month - 1]} {first.year}',
+                f'{MONTHS[first.month - 1]} {first.year}')
+    return str(first.year), str(first.year)
+
+
+def _nice_step(raw):
+    """Paso 1, 2, 2.5, 5 o 10 por potencia de diez, sin quedarse corto."""
+    magnitude = 10 ** math.floor(math.log10(raw))
+    for factor in (1, 2, 2.5, 5, 10):
+        if raw <= factor * magnitude:
+            return factor * magnitude
+    return 10 * magnitude
+
+
+def axis_ticks(maximum):
+    """Marcas del eje Y (0 hasta un máximo redondo) con su etiqueta.
+
+    Misma lógica que `niceScale` en scripts/financial_chart.js, que la
+    recalcula al filtrar series.
+    """
+    maximum = maximum or 4_000_000  # sin datos: escala de ejemplo
+    step = _nice_step(maximum / 4)
+    count = max(1, math.ceil(maximum / step))
+    top = step * count
+    top = int(top) if top == int(top) else top
+    if top >= 1_000_000:
+        divisor, suffix = 1_000_000, ' M'
+    elif top >= 10_000:
+        divisor, suffix = 1_000, ' K'
+    else:
+        divisor, suffix = 1, ''
+    ticks = []
+    for index in range(count + 1):
+        value = step * index
+        value = int(value) if value == int(value) else value
+        scaled = round(value / divisor, 1)
+        text = (str(int(scaled)) if scaled == int(scaled)
+                else str(scaled).replace('.', ','))
+        ticks.append({
+            'value': value,
+            'label': f'${text}{suffix}',
+            'position': round(index * 100 / count, 4),
+        })
+    return top, ticks
+
+
+def quick_periods(today, start, end, is_all):
+    """Botones de periodo rápido (enlaces GET) y cuál está activo."""
+    week_start = today - timedelta(days=today.weekday())
+    definitions = (
+        ('day', 'Día', today, today),
+        ('week', 'Semana', week_start, week_start + timedelta(days=6)),
+        ('month', 'Mes', today.replace(day=1), _month_end(today)),
+        ('year', 'Año', today.replace(month=1, day=1),
+         today.replace(month=12, day=31)),
+    )
+    periods = [
+        {
+            'key': key,
+            'label': label,
+            'url': f'?start={first.isoformat()}&end={last.isoformat()}',
+            'active': not is_all and (first, last) == (start, end),
+        }
+        for key, label, first, last in definitions
+    ]
+    periods.append({'key': 'all', 'label': 'Completo', 'url': '?range=all',
+                    'active': is_all})
+    return periods
 
 
 def build_financial_chart(request, finances, today=None):
@@ -150,12 +240,11 @@ def build_financial_chart(request, finances, today=None):
     today = today or timezone.localdate()
     events = _events(finances, today)
     start, end, is_all = _range(request, events, today)
-    granularity, granularity_label = _granularity(start, end)
+    granularity, granularity_label = _granularity(start, end, is_all)
 
-    first_bucket = _bucket_start(start, granularity)
+    cursor = _bucket_start(start, granularity)
     last_bucket = _bucket_start(end, granularity)
     keys = []
-    cursor = first_bucket
     while cursor <= last_bucket:
         keys.append(cursor)
         cursor = _next_bucket(cursor, granularity)
@@ -168,20 +257,31 @@ def build_financial_chart(request, finances, today=None):
     maximum = max(
         (amount for bucket in values.values() for amount in bucket.values()),
         default=0,
-    ) or 1
+    )
+    top, ticks = axis_ticks(maximum)
     buckets = []
     for key in keys:
+        # Los grupos parciales (semanas, meses) se recortan al rango pedido.
+        first = max(key, start)
+        last = min(_next_bucket(key, granularity) - timedelta(days=1), end)
+        label, title = _labels(first, last, granularity)
         bucket_values = []
-        for series, label, tone in SERIES:
+        for series, series_label, tone in SERIES:
             amount = values[key][series]
             bucket_values.append({
                 'key': series,
-                'label': label,
+                'label': series_label,
                 'tone': tone,
                 'value': amount,
-                'height': round(amount * 100 / maximum) if amount else 0,
+                'height': round(amount * 100 / top, 2) if amount else 0,
             })
-        buckets.append({'label': _label(key, granularity), 'values': bucket_values})
+        buckets.append({
+            'label': label,
+            'title': title,
+            'start': first.isoformat(),
+            'end': last.isoformat(),
+            'values': bucket_values,
+        })
 
     totals = [
         {
@@ -200,7 +300,9 @@ def build_financial_chart(request, finances, today=None):
         'granularity': granularity,
         'granularity_label': granularity_label,
         'buckets': buckets,
+        'axis': ticks,
         'totals': totals,
+        'periods': quick_periods(today, start, end, is_all),
         'legend': [
             {'key': key, 'label': label, 'tone': tone}
             for key, label, tone in SERIES

@@ -190,13 +190,13 @@ class GestorDashboardTests(TestCase):
         css = (Path(settings.BASE_DIR) / 'public/staticfiles/assets/custom/css/gestor.css').read_text(encoding='utf-8')
         self.assertIn('overflow-x: hidden', css)
 
-    def test_el_comparativo_abre_en_el_mes_actual_agrupado_por_dias(self):
+    def test_el_comparativo_abre_en_el_mes_actual_agrupado_por_semanas(self):
         respuesta = self.client.get(self.url)
         chart = respuesta.context['financial_chart']
         today = timezone.localdate()
 
         self.assertEqual(chart['start'], today.replace(day=1).isoformat())
-        self.assertEqual(chart['granularity'], 'day')
+        self.assertEqual(chart['granularity'], 'week')
         self.assertFalse(chart['is_all'])
         totals = {
             item['key']: sum(
@@ -212,7 +212,10 @@ class GestorDashboardTests(TestCase):
 
     def test_el_rango_cambia_automaticamente_la_agrupacion(self):
         today = timezone.localdate()
-        for days, expected in ((60, 'week'), (365, 'month'), (1000, 'year')):
+        for days, expected in (
+            (0, 'day'), (6, 'day'), (7, 'week'), (30, 'week'), (31, 'month'),
+            (60, 'month'), (365, 'month'), (366, 'year'), (1000, 'year'),
+        ):
             with self.subTest(days=days):
                 response = self.client.get(self.url, {
                     'start': (today - timedelta(days=days)).isoformat(),
@@ -236,7 +239,7 @@ class GestorDashboardTests(TestCase):
         response = self.client.get(self.url)
         chart = response.context['financial_chart']
         bucket = next(row for row in chart['buckets']
-                      if row['label'] == today.strftime('%d/%m'))
+                      if row['start'] <= today.isoformat() <= row['end'])
         values = {row['key']: row['value'] for row in bucket['values']}
 
         self.assertEqual(values['paid'], 1_000_000)
@@ -251,7 +254,7 @@ class GestorDashboardTests(TestCase):
 
         chart = response.context['financial_chart']
         self.assertEqual(chart['start'], today.replace(day=1).isoformat())
-        self.assertEqual(chart['granularity'], 'day')
+        self.assertEqual(chart['granularity'], 'week')
 
     def test_desde_el_inicio_toma_el_primer_registro(self):
         old_client = ClientModel.objects.create(
@@ -271,6 +274,181 @@ class GestorDashboardTests(TestCase):
         self.assertTrue(chart['is_all'])
         self.assertEqual(chart['start'], '2018-02-01')
         self.assertEqual(chart['granularity'], 'year')
+
+    # ---- Agrupación según la duración del rango ----
+
+    def _chart(self, start, end):
+        response = self.client.get(self.url, {'start': start, 'end': end})
+        return response.context['financial_chart']
+
+    def test_un_dia_es_un_solo_grupo_diario(self):
+        chart = self._chart('2026-09-15', '2026-09-15')
+
+        self.assertEqual(chart['granularity'], 'day')
+        self.assertEqual([b['label'] for b in chart['buckets']], ['15/09'])
+
+    def test_una_semana_se_separa_en_siete_dias(self):
+        chart = self._chart('2026-09-01', '2026-09-07')
+
+        self.assertEqual(chart['granularity'], 'day')
+        self.assertEqual(len(chart['buckets']), 7)
+        self.assertEqual(chart['buckets'][0]['label'], '01/09')
+        self.assertEqual(chart['buckets'][-1]['label'], '07/09')
+
+    def test_septiembre_se_separa_en_cinco_semanas_de_lunes_a_domingo(self):
+        chart = self._chart('2026-09-01', '2026-09-30')
+
+        self.assertEqual(chart['granularity'], 'week')
+        self.assertEqual(
+            [(b['start'], b['end']) for b in chart['buckets']],
+            [('2026-09-01', '2026-09-06'), ('2026-09-07', '2026-09-13'),
+             ('2026-09-14', '2026-09-20'), ('2026-09-21', '2026-09-27'),
+             ('2026-09-28', '2026-09-30')],
+        )
+        # Las semanas completas empiezan en lunes y terminan en domingo.
+        for bucket in chart['buckets'][1:4]:
+            self.assertEqual(date.fromisoformat(bucket['start']).weekday(), 0)
+            self.assertEqual(date.fromisoformat(bucket['end']).weekday(), 6)
+        self.assertEqual(
+            [b['label'] for b in chart['buckets']],
+            ['01–06 sep', '07–13 sep', '14–20 sep', '21–27 sep', '28–30 sep'],
+        )
+        self.assertEqual(chart['buckets'][0]['title'], '01–06 sep 2026')
+
+    def test_una_semana_que_cruza_de_mes_lo_dice_en_su_etiqueta(self):
+        chart = self._chart('2026-09-21', '2026-10-05')
+
+        self.assertEqual(chart['buckets'][1]['label'], '28 sep–04 oct')
+
+    def test_un_anio_se_separa_en_doce_meses(self):
+        chart = self._chart('2026-01-01', '2026-12-31')
+
+        self.assertEqual(chart['granularity'], 'month')
+        self.assertEqual(len(chart['buckets']), 12)
+        self.assertEqual(chart['buckets'][0]['label'], 'ene 2026')
+        self.assertEqual(chart['buckets'][-1]['label'], 'dic 2026')
+
+    def test_mas_de_un_anio_se_separa_en_anios(self):
+        chart = self._chart('2024-06-01', '2026-03-01')
+
+        self.assertEqual(chart['granularity'], 'year')
+        self.assertEqual([b['label'] for b in chart['buckets']],
+                         ['2024', '2025', '2026'])
+
+    def test_completo_se_separa_en_anios(self):
+        old_client = ClientModel.objects.create(
+            identification='1004', full_name='Histórico Cuatro'
+        )
+        old_case = CaseModel.objects.create(
+            client=old_client, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS
+        )
+        CaseFinanceModel.objects.create(
+            case=old_case, start_date=date(2023, 5, 1),
+            mandate=Mandate.PAYMENT, agreed_fee=500_000,
+        )
+
+        chart = self.client.get(self.url, {'range': 'all'}).context['financial_chart']
+
+        self.assertEqual(chart['granularity'], 'year')
+        labels = [b['label'] for b in chart['buckets']]
+        self.assertEqual(labels[0], '2023')
+        self.assertEqual(labels[-1], str(timezone.localdate().year))
+        self.assertEqual(len(labels), timezone.localdate().year - 2023 + 1)
+
+    def test_el_eje_y_se_abrevia_segun_la_escala(self):
+        from ..financial_chart import axis_ticks
+
+        top, ticks = axis_ticks(194_686_043)
+        self.assertEqual(top, 200_000_000)
+        self.assertEqual([t['label'] for t in ticks],
+                         ['$0 M', '$50 M', '$100 M', '$150 M', '$200 M'])
+        top, ticks = axis_ticks(42_000)
+        self.assertEqual([t['label'] for t in ticks][-1], '$60 K')
+        self.assertEqual(axis_ticks(0)[1][0]['label'], '$0 M')
+
+    # ---- Botones de periodo, tooltip y filtros independientes ----
+
+    def test_los_botones_de_periodo_rapido_estan_junto_a_las_fechas(self):
+        today = timezone.localdate()
+        html = self.client.get(self.url).content.decode()
+
+        for key, label in (('day', 'Día'), ('week', 'Semana'), ('month', 'Mes'),
+                           ('year', 'Año'), ('all', 'Completo')):
+            self.assertIn(f'data-period="{key}"', html)
+            self.assertIn(f'>{label}</a>', html)
+        self.assertIn('href="?range=all"', html)
+        self.assertIn(
+            f'href="?start={today.isoformat()}&amp;end={today.isoformat()}"', html
+        )
+        self.assertLess(html.index('data-financial-periods'),
+                        html.index('data-financial-range'))
+
+    def test_solo_el_periodo_vigente_esta_marcado(self):
+        today = timezone.localdate()
+        cases = (
+            ({}, 'month'),
+            ({'start': today.isoformat(), 'end': today.isoformat()}, 'day'),
+            ({'start': today.replace(month=1, day=1).isoformat(),
+              'end': today.replace(month=12, day=31).isoformat()}, 'year'),
+            ({'range': 'all'}, 'all'),
+        )
+        for params, expected in cases:
+            with self.subTest(expected=expected):
+                response = self.client.get(self.url, params)
+                active = [p['key'] for p in response.context['financial_chart']['periods']
+                          if p['active']]
+                self.assertEqual(active, [expected])
+                self.assertContains(response, 'aria-current="true"', count=1)
+
+    def test_semana_actual_va_de_lunes_a_domingo(self):
+        today = timezone.localdate()
+        response = self.client.get(self.url)
+        week = next(p for p in response.context['financial_chart']['periods']
+                    if p['key'] == 'week')
+        monday = today - timedelta(days=today.weekday())
+
+        self.assertEqual(
+            week['url'],
+            f'?start={monday.isoformat()}&end={(monday + timedelta(days=6)).isoformat()}',
+        )
+
+    def test_la_grafica_expone_el_tooltip_y_el_eje(self):
+        response = self.client.get(self.url, {'start': '2026-09-01', 'end': '2026-09-30'})
+
+        self.assertContains(response, 'data-chart-tooltip role="tooltip"')
+        self.assertContains(response, 'data-chart-axis')
+        self.assertContains(response, '$0 M')
+        self.assertContains(response, 'data-title="07–13 sep 2026"')
+        self.assertContains(response, 'data-name="Pagado"')
+        self.assertContains(response, 'data-value=')
+        self.assertContains(response, 'gestor-time-labels')
+        html = response.content.decode()
+        self.assertEqual(html.count('<div class="gestor-time-bucket"'), 5)
+
+    def test_barras_y_torta_tienen_filtros_independientes(self):
+        html = self.client.get(self.url).content.decode()
+
+        bars_block = html[html.index('aria-label="Filtro de series de las barras"'):html.index('data-time-chart')]
+        pie_block = html[html.index('aria-label="Filtro de series de la torta"'):html.index('data-pie-empty')]
+        for key in ('agreed', 'paid', 'balance', 'expectation', 'upcoming'):
+            self.assertIn(f'data-series-toggle="{key}"', bars_block)
+            self.assertNotIn('data-pie-toggle', bars_block)
+            self.assertIn(f'data-pie-toggle="{key}"', pie_block)
+            self.assertNotIn('data-series-toggle', pie_block)
+        self.assertEqual(pie_block.count('aria-pressed="true"'), 5)
+        self.assertEqual(pie_block.count('<button type="button"'), 5)
+        self.assertIn('aria-label="Filtro de series de las barras"', bars_block)
+        self.assertIn('aria-label="Filtro de series de la torta"', pie_block)
+
+    def test_exporta_el_panel_para_la_prueba_dom(self):
+        import os
+        directory = os.environ.get('CASE_FLOW_HTML_DIR')
+        if not directory:
+            self.skipTest('CASE_FLOW_HTML_DIR no definido')
+        response = self.client.get(self.url, {'start': '2026-09-01', 'end': '2026-09-30'})
+        target = Path(directory)
+        target.mkdir(parents=True, exist_ok=True)
+        (target / 'dashboard.html').write_bytes(response.content)
 
     def test_tabla_de_proximos_pagos_vacia_tiene_columnas_validas(self):
         respuesta = self.client.get(self.url)
