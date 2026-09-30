@@ -22,7 +22,7 @@ class PQRSModelSerializer(ModelSerializer):
     
     class Meta:
         model = PQRSModel
-        exclude = ['created', 'updated', 'history']
+        exclude = ['created', 'updated']
         extra_kwargs = {
             'request_type_en': {'required': False},
             'request_type_es': {'required': False},

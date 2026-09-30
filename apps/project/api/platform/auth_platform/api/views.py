@@ -1,9 +1,11 @@
 # apps/project/api/platform/auth_platform/api/views.py
 
+import logging
+import threading
 from datetime import timedelta
 
 from django.conf import settings
-from django.db import transaction
+from django.db import close_old_connections, transaction
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -32,40 +34,23 @@ from .serializers import (
 
 attlas_login_ip = RateLimit('attlas_login_ip', limit=10, window=15 * 60)
 
-clients_search_ip = RateLimit('clients_search_ip', limit=20, window=10*60)
-clients_search_doc = RateLimit('clients_search_doc', limit=5, window=10*60)
+logger = logging.getLogger(__name__)
 
 
-@extend_schema(tags=['Clients'])
-class ClientSearchView(APIView):
-    """
-    GET /api/v1/clients/search/?documentNumber=xxx&birthDate=yyyy-mm-dd
+def _send_lookup_code(email, code):
+    try:
+        send_lookup_code(email, code)
+    except Exception:
+        logger.exception('Fallo al enviar el código de verificación de calculadora.')
+    finally:
+        close_old_connections()
 
-    Búsqueda deshabilitada hasta el flujo OTP: valida y limita solicitudes,
-    y responde 404 uniforme sin consultar ni revelar datos de clientes.
-    """
-    permission_classes = [HasServerKey]
 
-    def get(self, request):
-        params = ClientSearchSerializer(data=request.query_params)
-        if not params.is_valid():
-            return Response(params.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        document_number = params.validated_data['documentNumber'].strip().lower()
-        ip_allowed = clients_search_ip.consume(request)
-        doc_allowed = clients_search_doc.consume(request, scope=document_number)
-        if not ip_allowed or not doc_allowed:
-            return Response(
-                {'detail': 'Demasiadas solicitudes. Intente más tarde.'},
-                status=status.HTTP_429_TOO_MANY_REQUESTS,
-            )
-
-        # Deshabilitado de facto hasta OTP: cédula + fecha no son credenciales.
-        # El 404 uniforme evita un oráculo que revele quién es cliente.
-        return Response(
-            {'detail': 'No encontrado'},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+def _start_lookup_email(email, code):
+    try:
+        threading.Thread(target=_send_lookup_code, args=(email, code), daemon=True).start()
+    except Exception:
+        logger.exception('No se pudo iniciar el envío del código de calculadora.')
 
 
 @extend_schema(tags=['Auth Attlas'])
@@ -177,7 +162,8 @@ class ClientLookupView(APIView):
                 expires_at=timezone.now() + timedelta(minutes=10),
             )
             if email:
-                transaction.on_commit(lambda: send_lookup_code(email, code, request=request))
+                # El correo no necesita contexto HTTP; el envío no bloquea la respuesta.
+                transaction.on_commit(lambda: _start_lookup_email(email, code))
         return Response({'challenge_id': str(challenge.id)}, status=202)
 
 
