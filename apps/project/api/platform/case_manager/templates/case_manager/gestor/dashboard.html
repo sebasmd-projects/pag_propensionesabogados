@@ -24,12 +24,14 @@
 
 {% block gestor_content %}
 
+  <section class="gestor-stage" data-gestor-section aria-label="Resumen financiero">
   <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mb-4">
     {% include 'case_manager/gestor/partials/stat.html' with label=_("Agreed") value=totals.agreed icon="file-earmark-check" tone="secondary" %}
     {% include 'case_manager/gestor/partials/stat.html' with label=_("Collected") value=totals.paid icon="cash-stack" tone="success" %}
     {% include 'case_manager/gestor/partials/stat.html' with label=_("Outstanding balance") value=totals.balance icon="hourglass-split" tone="warning" %}
     {% include 'case_manager/gestor/partials/stat.html' with label=_("Contingency expectation") value=totals.expectation icon="graph-up-arrow" tone="info" %}
     {% include 'case_manager/gestor/partials/stat.html' with label=_("Potential pending") value=totals.potential_pending icon="calculator" tone="secondary" %}
+    {% include 'case_manager/gestor/partials/stat.html' with label='Próximo a pago' value=upcoming_total icon='calendar-check' tone='primary' %}
     {% include 'case_manager/gestor/partials/stat.html' with label=_("Projected total") value=totals.projected_total icon="bullseye" tone="secondary" %}
   </div>
 
@@ -65,7 +67,37 @@
     </div>
   </div>
 
-  {% include 'case_manager/gestor/partials/portfolio.html' %}
+  </section>
+  <section class="gestor-stage" data-gestor-section aria-label="Gráficas financieras">
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body p-4">
+      <h2 class="h5">Comparativo financiero</h2>
+      <p class="text-muted small">Valores en COP. Lo pactado corresponde al contrato, no a facturas emitidas. Los próximos pagos ya pueden formar parte del saldo por cobrar: no se suman nuevamente.</p>
+      {% for bar in financial_bars %}
+      <div class="mb-3">
+        <div class="d-flex justify-content-between gap-3"><span>{{ bar.label }}</span><strong>${{ bar.value|intcomma }}</strong></div>
+        <div class="progress" style="height: 18px" role="img" aria-label="{{ bar.label }}: {{ bar.value }} pesos">
+          <div class="progress-bar bg-{{ bar.tone }}" style="width: {{ bar.width }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div></div>
+    {% include 'case_manager/gestor/partials/portfolio.html' %}
+  </section>
+  <section class="gestor-stage" data-gestor-section aria-labelledby="upcoming-title">
+    <div class="card border-0 shadow-sm"><div class="card-body p-4">
+      <h2 class="h5" id="upcoming-title">Próximos pagos</h2>
+      <p class="text-muted">Valor esperado total: <strong>${{ upcoming_total|intcomma }}</strong>. Registre el estado «Pago recibido» cuando ingrese el dinero.</p>
+      <div class="table-responsive"><table class="table align-middle" data-datatable data-dt-compact id="tablaProximosPagos">
+        <thead><tr><th>Cliente / caso</th><th>Valor esperado</th><th>Fecha esperada de recepción</th></tr></thead>
+        <tbody>{% for payment in upcoming_payments %}<tr>
+          <td><a href="{% url 'case_manager:gestor_case_update' payment.case.pk %}">{{ payment.case.client.full_name }}</a><div class="small text-muted">{{ payment.case.service_display }} · {{ payment.case.case_number|default:payment.case.pk }}</div></td>
+          <td data-order="{{ payment.amount }}">${{ payment.amount|intcomma }}</td>
+          <td data-order="{{ payment.date|default:'9999-12-31' }}">{{ payment.date|default:'Sin fecha definida' }}</td>
+        </tr>{% empty %}<tr><td colspan="3" class="text-muted">No hay pagos próximos registrados.</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </div></div>
+  </section>
+  <section class="gestor-stage" data-gestor-section aria-label="Cartera y expectativas">
 
   <div class="row g-4">
 
@@ -158,4 +190,5 @@
     </div>
 
   </div>
+  </section>
 {% endblock gestor_content %}

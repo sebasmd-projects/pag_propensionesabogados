@@ -3,11 +3,19 @@
     <h3 class="h6 mb-0" data-payment-title>{% if payment.kind == 'administrative' %}Pago administrativo / externo{% else %}Pago / abono{% endif %}</h3>
     <button type="button" class="btn btn-sm btn-outline-danger" data-remove-payment{% if payment.kind == 'administrative' %} hidden{% endif %}>Quitar</button>
   </div>
+  {% if payment.kind != 'administrative' %}
+  <label class="form-label">Estado
+    <select class="form-select" data-payment-kind>
+      <option value="payment"{% if payment.kind != 'expected' %} selected{% endif %}>Pago recibido</option>
+      <option value="expected"{% if payment.kind == 'expected' %} selected{% endif %}>Próximo a pago</option>
+    </select>
+  </label>
+  {% endif %}
   <div class="row g-3">
-    <div class="col-12 col-md-4"><label class="form-label d-block">Valor del pago
+    <div class="col-12 col-md-4"><label class="form-label d-block"><span data-amount-label>Valor del pago</span>
       <input class="form-control" type="number" min="0" step="1" max="9000000000000" value="{{ payment.amount|default:0 }}" data-payment-amount>
     </label></div>
-    <div class="col-12 col-md-4"><label class="form-label d-block">Fecha de pago
+    <div class="col-12 col-md-4"><label class="form-label d-block"><span data-date-label>Fecha de pago</span>
       <input class="form-control" type="date" value="{{ payment.date|default:'' }}" data-payment-date>
     </label></div>
     <div class="col-12 col-md-4"><label class="form-label d-block">Próxima fecha de pago

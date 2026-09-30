@@ -20,7 +20,7 @@
     {# vista: la franja de aqui arriba quedaba fuera de la pantalla de quien #}
     {# acaba de darle a guardar al final de un formulario largo. #}
 
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 gestor-stage" data-gestor-section>
       <div class="card-header bg-transparent border-0 pt-3">
         <h2 class="h6 fw-bold mb-0">{% trans "The matter" %}</h2>
       </div>
@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <div class="accordion mb-4" id="bloquesDelTramite">
+    <div class="accordion mb-4 gestor-stage" data-gestor-section id="bloquesDelTramite">
       <div class="accordion-item" data-procedure-block="general">
         <h2 class="accordion-header">
           <button class="accordion-button" aria-expanded="true" type="button" data-bs-toggle="collapse"
@@ -102,7 +102,7 @@
       </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 gestor-stage" data-gestor-section>
       <div class="card-header bg-transparent border-0 pt-3">
         <h2 class="h6 fw-bold mb-0">Gestión de Pagos</h2>
         <p class="text-muted small mb-0" data-contingency-help hidden>
@@ -131,6 +131,7 @@
               {% endfor %}
             </div>
             <button class="btn btn-outline-primary" type="button" data-add-payment>+ Añadir pago</button>
+            <button class="btn btn-outline-info" type="button" data-add-expected>+ Próximo a pago</button>
             <template data-payment-template>{% include 'case_manager/gestor/partials/payment_row.html' with payment=empty_payment %}</template>
           </div>
           <div class="alert alert-light border small mt-3 mb-0" data-finance-summary aria-live="polite"{% if not finance.is_free %} hidden{% endif %}>{% if finance.is_free %}Servicio gratuito. Sin honorarios, pagos ni saldo por cobrar.{% endif %}</div>
@@ -138,7 +139,7 @@
       </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 gestor-stage" data-gestor-section>
       <div class="card-body">
         <div class="row g-3">
           {% include 'case_manager/gestor/partials/field.html' with field=form.paz_y_salvo_authorized cols="col-12" %}
@@ -146,7 +147,7 @@
       </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 gestor-stage" data-gestor-section>
       <div class="card-body">
         <div class="row g-3">
           {% include 'case_manager/gestor/partials/field.html' with field=form.notify_stage_change cols="col-12" %}

@@ -379,6 +379,51 @@ class CaseCrudTests(TestCase):
         self.assertContains(response, '2000000')
         self.assertEqual(len(case.finance.payment_history), 3)
 
+    def test_expected_payment_roundtrip_dashboard_and_receipt(self):
+        rows = [
+            {'kind': 'payment', 'amount': 100000, 'date': ''},
+            {'kind': 'expected', 'amount': 900000, 'date': ''},
+            {'kind': 'expected', 'amount': 500000, 'date': '2026-12-01'},
+        ]
+        response = self.client.post(reverse('case_manager:gestor_case_create'),
+                                    self.datos(**{'finance-0-payment_history': json.dumps(rows)}))
+        self.assertEqual(response.status_code, 302)
+        case = CaseModel.objects.get()
+        self.assertEqual(case.finance.paid_amount, 100000)
+        self.assertEqual(case.finance.balance, 5900000)
+        edit = self.client.get(reverse('case_manager:gestor_case_update', args=[case.pk]))
+        self.assertContains(edit, 'value="expected" selected', count=2)
+        dashboard = self.client.get(reverse('case_manager:gestor_dashboard'))
+        self.assertEqual(dashboard.context['upcoming_total'], 1400000)
+        self.assertEqual(dashboard.context['upcoming_payments'][0]['date'], '2026-12-01')
+        self.assertContains(dashboard, 'Sin fecha definida')
+        rows[1]['kind'] = 'payment'
+        response = self.client.post(reverse('case_manager:gestor_case_update', args=[case.pk]),
+            self.datos(**{'finance-INITIAL_FORMS': '1', 'finance-0-id': str(case.finance.pk), 'finance-0-case': str(case.pk),
+                          'finance-0-payment_history': json.dumps(rows)}))
+        self.assertEqual(response.status_code, 302)
+        case.finance.refresh_from_db()
+        self.assertEqual(case.finance.paid_amount, 1000000)
+        dashboard = self.client.get(reverse('case_manager:gestor_dashboard'))
+        self.assertEqual(dashboard.context['upcoming_total'], 500000)
+        case.finance.show_in_dashboard = False
+        case.finance.save()
+        dashboard = self.client.get(reverse('case_manager:gestor_dashboard'))
+        self.assertEqual(dashboard.context['upcoming_total'], 0)
+
+    def test_invalid_expected_payment_is_rejected(self):
+        for row in [
+            {'kind': 'expected', 'amount': 0},
+            {'kind': 'expected', 'amount': -1},
+            {'kind': 'expected', 'amount': 10, 'date': 'invalid'},
+        ]:
+            with self.subTest(row=row):
+                response = self.client.post(reverse('case_manager:gestor_case_create'),
+                    self.datos(**{'finance-0-payment_history': json.dumps([row])}))
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.context['finance_formset'].errors[0]['payment_history'])
+                self.assertFalse(CaseModel.objects.exists())
+
     def test_un_abono_sin_fecha_se_guarda(self):
         """
         Ningun campo del pago es obligatorio.

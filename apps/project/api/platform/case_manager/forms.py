@@ -435,7 +435,7 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
             rows = []
         rows = [r for r in (rows or []) if isinstance(r, dict)] if isinstance(rows, list) else []
         admin = next((r for r in rows if r.get('kind') == 'administrative'), None)
-        payments = [r for r in rows if r.get('kind') == 'payment']
+        payments = [r for r in rows if r.get('kind') in ('payment', 'expected')]
         return [admin or {'kind': 'administrative', 'amount': 0},
                 *(payments or [{'kind': 'payment', 'amount': 0}])]
 
@@ -449,11 +449,13 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
         admin_count = 0
         old_rows = self.initial.get('payment_history', [])
         for index, row in enumerate(rows):
-            if not isinstance(row, dict) or row.get('kind') not in ('administrative', 'payment'):
+            if not isinstance(row, dict) or row.get('kind') not in ('administrative', 'payment', 'expected'):
                 raise forms.ValidationError('Tipo de pago inválido.')
             amount = row.get('amount', 0)
             if type(amount) is not int or not 0 <= amount <= 9_000_000_000_000:
                 raise forms.ValidationError('Cada pago debe ser un valor entero no negativo.')
+            if row['kind'] == 'expected' and amount == 0:
+                raise forms.ValidationError('El valor esperado debe ser mayor que cero.')
             admin_count += row['kind'] == 'administrative'
             if admin_count > 1:
                 raise forms.ValidationError('Solo puede existir un pago administrativo.')
@@ -488,7 +490,8 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
             if self.add_prefix('payment_history') in self.data or self.instance.payment_history:
                 if self.add_prefix('payment_history') not in self.data:
                     data['payment_history'] = self.instance.payment_history
-                data['paid_amount'] = sum(row['amount'] for row in data['payment_history'])
+                data['paid_amount'] = sum(row['amount'] for row in data['payment_history']
+                                          if row['kind'] != 'expected')
         return data
 
     class Meta:

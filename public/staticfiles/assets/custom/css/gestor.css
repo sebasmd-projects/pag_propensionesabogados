@@ -100,3 +100,12 @@
     height: 7rem;
   }
 }
+
+/* Secciones completas, sin limitar contenido largo ni tablas en móviles. */
+.gestor-stage { min-height: 85vh; min-height: 85svh; scroll-margin-top: 110px; padding-bottom: 2rem; }
+.gestor-next-section { position: fixed; right: 140px; bottom: 15px; z-index: 999; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--bs-primary, #0d6efd); color: white; box-shadow: 0 3px 12px #0003; }
+.gestor-next-section[hidden] { display: none; }
+.gestor-next-section i { display: inline-block; animation: gestor-bounce 1.8s infinite; }
+.gestor-next-section:focus-visible { outline: 3px solid var(--bs-info); outline-offset: 3px; }
+@keyframes gestor-bounce { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .gestor-next-section i { animation: none; } }

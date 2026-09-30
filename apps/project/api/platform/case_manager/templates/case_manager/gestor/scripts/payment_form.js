@@ -18,7 +18,16 @@
     const serialize = () => {
       let number = 0;
       const payments = Array.from(rows.querySelectorAll('[data-payment-row]')).map(row => {
-        const kind = row.dataset.kind;
+        const kind = row.querySelector('[data-payment-kind]')?.value || row.dataset.kind;
+        row.dataset.kind = kind;
+        const expected = kind === 'expected';
+        row.querySelector('[data-amount-label]').textContent = expected ? 'Valor esperado' : 'Valor del pago';
+        row.querySelector('[data-date-label]').textContent = expected ? '(Opcional) Fecha esperada de recepción' : 'Fecha de pago';
+        row.querySelector('[data-payment-next-date]').closest('.col-12').hidden = expected;
+        if (expected) {
+          row.querySelector('[data-payment-title]').textContent = 'Próximo a pago';
+          row.querySelector('[data-payment-next-date]').value = '';
+        }
         if (kind === 'payment') {
           number += 1;
           row.querySelector('[data-payment-title]').textContent = number === 1 ? 'Pago 1 / primer abono' : `Pago ${number}`;
@@ -34,7 +43,7 @@
           legacy: row.dataset.legacy === 'true'};
       });
       historyField.value = JSON.stringify(payments);
-      return payments.reduce((sum, payment) => sum + payment.amount, 0);
+      return payments.reduce((sum, payment) => sum + (payment.kind === 'expected' ? 0 : payment.amount), 0);
     };
     const currency = n => new Intl.NumberFormat('es-CO', {style: 'currency', currency: 'COP', maximumFractionDigits: 0}).format(n);
     const updateFinance = (changed = false) => {
@@ -56,7 +65,7 @@
       show(column(moneyField('show_in_dashboard')), !free);
       show(mandate.closest('.card').querySelector('[data-contingency-help]'), litis);
       show(history, payment);
-      history.querySelectorAll('input, button').forEach(input => { input.disabled = !payment; });
+      history.querySelectorAll('input, select, button').forEach(input => { input.disabled = !payment; });
       if (payment) moneyField('paid_amount').value = serialize();
       const agreed = Number(moneyField(payment ? 'agreed_fee' : 'contingency_value').value || 0);
       const paid = Number(moneyField('paid_amount').value || 0);
@@ -70,21 +79,24 @@
     mandate.addEventListener('change', () => updateFinance(true));
     percentage.addEventListener('change', () => updateFinance(true));
     ['contingency_value', 'agreed_fee', 'paid_amount'].forEach(name => moneyField(name).addEventListener('input', () => updateFinance()));
-    history.querySelector('[data-add-payment]').addEventListener('click', () => {
+    const addRow = kind => {
       if (rows.children.length >= 100) return;
       const row = history.querySelector('template').content.firstElementChild.cloneNode(true);
-      row.dataset.kind = 'payment';
+      row.dataset.kind = kind;
+      row.querySelector('[data-payment-kind]').value = kind;
       rows.append(row);
       updateFinance();
       row.querySelector('input').focus();
-    });
+    };
+    history.querySelector('[data-add-payment]').addEventListener('click', () => addRow('payment'));
+    history.querySelector('[data-add-expected]').addEventListener('click', () => addRow('expected'));
     rows.addEventListener('input', () => updateFinance());
     rows.addEventListener('change', () => updateFinance());
     rows.addEventListener('click', event => {
       const button = event.target.closest('[data-remove-payment]');
       if (!button) return;
       const row = button.closest('[data-payment-row]');
-      if (row.dataset.kind === 'payment') row.remove();
+      if (row.dataset.kind !== 'administrative') row.remove();
       updateFinance();
     });
     mandate.form.addEventListener('submit', () => { if (mandate.value === 'Modalidad de pago') serialize(); });
