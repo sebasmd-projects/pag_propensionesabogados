@@ -41,6 +41,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from .access import GestorRequiredMixin
 from .choices import Mandate, NoteKind
 from .emails import send_case_note
+from .financial_chart import build_financial_chart
 from .forms import CaseFinanceFormSet, CaseForm, CaseNoteForm, ClientForm
 from .models import (CaseFinanceModel, CaseModel, CaseNoteModel, ClientModel)
 from .reports import client_report, crm_report
@@ -101,10 +102,16 @@ class GestorDashboardView(GestorRequiredMixin, TemplateView):
 
         context['totals'] = CaseFinanceModel.objects.totals()
         context['areas'] = CaseFinanceModel.objects.by_area()
+        dashboard_finances = list(
+            CaseFinanceModel.objects.in_dashboard().select_related('case', 'case__client')
+        )
+        context['financial_chart'] = build_financial_chart(
+            self.request, dashboard_finances
+        )
         upcoming = []
-        for finance in CaseFinanceModel.objects.in_dashboard().filter(
-            mandate=Mandate.PAYMENT
-        ).select_related('case', 'case__client'):
+        for finance in dashboard_finances:
+            if finance.mandate != Mandate.PAYMENT:
+                continue
             for payment in finance.payment_history:
                 if payment.get('kind') == 'expected':
                     upcoming.append({'case': finance.case, 'amount': payment['amount'],
@@ -112,21 +119,6 @@ class GestorDashboardView(GestorRequiredMixin, TemplateView):
         upcoming.sort(key=lambda row: (not row['date'], row['date']))
         context['upcoming_payments'] = upcoming
         context['upcoming_total'] = sum(row['amount'] for row in upcoming)
-        totals = context['totals']
-        comparisons = [
-            ('Pactado / contratado', totals['agreed'], 'secondary'),
-            ('Pagado', totals['paid'], 'success'),
-            ('Por cobrar', totals['balance'], 'warning'),
-            ('Expectativa de cuota litis', totals['expectation'], 'info'),
-            ('Próximo a pago', context['upcoming_total'], 'primary'),
-        ]
-        maximum = max((value for _, value, _ in comparisons), default=0) or 1
-        context['financial_bars'] = [
-            {'label': label, 'value': value, 'tone': tone,
-             'height': round(value * 100 / maximum)}
-            for label, value, tone in comparisons
-        ]
-
         # Sin recortar a diez. Antes la tarjeta ensenaba los diez primeros y
         # se callaba los demas: quien debia el puesto once no aparecia en
         # ninguna parte del panel, y nada en la pantalla decia que faltaba

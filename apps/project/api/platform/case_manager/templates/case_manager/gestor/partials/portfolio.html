@@ -1,68 +1,77 @@
 {% load i18n humanize %}
-{% comment %}
-  «Estado financiero del portafolio» y «Distribucion por area», que son las dos
-  piezas que el panel aprobado pone antes de las tablas.
-
-  El anillo es un `conic-gradient` y no una libreria de graficos: son tres
-  tramos y un porcentaje en el centro. Traerse Chart.js --unos 200 KB-- para
-  esto obligaria ademas a pasarle los datos por JavaScript, y entonces una
-  cifra del panel economico dejaria de estar en el HTML que Django escapa.
-
-  Las barras por area son `.progress` de Bootstrap, que ya trae el sitio.
-{% endcomment %}
+{% comment %}Comparativo temporal y distribución por área del portafolio.{% endcomment %}
 
 <div class="row g-4 mb-4">
 
-  <div class="col-12 col-xl-6">
+  <div class="col-12 col-xl-8">
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body p-4">
-        <h2 class="h6 fw-bold mb-3">
-          <i class="bi bi-pie-chart me-1"></i>{% trans "Portfolio financial status" %}
-        </h2>
-
-        <div class="d-flex align-items-center flex-wrap gap-4">
-          {% comment %}
-            El anillo se describe con `role="img"` y su `aria-label`: el
-            gradiente no dice nada a un lector de pantalla, y la cifra del
-            centro sola tampoco --«29 %» de que--.
-          {% endcomment %}
-          <div class="cp-donut" role="img"
-               style="--pagado: {{ totals.share_paid|stringformat:'s' }}%;
-                      --cobrar: {{ totals.share_balance|stringformat:'s' }}%"
-               aria-label="{% blocktrans with rate=totals.collection_rate %}Collected: {{ rate }} percent of the projected total.{% endblocktrans %}">
-            <div class="cp-donut-texto">
-              <span class="fs-5 fw-bold">{{ totals.collection_rate }} %</span>
-              <span class="d-block text-muted" style="font-size: .7rem;">{% trans "collected" %}</span>
-            </div>
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+          <div>
+            <h2 class="h6 fw-bold mb-1">
+              <i class="bi bi-graph-up-arrow me-1"></i>Comparativo financiero
+            </h2>
+            <p class="text-muted small mb-0">
+              Agrupado por {{ financial_chart.granularity_label|lower }} · valores en COP
+            </p>
           </div>
+          <div class="btn-group btn-group-sm" role="group" aria-label="Rangos rápidos">
+            <a class="btn btn-outline-secondary{% if not financial_chart.is_all and not request.GET.start and not request.GET.end %} active{% endif %}"
+               href="?">Mes actual</a>
+            <a class="btn btn-outline-secondary{% if financial_chart.is_all %} active{% endif %}"
+               href="?range=all">Desde el inicio</a>
+          </div>
+        </div>
 
-          <ul class="list-unstyled mb-0 flex-grow-1">
-            <li class="d-flex justify-content-between align-items-center gap-3 py-1">
-              <span><i class="cp-punto cp-punto-pagado"></i>{% trans "Paid" %}</span>
-              <b>${{ totals.paid|intcomma }}</b>
-            </li>
-            <li class="d-flex justify-content-between align-items-center gap-3 py-1">
-              <span><i class="cp-punto cp-punto-saldo"></i>{% trans "Outstanding" %}</span>
-              <b>${{ totals.balance|intcomma }}</b>
-            </li>
-            <li class="d-flex justify-content-between align-items-center gap-3 py-1">
-              <span><i class="cp-punto cp-punto-expectativa"></i>{% trans "Expectation" %}</span>
-              <b>${{ totals.expectation|intcomma }}</b>
-            </li>
-          </ul>
+        <form method="get" class="row g-2 align-items-end mb-4" data-financial-range>
+          <div class="col-12 col-sm-5">
+            <label class="form-label small mb-1" for="financial-start">Desde</label>
+            <input class="form-control form-control-sm" id="financial-start" name="start"
+                   type="date" value="{{ financial_chart.start }}" required>
+          </div>
+          <div class="col-12 col-sm-5">
+            <label class="form-label small mb-1" for="financial-end">Hasta</label>
+            <input class="form-control form-control-sm" id="financial-end" name="end"
+                   type="date" value="{{ financial_chart.end }}" required>
+          </div>
+          <div class="col-12 col-sm-2 d-grid">
+            <button class="btn btn-primary btn-sm" type="submit">Aplicar</button>
+          </div>
+        </form>
+
+        <ul class="gestor-chart-legend" aria-label="Series de la gráfica">
+          {% for item in financial_chart.legend %}
+            <li><i class="bg-{{ item.tone }}"></i>{{ item.label }}</li>
+          {% endfor %}
+        </ul>
+
+        <div class="gestor-time-chart" role="img"
+             style="--chart-columns: {{ financial_chart.buckets|length }}"
+             aria-label="Comparativo financiero agrupado por {{ financial_chart.granularity_label|lower }}">
+          <div class="gestor-time-grid" aria-hidden="true"></div>
+          {% for bucket in financial_chart.buckets %}
+            <div class="gestor-time-bucket">
+              <div class="gestor-time-bars">
+                {% for bar in bucket.values %}
+                  <div class="gestor-time-bar bg-{{ bar.tone }}{% if not bar.value %} is-zero{% endif %}"
+                       style="--bar-height: {{ bar.height }}%"
+                       title="{{ bucket.label }} · {{ bar.label }}: ${{ bar.value|intcomma }}"
+                       aria-label="{{ bucket.label }}, {{ bar.label }}: {{ bar.value }} pesos"></div>
+                {% endfor %}
+              </div>
+              <span class="gestor-time-label">{{ bucket.label }}</span>
+            </div>
+          {% endfor %}
         </div>
 
         <p class="text-muted small mb-0 mt-3">
-          {% blocktrans trimmed %}
-            The contingency expectation is shown separately and, in addition,
-            adds into the potential pending and the projected total.
-          {% endblocktrans %}
+          Lo pactado, el saldo por cobrar y la cuota litis se ubican en la fecha de inicio del caso. Los pagos usan su fecha real y los próximos pagos su fecha esperada; los registros sin fecha usan la fecha de inicio o el día actual, según corresponda.
         </p>
       </div>
     </div>
   </div>
 
-  <div class="col-12 col-xl-6">
+  <div class="col-12 col-xl-4">
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body p-4">
         <h2 class="h6 fw-bold mb-3">

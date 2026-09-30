@@ -1,130 +1,79 @@
-/*
- * Lo poco del panel del gestor que Bootstrap no trae hecho.
- *
- * Son dos cosas: el anillo del estado del portafolio y los puntos de su
- * leyenda. Todo lo demas --tarjetas, tablas, barras, pestanas, paginado-- es
- * Bootstrap, que el sitio ya carga.
- *
- * Los colores salen de las variables de Bootstrap (`--bs-success`,
- * `--bs-warning`...) y no de una paleta propia, asi que el modo oscuro los
- * cambia solo y no hay nada que mantener por duplicado.
- */
-
-/* ------------------------------------------------------------------ *
- * El anillo de recaudo
- *
- * Un `conic-gradient` con tres tramos y un agujero en el centro hecho con
- * `mask`. La alternativa era traerse una libreria de graficos de unos 200 KB
- * para dibujar tres arcos, y de paso tener que pasarle las cifras del panel
- * economico por JavaScript --con lo que dejarian de estar en el HTML que
- * Django escapa--.
- *
- * La plantilla pone los dos **cortes**, no los anchos: un `conic-gradient`
- * dibuja donde termina cada tramo, asi que `--cobrar` viene ya acumulado
- * desde `totals()`. El tercer tramo es el resto y no hace falta decirlo.
- * ------------------------------------------------------------------ */
-
-.cp-donut {
-  --pagado: 0%;
-  --cobrar: 0%;
-
-  position: relative;
-  flex: 0 0 auto;
-  width: 9rem;
-  height: 9rem;
+/* Navegación vertical del gestor. */
+.gestor-stage {
+  min-height: 85vh;
+  min-height: 85svh;
+  scroll-margin-top: 110px;
+  padding-bottom: 2rem;
 }
 
-/*
- * El aro va en un `::before` y no en el elemento mismo.
- *
- * `mask` recorta **todo** el elemento, hijos incluidos, asi que con el
- * gradiente puesto directamente en `.cp-donut` el agujero del centro se
- * llevaba por delante el porcentaje que iba dentro: quedaba un aro de
- * colores sin la unica cifra que lo explica. Separandolos, la mascara solo
- * alcanza al aro.
- */
-.cp-donut::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+.gestor-next-section {
+  position: fixed;
+  right: 140px;
+  bottom: 15px;
+  z-index: 999;
+  width: 44px;
+  height: 44px;
+  border: 0;
   border-radius: 50%;
-  background: conic-gradient(
-    var(--bs-success) 0 var(--pagado),
-    var(--bs-warning) var(--pagado) var(--cobrar),
-    var(--bs-info) var(--cobrar) 100%
-  );
-  /*
-   * El agujero. Con `mask` y no con un circulo encima: encima habria que
-   * darle el color del fondo, y ese cambia con el tema.
-   *
-   * El 64 % no es estetica: dentro van dos renglones --el porcentaje y la
-   * palabra «recaudado»--, y con el aro mas grueso el segundo se montaba
-   * encima del color.
-   */
-  mask: radial-gradient(farthest-side, transparent 64%, #000 65%);
-  -webkit-mask: radial-gradient(farthest-side, transparent 64%, #000 65%);
+  background: var(--bs-primary, #0d6efd);
+  color: white;
+  box-shadow: 0 3px 12px #0003;
 }
 
-.cp-donut-texto {
-  position: absolute;
-  inset: 12%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  line-height: 1.1;
-}
-
-/* ------------------------------------------------------------------ *
- * Los puntos de la leyenda
- * ------------------------------------------------------------------ */
-
-.cp-punto {
+.gestor-next-section[hidden] { display: none; }
+.gestor-next-section i {
   display: inline-block;
+  animation: gestor-bounce 1.8s infinite;
+}
+.gestor-next-section:focus-visible {
+  outline: 3px solid var(--bs-info);
+  outline-offset: 3px;
+}
+
+@keyframes gestor-bounce {
+  0%, 100% { transform: translateY(-3px); }
+  50% { transform: translateY(4px); }
+}
+
+/* Comparativo financiero temporal. */
+.gestor-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  color: var(--bs-secondary-color);
+  font-size: .75rem;
+}
+
+.gestor-chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.gestor-chart-legend i {
   width: .65rem;
   height: .65rem;
-  margin-right: .4rem;
-  border-radius: 50%;
-  vertical-align: baseline;
+  border-radius: 2px;
 }
 
-.cp-punto-pagado { background-color: var(--bs-success); }
-.cp-punto-saldo { background-color: var(--bs-warning); }
-.cp-punto-expectativa { background-color: var(--bs-info); }
-
-/* El anillo no cabe al lado de la leyenda en pantalla estrecha. */
-@media (max-width: 400px) {
-  .cp-donut {
-    width: 7rem;
-    height: 7rem;
-  }
-}
-
-/* Secciones completas, sin limitar contenido largo ni tablas en móviles. */
-.gestor-stage { min-height: 85vh; min-height: 85svh; scroll-margin-top: 110px; padding-bottom: 2rem; }
-.gestor-next-section { position: fixed; right: 140px; bottom: 15px; z-index: 999; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--bs-primary, #0d6efd); color: white; box-shadow: 0 3px 12px #0003; }
-.gestor-next-section[hidden] { display: none; }
-.gestor-next-section i { display: inline-block; animation: gestor-bounce 1.8s infinite; }
-.gestor-next-section:focus-visible { outline: 3px solid var(--bs-info); outline-offset: 3px; }
-@keyframes gestor-bounce { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(4px); } }
-@media (prefers-reduced-motion: reduce) { .gestor-next-section i { animation: none; } }
-
-/* Comparativo de columnas: los valores siguen en el HTML y no dependen de JS. */
-.gestor-bar-chart {
+.gestor-time-chart {
+  --chart-columns: 1;
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, minmax(5.5rem, 1fr));
-  gap: clamp(.75rem, 2vw, 1.5rem);
-  min-height: 24rem;
-  padding: 2.5rem 1rem 0;
+  grid-template-columns: repeat(var(--chart-columns), minmax(4.75rem, 1fr));
+  gap: clamp(.4rem, 1.25vw, 1rem);
+  min-height: 20rem;
+  padding: 1rem .75rem 0;
   overflow-x: auto;
   border-bottom: 1px solid var(--bs-border-color);
 }
 
-.gestor-bar-grid {
+.gestor-time-grid {
   position: absolute;
-  inset: 2.5rem 1rem 3.25rem;
+  inset: 1rem .75rem 2.75rem;
   background: repeating-linear-gradient(
     to bottom,
     var(--bs-border-color-translucent) 0,
@@ -135,49 +84,48 @@
   pointer-events: none;
 }
 
-.gestor-bar-item {
+.gestor-time-bucket {
   z-index: 1;
   display: grid;
-  grid-template-rows: 2.25rem 1fr 3.25rem;
-  min-width: 5.5rem;
-  text-align: center;
+  grid-template-rows: 1fr 2.75rem;
+  min-width: 4.75rem;
 }
 
-.gestor-bar-value {
-  align-self: end;
-  padding-bottom: .35rem;
-  font-size: clamp(.7rem, 1.2vw, .9rem);
-  white-space: nowrap;
-}
-
-.gestor-bar-track {
+.gestor-time-bars {
   display: flex;
   align-items: end;
   justify-content: center;
+  gap: clamp(2px, .35vw, 5px);
   min-height: 16rem;
 }
 
-.gestor-bar {
-  width: min(4.5rem, 75%);
+.gestor-time-bar {
+  width: clamp(.35rem, 13%, .9rem);
   height: max(3px, var(--bar-height));
-  border-radius: .4rem .4rem 0 0;
+  border-radius: .2rem .2rem 0 0;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
-  transition: height .4s ease;
+  transition: height .4s ease, filter .15s ease;
 }
 
-.gestor-bar-label {
-  display: flex;
-  align-items: start;
-  justify-content: center;
-  padding-top: .65rem;
-  font-size: .78rem;
-  line-height: 1.2;
+.gestor-time-bar.is-zero { height: 0; }
+.gestor-time-bar:hover { filter: brightness(.85); }
+
+.gestor-time-label {
+  align-self: start;
+  padding-top: .6rem;
+  color: var(--bs-secondary-color);
+  font-size: .7rem;
+  line-height: 1.15;
+  text-align: center;
 }
 
 @media (max-width: 767.98px) {
-  .gestor-bar-chart { grid-template-columns: repeat(5, 6.5rem); }
+  .gestor-time-chart {
+    grid-template-columns: repeat(var(--chart-columns), 5.25rem);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gestor-bar { transition: none; }
+  .gestor-next-section i { animation: none; }
+  .gestor-time-bar { transition: none; }
 }

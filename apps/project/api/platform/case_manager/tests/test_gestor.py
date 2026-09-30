@@ -17,10 +17,12 @@ Lo que mas se cuida aqui son dos cosas:
 
 from io import StringIO
 import json
+from datetime import date, timedelta
 
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from ..choices import Court, Mandate, Procedure, Service, Stage
 from ..models import CaseFinanceModel, CaseModel, ClientModel
@@ -167,8 +169,92 @@ class GestorDashboardTests(TestCase):
     def test_el_comparativo_se_renderiza_como_grafica_de_columnas(self):
         respuesta = self.client.get(self.url)
 
-        self.assertContains(respuesta, 'gestor-bar-chart')
-        self.assertContains(respuesta, '--bar-height: 100%')
+        self.assertContains(respuesta, 'gestor-time-chart')
+        self.assertContains(respuesta, 'bi-graph-up-arrow')
+        self.assertNotContains(respuesta, 'Portfolio financial status')
+        self.assertNotContains(respuesta, 'bi-pie-chart')
+
+    def test_el_comparativo_abre_en_el_mes_actual_agrupado_por_dias(self):
+        respuesta = self.client.get(self.url)
+        chart = respuesta.context['financial_chart']
+        today = timezone.localdate()
+
+        self.assertEqual(chart['start'], today.replace(day=1).isoformat())
+        self.assertEqual(chart['granularity'], 'day')
+        self.assertFalse(chart['is_all'])
+        totals = {
+            item['key']: sum(
+                value['value'] for bucket in chart['buckets']
+                for value in bucket['values'] if value['key'] == item['key']
+            )
+            for item in chart['legend']
+        }
+        self.assertEqual(totals['agreed'], 5_000_000)
+        self.assertEqual(totals['paid'], 1_000_000)
+        self.assertEqual(totals['balance'], 4_000_000)
+        self.assertEqual(totals['expectation'], 9_000_000)
+
+    def test_el_rango_cambia_automaticamente_la_agrupacion(self):
+        today = timezone.localdate()
+        for days, expected in ((60, 'week'), (365, 'month'), (1000, 'year')):
+            with self.subTest(days=days):
+                response = self.client.get(self.url, {
+                    'start': (today - timedelta(days=days)).isoformat(),
+                    'end': today.isoformat(),
+                })
+                self.assertEqual(
+                    response.context['financial_chart']['granularity'], expected
+                )
+
+    def test_pagos_y_proximos_pagos_usan_sus_fechas(self):
+        today = timezone.localdate()
+        finance = CaseFinanceModel.objects.get(mandate=Mandate.PAYMENT)
+        finance.payment_history = [
+            {'kind': 'payment', 'amount': 1_000_000,
+             'date': today.isoformat(), 'next_date': ''},
+            {'kind': 'expected', 'amount': 2_000_000,
+             'date': today.isoformat(), 'next_date': ''},
+        ]
+        finance.save(update_fields=['payment_history'])
+
+        response = self.client.get(self.url)
+        chart = response.context['financial_chart']
+        bucket = next(row for row in chart['buckets']
+                      if row['label'] == today.strftime('%d/%m'))
+        values = {row['key']: row['value'] for row in bucket['values']}
+
+        self.assertEqual(values['paid'], 1_000_000)
+        self.assertEqual(values['upcoming'], 2_000_000)
+
+    def test_un_rango_invertido_regresa_al_mes_actual(self):
+        today = timezone.localdate()
+        response = self.client.get(self.url, {
+            'start': today.isoformat(),
+            'end': (today - timedelta(days=1)).isoformat(),
+        })
+
+        chart = response.context['financial_chart']
+        self.assertEqual(chart['start'], today.replace(day=1).isoformat())
+        self.assertEqual(chart['granularity'], 'day')
+
+    def test_desde_el_inicio_toma_el_primer_registro(self):
+        old_client = ClientModel.objects.create(
+            identification='1003', full_name='Histórico Tres'
+        )
+        old_case = CaseModel.objects.create(
+            client=old_client, service=Service.JUDICIAL, stage=Stage.IN_PROGRESS
+        )
+        CaseFinanceModel.objects.create(
+            case=old_case, start_date=date(2018, 2, 1),
+            mandate=Mandate.PAYMENT, agreed_fee=500_000,
+        )
+
+        respuesta = self.client.get(self.url, {'range': 'all'})
+        chart = respuesta.context['financial_chart']
+
+        self.assertTrue(chart['is_all'])
+        self.assertEqual(chart['start'], '2018-02-01')
+        self.assertEqual(chart['granularity'], 'year')
 
     def test_tabla_de_proximos_pagos_vacia_tiene_columnas_validas(self):
         respuesta = self.client.get(self.url)

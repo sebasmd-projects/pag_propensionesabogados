@@ -4,7 +4,7 @@
 {% comment %}
   Panel economico y gerencial.
 
-  Las seis cifras de cabecera salen de `CaseFinanceQuerySet.totals()`, en una
+  Las cifras de cabecera salen de `CaseFinanceQuerySet.totals()`, en una
   sola consulta. Las dos tablas son las dos preguntas que el despacho hace
   sobre el dinero, y son distintas: quien debe hoy, y cuanto se espera ganar
   si los pleitos salen. La pantalla las separa porque sumarlas seria contar
@@ -69,36 +69,6 @@
 
   </section>
   <section class="gestor-stage" data-gestor-section aria-label="Gráficas financieras">
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
-          <div>
-            <h2 class="h5 mb-1">Comparativo financiero</h2>
-            <p class="text-muted small mb-0">Pactado, pagado, cartera y expectativas · valores en COP</p>
-          </div>
-          <span class="badge text-bg-light border">Estado actual</span>
-        </div>
-
-        <div class="gestor-bar-chart" role="img"
-             aria-label="Comparativo de valores financieros actuales en pesos colombianos">
-          <div class="gestor-bar-grid" aria-hidden="true"></div>
-          {% for bar in financial_bars %}
-            <div class="gestor-bar-item">
-              <strong class="gestor-bar-value">${{ bar.value|intcomma }}</strong>
-              <div class="gestor-bar-track">
-                <div class="gestor-bar bg-{{ bar.tone }}"
-                     style="--bar-height: {{ bar.height }}%"></div>
-              </div>
-              <span class="gestor-bar-label">{{ bar.label }}</span>
-            </div>
-          {% endfor %}
-        </div>
-
-        <p class="text-muted small mt-4 mb-0">
-          Lo pactado corresponde al valor de los contratos. Los próximos pagos pueden formar parte del saldo por cobrar, por lo que no se suman nuevamente.
-        </p>
-      </div>
-    </div>
     {% include 'case_manager/gestor/partials/portfolio.html' %}
   </section>
   <section class="gestor-stage" data-gestor-section aria-labelledby="upcoming-title">
