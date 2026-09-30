@@ -467,14 +467,14 @@ class CaseFinanceForm(BootstrapFormMixin, forms.ModelForm):
     """
     El dinero de un asunto.
 
-    Cada modalidad muestra sus columnas; el modelo valida los importes.
+    Cada esquema de honorarios muestra sus columnas; el modelo valida los importes.
     """
 
     def configure_fields(self):
         self.fields['mandate'].choices = [
-            ('', 'Seleccione una modalidad'),
+            ('', 'Seleccione un esquema de honorarios'),
             (choices.Mandate.CONTINGENCY.value, choices.Mandate.CONTINGENCY.label),
-            (choices.Mandate.PAYMENT.value, 'Modalidad del contrato'),
+            (choices.Mandate.PAYMENT.value, choices.Mandate.PAYMENT.label),
             (choices.Mandate.PRO_BONO.value, choices.Mandate.PRO_BONO.label),
             (choices.Mandate.GUARDIANSHIP.value, choices.Mandate.GUARDIANSHIP.label),
         ]

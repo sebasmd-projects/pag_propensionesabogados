@@ -711,7 +711,7 @@ class CaseModel(TimeStampedModel):
     @property
     def public_mandate(self) -> str:
         """
-        La modalidad del contrato, tal y como se le ensena al cliente.
+        El esquema de honorarios, tal y como se le ensena al cliente.
 
         Sale del bloque economico, que por lo demas no se asoma al portal:
         esta fila es la excepcion, y esta en la pantalla aprobada
@@ -813,6 +813,40 @@ class CaseModel(TimeStampedModel):
         ]
 
 
+#: Las reglas de categoria, sueltas para poder combinarlas: `debtors()` las
+#: suma, `unclassified()` las resta. Una sola definicion por regla, para que el
+#: cuadro y la red que lo cierra no puedan discrepar.
+_DEBTOR = (
+    Q(mandate=choices.Mandate.PAYMENT, agreed_fee__gt=F('paid_amount'))
+    | Q(
+        mandate=choices.Mandate.CONTINGENCY,
+        contingency_percentage=0,
+        contingency_value__gt=F('paid_amount'),
+    )
+)
+_EXPECTATION = Q(
+    mandate=choices.Mandate.CONTINGENCY,
+    contingency_percentage__gt=0,
+    contingency_value__gt=0,
+)
+_PAID_IN_FULL = (
+    Q(mandate=choices.Mandate.PAYMENT, agreed_fee__lte=F('paid_amount'))
+    & (Q(agreed_fee__gt=0) | Q(paid_amount__gt=0))
+) | (
+    Q(
+        mandate=choices.Mandate.CONTINGENCY,
+        contingency_percentage=0,
+        contingency_value__lte=F('paid_amount'),
+    )
+    & (Q(contingency_value__gt=0) | Q(paid_amount__gt=0))
+)
+_FIXED_NOT_OWED = Q(
+    mandate=choices.Mandate.CONTINGENCY,
+    contingency_percentage=0,
+    contingency_value__lte=F('paid_amount'),
+)
+
+
 class CaseFinanceQuerySet(models.QuerySet):
     """
     Las preguntas del panel economico y del panel gerencial.
@@ -831,17 +865,10 @@ class CaseFinanceQuerySet(models.QuerySet):
         Quien debe dinero, hoy.
 
         Son dos cosas sumadas, y es la parte que mas se malentiende:
-        `Modalidad de pago` con saldo, **y** `Cuota litis` al 0 %, que no es
+        `Honorarios fijos (abonos)` con saldo, **y** `Cuota litis` al 0 %, que no es
         una expectativa sino un valor fijo cerrado que aun no se ha cobrado.
         """
-        return self.in_dashboard().filter(
-            Q(mandate=choices.Mandate.PAYMENT, agreed_fee__gt=F('paid_amount'))
-            | Q(
-                mandate=choices.Mandate.CONTINGENCY,
-                contingency_percentage=0,
-                contingency_value__gt=F('paid_amount'),
-            )
-        )
+        return self.in_dashboard().filter(_DEBTOR)
 
     def expectations(self):
         """
@@ -850,11 +877,64 @@ class CaseFinanceQuerySet(models.QuerySet):
         No es dinero debido. Se ensena aparte **y ademas** se suma al
         pendiente potencial, tal como lo explica la propia pantalla.
         """
-        return self.in_dashboard().filter(
-            mandate=choices.Mandate.CONTINGENCY,
-            contingency_percentage__gt=0,
-            contingency_value__gt=0,
+        return self.in_dashboard().filter(_EXPECTATION)
+
+    # -- Las categorias del panel ------------------------------------------
+    #
+    # Un asunto tiene que caer en **alguna** categoria del panel, o desaparece
+    # sin que nadie lo note. Cada regla vive aqui, como consulta, y el panel
+    # solo las pinta; `unclassified()` es la red: lo que no encaja en ninguna
+    # de las demas.
+
+    def paid_in_full(self):
+        """
+        Pagados por completo: nada que cobrar y algo que ya entro.
+
+        Modalidad de pago con el abono igual o mayor que lo pactado, y cuota
+        litis al 0 % (valor fijo) con el valor cubierto. Se exige que haya
+        cifra --pactada o pagada--: un asunto con todo a cero no esta
+        «pagado», esta sin rellenar, y eso lo recoge `unclassified()`.
+        """
+        return self.in_dashboard().filter(_PAID_IN_FULL)
+
+    def pro_bono(self):
+        """Ad honorem: no hay dinero de por medio."""
+        return self.in_dashboard().filter(mandate=choices.Mandate.PRO_BONO)
+
+    def guardianship(self):
+        """Curaduria: tampoco hay dinero."""
+        return self.in_dashboard().filter(mandate=choices.Mandate.GUARDIANSHIP)
+
+    def fixed_contingency(self):
+        """
+        Cuota litis al 0 % (valor fijo) que **no** esta en deudores.
+
+        Es decir, la que no debe nada: cubierta o sin valor todavia. Las que
+        deben salen en `debtors()`. Las cubiertas salen tambien en
+        `paid_in_full()`: el cuadro lo justifica porque este es el de la
+        modalidad, con su valor, y aquel el del estado de cobro.
+        """
+        return self.in_dashboard().filter(_FIXED_NOT_OWED)
+
+    def unclassified(self):
+        """
+        En el panel pero sin encajar en ninguna categoria de arriba.
+
+        Son los asuntos con la modalidad puesta y las cifras sin rellenar:
+        una modalidad de pago con todo a cero, o una cuota litis sobre 0 %
+        sin valor. Se ensenan aparte para que se completen, no para que
+        desaparezcan.
+        """
+        return self.in_dashboard().exclude(
+            _DEBTOR | _EXPECTATION | _PAID_IN_FULL | _FIXED_NOT_OWED
+            | Q(mandate__in=(
+                choices.Mandate.PRO_BONO, choices.Mandate.GUARDIANSHIP,
+            ))
         )
+
+    def hidden_from_dashboard(self):
+        """Asuntos vigentes que el despacho marco «No incluir en panel»."""
+        return self.filter(show_in_dashboard=False, case__is_active=True)
 
     def totals(self) -> dict[str, int]:
         """
@@ -862,7 +942,7 @@ class CaseFinanceQuerySet(models.QuerySet):
 
         Reproduce `actualizarPanelGerencial()` del JavaScript:
 
-        - **pactado**: lo cerrado (`Modalidad de pago`, mas la cuota litis
+        - **pactado**: lo cerrado (`Honorarios fijos (abonos)`, mas la cuota litis
           al 0 %, que es valor fijo).
         - **pagado**: lo que ya entro.
         - **saldo**: lo pactado que falta por cobrar.
@@ -1014,7 +1094,7 @@ class CaseFinanceModel(TimeStampedModel):
     Cuatro modalidades, y cada una usa columnas distintas:
 
     ===================  ==========================================
-    `Modalidad de pago`  `agreed_fee` y `paid_amount`; debe la resta
+    Honorarios fijos     `agreed_fee` y `paid_amount`; debe la resta
     `Cuota litis` 0 %    `contingency_value` menos `paid_amount`: valor fijo
     `Cuota litis` > 0 %  `contingency_value`: expectativa, no es deuda
     `Ad honorem`         nada; no hay dinero
@@ -1046,7 +1126,7 @@ class CaseFinanceModel(TimeStampedModel):
     )
 
     mandate = models.CharField(
-        _('contract modality'),
+        _('fee arrangement'),
         max_length=30,
         choices=choices.Mandate.choices
     )
@@ -1192,12 +1272,12 @@ class CaseFinanceModel(TimeStampedModel):
         if self.mandate in (choices.Mandate.PRO_BONO, choices.Mandate.GUARDIANSHIP):
             if self.agreed_fee or self.paid_amount or self.contingency_value:
                 errors['mandate'] = _(
-                    'This modality cannot carry any amount.'
+                    'This fee arrangement cannot carry any amount.'
                 )
 
         if self.mandate == choices.Mandate.PAYMENT and self.contingency_value:
             errors['contingency_value'] = _(
-                'A payment modality does not carry a contingency value.'
+                'Fixed fees do not carry a contingency value.'
             )
 
         if self.mandate == choices.Mandate.CONTINGENCY and self.agreed_fee:

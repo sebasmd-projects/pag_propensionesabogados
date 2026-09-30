@@ -5,7 +5,7 @@
   Panel economico y gerencial.
 
   Las cifras de cabecera salen de `CaseFinanceQuerySet.totals()`, en una
-  sola consulta. Las dos tablas son las dos preguntas que el despacho hace
+  sola consulta. Las dos primeras tablas son las dos preguntas que el despacho hace
   sobre el dinero, y son distintas: quien debe hoy, y cuanto se espera ganar
   si los pleitos salen. La pantalla las separa porque sumarlas seria contar
   dos veces lo mismo.
@@ -174,5 +174,21 @@
     </div>
 
   </div>
+  </section>
+
+  {% comment %}
+    Las demas categorias. Un asunto tiene que salir en alguna: pagados,
+    ad honorem, curaduria, cuota litis al 0 %, sin cifras, fuera del panel,
+    inactivos y sin bloque economico. `tests/test_dashboard_boxes.py` lo
+    comprueba con los datos de prueba.
+  {% endcomment %}
+  <section class="gestor-stage" data-gestor-section aria-label="{% trans 'Other case categories' %}">
+    <h2 class="h5 mb-1">{% trans "Other case categories" %}</h2>
+    <p class="text-muted small">{% trans "Every case appears in at least one table. These are the ones that are not a balance or an expectation." %}</p>
+    <div class="row g-4">
+      {% for box in boxes %}
+        {% include 'case_manager/gestor/partials/category_box.html' %}
+      {% endfor %}
+    </div>
   </section>
 {% endblock gestor_content %}

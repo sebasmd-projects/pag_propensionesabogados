@@ -47,7 +47,7 @@
 
   // Formularios ajenos (p. ej. la nota) también sacan de la página.
   document.addEventListener('submit', event => {
-    if (event.target === form) return;
+    if (event.target === form || event.target.hasAttribute?.('data-unsaved-skip')) return;
     guard(event, () => event.target.submit());
   }, true);
 

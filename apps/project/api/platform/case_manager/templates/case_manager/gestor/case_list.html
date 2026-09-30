@@ -86,6 +86,12 @@
                 {% if not case.is_active %}
                   <span class="badge text-bg-secondary">{% trans "Inactive" %}</span>
                 {% endif %}
+                {% if case.note_count %}
+                  <a href="{% url 'case_manager:gestor_case_update' case.pk %}#notas"
+                     class="badge text-bg-info text-decoration-none" data-note-count="{{ case.note_count }}">
+                    <i class="bi bi-chat-left-text me-1"></i>{% blocktrans count total=case.note_count %}{{ total }} note{% plural %}{{ total }} notes{% endblocktrans %}
+                  </a>
+                {% endif %}
                 {% if case.public_start %}
                   <div class="text-muted small">{{ case.public_elapsed }}</div>
                 {% endif %}

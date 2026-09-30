@@ -98,7 +98,7 @@
             <th scope="col">{% trans "Area / subtype" %}</th>
             <th scope="col">{% trans "Stage" %}</th>
             <th scope="col">{% trans "Elapsed" %}</th>
-            <th scope="col">{% trans "Modality" %}</th>
+            <th scope="col">{% trans "Fee arrangement" %}</th>
             <th scope="col" class="text-end">{% trans "Agreed / expectation" %}</th>
             <th scope="col" class="text-end">{% trans "Paid" %}</th>
             <th scope="col" class="text-end">{% trans "Owes" %}</th>
@@ -136,7 +136,7 @@
               {% comment %}
                 Lo pactado y la expectativa comparten columna porque nunca
                 coinciden: una cuota litis sobre 0 % no tiene nada cerrado, y
-                una modalidad de pago no tiene expectativa. Dos columnas
+                unos honorarios fijos no tienen expectativa. Dos columnas
                 dejarian una siempre vacia en cada fila.
               {% endcomment %}
               <td class="text-end"
@@ -161,6 +161,62 @@
       </table>
       {% if not cases %}
         <p class="text-muted text-center py-4 mb-0" data-dt-fallback>{% trans "This client has no cases yet." %}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% comment %}
+    Las notas de cada asunto. La vista ya las cargaba (`prefetch_related`)
+    y la ficha no las pintaba: quien abria a un cliente con varios asuntos y
+    varias notas no veia ninguna. Ahora salen **todas**, asunto por asunto,
+    de la mas reciente a la mas antigua, con scroll si son muchas. Solo
+    lectura: para cambiar su visibilidad se abre el asunto.
+  {% endcomment %}
+  <div class="card border-0 shadow-sm mt-4" id="notas-del-cliente">
+    <div class="card-header bg-transparent border-0 pt-3 px-4">
+      <h2 class="h6 fw-bold mb-0">
+        <i class="bi bi-chat-left-text me-1"></i>{% trans "Notes by case" %}
+      </h2>
+    </div>
+    <div class="card-body px-4">
+      {% for case in cases %}
+        {% with notes=case.notes.all %}
+          {% if notes %}
+            <div class="mb-4" data-case-notes="{{ case.pk }}">
+              <h3 class="h6">
+                <a href="{% url 'case_manager:gestor_case_update' case.pk %}#notas" class="text-decoration-none">{{ case.service_display }}</a>
+                <span class="badge text-bg-light ms-1">{{ notes|length }}</span>
+                {% if not case.is_active %}<span class="badge text-bg-secondary">{% trans "Inactive" %}</span>{% endif %}
+              </h3>
+              <div class="gestor-notes-list" tabindex="0" role="region"
+                   aria-label="{% trans 'Notes and notices' %}: {{ case.service_display }}">
+                {% for note in notes %}
+                  <div class="gestor-note border-start border-4 border-{{ note.style.tone }} bg-light rounded-end p-3 mb-2"
+                       data-note-visible="{{ note.visible_to_client|yesno:'true,false' }}">
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                      <div>
+                        <span class="badge text-bg-{{ note.style.tone }}"><i class="bi bi-{{ note.style.icon }} me-1"></i>{{ note.get_kind_display }}</span>
+                        <strong class="ms-1">{{ note.title }}</strong>
+                      </div>
+                      <div class="text-muted small">{{ note.created|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="small mt-1">{{ note.body|linebreaks }}</div>
+                    {% if note.visible_to_client %}
+                      <span class="badge text-bg-light"><i class="bi bi-eye me-1"></i>{% trans "Visible in the portal" %}</span>
+                    {% else %}
+                      <span class="badge text-bg-secondary"><i class="bi bi-eye-slash me-1"></i>{% trans "Internal" %}</span>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        {% endwith %}
+      {% empty %}
+        <p class="text-muted mb-0">{% trans "This client has no cases yet." %}</p>
+      {% endfor %}
+      {% if cases and not has_notes %}
+        <p class="text-muted mb-0">{% trans "No notes on this client's cases yet." %}</p>
       {% endif %}
     </div>
   </div>

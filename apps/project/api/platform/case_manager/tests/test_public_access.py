@@ -613,7 +613,7 @@ class PublicCardFieldsTests(TestCase):
 
         respuesta = self.consultar()
 
-        self.assertContains(respuesta, 'Modalidad de pago')
+        self.assertContains(respuesta, 'Fixed fees (installments)')
         self.assertNotContains(respuesta, '8123456')
         self.assertNotContains(respuesta, '8.123.456')
         self.assertNotContains(respuesta, '3111222')

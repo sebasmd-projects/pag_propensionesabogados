@@ -70,7 +70,7 @@ class CaseFinanceInline(CaseManagerAdminMixin, admin.StackedInline):
 
     Va como `inline` y no como una entrada suelta del menu porque un importe
     sin su caso delante no se puede revisar: el saldo solo significa algo
-    junto a la modalidad del contrato.
+    junto al esquema de honorarios.
     """
 
     model = CaseFinanceModel
@@ -88,7 +88,7 @@ class CaseFinanceInline(CaseManagerAdminMixin, admin.StackedInline):
                 'value, and it counts as debt, not as an expectation.'
             ),
         }),
-        (_('Payment modality'), {
+        (_('Fixed fees (installments)'), {
             'fields': ('agreed_fee', 'paid_amount'),
         }),
         (_('Calculated'), {

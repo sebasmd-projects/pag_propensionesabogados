@@ -27,12 +27,13 @@ superusuario. A quien ha entrado pero no tiene el grupo se le responde 404, no
 
 import uuid
 
+from auditlog.context import set_actor
 from django.contrib import messages
 from django.db import transaction
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.db.models import Count, Q
+from django.db.models import Count, Prefetch, Q
 from django.urls import reverse_lazy
 from django.utils.cache import patch_vary_headers
 from django.utils.translation import gettext_lazy as _
@@ -41,6 +42,7 @@ from django.views.generic.edit import CreateView, UpdateView
 
 from .access import GestorRequiredMixin
 from .choices import Mandate, NoteKind
+from .dashboard_boxes import build_boxes
 from .emails import send_case_note
 from .financial_chart import build_financial_chart
 from .forms import CaseFinanceFormSet, CaseForm, CaseNoteForm, ClientForm
@@ -56,6 +58,18 @@ from .reports import client_report, crm_report
 #: Es una decision de escala, no de gusto: el despacho tiene clientes y
 #: asuntos en cientos, no en cientos de miles. El dia que no quepan, lo que
 #: toca es el modo de servidor de DataTables, no volver a este.
+
+
+def _case_notes(case):
+    """
+    **Todas** las notas del asunto, de la mas reciente a la mas antigua.
+
+    El orden es explicito --`-created` y luego `-pk` para desempatar--: no se
+    fia del `Meta.ordering` del modelo, que un `annotate` o un `values`
+    cualquiera dejaria sin efecto. No hay limite ni recorte: si son muchas, la
+    plantilla las deja en una lista con scroll.
+    """
+    return case.notes.select_related('created_by').order_by('-created', '-pk')
 
 
 def _client_or_none(pedido):
@@ -155,6 +169,7 @@ class GestorDashboardView(GestorRequiredMixin, TemplateView):
             .select_related('case', 'case__client')
             .order_by('-contingency_value')
         )
+        context['boxes'] = build_boxes()
         context['counters'] = ClientModel.objects.aggregate(
             clients=Count('pk'),
             active_clients=Count('pk', filter=Q(is_active=True)),
@@ -239,8 +254,14 @@ class ClientDetailView(GestorRequiredMixin, DetailView):
         context['cases'] = (
             CaseModel.objects.filter(client=cliente)
             .select_related('finance')
-            .prefetch_related('notes')
+            .prefetch_related(Prefetch(
+                'notes',
+                queryset=CaseNoteModel.objects.order_by('-created', '-pk'),
+            ))
             .order_by('-is_active', '-updated')
+        )
+        context['has_notes'] = any(
+            case.notes.all() for case in context['cases']
         )
         context['gestor_title'] = cliente.full_name
         context['gestor_subtitle'] = _('Client file and financial summary.')
@@ -343,7 +364,12 @@ class CaseListView(GestorRequiredMixin, ListView):
     context_object_name = 'cases'
 
     def get_queryset(self):
-        queryset = CaseModel.objects.select_related('client', 'finance')
+        # `note_count` para que el listado diga cuales llevan notas: la ficha
+        # del asunto las tiene abajo del todo y, sin este aviso, quien busca
+        # «el caso con varias notas» no tiene por donde empezar.
+        queryset = CaseModel.objects.select_related(
+            'client', 'finance'
+        ).annotate(note_count=Count('notes', distinct=True))
 
         # Un identificador que no existe --o que ni siquiera es un UUID-- se
         # ignora y se ensena la lista entera, en vez de reventar con un 500
@@ -378,7 +404,7 @@ class CaseFormMixin:
 
     Son dos formularios --uno del asunto, otro del formset del dinero-- y un
     solo boton. Si se guardara el asunto y fallara el dinero, quedaria un
-    expediente sin modalidad de contrato que no suma en ningun panel y que
+    expediente sin esquema de honorarios que no suma en ningun panel y que
     nadie sabria que esta a medias. La transaccion lo impide.
 
     (`ATOMIC_REQUESTS` ya envuelve la peticion entera, pero esto no depende de
@@ -394,7 +420,7 @@ class CaseFormMixin:
         context = super().get_context_data(**kwargs)
 
         if self.object and self.object.pk:
-            context['notes'] = self.object.notes.select_related('created_by')
+            context['notes'] = _case_notes(self.object)
             context.setdefault('note_form', CaseNoteForm())
 
         if 'finance_formset' not in context:
@@ -606,6 +632,59 @@ class CaseToggleSettlementView(GestorRequiredMixin, View):
         return redirect('case_manager:gestor_case_list')
 
 
+class CaseNoteVisibilityView(GestorRequiredMixin, View):
+    """
+    Muestra u oculta una nota ya creada en el portal del cliente.
+
+    Solo cambia `visible_to_client`: **no reenvia nada**. Si la nota se mando
+    por correo, `notified_at` se queda como estaba y no se vuelve a llamar a
+    `send_case_note`. Cambiar quien la ve no es avisar de nuevo.
+
+    Va por `POST` (con el CSRF de siempre) y con el mismo permiso que el resto
+    del gestor. El valor viene explicito en `visible` (`1` = la ve el cliente,
+    cualquier otra cosa o ausente = interna): una casilla sin marcar no manda
+    nada, y asi el envio sin JavaScript tambien dice lo que quiere.
+
+    Con `X-Requested-With: fetch` contesta JSON y la ficha no se recarga; sin
+    esa cabecera redirige a la ficha, con un aviso. La nota tiene que ser del
+    asunto de la URL: si no, 404.
+
+    `CaseNoteModel` esta registrado en auditlog, asi que el cambio deja rastro
+    con el usuario, sin codigo extra.
+    """
+
+    http_method_names = ['post']
+
+    def post(self, request, pk, note_pk):
+        note = get_object_or_404(CaseNoteModel, pk=note_pk, case_id=pk)
+        visible = request.POST.get('visible') == '1'
+
+        if note.visible_to_client != visible:
+            note.visible_to_client = visible
+            # El actor se fija a mano: `AuditlogMiddleware` esta antes que
+            # `AuthenticationMiddleware` en `MIDDLEWARE` y, cuando lee
+            # `request.user`, todavia no existe, asi que el rastro saldria
+            # sin usuario.
+            with set_actor(request.user):
+                note.save(update_fields=['visible_to_client', 'updated'])
+
+        if request.headers.get('X-Requested-With') == 'fetch':
+            return JsonResponse({
+                'visible': note.visible_to_client,
+                'notified': note.notified_at is not None,
+            })
+
+        messages.success(
+            request,
+            _('The note is now visible in the portal.')
+            if note.visible_to_client
+            else _('The note is now internal: the client will not see it.'),
+        )
+        return redirect(
+            reverse('case_manager:gestor_case_update', args=[pk]) + '#notas'
+        )
+
+
 class CaseNoteCreateView(GestorRequiredMixin, CreateView):
     """
     Anade una novedad a un asunto, y la manda al cliente si se marco.
@@ -674,7 +753,7 @@ class CaseNoteCreateView(GestorRequiredMixin, CreateView):
                 'form': CaseForm(instance=self.case),
                 'finance_formset': _Formset(instance=self.case),
                 'object': self.case,
-                'notes': self.case.notes.select_related('created_by'),
+                'notes': _case_notes(self.case),
                 'note_form': form,
                 'gestor_title': _('Edit case'),
                 'gestor_section': 'cases',

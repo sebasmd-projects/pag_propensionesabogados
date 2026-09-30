@@ -3,7 +3,9 @@
 //   CASE_FLOW_HTML_DIR=<dir> python manage.py test ...tests.test_dynamic_flow
 //   node gestor_ui.cjs <dir>
 // (el mismo directorio trae dashboard.html y chart_partial.html si se ejecuta test_gestor:
-//  filtros, tooltip y refresco parcial del periodo, con fetch simulado)
+//  filtros, tooltip y refresco parcial del periodo, con fetch simulado; y notes.html +
+//  notes_url.txt si se ejecuta test_note_visibility: interruptor de notas. Los botones
+//  flotantes (tooltip a 1 s, clic y doble clic) se prueban sobre edit.html)
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -11,8 +13,8 @@ const { JSDOM } = require('jsdom');
 
 const html = fs.readFileSync(path.join(process.argv[2], 'edit.html'), 'utf8');
 
-function boot() {
-  const dom = new JSDOM(html, {runScripts: 'outside-only', pretendToBeVisual: true, url: 'http://localhost/gestor/asuntos/1/'});
+function boot(source = html) {
+  const dom = new JSDOM(source, {runScripts: 'outside-only', pretendToBeVisual: true, url: 'http://localhost/gestor/asuntos/1/'});
   const w = dom.window;
   w.HTMLFormElement.prototype.requestSubmit = function () {
     const event = new w.Event('submit', {bubbles: true, cancelable: true});
@@ -20,7 +22,8 @@ function boot() {
     this.submitted = (this.submitted || 0) + 1;
   };
   w.HTMLFormElement.prototype.submit = function () { this.submitted = (this.submitted || 0) + 1; };
-  const wanted = ['const source =', 'Importes en pesos', 'Gestión de Pagos se inicializa', 'Aviso de cambios'];
+  const wanted = ['const source =', 'Importes en pesos', 'Gestión de Pagos se inicializa', 'Aviso de cambios',
+    'TIP_DELAY', 'form[data-note-visibility]'];
   for (const script of w.document.querySelectorAll('script:not([src])')) {
     if (wanted.some(text => script.textContent.includes(text))) w.eval(script.textContent);
   }
@@ -390,5 +393,156 @@ const type = (w, input, text) => {
     }
   }
 
-  console.log('Formato COP, copia limpia, fechas sin truncar, aviso de cambios, filtros independientes, tooltip y refresco parcial verificados.');
+  // ---- Botones flotantes: tooltip a 1 s, clic y doble clic ----
+  {
+    const nw = boot();
+    const nd = nw.document;
+    await tick(nw, 30);
+    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const up = nd.querySelector('.scroll-top');
+    const down = nd.querySelector('.gestor-next-section');
+    assert(up && down, 'existen el botón de subir y el de siguiente sección');
+    down.hidden = false;
+    const tipOf = el => nd.getElementById(el.getAttribute('aria-describedby'));
+
+    // Enlazado accesible y sin title nativo.
+    assert(tipOf(up) && tipOf(up).getAttribute('role') === 'tooltip');
+    assert(!up.hasAttribute('title') && !down.hasAttribute('title'));
+    assert.deepEqual([...tipOf(up).querySelectorAll('span')].map(s => s.textContent),
+      ['Clic: sección anterior', 'Doble clic: ir al inicio']);
+    assert.deepEqual([...tipOf(down).querySelectorAll('span')].map(s => s.textContent),
+      ['Clic: sección siguiente']);
+    assert(tipOf(up).hidden, 'oculto de entrada');
+
+    // Ratón: no antes de 1 s; sí después; se cierra al salir.
+    up.dispatchEvent(new nw.MouseEvent('mouseenter'));
+    await pause(600);
+    assert(tipOf(up).hidden, 'a los 0,6 s todavía no');
+    await pause(550);
+    assert(!tipOf(up).hidden, 'pasado 1 s se muestra');
+    up.dispatchEvent(new nw.MouseEvent('mouseleave'));
+    assert(tipOf(up).hidden);
+
+    // Salir antes de 1 s cancela el temporizador.
+    up.dispatchEvent(new nw.MouseEvent('mouseenter'));
+    await pause(400);
+    up.dispatchEvent(new nw.MouseEvent('mouseleave'));
+    await pause(800);
+    assert(tipOf(up).hidden, 'salir antes de 1 s lo cancela');
+
+    // Foco de teclado: mismo retraso; Escape lo cierra.
+    up.focus();
+    await pause(1100);
+    assert(!tipOf(up).hidden, 'el foco también lo muestra a 1 s');
+    up.dispatchEvent(new nw.KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+    assert(tipOf(up).hidden, 'Escape lo cierra');
+    up.blur();
+
+    // Clic = sección anterior; doble clic = inicio; el de abajo = siguiente.
+    const tops = [-800, -100, 600];
+    const sections = [...nd.querySelectorAll('[data-gestor-section]')].slice(0, 3);
+    assert.equal(sections.length, 3, 'la ficha trae al menos tres secciones');
+    nd.querySelectorAll('[data-gestor-section]').forEach(section => {
+      section.getClientRects = () => [1];
+      section.getBoundingClientRect = () => ({top: 9999});
+    });
+    sections.forEach((section, index) => { section.getBoundingClientRect = () => ({top: tops[index]}); });
+    nw.matchMedia = () => ({matches: false});
+    const reached = [];
+    nw.HTMLElement.prototype.scrollIntoView = function () { reached.push(this); };
+    let scrolledTop = 0;
+    nw.scrollTo = () => { scrolledTop += 1; };
+    const fire = (el, type, detail) => el.dispatchEvent(new nw.MouseEvent(type, {bubbles: true, cancelable: true, detail}));
+
+    fire(up, 'click', 1);
+    await pause(400);
+    assert.deepEqual(reached, [sections[0]], 'un clic va a la sección anterior');
+    assert.equal(scrolledTop, 0);
+
+    reached.length = 0;
+    fire(up, 'click', 1);
+    fire(up, 'click', 2);
+    fire(up, 'dblclick', 2);
+    await pause(400);
+    assert.equal(reached.length, 0, 'el doble clic no salta a la sección anterior');
+    assert.equal(scrolledTop, 1, 'el doble clic va al inicio');
+
+    fire(down, 'click', 1);
+    assert.equal(reached[0], sections[2], 'el botón de abajo va a la siguiente');
+  }
+
+  // ---- Notas: interruptor de visibilidad sin recargar ----
+  const notesFile = path.join(process.argv[2], 'notes.html');
+  if (fs.existsSync(notesFile)) {
+    const notesHtml = fs.readFileSync(notesFile, 'utf8');
+    const urlToggle = fs.readFileSync(path.join(process.argv[2], 'notes_url.txt'), 'utf8').trim();
+    const setup = fetchImpl => {
+      const nw = boot(notesHtml);
+      nw.fetch = fetchImpl;
+      return nw;
+    };
+    const calls = [];
+    const nw = setup(async (url, options) => {
+      calls.push({url, options});
+      return {ok: true, redirected: false, json: async () => ({visible: options.body.get('visible') === '1', notified: true})};
+    });
+    const nd = nw.document;
+    await tick(nw, 20);
+    nw.dispatchEvent(new nw.Event('load'));
+    await tick(nw, 20);
+    const form = nd.querySelector('form[data-note-visibility]');
+    assert(form && form.hasAttribute('data-unsaved-skip'));
+    const box = form.querySelector('input[name="visible"]');
+    const note = form.closest('[data-note]');
+    const modal = nd.getElementById('cambiosSinGuardar');
+    assert(box.checked && note.dataset.noteVisible === 'true');
+
+    // El formulario del asunto está sucio: cambiar la nota no debe avisar.
+    const number = nd.getElementById('id_case_number');
+    number.value = 'CAMBIO-1';
+    number.dispatchEvent(new nw.Event('input', {bubbles: true}));
+
+    box.checked = false;
+    box.dispatchEvent(new nw.Event('change', {bubbles: true}));
+    await tick(nw, 20);
+    assert.equal(calls.length, 1, 'un solo POST, sin recargar');
+    assert.equal(calls[0].url, form.action);
+    assert(calls[0].url.endsWith(urlToggle), calls[0].url);
+    assert.equal(calls[0].options.method, 'POST');
+    assert.equal(calls[0].options.headers['X-Requested-With'], 'fetch');
+    assert.equal(calls[0].options.body.get('visible'), '0', 'casilla sin marcar viaja como 0');
+    assert(calls[0].options.body.get('csrfmiddlewaretoken'), 'lleva el CSRF');
+    assert.equal(note.dataset.noteVisible, 'false');
+    assert(note.querySelector('[data-note-state]').textContent.includes('Interna'));
+    assert(note.querySelector('[data-note-status]').textContent.includes('interna'));
+    assert(!modal.classList.contains('show'), 'no dispara el aviso de cambios sin guardar');
+    const submit = new nw.Event('submit', {bubbles: true, cancelable: true});
+    form.dispatchEvent(submit);
+    assert(!submit.defaultPrevented, 'el envío de la nota no lo detiene el aviso');
+
+    box.checked = true;
+    box.dispatchEvent(new nw.Event('change', {bubbles: true}));
+    await tick(nw, 20);
+    assert.equal(calls[1].options.body.get('visible'), '1');
+    assert.equal(note.dataset.noteVisible, 'true');
+    assert(note.querySelector('[data-note-state]').textContent.includes('Visible en el portal'));
+
+    // Fallo: el interruptor vuelve atrás y se avisa.
+    for (const failing of [
+      async () => { throw new Error('red caída'); },
+      async () => ({ok: false, redirected: false, json: async () => ({})}),
+      async () => ({ok: true, redirected: true, json: async () => ({})}),
+    ]) {
+      const fw = setup(failing);
+      const fbox = fw.document.querySelector('form[data-note-visibility] input[name="visible"]');
+      fbox.checked = false;
+      fbox.dispatchEvent(new fw.Event('change', {bubbles: true}));
+      await tick(fw, 20);
+      assert.equal(fbox.checked, true, 'vuelve a su estado anterior');
+      assert(fw.document.querySelector('[data-note-status]').textContent.includes('No se pudo guardar'));
+      assert.equal(fw.document.querySelector('[data-note]').dataset.noteVisible, 'true');
+    }
+  }
+
+  console.log('Formato COP, copia limpia, fechas sin truncar, aviso de cambios, filtros independientes, tooltip, refresco parcial, botones flotantes e interruptor de notas verificados.');
 })().catch(error => { console.error(error); process.exit(1); });

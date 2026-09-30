@@ -36,6 +36,39 @@
   outline-offset: 3px;
 }
 
+/* Tooltip de los botones flotantes: dos lineas, sobre el boton. */
+.gestor-nav-tooltip {
+  position: fixed;
+  z-index: 100000;
+  max-width: 16rem;
+  padding: .4rem .65rem;
+  border-radius: .35rem;
+  background: #212529;
+  color: #fff;
+  font-size: .8rem;
+  line-height: 1.35;
+  box-shadow: 0 3px 12px #0004;
+  pointer-events: none;
+}
+.gestor-nav-tooltip[hidden] { display: none; }
+.gestor-nav-tooltip span { display: block; }
+
+/* Notas del asunto: todas, con scroll cuando son muchas. */
+.gestor-notes-list {
+  max-height: 34rem;
+  overflow-y: auto;
+  padding-right: .25rem;
+}
+.gestor-notes-list:focus-visible {
+  outline: 3px solid var(--bs-info);
+  outline-offset: 2px;
+}
+.gestor-note[data-note-visible="false"] {
+  border-style: dashed !important;
+  border-left-style: solid !important;
+}
+.gestor-note-switch.busy { opacity: .6; pointer-events: none; }
+
 @keyframes gestor-bounce {
   0%, 100% { transform: translateY(-3px); }
   50% { transform: translateY(4px); }

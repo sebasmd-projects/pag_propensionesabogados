@@ -122,7 +122,7 @@ class PoliceInstance(models.TextChoices):
 
 class Mandate(models.TextChoices):
     """
-    Modalidad del contrato. Es el campo del que cuelga todo el dinero.
+    Esquema de honorarios. Es el campo del que cuelga todo el dinero.
 
     Cual de los cuatro sea decide que columnas tienen sentido y como suma el
     caso en el panel: ver ``CaseFinanceModel``.
@@ -131,7 +131,10 @@ class Mandate(models.TextChoices):
     PRO_BONO = 'Ad honorem', _('Ad honorem')
     CONTINGENCY = 'Cuota litis', _('Cuota litis')
     GUARDIANSHIP = 'Curaduría', _('Curaduría')
-    PAYMENT = 'Modalidad de pago', _('Modalidad de pago')
+    #: Se guarda como `'Modalidad de pago'` --los datos ya existentes y la
+    #: importacion dependen de ese valor-- pero se **muestra** como honorarios
+    #: fijos pagados por abonos.
+    PAYMENT = 'Modalidad de pago', _('Fixed fees (installments)')
 
 
 class NoteKind(models.TextChoices):

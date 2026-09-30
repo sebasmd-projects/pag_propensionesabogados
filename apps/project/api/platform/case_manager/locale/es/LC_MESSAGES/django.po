@@ -30,10 +30,6 @@ msgid ""
 "counts as debt, not as an expectation."
 msgstr ""
 
-#: apps/project/api/platform/case_manager/admin.py:91
-msgid "Payment modality"
-msgstr "Modalidad de pago"
-
 #: apps/project/api/platform/case_manager/admin.py:94
 msgid "Calculated"
 msgstr "Calculado"
@@ -267,8 +263,8 @@ msgid "Curaduría"
 msgstr "Curaduría"
 
 #: apps/project/api/platform/case_manager/choices.py:117
-msgid "Modalidad de pago"
-msgstr "Modalidad de pago"
+msgid "Fixed fees (installments)"
+msgstr "Honorarios fijos (abonos)"
 
 #: apps/project/api/platform/case_manager/choices.py:131
 msgid "Update"
@@ -723,8 +719,8 @@ msgid "Month and year the matter started."
 msgstr "Mes y año en que empezó el asunto."
 
 #: apps/project/api/platform/case_manager/models.py:876
-msgid "contract modality"
-msgstr "modalidad del contrato"
+msgid "fee arrangement"
+msgstr "esquema de honorarios"
 
 #: apps/project/api/platform/case_manager/models.py:882
 msgid "contingency percentage"
@@ -782,12 +778,12 @@ msgstr[1] "%d meses"
 msgstr[2] "%d meses"
 
 #: apps/project/api/platform/case_manager/models.py:1022
-msgid "This modality cannot carry any amount."
-msgstr "Esta modalidad no puede llevar ningún importe."
+msgid "This fee arrangement cannot carry any amount."
+msgstr "Este esquema de honorarios no puede llevar ningún importe."
 
 #: apps/project/api/platform/case_manager/models.py:1027
-msgid "A payment modality does not carry a contingency value."
-msgstr "Una modalidad de pago no lleva valor de cuota litis."
+msgid "Fixed fees do not carry a contingency value."
+msgstr "Los honorarios fijos no llevan valor de cuota litis."
 
 #: apps/project/api/platform/case_manager/models.py:1031
 msgid "Una cuota litis no admite honorarios pactados."
@@ -973,8 +969,8 @@ msgstr "Tiempo"
 #: apps/project/api/platform/case_manager/reports.py:229
 #: apps/project/api/platform/case_manager/reports.py:319
 #: apps/project/api/platform/case_manager/templates/case_manager/gestor/client_detail.html:88
-msgid "Modality"
-msgstr "Modalidad"
+msgid "Fee arrangement"
+msgstr "Esquema de honorarios"
 
 #: apps/project/api/platform/case_manager/reports.py:229
 #: apps/project/api/platform/case_manager/reports.py:319
@@ -1139,10 +1135,6 @@ msgstr "Subtipo / especialidad"
 #: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:290
 msgid "Second sublevel"
 msgstr "Segundo subnivel"
-
-#: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:292
-msgid "Contract modality"
-msgstr "Modalidad del contrato"
 
 #: apps/project/api/platform/case_manager/templates/case_manager/consultar_proceso.html:302
 msgid "Process started"
@@ -1845,3 +1837,116 @@ msgstr "Teléfono del representante legal"
 
 #~ msgid "Este segundo subnivel no corresponde al subtipo seleccionado."
 #~ msgstr "Este segundo subnivel no corresponde al subtipo seleccionado."
+
+#: nuevas cadenas del lote 2 del gestor
+msgid "Other case categories"
+msgstr "Otras categorías de asuntos"
+
+msgid "Every case appears in at least one table. These are the ones that are not a balance or an expectation."
+msgstr "Todo asunto sale en al menos una tabla. Estos son los que no son un saldo ni una expectativa."
+
+msgid "Not authorized"
+msgstr "No autorizado"
+
+msgid "Covered"
+msgstr "Cubierta"
+
+msgid "No value set"
+msgstr "Sin valor"
+
+msgid "Paid in full"
+msgstr "Pagados por completo"
+
+msgid "No cases paid in full."
+msgstr "No hay asuntos pagados por completo."
+
+msgid "Nothing left to collect, with the settlement letter status (it is authorized from the case list)."
+msgstr "Sin nada por cobrar, con el estado del paz y salvo (se autoriza desde la lista de asuntos)."
+
+msgid "No ad honorem cases."
+msgstr "No hay asuntos ad honorem."
+
+msgid "No curaduría cases."
+msgstr "No hay asuntos de curaduría."
+
+msgid "No money involved: listed so that they are not lost."
+msgstr "Sin dinero de por medio: se listan para que no se pierdan."
+
+msgid "Contingency at 0 % (fixed value)"
+msgstr "Cuota litis al 0 % (valor fijo)"
+
+msgid "No fixed-value contingency cases without a balance."
+msgstr "No hay cuotas litis de valor fijo sin saldo."
+
+msgid "Fixed value with nothing owed: already covered, or without a value yet. Those that still owe are in the balance table."
+msgstr "Valor fijo sin deuda: ya cubierto o aún sin valor. Las que todavía deben están en la tabla de saldos."
+
+msgid "Fixed value"
+msgstr "Valor fijo"
+
+msgid "Amounts not filled in"
+msgstr "Cifras sin rellenar"
+
+msgid "Every case in the dashboard has its amounts filled in."
+msgstr "Todos los asuntos del panel tienen sus cifras rellenas."
+
+msgid "The fee arrangement is set but no amount is: fill them in or they will not add up anywhere."
+msgstr "El esquema de honorarios está puesto pero no hay cifras: rellénelas o no sumarán en ninguna parte."
+
+msgid "Not included in the financial dashboard"
+msgstr "No incluidos en el panel económico"
+
+msgid "No cases are excluded from the financial dashboard."
+msgstr "Ningún asunto queda fuera del panel económico."
+
+msgid "Marked «Do not include in the financial dashboard»: their amounts are not in the totals above."
+msgstr "Marcados «No incluir en panel económico»: sus cifras no están en los totales de arriba."
+
+msgid "Inactive or closed cases"
+msgstr "Asuntos inactivos o cerrados"
+
+msgid "No inactive cases."
+msgstr "No hay asuntos inactivos."
+
+msgid "Cases no longer in force. They are out of the totals whatever their fee arrangement."
+msgstr "Asuntos que ya no están vigentes. Quedan fuera de los totales sea cual sea su esquema de honorarios."
+
+msgid "Cases without financial block"
+msgstr "Asuntos sin bloque económico"
+
+msgid "Every case has its financial block."
+msgstr "Todos los asuntos tienen su bloque económico."
+
+msgid "The fee arrangement has not been filled in yet, so they add up nowhere."
+msgstr "Aún no se rellenó el esquema de honorarios, así que no suman en ninguna parte."
+
+msgid "Created"
+msgstr "Creado"
+
+msgid "Fixed fees with a balance, and 0 % contingency (fixed value) not yet collected in full."
+msgstr "Honorarios fijos con saldo y cuota litis al 0 % (valor fijo) aún no cobrada del todo."
+
+msgid "Contingency above 0 %: what is expected if the case succeeds. Not money owed."
+msgstr "Cuota litis sobre 0 %: lo que se espera si el caso sale. No es dinero debido."
+
+msgid "The note is now visible in the portal."
+msgstr "La nota ahora es visible en el portal."
+
+msgid "The note is now internal: the client will not see it."
+msgstr "La nota ahora es interna: el cliente no la verá."
+
+msgid "Show in the client portal"
+msgstr "Mostrar en el portal del cliente"
+
+msgid "Notes by case"
+msgstr "Notas por asunto"
+
+msgid "No notes on this client's cases yet."
+msgstr "Los asuntos de este cliente todavía no tienen notas."
+
+#, python-format
+msgid "%(total)s note"
+msgid_plural "%(total)s notes"
+msgstr[0] "%(total)s nota"
+msgstr[1] "%(total)s notas"
+msgstr[2] "%(total)s notas"

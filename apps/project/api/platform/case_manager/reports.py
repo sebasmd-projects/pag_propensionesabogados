@@ -237,7 +237,7 @@ def client_report(client: ClientModel, case: CaseModel | None = None) -> HttpRes
         document,
         [
             _('Service'), _('Area'), _('Stage'), _('Elapsed'),
-            _('Modality'), _('Contingency type'), _('Contingency'),
+            _('Fee arrangement'), _('Contingency type'), _('Contingency'),
             _('Agreed / expectation'), _('Paid'), _('Owes'),
         ],
         [_fila_de_asunto(case) for case in cases],
@@ -327,7 +327,7 @@ def crm_report() -> HttpResponse:
         document,
         [
             _('Client'), _('Identification'), _('Area'), _('Started'),
-            _('Elapsed'), _('Modality'), _('Contingency type'),
+            _('Elapsed'), _('Fee arrangement'), _('Contingency type'),
             _('Agreed / expectation'), _('Paid'), _('Owes'),
         ],
         [

@@ -10,11 +10,12 @@
   Espera `object` (el asunto), `notes` y `note_form`.
 {% endcomment %}
 
-<section class="gestor-stage--compact" data-gestor-section aria-label="Notas y avisos">
+<section class="gestor-stage--compact" id="notas" data-gestor-section aria-label="Notas y avisos">
 <div class="card border-0 shadow-sm mb-4">
   <div class="card-header bg-transparent border-0 pt-3">
     <h2 class="h6 fw-bold mb-0">
       <i class="bi bi-chat-left-text me-1"></i>{% trans "Notes and notices" %}
+      <span class="badge text-bg-light ms-1" data-notes-count>{{ notes|length }}</span>
     </h2>
     <p class="text-muted small mb-0">
       {% blocktrans %}What the client reads in the portal, and what gets emailed to them.{% endblocktrans %}
@@ -56,8 +57,23 @@
       </div>
     {% endif %}
 
+    {% comment %}
+      **Todas** las notas, de la mas reciente a la mas antigua. Con muchas, la
+      lista hace scroll dentro de su caja (`.gestor-notes-list`) en vez de
+      alargar la ficha; el contador de arriba dice cuantas hay.
+
+      Cada nota lleva su interruptor de visibilidad en el portal. Es un
+      `<form>` propio --las notas estan fuera del formulario del asunto-- y
+      `data-unsaved-skip` evita que el aviso de cambios sin guardar salte por
+      cambiar quien ve una nota. Sin JavaScript, el boton de guardar hace el
+      mismo `POST`; con JavaScript se envia con `fetch` y la pagina no se
+      recarga (`note_visibility.js`).
+    {% endcomment %}
+    <div class="gestor-notes-list" tabindex="0" role="region"
+         aria-label="{% trans 'Notes and notices' %}" data-notes-list>
     {% for note in notes %}
-      <div class="border-start border-4 border-{{ note.style.tone }} bg-light rounded-end p-3 mb-3">
+      <div class="gestor-note border-start border-4 border-{{ note.style.tone }} bg-light rounded-end p-3 mb-3"
+           data-note data-note-visible="{{ note.visible_to_client|yesno:'true,false' }}">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
           <div>
             <span class="badge text-bg-{{ note.style.tone }}">
@@ -71,16 +87,32 @@
           </div>
         </div>
         <div class="small mb-2">{{ note.body|linebreaks }}</div>
-        <div class="d-flex gap-2 flex-wrap">
-          {% if note.visible_to_client %}
-            <span class="badge text-bg-light">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <span class="badge {% if note.visible_to_client %}text-bg-light{% else %}text-bg-secondary{% endif %}"
+                data-note-state>
+            {% if note.visible_to_client %}
               <i class="bi bi-eye me-1"></i>{% trans "Visible in the portal" %}
-            </span>
-          {% else %}
-            <span class="badge text-bg-secondary">
+            {% else %}
               <i class="bi bi-eye-slash me-1"></i>{% trans "Internal" %}
-            </span>
-          {% endif %}
+            {% endif %}
+          </span>
+          <form method="post" class="d-inline-flex align-items-center gap-2 gestor-note-switch"
+                action="{% url 'case_manager:gestor_case_note_visibility' object.pk note.pk %}"
+                data-note-visibility data-unsaved-skip>
+            {% csrf_token %}
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" role="switch" name="visible" value="1"
+                     id="note-visible-{{ note.pk }}"
+                     {% if note.visible_to_client %}checked{% endif %}>
+              <label class="form-check-label small" for="note-visible-{{ note.pk }}">
+                {% trans "Show in the client portal" %}
+              </label>
+            </div>
+            <noscript>
+              <button type="submit" class="btn btn-sm btn-outline-secondary">{% trans "Save" %}</button>
+            </noscript>
+            <span class="small text-muted" role="status" aria-live="polite" data-note-status></span>
+          </form>
           {% if note.notified_at %}
             <span class="badge text-bg-light">
               <i class="bi bi-envelope-check me-1"></i>
@@ -94,6 +126,8 @@
         {% trans "No notes on this case yet." %}
       </p>
     {% endfor %}
+    </div>
+
 
   </div>
 </div>

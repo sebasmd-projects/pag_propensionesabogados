@@ -1,0 +1,58 @@
+{% load i18n humanize %}
+{% comment %}
+  Un cuadro de categoria del panel (ver `dashboard_boxes.py`).
+
+  Mismo patron que los de deudores y expectativas: tabla `[data-datatable]`,
+  sin filas `colspan` --DataTables espera el mismo numero de celdas en cada
+  fila--, con `data-dt-empty` y un `<p data-dt-fallback>` para cuando no hay
+  nada. Espera `box`.
+{% endcomment %}
+<div class="col-12 col-xl-6" data-dashboard-box="{{ box.key }}">
+  <div class="card border-0 shadow-sm h-100">
+    <div class="card-header bg-transparent border-0 pt-3">
+      <h2 class="h6 fw-bold mb-0">
+        <i class="bi bi-{{ box.icon }} me-1 text-{{ box.tone }}"></i>{{ box.title }}
+        <span class="badge text-bg-light ms-1">{{ box.rows|length }}</span>
+      </h2>
+      <p class="text-muted small mb-0">{{ box.hint }}</p>
+    </div>
+    <div class="card-body pt-2">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0 w-100" id="{{ box.table_id }}"
+               data-datatable data-dt-compact data-dt-order="{{ box.order }}"
+               data-dt-empty="{{ box.empty }}">
+          <thead>
+            <tr class="text-uppercase small text-muted">
+              {% for column in box.columns %}
+                <th scope="col"{% if column.align == 'end' %} class="text-end"{% endif %}>{{ column.label }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in box.rows %}
+              <tr>
+                {% for cell in row.cells %}
+                  <td{% if cell.align == 'end' %} class="text-end"{% endif %}{% if cell.order is not None %} data-order="{{ cell.order }}"{% endif %}>
+                    {% if cell.url %}
+                      <a href="{{ cell.url }}" class="text-decoration-none">{{ cell.text }}</a>
+                      <div class="text-muted small">{{ cell.sub }}</div>
+                    {% elif cell.money %}
+                      ${{ cell.text|intcomma }}
+                    {% elif cell.badge %}
+                      <span class="badge text-bg-{{ cell.badge }}">{{ cell.text }}</span>
+                    {% else %}
+                      {{ cell.text }}
+                    {% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if not box.rows %}
+          <p class="text-muted text-center py-3 mb-0" data-dt-fallback>{{ box.empty }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
