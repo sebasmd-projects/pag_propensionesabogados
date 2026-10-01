@@ -179,13 +179,13 @@ class CertifiedBase(TestCase):
 
         self.gea = FakeGea()
         for target, replacement in (
-            ('apps.project.api.platform.case_manager.gea_client.'
+            ('apps.project.case_manager.gea_client.'
              'requests.request', self.gea),
-            ('apps.project.api.platform.case_manager.paz_y_salvo.'
+            ('apps.project.case_manager.paz_y_salvo.'
              'threading.Thread', InlineThread),
             # En una prueba la conexion es la de la transaccion del test:
             # `close_old_connections()` la cerraria.
-            ('apps.project.api.platform.case_manager.paz_y_salvo.'
+            ('apps.project.case_manager.paz_y_salvo.'
              'close_old_connections', lambda: None),
         ):
             p = mock.patch(target, replacement)

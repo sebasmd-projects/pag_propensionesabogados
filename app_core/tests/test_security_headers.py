@@ -17,11 +17,11 @@ from django.http import HttpResponse
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from apps.project.api.platform.case_manager.choices import Service, Stage
-from apps.project.api.platform.case_manager.models import CaseModel, ClientModel
-from apps.project.api.platform.case_manager.tests.test_access import (
+from apps.project.case_manager.choices import Service, Stage
+from apps.project.case_manager.models import CaseModel, ClientModel
+from apps.project.case_manager.tests.test_access import (
     login_as, make_user)
-from apps.project.api.platform.case_manager.tests.test_public_access import (
+from apps.project.case_manager.tests.test_public_access import (
     identificarse)
 
 REPORT_ONLY = 'Content-Security-Policy-Report-Only'

@@ -237,7 +237,7 @@ class CheckMediaTests(TestCase):
         self.assertIn('dentro de MEDIA_ROOT', out.getvalue())
 
     def test_a_missing_file_is_named(self):
-        from apps.project.api.platform.case_manager.models import (
+        from apps.project.case_manager.models import (
             CaseModel, ClientModel, PazYSalvoDocumentModel)
 
         client = ClientModel.objects.create(

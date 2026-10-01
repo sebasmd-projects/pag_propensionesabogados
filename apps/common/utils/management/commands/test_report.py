@@ -324,7 +324,7 @@ class Command(BaseCommand):
 
         El reparto sale de ``ALL_CUSTOM_APPS`` y no de partir la ruta por
         tramos: las apps estan a profundidades distintas
-        (``apps.common.utils`` y ``apps.project.api.platform.case_manager``),
+        (``apps.common.utils`` y ``apps.project.case_manager``),
         asi que cualquier regla por numero de tramos acierta en unas y falla en
         otras. Se comparan los prefijos de mas largo a mas corto para que
         ``.../internal/code_gen`` no caiga en ``.../internal``.

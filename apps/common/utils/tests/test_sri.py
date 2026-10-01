@@ -230,7 +230,7 @@ class EveryThirdPartyAssetIsPinnedTests(SimpleTestCase):
 
     def test_the_gestor_scripts_are_the_pinned_ones(self):
         """Lo que el gestor carga de fuera, tal como esta hoy."""
-        path = (BASE / 'apps/project/api/platform/case_manager/templates/'
+        path = (BASE / 'apps/project/case_manager/templates/'
                 'case_manager/gestor/partials')
         content = (path / 'datatables_js.html').read_text(encoding='utf-8')
         content += (path / 'datatables.html').read_text(encoding='utf-8')

@@ -32,7 +32,7 @@ from django.test import SimpleTestCase, TestCase
 from apps.common.core.models import ContactModel
 from apps.project.api.platform.auth_platform.models import \
     AttlasInsolvencyAuthModel
-from apps.project.api.platform.case_manager.models import (CaseModel,
+from apps.project.case_manager.models import (CaseModel,
                                                            ClientModel)
 from apps.project.api.platform.insolvency_form.models import (
     AttlasInsolvencyFormModel, AttlasInsolvencySignatureModel)

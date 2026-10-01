@@ -9,8 +9,8 @@ from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.project.api.platform.case_manager.access import GESTOR_GROUP
-from apps.project.api.platform.case_manager.models import (CaseFinanceModel,
+from apps.project.case_manager.access import GESTOR_GROUP
+from apps.project.case_manager.models import (CaseFinanceModel,
                                                            CaseModel,
                                                            ClientModel)
 

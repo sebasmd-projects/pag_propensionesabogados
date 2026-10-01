@@ -30,10 +30,10 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from apps.project.api.platform.case_manager import choices
-from apps.project.api.platform.case_manager.access import GESTOR_GROUP
-from apps.project.api.platform.case_manager.identification import     nit_check_digit
-from apps.project.api.platform.case_manager.models import (CaseFinanceModel,
+from apps.project.case_manager import choices
+from apps.project.case_manager.access import GESTOR_GROUP
+from apps.project.case_manager.identification import     nit_check_digit
+from apps.project.case_manager.models import (CaseFinanceModel,
                                                            CaseModel,
                                                            CaseNoteModel,
                                                            ClientModel)

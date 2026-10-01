@@ -17,7 +17,7 @@ from django.contrib.auth.models import Group
 from django.test import TestCase
 from django.urls import reverse
 
-from apps.project.api.platform.case_manager.access import GESTOR_GROUP
+from apps.project.case_manager.access import GESTOR_GROUP
 
 User = get_user_model()
 

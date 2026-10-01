@@ -43,10 +43,10 @@ class InlineBase(TransactionTestCase):
 
         self.gea = FakeGea()
         for target, replacement in (
-            ('apps.project.api.platform.case_manager.gea_client.'
+            ('apps.project.case_manager.gea_client.'
              'requests.request', self.gea),
             # En linea no hay hilos: si se lanzara uno, la prueba revienta.
-            ('apps.project.api.platform.case_manager.paz_y_salvo.'
+            ('apps.project.case_manager.paz_y_salvo.'
              'threading.Thread', mock.Mock(side_effect=AssertionError(
                  'no debe lanzarse un hilo'))),
         ):
@@ -126,7 +126,7 @@ class ToggleInlineTests(InlineBase):
 
     def test_una_excepcion_inesperada_no_rompe_el_request(self):
         with mock.patch(
-                'apps.project.api.platform.case_manager.paz_y_salvo.certify',
+                'apps.project.case_manager.paz_y_salvo.certify',
                 side_effect=RuntimeError('boom')):
             respuesta = self.gestor.post(self.toggle_url, **ES)
 
@@ -151,7 +151,7 @@ class ToggleInlineTests(InlineBase):
     def test_en_modo_asincrono_se_lanza_un_hilo(self):
         hilo = mock.Mock()
         with mock.patch(
-                'apps.project.api.platform.case_manager.paz_y_salvo.'
+                'apps.project.case_manager.paz_y_salvo.'
                 'threading.Thread', hilo):
             self.gestor.post(self.toggle_url)
 

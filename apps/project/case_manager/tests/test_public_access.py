@@ -217,7 +217,7 @@ class PublicQueryTests(TestCase):
         with patch.object(
             portal_otp, 'send_access_code', create=True, side_effect=OSError
         ), patch(
-            'apps.project.api.platform.case_manager.emails.send_access_code',
+            'apps.project.case_manager.emails.send_access_code',
             side_effect=OSError,
         ):
             response = pedir_codigo(self.client)

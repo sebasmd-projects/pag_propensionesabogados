@@ -86,7 +86,7 @@ CUSTOM_APPS = [
     'apps.project.api.platform.auth_platform',
     'apps.project.api.platform.insolvency_form',
     'apps.project.api.platform.calculator',
-    'apps.project.api.platform.case_manager',
+    'apps.project.case_manager',
 ]
 
 
@@ -201,7 +201,7 @@ TEMPLATES = [
                 f'{UTILS_PATH}.context_processors.custom_processors',
                 # La cabecera del sitio ensena el enlace al gestor solo a
                 # quien puede entrar. El porque, en ese modulo.
-                'apps.project.api.platform.case_manager.context_processors.gestor_access'
+                'apps.project.case_manager.context_processors.gestor_access'
             ],
         },
     },

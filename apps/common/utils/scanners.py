@@ -167,7 +167,7 @@ BANDIT_ACCEPTED = {
     ),
 
     # --- B406: xml.sax ---
-    ('B406', 'apps/project/api/platform/case_manager/paz_y_salvo_pdf.py'): (
+    ('B406', 'apps/project/case_manager/paz_y_salvo_pdf.py'): (
         'Solo importa xml.sax.saxutils.escape, que ESCAPA texto para el '
         'marcado de los parrafos de reportlab; no parsea ningun XML. La regla '
         'salta con cualquier import de xml.sax, y aqui no hay ninguna entrada '

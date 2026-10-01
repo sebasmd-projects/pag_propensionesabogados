@@ -131,8 +131,8 @@ class TheAppOfATestTests(SimpleTestCase):
     def test_it_cuts_at_the_tests_package_however_deep_the_app_is(self):
         self.assertEqual(
             app_of(_fake(
-                'apps.project.api.platform.case_manager.tests.test_gestor')),
-            'project.api.platform.case_manager')
+                'apps.project.case_manager.tests.test_gestor')),
+            'project.case_manager')
 
     def test_something_outside_apps_still_gets_a_name(self):
         self.assertEqual(app_of(_fake('')), 'sin app')
@@ -221,7 +221,7 @@ class TheReportIsOnlyWrittenWhenAskedTests(SimpleTestCase):
 APPS = [
     'apps.common.utils',
     'apps.project.api.platform',
-    'apps.project.api.platform.case_manager',
+    'apps.project.case_manager',
 ]
 
 
@@ -238,14 +238,14 @@ class TheCoverageIsSplitByAppTests(SimpleTestCase):
         Se comparan prefijos de mas largo a mas corto.
         """
         buckets = self._buckets({
-            'apps/project/api/platform/case_manager/access.py':
+            'apps/project/case_manager/access.py':
                 _summary(100, 90),
             'apps/project/api/platform/__init__.py':
                 _summary(200, 200),
         })
 
         self.assertEqual(
-            buckets['project.api.platform.case_manager']['percent'], 90.0)
+            buckets['project.case_manager']['percent'], 90.0)
         self.assertEqual(
             buckets['project.api.platform']['percent'], 100.0)
 
@@ -277,7 +277,7 @@ class TheCoverageIsSplitByAppTests(SimpleTestCase):
         """
         buckets = self._buckets({
             'apps/common/utils/__init__.py': _summary(0, 0),
-            'apps/project/api/platform/case_manager/access.py':
+            'apps/project/case_manager/access.py':
                 _summary(10, 10),
         })
 

@@ -15,8 +15,8 @@ autorizar o reintentar; esto recoge lo que haya quedado PENDING o FAILED.
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from apps.project.api.platform.case_manager import gea_client, paz_y_salvo
-from apps.project.api.platform.case_manager.models import \
+from apps.project.case_manager import gea_client, paz_y_salvo
+from apps.project.case_manager.models import \
     PazYSalvoDocumentModel
 
 Status = PazYSalvoDocumentModel.Status
