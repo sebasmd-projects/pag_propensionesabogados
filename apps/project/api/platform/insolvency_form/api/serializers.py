@@ -363,7 +363,7 @@ class SignatureCreateSerializer(serializers.Serializer):
     signature = serializers.CharField(write_only=True)
     signed = serializers.SerializerMethodField(read_only=True)
 
-    def get_signed(self, obj):
+    def get_signed(self, obj) -> bool:
         # Siempre devolvemos true si llegamos aquí
         return True
 

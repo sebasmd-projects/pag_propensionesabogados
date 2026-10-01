@@ -530,6 +530,11 @@ SPECTACULAR_SETTINGS = {
     'VERSION': 'v1',
     'CONTACT': {'email': 'support@propensionesabogados.com'},
     'TERMS_OF_SERVICE': 'https://fundacionattlas.org/es/documentos/legales/terminos-y-condiciones',
+    # Un solo nombre para el conjunto de opciones de tipo de solicitud de PQRS
+    # (se repite en varios campos y drf-spectacular avisaba del choque).
+    'ENUM_NAME_OVERRIDES': {
+        'RequestTypeEnum': 'apps.project.api.pqrs.models.PQRSModel.RequestTypeChoicesEN',
+    },
     'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated', 'rest_framework.permissions.IsAdminUser'],
 
     'SWAGGER_UI_SETTINGS': {

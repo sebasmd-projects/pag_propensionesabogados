@@ -8,8 +8,9 @@ from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.db import IntegrityError, close_old_connections, transaction
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers, status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -33,6 +34,35 @@ from .serializers import (
     ClientLookupVerifySerializer,
     ClientResponseSerializer,
     ClientSearchSerializer,
+)
+
+
+
+# Esquemas OpenAPI de las respuestas (solo documentacion, no se usan en runtime).
+_DETAIL_SCHEMA = inline_serializer(
+    name='AuthDetailResponse', fields={'detail': serializers.CharField()},
+)
+_CHALLENGE_SCHEMA = inline_serializer(
+    name='ChallengeCreatedResponse', fields={'challenge_id': serializers.UUIDField()},
+)
+_LOGIN_RESPONSE_SCHEMA = inline_serializer(
+    name='AttlasInsolvencyAuthLoginResponse',
+    fields={
+        'token': serializers.CharField(),
+        'expires_in': serializers.IntegerField(),
+        'user': serializers.CharField(),
+    },
+)
+_TOKEN_INFO_SCHEMA = inline_serializer(
+    name='TokenInfoResponse',
+    fields={
+        'document_number': serializers.CharField(),
+        'birth_date': serializers.DateField(),
+    },
+)
+_CONSULTANT_VERIFY_SCHEMA = inline_serializer(
+    name='ConsultantRegisterVerifyResponse',
+    fields={'user': serializers.CharField(), 'email': serializers.EmailField()},
 )
 
 
@@ -125,6 +155,14 @@ class AttlasInsolvencyAuthConsultantsRegisterAPIView(APIView):
 class AttlasInsolvencyAuthLoginAPIView(APIView):
     permission_classes = [HasServerKey]
 
+    @extend_schema(
+        request=AttlasInsolvencyAuthSerializer,
+        responses={
+            200: _LOGIN_RESPONSE_SCHEMA,
+            400: OpenApiTypes.OBJECT,
+            429: _DETAIL_SCHEMA,
+        },
+    )
     def post(self, request):
 
         username = request.data.get('user', '')
@@ -161,6 +199,10 @@ class AttlasInsolvencyAuthLoginAPIView(APIView):
 class TokenInfoAPIView(APIView):
     permission_classes = [HasServerKey]
 
+    @extend_schema(
+        request=None,
+        responses={200: _TOKEN_INFO_SCHEMA, 400: _DETAIL_SCHEMA, 401: _DETAIL_SCHEMA},
+    )
     def get(self, request):
         token = request.headers.get('Authorization', '').replace('Bearer ', '')
 
@@ -213,6 +255,10 @@ def _start_consultant_registration_email(email, code):
 class AttlasInsolvencyAuthConsultantsRegisterVerifyAPIView(APIView):
     permission_classes = [HasServerKey]
 
+    @extend_schema(
+        request=ClientLookupVerifySerializer,
+        responses={200: _CONSULTANT_VERIFY_SCHEMA, 400: _DETAIL_SCHEMA, 429: _DETAIL_SCHEMA},
+    )
     def post(self, request):
         if not consultant_register_verify_ip.consume(request):
             return Response(LOOKUP_LIMIT_DETAIL, status=429)
@@ -251,6 +297,10 @@ class AttlasInsolvencyAuthConsultantsRegisterVerifyAPIView(APIView):
 class ClientLookupView(APIView):
     permission_classes = [HasServerKey]
 
+    @extend_schema(
+        request=ClientSearchSerializer,
+        responses={202: _CHALLENGE_SCHEMA, 429: _DETAIL_SCHEMA},
+    )
     def post(self, request):
         params = ClientSearchSerializer(data=request.data)
         params.is_valid(raise_exception=True)
@@ -283,6 +333,10 @@ class ClientLookupView(APIView):
 class ClientLookupVerifyView(APIView):
     permission_classes = [HasServerKey]
 
+    @extend_schema(
+        request=ClientLookupVerifySerializer,
+        responses={200: ClientResponseSerializer, 400: _DETAIL_SCHEMA, 429: _DETAIL_SCHEMA},
+    )
     def post(self, request):
         if not clients_lookup_verify_ip.consume(request):
             return Response(LOOKUP_LIMIT_DETAIL, status=429)

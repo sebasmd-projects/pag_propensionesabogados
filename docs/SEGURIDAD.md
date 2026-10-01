@@ -141,15 +141,12 @@ generar, ahora sí.
 **Avisos que quedan** en `check --deploy` con el `.env` de producción (0 errores),
 todos de calidad de la documentación generada y ninguno de seguridad:
 
-- `drf_spectacular.W001/W002` (16): serializadores sin adivinar en cinco vistas
-  `APIView` de `auth_platform` (falta `serializer_class` o `@extend_schema`),
-  tres `get_*` de serializador sin tipo (`get_category`, `get_category_en`,
-  `get_signed`), tres autenticadores propios sin `OpenApiAuthenticationExtension`
-  (`LookupOrPlatformTokenAuthentication`, `BearerTokenAuthentication`), un
-  choque de nombres de enumeración (`RequestTypeEnEnum`) y tres `operationId`
-  repetidos en `insolvency-form/`. Arreglarlos cambia el **esquema público**
-  (nombres de operaciones y componentes), que era lo que había que evitar en
-  esta tarea; quedan para una limpieza aparte.
+- `drf_spectacular.W001/W002`: resueltos. Se tiparon `get_category`,
+  `get_category_en` y `get_signed`, hay extensiones de autenticacion en
+  `auth_platform/schema.py`, `ENUM_NAME_OVERRIDES` fija `RequestTypeEnum`, las
+  cinco `APIView` de `auth_platform` llevan `@extend_schema` y `insolvency-form/`
+  (sin id) usa `InsolvencyFormMeView` con `operationId` propios
+  (`v1_insolvency_form_me_*`).
 - `security.W019`: `X_FRAME_OPTIONS = 'SAMEORIGIN'` a propósito; la página de
   documentos incrusta sus PDF (`<embed>`) desde el propio sitio.
 

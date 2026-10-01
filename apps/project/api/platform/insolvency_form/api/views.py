@@ -9,7 +9,7 @@ from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -263,3 +263,15 @@ class SignatureCreateAPIView(CreateAPIView):
         sig_obj = serializer.save()
         # Devolver sólo el payload de to_representation()
         return Response(serializer.to_representation(sig_obj), status=status.HTTP_200_OK)
+
+
+@extend_schema_view(
+    get=extend_schema(operation_id='v1_insolvency_form_me_retrieve'),
+    put=extend_schema(operation_id='v1_insolvency_form_me_update'),
+    patch=extend_schema(operation_id='v1_insolvency_form_me_partial_update'),
+)
+class InsolvencyFormMeView(InsolvencyFormWizardView):
+    """
+    Misma vista para `insolvency-form/` (sin id): solo existe para dar
+    operationId distintos en el esquema OpenAPI. El comportamiento es identico.
+    """

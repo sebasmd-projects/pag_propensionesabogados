@@ -11,14 +11,14 @@ class FinancialEducationModelSerializer(ModelSerializer):
         model = FinancialEducationModel
         exclude = ['created', 'updated']
 
-    def get_category(self, obj):
+    def get_category(self, obj) -> list[str]:
         """
         Devuelve el campo `category` como una lista.
         Si está vacío o es None, se retorna una lista vacía.
         """
         return obj.category.split(',') if obj.category else []
 
-    def get_category_en(self, obj):
+    def get_category_en(self, obj) -> list[str]:
         """
         Devuelve el campo `category_en` como una lista.
         Si está vacío o es None, se retorna una lista vacía.
