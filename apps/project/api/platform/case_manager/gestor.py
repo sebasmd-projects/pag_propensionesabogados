@@ -28,13 +28,14 @@ superusuario. A quien ha entrado pero no tiene el grupo se le responde 404, no
 import uuid
 
 from django.contrib import messages
-from django.db import transaction
+from django.db import connection, transaction
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.db.models import Count, Prefetch, Q
 from django.urls import reverse_lazy
 from django.utils.cache import patch_vary_headers
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView, View
 from django.views.generic.edit import CreateView, UpdateView
@@ -605,6 +606,7 @@ class CaseUpdateView(CaseFormMixin, GestorRequiredMixin, UpdateView):
         return CaseModel.objects.select_related('client', 'finance')
 
 
+@method_decorator(transaction.non_atomic_requests, name='dispatch')
 class CaseToggleSettlementView(GestorRequiredMixin, View):
     """
     Autorizar o retirar el paz y salvo de un asunto, desde el listado.
@@ -640,29 +642,81 @@ class CaseToggleSettlementView(GestorRequiredMixin, View):
                 paz_y_salvo.revoke(asunto)
             else:
                 paz_y_salvo.authorize(asunto)
+        # Al salir del `atomic` (la vista no es atomica, ver el decorador) se
+        # confirma y salta el `on_commit`: la certificacion o la revocacion en
+        # gea ya corrio en linea.
 
         # Sin bloqueo: el cliente se carga aparte para el mensaje.
         asunto.client = ClientModel.objects.get(pk=asunto.client_id)
+        nombre = asunto.client.full_name
 
-        plantilla = (
-            _('Settlement letter enabled for %(name)s.')
-            if asunto.paz_y_salvo_authorized
-            else _('Settlement letter disabled for %(name)s.')
-        )
-        messages.success(
-            request, plantilla % {'name': asunto.client.full_name}
-        )
+        if asunto.paz_y_salvo_authorized:
+            self._avisar_autorizacion(request, asunto, nombre)
+        else:
+            self._avisar_retiro(request, asunto, nombre)
         return redirect('case_manager:gestor_case_list')
 
+    @staticmethod
+    def _transaccion_abierta():
+        """True si algo mas grande (p. ej. un test) aun no confirmo: el
+        `on_commit` no ha corrido y no hay resultado que contar."""
+        return connection.in_atomic_block
 
+    def _avisar_autorizacion(self, request, asunto, nombre):
+        documento = (
+            asunto.paz_y_salvo_documents
+            .exclude(status=PazYSalvoDocumentModel.Status.REVOKED)
+            .order_by('-authorized_at').first()
+        )
+        if (documento is None or self._transaccion_abierta()):
+            messages.success(
+                request,
+                _('Settlement letter enabled for %(name)s.') % {'name': nombre})
+        elif documento.is_certified:
+            messages.success(
+                request,
+                _('Settlement letter enabled and certified for %(name)s.')
+                % {'name': nombre})
+        else:
+            messages.warning(
+                request,
+                _('Settlement letter enabled for %(name)s, but it is not '
+                  'certified yet: %(error)s. You can retry it from the case.')
+                % {'name': nombre,
+                   'error': documento.last_error or _('no detail available')})
+
+    def _avisar_retiro(self, request, asunto, nombre):
+        pendiente = (
+            None if self._transaccion_abierta()
+            else asunto.paz_y_salvo_documents.filter(
+                status=PazYSalvoDocumentModel.Status.REVOKED,
+                gea_revoked=False,
+            ).exclude(gea_document_id='').order_by('-revoked_at').first()
+        )
+        if pendiente is not None:
+            messages.warning(
+                request,
+                _('Settlement letter disabled for %(name)s, but revoking it '
+                  'in gea is pending: %(error)s')
+                % {'name': nombre,
+                   'error': pendiente.last_error or _('no detail available')})
+        else:
+            messages.success(
+                request,
+                _('Settlement letter disabled for %(name)s.') % {'name': nombre})
+
+
+@method_decorator(transaction.non_atomic_requests, name='dispatch')
 class CaseRetryCertificationView(GestorRequiredMixin, View):
     """
     Reintenta la certificacion de un paz y salvo que no llego a gea.
 
-    `POST` con CSRF y el mismo permiso que el resto del gestor. Lanza el
-    reintento en segundo plano --gea puede tardar-- y vuelve a la ficha; el
-    resultado se ve en el estado del documento. Ignora el tope de intentos: si
-    alguien pulsa el boton es que quiere que se intente.
+    `POST` con CSRF y el mismo permiso que el resto del gestor. Certifica en
+    linea --el request espera a gea, con los timeouts de `gea_client`-- y
+    vuelve a la ficha con el resultado real: certificado, o el motivo del
+    fallo. Ignora el tope de intentos: si alguien pulsa el boton es que quiere
+    que se intente. No es atomica para no tener una transaccion abierta
+    mientras se espera a gea.
     """
 
     http_method_names = ['post']
@@ -683,10 +737,18 @@ class CaseRetryCertificationView(GestorRequiredMixin, View):
                 _('gea is not configured: the settlement letter cannot be '
                   'certified yet.'))
         else:
-            paz_y_salvo.start_certification(documento.pk, force=True)
-            messages.success(
-                request, _('Certification retry started. Reload in a moment '
-                           'to see the result.'))
+            documento = paz_y_salvo.certify_now(documento.pk, force=True)
+            if documento.is_certified:
+                messages.success(
+                    request, _('The settlement letter was certified.'))
+            elif documento.is_revoked:
+                messages.info(request, _('There is nothing to retry.'))
+            else:
+                messages.error(
+                    request,
+                    _('Certification failed: %(error)s')
+                    % {'error': documento.last_error
+                       or _('no detail available')})
         return redirect('case_manager:gestor_case_update', pk=asunto.pk)
 
 

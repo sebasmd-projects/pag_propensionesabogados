@@ -8,7 +8,8 @@ emitido. Tambien termina las revocaciones que no se pudieron pedir a gea.
 
     manage.py certify_pending_paz_y_salvo [--case <uuid>] [--force]
 
-Pensado para un cron cada pocos minutos.
+Respaldo (cron cada pocos minutos): la certificacion normal corre en linea al
+autorizar o reintentar; esto recoge lo que haya quedado PENDING o FAILED.
 """
 
 from django.conf import settings

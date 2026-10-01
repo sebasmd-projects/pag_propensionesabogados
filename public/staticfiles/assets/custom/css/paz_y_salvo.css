@@ -25,7 +25,7 @@ body{font-family:Arial,Helvetica,sans-serif}
 .nitPS{font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:14pt;margin:0}
 .entidadPS{font-family:Georgia,'Times New Roman',serif;font-size:12.5pt;line-height:1.18;margin:6mm auto 0;max-width:160mm}
 .refPS{font-size:9.5pt;text-align:center;color:#4b5b6b;margin:-6mm 0 8mm}
-.accionesPS{width:210mm;margin:0 auto;padding:4mm 18mm 0;text-align:right}
+.accionesPS{width:210mm;max-width:100%;margin:0 auto;padding:6mm 18mm 10mm;text-align:center;box-sizing:border-box}
 .botonPS{display:inline-block;padding:2mm 4mm;background:#12263a;color:#fff;text-decoration:none;font-size:10pt;border-radius:1mm}
 .avisoPS{font-size:9.5pt;color:#4b5b6b}
 .tituloPS{font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:15pt;text-align:center;margin:12mm 0 10mm;text-transform:uppercase;line-height:1.15}

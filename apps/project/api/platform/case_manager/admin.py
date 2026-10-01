@@ -180,7 +180,7 @@ class CaseAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
 
 @admin.register(PazYSalvoDocumentModel)
 class PazYSalvoDocumentAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
-    """Solo lectura: el estado lo llevan los hilos y el comando, no una mano."""
+    """Solo lectura: el estado lo lleva la certificacion (en linea, con el comando como respaldo), no una mano."""
 
     list_display = (
         'short_case_id', 'status', 'authorized_at', 'gea_code', 'attempts',

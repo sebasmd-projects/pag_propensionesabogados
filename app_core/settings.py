@@ -418,6 +418,11 @@ GEA_CERT_TIMEOUT = (
 )
 #: Intentos maximos de certificacion por documento antes de rendirse.
 PAZ_Y_SALVO_MAX_ATTEMPTS = env_int('PAZ_Y_SALVO_MAX_ATTEMPTS', 5)
+#: False (por defecto): certificar y revocar en linea, en el request, justo
+#: tras confirmar la transaccion. True: en un hilo daemon (no fiable en
+#: Passenger/cPanel, donde el proceso puede congelarse al responder).
+PAZ_Y_SALVO_CERTIFY_ASYNC = os.getenv(
+    'PAZ_Y_SALVO_CERTIFY_ASYNC', 'false').strip().lower() in ('1', 'true', 'yes')
 #: Base publica de la URL que lleva el QR del paz y salvo. gea exige https.
 PAZ_Y_SALVO_PUBLIC_BASE = os.getenv(
     'PAZ_Y_SALVO_PUBLIC_BASE', ''

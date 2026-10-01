@@ -34,15 +34,6 @@
 {% block body_css %}class="paz-y-salvo"{% endblock body_css %}
 
 {% block content %}{% language "es" %}
-  {% if document %}
-    <div class="noPrint accionesPS">
-      {% if document.is_certified and document.public_copy_file %}
-        <a class="botonPS" href="{% url 'case_manager:paz_y_salvo_download' case.pk %}">{% trans "Download distributable copy" %}</a>
-      {% else %}
-        <span class="avisoPS">{% trans "The certified copy is being prepared. Reload in a few minutes to download it." %}</span>
-      {% endif %}
-    </div>
-  {% endif %}
   <div class="paginaPS">
     <div class="encabezadoPS">
       <img class="logoPS" src="{% static 'assets/imgs/consultar_proceso/membrete-paz-y-salvo.jpg' %}"
@@ -83,4 +74,14 @@
       <strong>Firmado por:</strong> Jorge Uriel Vega Londo&ntilde;o &ndash; Representante legal.
     </div>
   </div>
+  {% if document %}
+    {# Debajo de la hoja, centrado; no se imprime. #}
+    <div class="noPrint accionesPS">
+      {% if document.is_certified and document.public_copy_file %}
+        <a class="botonPS" href="{% url 'case_manager:paz_y_salvo_download' case.pk %}">{% trans "Download distributable copy" %}</a>
+      {% else %}
+        <span class="avisoPS">{% trans "The certified copy is being prepared. Reload in a few minutes to download it." %}</span>
+      {% endif %}
+    </div>
+  {% endif %}
 {% endlanguage %}{% endblock content %}

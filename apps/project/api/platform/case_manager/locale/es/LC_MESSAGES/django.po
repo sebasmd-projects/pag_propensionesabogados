@@ -2119,3 +2119,33 @@ msgstr ""
 
 msgid "Reference"
 msgstr "Referencia"
+
+#, python-format
+msgid "Settlement letter enabled and certified for %(name)s."
+msgstr "Paz y salvo habilitado y certificado para %(name)s."
+
+#, python-format
+msgid ""
+"Settlement letter enabled for %(name)s, but it is not certified yet: "
+"%(error)s. You can retry it from the case."
+msgstr ""
+"Paz y salvo habilitado para %(name)s, pero aún no está certificado: "
+"%(error)s. Puede reintentarlo desde el asunto."
+
+msgid "no detail available"
+msgstr "sin detalle disponible"
+
+#, python-format
+msgid ""
+"Settlement letter disabled for %(name)s, but revoking it in gea is pending: "
+"%(error)s"
+msgstr ""
+"Paz y salvo retirado a %(name)s, pero su revocación en gea está pendiente: "
+"%(error)s"
+
+msgid "The settlement letter was certified."
+msgstr "El paz y salvo quedó certificado."
+
+#, python-format
+msgid "Certification failed: %(error)s"
+msgstr "La certificación falló: %(error)s"

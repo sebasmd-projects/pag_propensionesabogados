@@ -1,17 +1,24 @@
 """
 El ciclo de vida del paz y salvo certificado.
 
-    autorizar -> documento PENDING -> (hilo) PDF -> gea -> copia -> CERTIFIED
-    retirar   -> documento REVOKED -> (hilo) revocar en gea
+    autorizar -> documento PENDING -> (al confirmar) PDF -> gea -> copia -> CERTIFIED
+    retirar   -> documento REVOKED -> (al confirmar) revocar en gea
+
+Por defecto todo corre **en linea**, dentro del mismo request y justo despues
+de confirmar la transaccion (`transaction.on_commit`): en Passenger/cPanel los
+hilos en segundo plano no son fiables (el proceso puede congelarse al devolver
+la respuesta) y dejaban los documentos PENDING. Con
+`PAZ_Y_SALVO_CERTIFY_ASYNC=True` se vuelve a lanzar un hilo daemon.
 
 Nada de esto rompe la autorizacion: si gea esta caido o sin configurar, el
 documento queda PENDING o FAILED con su `last_error`, la autorizacion sigue en
-pie y `certify_pending_paz_y_salvo` lo reintenta con la misma
-`idempotency_key`, de modo que reintentar no duplica el certificado.
+pie y se puede reintentar desde la ficha del asunto. El comando
+`certify_pending_paz_y_salvo` queda como respaldo (cron) y reintenta con la
+misma `idempotency_key`, de modo que reintentar no duplica el certificado.
 
-Los hilos son daemon y no reciben el request: ni el usuario, ni la sesion, ni
-la conexion de BD del request. Cada uno abre y cierra la suya, como el correo
-de codigos de `auth_platform`.
+En modo asincrono los hilos no reciben el request: ni el usuario, ni la sesion,
+ni la conexion de BD del request. Cada uno abre y cierra la suya, como el
+correo de codigos de `auth_platform`.
 """
 
 import logging
@@ -67,14 +74,21 @@ def _short_error(error) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Hilos
+# Ejecucion (en linea o en hilo)
 # ---------------------------------------------------------------------------
 
 def _run(target, *args, **kwargs):
+    """Ejecuta sin dejar escapar ninguna excepcion: nunca rompe al llamador."""
     try:
         target(*args, **kwargs)
     except Exception:
-        logger.exception('Paz y salvo: fallo inesperado en el hilo.')
+        logger.exception('Paz y salvo: fallo inesperado.')
+
+
+def _thread_main(target, *args, **kwargs):
+    # Solo el hilo cierra su conexion: en linea se cerraria la del request.
+    try:
+        _run(target, *args, **kwargs)
     finally:
         close_old_connections()
 
@@ -82,18 +96,35 @@ def _run(target, *args, **kwargs):
 def _spawn(target, *args, **kwargs):
     try:
         threading.Thread(
-            target=_run, args=(target, *args), kwargs=kwargs,
+            target=_thread_main, args=(target, *args), kwargs=kwargs,
             daemon=True).start()
     except Exception:
         logger.exception('Paz y salvo: no se pudo iniciar el hilo.')
 
 
+def _dispatch(target, *args, **kwargs):
+    if getattr(settings, 'PAZ_Y_SALVO_CERTIFY_ASYNC', False):
+        _spawn(target, *args, **kwargs)
+    else:
+        _run(target, *args, **kwargs)
+
+
 def start_certification(document_id, *, force=False):
-    _spawn(certify, document_id, force=force)
+    _dispatch(certify, document_id, force=force)
 
 
 def start_revocation(document_id):
-    _spawn(revoke_in_gea, document_id)
+    _dispatch(revoke_in_gea, document_id)
+
+
+def certify_now(document_id, *, force=False):
+    """
+    Certifica en linea y devuelve el documento recargado, pase lo que pase:
+    una excepcion queda en el registro y en `last_error`, nunca sale.
+    """
+    _run(certify, document_id, force=force)
+    document = PazYSalvoDocumentModel.objects.get(pk=document_id)
+    return document
 
 
 # ---------------------------------------------------------------------------
