@@ -21,7 +21,7 @@ body {
 
 .paginaPS {
   width: 210mm;
-  min-height: 297mm;
+  min-height: 100vh;
   margin: 0 auto;
   padding: 9mm 18mm 8mm;
   page-break-inside: avoid
@@ -35,7 +35,7 @@ body {
   width: 34mm;
   height: auto;
   display: block;
-  margin: 0 auto 7mm
+  margin: 0 auto 2mm
 }
 
 .dirPS {
@@ -74,12 +74,11 @@ body {
   margin: -6mm 0 8mm
 }
 
-/* ===== Botón flotante de acciones ===== */
 .accionesPS {
   position: fixed;
   bottom: 1.5rem;
   left: auto;
-  right: 1.5rem;
+  right: 7rem;
   transform: none;
   z-index: 1050;
   width: auto;
@@ -131,7 +130,7 @@ body {
   font-weight: 800;
   font-size: 15pt;
   text-align: center;
-  margin: 12mm 0 10mm;
+  margin: 5mm 0 10mm;
   text-transform: uppercase;
   line-height: 1.15
 }
@@ -140,7 +139,7 @@ body {
   font-size: 11pt;
   line-height: 1.35;
   text-align: justify;
-  margin: 0 0 6mm
+  margin: 0 0 5mm
 }
 
 .fechaPS {
