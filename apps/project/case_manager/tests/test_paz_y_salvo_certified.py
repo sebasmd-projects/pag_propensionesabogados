@@ -12,6 +12,7 @@ el objetivo al llamar a `start()`.
 import hashlib
 import io
 import json
+import os
 import re
 import shutil
 import tempfile
@@ -850,3 +851,73 @@ class SpanishStatusTests(TestCase):
                                   (Status.FAILED, 'Fallido'),
                                   (Status.REVOKED, 'Revocado')):
                 self.assertEqual(PazYSalvoDocumentModel(status=status).get_status_display(), label)
+
+
+class AdminDocumentTests(CertifiedBase):
+    """
+    El admin de solo lectura no puede pedir `.url` a ficheros privados.
+
+    Antes pintaba `<a href=value.url>` y la ficha reventaba con un 500
+    ('Private files have no public URL.').
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.toggle()
+        self.doc = self.document()
+        make_user('jefe', superuser=True)
+        self.admin = Client()
+        login_as(self.admin, 'jefe')
+
+    def change_url(self, doc):
+        return reverse(
+            'admin:case_manager_pazysalvodocumentmodel_change',
+            args=[doc.pk])
+
+    def test_la_ficha_se_abre_con_nombre_y_enlace_de_descarga(self):
+        self.assertTrue(self.doc.source_file)
+        self.assertTrue(self.doc.public_copy_file)
+
+        respuesta = self.admin.get(self.change_url(self.doc))
+        html = respuesta.content.decode()
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIn(os.path.basename(self.doc.source_file.name), html)
+        self.assertIn(os.path.basename(self.doc.public_copy_file.name), html)
+        self.assertIn(reverse(
+            'case_manager:paz_y_salvo_download', args=[self.case.pk]), html)
+        self.assertNotIn('/media/', html)
+
+    def test_el_original_interno_no_lleva_enlace(self):
+        html = self.admin.get(self.change_url(self.doc)).content.decode()
+        nombre = os.path.basename(self.doc.source_file.name)
+
+        self.assertNotIn(f'>{nombre}</a>', html)
+
+    def test_el_gestor_tambien_la_abre(self):
+        make_user('staffgestor', staff=True, gestor=True)
+        gestor = Client()
+        login_as(gestor, 'staffgestor')
+
+        self.assertEqual(
+            gestor.get(self.change_url(self.doc)).status_code, 200)
+
+    def test_un_documento_revocado_muestra_el_nombre_sin_enlace(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.gestor.post(self.toggle_url)   # retira el paz y salvo
+        self.doc.refresh_from_db()
+        self.assertEqual(self.doc.status, Status.REVOKED)
+
+        respuesta = self.admin.get(self.change_url(self.doc))
+        html = respuesta.content.decode()
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIn(os.path.basename(self.doc.public_copy_file.name), html)
+        self.assertNotIn(reverse(
+            'case_manager:paz_y_salvo_download', args=[self.case.pk]), html)
+
+    def test_el_listado_se_abre(self):
+        respuesta = self.admin.get(reverse(
+            'admin:case_manager_pazysalvodocumentmodel_changelist'))
+
+        self.assertEqual(respuesta.status_code, 200)

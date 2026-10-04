@@ -19,8 +19,12 @@ filtros y paginacion propias, exportacion segmentada, papelera, asignacion de
 responsable y reportes gerenciales historicos.
 """
 
+import os
+
 from django.contrib import admin
 from django.db import transaction
+from django.urls import reverse
+from django.utils.html import format_html
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -190,8 +194,63 @@ class PazYSalvoDocumentAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
     search_fields = ('case__id', 'gea_code', 'gea_document_id')
     ordering = ('-authorized_at',)
 
+    #: Los ficheros viven en `PrivateMediaStorage`, que no tiene URL: el admin
+    #: de solo lectura pintaria `<a href=value.url>` y reventaria con un 500.
+    #: Se sustituyen por estos metodos, que no piden nunca `.url`.
+    file_fields = {
+        'source_file': 'source_file_display',
+        'public_copy_file': 'public_copy_file_display',
+    }
+
     def get_readonly_fields(self, request, obj=None):
-        return [field.name for field in self.model._meta.fields]
+        return [
+            self.file_fields.get(field.name, field.name)
+            for field in self.model._meta.fields
+        ]
+
+    def get_fields(self, request, obj=None):
+        # Sin permiso de cambio el admin vuelve de solo lectura todo lo que
+        # hay en los fieldsets: si ahi siguen los FileField, vuelve el 500.
+        return self.get_readonly_fields(request, obj)
+
+    @admin.display(
+        description=PazYSalvoDocumentModel._meta.get_field(
+            'source_file').verbose_name)
+    def source_file_display(self, obj):
+        """Solo el nombre: es el original interno, sin enlace."""
+        if not obj.source_file:
+            return self.get_empty_value_display()
+        return os.path.basename(obj.source_file.name)
+
+    @admin.display(
+        description=PazYSalvoDocumentModel._meta.get_field(
+            'public_copy_file').verbose_name)
+    def public_copy_file_display(self, obj):
+        """
+        El nombre del fichero y, si es el que sirve la descarga, su enlace.
+
+        La descarga solo entrega el ultimo documento certificado de un caso
+        con el paz y salvo autorizado; de cualquier otro (revocado, fallido,
+        anterior) se ensena solo el nombre.
+        """
+        if not obj.public_copy_file:
+            return self.get_empty_value_display()
+
+        name = os.path.basename(obj.public_copy_file.name)
+        served = PazYSalvoDocumentModel.objects.filter(
+            case_id=obj.case_id,
+            status=PazYSalvoDocumentModel.Status.CERTIFIED,
+            case__paz_y_salvo_authorized=True,
+        ).exclude(public_copy_file='').order_by('-authorized_at').first()
+
+        if served is None or served.pk != obj.pk:
+            return name
+
+        return format_html(
+            '<a href="{}">{}</a>',
+            reverse('case_manager:paz_y_salvo_download', args=[obj.case_id]),
+            name,
+        )
 
     def has_add_permission(self, request, obj=None):
         return False
