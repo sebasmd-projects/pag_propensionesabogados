@@ -199,7 +199,9 @@ class PazYSalvoNoSigueElTemaTests(TestCase):
             Path(settings.STATICFILES_DIRS[0])
             / 'assets' / 'custom' / 'css' / 'paz_y_salvo.css'
         )
-        contenido = hoja.read_text(encoding='utf-8')
+        # La hoja esta formateada (`background: #fff;`), no minificada: se
+        # compara sin espacios para no depender del formato.
+        contenido = ''.join(hoja.read_text(encoding='utf-8').split())
 
         self.assertIn('background:#fff', contenido)
         self.assertIn('color:#12263a', contenido)

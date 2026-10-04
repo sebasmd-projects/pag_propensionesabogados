@@ -76,7 +76,10 @@ class IPBlockedModelAdmin(GeneralAdminModel):
     )
     list_display_links = ('current_ip',)
     ordering = ('-created', '-updated')
-    date_hierarchy = 'created'
+    # Sin date_hierarchy: con USE_TZ=True Django lo resuelve con CONVERT_TZ en
+    # MySQL, y en produccion (hosting compartido) no hay tablas de zonas
+    # horarias, asi que devuelve NULL y el listado cae en un 500. El filtro
+    # lateral 'created' si sirve: usa rangos simples calculados en Python.
 
     list_filter = (
         'is_datacenter', 'reason', 'is_active', 'country', 'network_owner',
@@ -246,3 +249,29 @@ class WhiteListedIPModelAdmin(GeneralAdminModel):
     list_display = ('current_ip', 'reason', 'is_active', 'created', 'updated')
     list_filter = ('is_active', 'reason')
     search_fields = ('current_ip', 'reason')
+
+
+# Admins de terceros (django-axes y django-auditlog) que traen
+# date_hierarchy sobre un DateTimeField: en MySQL sin tablas de zonas
+# horarias fallan igual que el nuestro. Se reregistran sin esa opcion.
+def _drop_date_hierarchy(model):
+    try:
+        current = type(admin.site._registry[model])
+    except KeyError:
+        return
+    admin.site.unregister(model)
+    admin.site.register(
+        model, type(current.__name__, (current,), {'date_hierarchy': None}))
+
+
+def _patch_third_party_admins():
+    from auditlog.admin import LogEntryAdmin  # noqa: F401  (registra el admin)
+    from auditlog.models import LogEntry
+    from axes.admin import AccessAttemptAdmin  # noqa: F401  (idem)
+    from axes.models import AccessAttempt, AccessFailureLog, AccessLog
+
+    for model in (AccessAttempt, AccessLog, AccessFailureLog, LogEntry):
+        _drop_date_hierarchy(model)
+
+
+_patch_third_party_admins()
