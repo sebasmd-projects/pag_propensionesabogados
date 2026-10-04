@@ -1,0 +1,9 @@
+# Exclusiones de graphify (ademas de lo que ya ignora .gitignore)
+graphify-out/
+docs/
+
+# De public/staticfiles solo se incluye assets/custom
+public/staticfiles/assets/imgs/
+public/staticfiles/assets/vendor/
+public/staticfiles/assets/video/
+public/staticfiles/documents/

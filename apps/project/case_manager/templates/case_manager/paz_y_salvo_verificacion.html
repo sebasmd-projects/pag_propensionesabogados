@@ -1,14 +1,6 @@
 {% extends 'raw.html' %}
 {% load i18n static %}
 
-{% comment %}
-  Verificacion publica del paz y salvo: lo que ve quien escanea el QR.
-
-  No lleva el nombre del cliente ni su documento de identidad, ni nada que
-  permita saber quien es: solo si el documento es valido, cuando se emitio, a
-  que caso pertenece y quien lo emite.
-{% endcomment %}
-
 {% block title %}{% language "es" %}{% trans "Settlement letter verification" %} | Propensiones&reg;{% endlanguage %}{% endblock title %}
 
 {% block meta_basic %}
