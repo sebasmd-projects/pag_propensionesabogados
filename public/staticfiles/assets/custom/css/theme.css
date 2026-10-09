@@ -202,6 +202,51 @@
   line-height: 1;
 }
 
+.tema-boton-mobile {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  /* Conserva la posicion y altura de la barra al reservar espacio tactil. */
+  .header .logo {
+    min-height: 50px;
+  }
+
+  .header .logo img {
+    max-width: calc(100vw - 148px);
+    height: auto;
+  }
+
+  .tema-boton,
+  .navmenu .tema-boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* Fuera del menu plegado, sin mover el logo ni su interruptor. */
+  .header .tema-boton-mobile {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--nav-color);
+  }
+
+  .navmenu .tema-boton-menu {
+    display: none;
+  }
+
+  .tema-boton i::before {
+    vertical-align: 0;
+  }
+}
+
 .tema-boton .bi-sun-fill,
 :root[data-bs-theme="dark"] .tema-boton .bi-moon-stars-fill {
   display: none;
