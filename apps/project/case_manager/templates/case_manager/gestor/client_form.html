@@ -7,6 +7,13 @@
       <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
 
+          {% if form.deleted_client %}
+            <div class="alert alert-warning">{% trans "Existe un cliente eliminado con ese documento. Puedes restaurarlo." %}
+              <form method="post" action="{% url 'case_manager:gestor_client_restore' form.deleted_client.pk %}">{% csrf_token %}
+                <button class="btn btn-warning" type="submit">{% trans "Restaurar" %}</button>
+              </form>
+            </div>
+          {% endif %}
           <form method="post" novalidate data-client-form>
             {% csrf_token %}
 

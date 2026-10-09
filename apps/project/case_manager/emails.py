@@ -91,6 +91,10 @@ def send_case_note(note, *, request=None) -> bool:
     """
     cliente = note.case.client
 
+    from .models import CaseModel
+    if not CaseModel.objects.filter(pk=note.case_id).exists():
+        return False
+
     if not note.visible_to_client:
         return False
 

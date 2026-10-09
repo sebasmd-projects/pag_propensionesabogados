@@ -138,6 +138,8 @@
                 </button>
               </td>
               <td class="text-end">
+<button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmDelete" data-delete-url="{% url 'case_manager:gestor_case_delete' case.pk %}" data-delete-message="{% blocktrans with service=case.service_display reference=case.public_reference %}Se eliminará el asunto «{{ service }}» con radicado «{{ reference }}».{% endblocktrans %}">{% trans "Eliminar" %}</button>
+
                 <a href="{% url 'case_manager:gestor_case_report' case.pk %}" class="btn btn-sm btn-outline-secondary">Imprimir ficha</a>
                 <a href="{% url 'case_manager:gestor_case_update' case.pk %}"
                    class="btn btn-sm btn-outline-secondary">

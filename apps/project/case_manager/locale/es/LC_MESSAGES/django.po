@@ -2149,3 +2149,101 @@ msgstr "El paz y salvo quedó certificado."
 #, python-format
 msgid "Certification failed: %(error)s"
 msgstr "La certificación falló: %(error)s"
+
+#: .\admin.py:119
+msgid "Eliminados"
+msgstr "Eliminados"
+
+#: .\admin.py:123
+msgid "Sí"
+msgstr "Sí"
+
+#: .\admin.py:123
+msgid "No"
+msgstr "No"
+
+#: .\admin.py:137 .\templates\case_manager\gestor\client_form.html:13
+msgid "Restaurar"
+msgstr "Restaurar"
+
+#: .\admin.py:142
+msgid "Registros restaurados. La vigencia no se reactiva automáticamente."
+msgstr "Registros restaurados. La vigencia no se reactiva automáticamente."
+
+#: .\forms.py:285 .\templates\case_manager\gestor\client_form.html:11
+msgid "Existe un cliente eliminado con ese documento. Puedes restaurarlo."
+msgstr "Existe un cliente eliminado con ese documento. Puedes restaurarlo."
+
+#: .\forms.py:334
+#, python-format
+msgid ""
+"El servicio «%(service)s» con radicado «%(reference)s» ya existe para este "
+"cliente. ¿Deseas continuar?"
+msgstr ""
+"El servicio «%(service)s» con radicado «%(reference)s» ya existe para este "
+"cliente. ¿Deseas continuar?"
+
+#: .\forms.py:338
+#, python-format
+msgid ""
+"El servicio «%(service)s» ya existe para este cliente. ¿Deseas continuar?"
+msgstr ""
+"El servicio «%(service)s» ya existe para este cliente. ¿Deseas continuar?"
+
+#: .\gestor.py:888
+msgid "Cliente y asuntos eliminados."
+msgstr "Cliente y asuntos eliminados."
+
+#: .\gestor.py:899
+msgid "Asunto eliminado."
+msgstr "Asunto eliminado."
+
+#: .\gestor.py:912
+msgid "Cliente restaurado. La vigencia no se reactiva automáticamente."
+msgstr "Cliente restaurado. La vigencia no se reactiva automáticamente."
+
+#: .\models.py:72
+msgid "Fecha de eliminación"
+msgstr "Fecha de eliminación"
+
+#: .\models.py:76
+msgid "Eliminado por"
+msgstr "Eliminado por"
+
+#: .\templates\case_manager\gestor\case_form.html:8
+#: .\templates\case_manager\gestor\case_list.html:143
+#, python-format
+msgid "Se eliminará el asunto «%(service)s» con radicado «%(reference)s»."
+msgstr "Se eliminará el asunto «%(service)s» con radicado «%(reference)s»."
+
+#: .\templates\case_manager\gestor\case_form.html:8
+#: .\templates\case_manager\gestor\case_list.html:143
+#: .\templates\case_manager\gestor\client_detail.html:15
+#: .\templates\case_manager\gestor\client_list.html:96
+#: .\templates\case_manager\gestor\partials\delete_modal.html:4
+#: .\templates\case_manager\gestor\partials\delete_modal.html:8
+msgid "Eliminar"
+msgstr "Eliminar"
+
+#: .\templates\case_manager\gestor\case_form.html:23
+msgid "Ver asunto existente"
+msgstr "Ver asunto existente"
+
+#: .\templates\case_manager\gestor\case_form.html:25
+msgid "Continuar y guardar"
+msgstr "Continuar y guardar"
+
+#: .\templates\case_manager\gestor\case_form.html:26
+#: .\templates\case_manager\gestor\partials\delete_modal.html:7
+msgid "Cancelar"
+msgstr "Cancelar"
+
+#: .\templates\case_manager\gestor\client_detail.html:15
+#: .\templates\case_manager\gestor\client_list.html:96
+#, python-format
+msgid "Se eliminarán el cliente y sus %(total)s asuntos"
+msgstr "Se eliminarán el cliente y sus %(total)s asuntos"
+
+#: .\templates\case_manager\gestor\partials\delete_modal.html:4
+msgid "Cerrar"
+msgstr "Cerrar"

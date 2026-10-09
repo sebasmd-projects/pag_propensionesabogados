@@ -34,7 +34,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import F, Q, Sum, Value
 from django.db.models.functions import Coalesce, Greatest, NullIf
 from django.utils import timezone
@@ -63,7 +63,42 @@ alphanumeric = RegexValidator(
 )
 
 
-class ClientModel(TimeStampedModel):
+class LiveManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+
+class SoftDeleteModel(TimeStampedModel):
+    deleted_at = models.DateTimeField(_('Fecha de eliminación'), null=True, blank=True, editable=False)
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(app_label)s_%(class)s_deleted', editable=False,
+        verbose_name=_('Eliminado por'),
+    )
+    objects = LiveManager()
+    all_objects = models.Manager()
+
+    @transaction.atomic
+    def soft_delete(self, actor, at=None):
+        if self.deleted_at is not None:
+            return
+        self.deleted_at = at or timezone.now()
+        self.deleted_by = actor
+        self.is_active = False
+        self.save(update_fields=['deleted_at', 'deleted_by', 'is_active', 'updated'])
+
+    def restore(self):
+        self.deleted_at = None
+        self.deleted_by = None
+        self.save(update_fields=['deleted_at', 'deleted_by', 'updated'])
+
+    class Meta:
+        abstract = True
+        default_manager_name = 'objects'
+        base_manager_name = 'all_objects'
+
+
+class ClientModel(SoftDeleteModel):
     """
     Una persona con uno o mas asuntos en el despacho.
 
@@ -356,7 +391,14 @@ class ClientModel(TimeStampedModel):
     def __str__(self) -> str:
         return f'{self.display_identification} - {self.full_name}'
 
-    class Meta:
+    @transaction.atomic
+    def soft_delete(self, actor, at=None):
+        at = at or timezone.now()
+        for case in self.cases.select_for_update():
+            case.soft_delete(actor, at)
+        super().soft_delete(actor, at)
+
+    class Meta(SoftDeleteModel.Meta):
         db_table = 'apps_project_case_manager_client'
         verbose_name = _('Client')
         verbose_name_plural = _('Clients')
@@ -375,10 +417,16 @@ class CaseQuerySet(models.QuerySet):
         va en el queryset y no en la plantilla, porque una plantilla que no
         pinta algo sigue habiendolo recibido.
         """
-        return self.filter(is_active=True, client__is_active=True)
+        return self.filter(is_active=True, client__is_active=True,
+                           deleted_at__isnull=True, client__deleted_at__isnull=True)
 
 
-class CaseModel(TimeStampedModel):
+class LiveCaseManager(LiveManager.from_queryset(CaseQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().filter(client__deleted_at__isnull=True)
+
+
+class CaseModel(SoftDeleteModel):
     """
     Un asunto del despacho: el expediente que ve el cliente.
 
@@ -582,7 +630,7 @@ class CaseModel(TimeStampedModel):
         )
     )
 
-    objects = CaseQuerySet.as_manager()
+    objects = LiveCaseManager()
 
     @property
     def detail_rows(self) -> list[tuple[str, str]]:
@@ -817,7 +865,7 @@ class CaseModel(TimeStampedModel):
     def __str__(self) -> str:
         return f'{self.client.display_identification} - {self.service}'
 
-    class Meta:
+    class Meta(SoftDeleteModel.Meta):
         db_table = 'apps_project_case_manager_case'
         verbose_name = _('Case')
         verbose_name_plural = _('Cases')
@@ -1096,6 +1144,13 @@ class CaseFinanceQuerySet(models.QuerySet):
         return sorted(areas, key=lambda row: row['total'], reverse=True)
 
 
+class LiveCaseRelatedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            case__deleted_at__isnull=True, case__client__deleted_at__isnull=True,
+        )
+
+
 class CaseFinanceModel(TimeStampedModel):
     """
     El dinero de un caso: que se pacto, que entro y que falta.
@@ -1174,7 +1229,7 @@ class CaseFinanceModel(TimeStampedModel):
         default=True
     )
 
-    objects = CaseFinanceQuerySet.as_manager()
+    objects = LiveCaseRelatedManager.from_queryset(CaseFinanceQuerySet)()
 
     @property
     def is_contingency_expectation(self) -> bool:
@@ -1415,7 +1470,7 @@ class CaseNoteModel(TimeStampedModel):
         editable=False
     )
 
-    objects = CaseNoteQuerySet.as_manager()
+    objects = LiveCaseRelatedManager.from_queryset(CaseNoteQuerySet)()
 
     @property
     def style(self) -> dict:

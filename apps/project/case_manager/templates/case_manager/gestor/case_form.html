@@ -5,6 +5,8 @@
 
 {% block gestor_actions %}
   {% if object %}
+<button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmDelete" data-delete-url="{% url 'case_manager:gestor_case_delete' object.pk %}" data-delete-message="{% blocktrans with service=object.service_display reference=object.public_reference %}Se eliminará el asunto «{{ service }}» con radicado «{{ reference }}».{% endblocktrans %}">{% trans "Eliminar" %}</button>
+
     <a class="btn btn-outline-secondary" data-unsaved-skip href="{% url 'case_manager:gestor_case_report' object.pk %}">
       <i class="bi bi-download me-1"></i>Imprimir ficha
     </a>
@@ -15,6 +17,15 @@
 {% block gestor_content %}
   <form method="post" novalidate data-unsaved-guard>
     {% csrf_token %}
+    {% if form.duplicate_case %}
+      <div class="alert alert-warning" role="alert">
+        {{ form.non_field_errors }}
+        <a href="{% url 'case_manager:gestor_case_update' form.duplicate_case.pk %}">{% trans "Ver asunto existente" %}</a>
+        <input type="hidden" name="confirm_duplicate" value="">
+        <button type="submit" class="btn btn-warning" onclick="this.form.elements.confirm_duplicate.value='1'">{% trans "Continuar y guardar" %}</button>
+        <a class="btn btn-secondary" href="{% url 'case_manager:gestor_case_list' %}">{% trans "Cancelar" %}</a>
+      </div>
+    {% endif %}
 
     {# Los errores que no son de un campo salen como aviso flotante, desde la #}
     {# vista: la franja de aqui arriba quedaba fuera de la pantalla de quien #}

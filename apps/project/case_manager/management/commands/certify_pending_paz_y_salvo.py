@@ -43,7 +43,10 @@ class Command(BaseCommand):
         if options['case']:
             documents = documents.filter(case_id=options['case'])
 
-        pending = documents.filter(status__in=(Status.PENDING, Status.FAILED))
+        pending = documents.filter(
+            status__in=(Status.PENDING, Status.FAILED),
+            case__deleted_at__isnull=True, case__client__deleted_at__isnull=True,
+        )
         if not options['force']:
             pending = pending.filter(
                 attempts__lt=settings.PAZ_Y_SALVO_MAX_ATTEMPTS)

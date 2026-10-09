@@ -115,14 +115,49 @@ class CaseFinanceInline(CaseManagerAdminMixin, admin.StackedInline):
         return f'$ {obj.expectation:,.0f}'.replace(',', '.') if obj.pk else '—'
 
 
+class DeletedFilter(admin.SimpleListFilter):
+    title = _('Eliminados')
+    parameter_name = 'deleted'
+
+    def lookups(self, request, model_admin):
+        return [('yes', _('Sí')), ('no', _('No'))]
+
+    def queryset(self, request, queryset):
+        if self.value() in ('yes', 'no'):
+            return queryset.filter(deleted_at__isnull=self.value() == 'no')
+        return queryset
+
+
+class SoftDeleteAdminMixin:
+    actions = ['restore_selected']
+
+    def get_queryset(self, request):
+        return self.model.all_objects.all()
+
+    @admin.action(description=_('Restaurar'))
+    def restore_selected(self, request, queryset):
+        with transaction.atomic():
+            for obj in queryset.select_for_update().filter(deleted_at__isnull=False):
+                obj.restore()
+        self.message_user(request, _('Registros restaurados. La vigencia no se reactiva automáticamente.'))
+
+    def delete_model(self, request, obj):
+        obj.soft_delete(request.user)
+
+    def delete_queryset(self, request, queryset):
+        with transaction.atomic():
+            for obj in queryset.select_for_update():
+                obj.soft_delete(request.user)
+
+
 @admin.register(CaseModel)
-class CaseAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
+class CaseAdmin(SoftDeleteAdminMixin, CaseManagerAdminMixin, admin.ModelAdmin):
     inlines = [CaseFinanceInline]
     list_display = (
         'client', 'service', 'stage', 'is_active',
         'paz_y_salvo_authorized', 'updated',
     )
-    list_filter = ('service', 'procedure', 'area', 'stage', 'is_active')
+    list_filter = (DeletedFilter, 'service', 'procedure', 'area', 'stage', 'is_active')
     search_fields = (
         'client__identification', 'client__full_name', 'case_number',
         'administrative_case_number', 'police_case_number',
@@ -174,7 +209,7 @@ class CaseAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
         igual que en el gestor: crea o revoca su documento certificado.
         """
         was_authorized = bool(
-            change and CaseModel.objects.filter(
+            change and CaseModel.all_objects.filter(
                 pk=obj.pk, paz_y_salvo_authorized=True).exists()
         )
         with transaction.atomic():
@@ -263,11 +298,11 @@ class PazYSalvoDocumentAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(ClientModel)
-class ClientAdmin(CaseManagerAdminMixin, admin.ModelAdmin):
+class ClientAdmin(SoftDeleteAdminMixin, CaseManagerAdminMixin, admin.ModelAdmin):
     list_display = (
         'document', 'full_name', 'email', 'is_active', 'code_state',
     )
-    list_filter = ('identification_type', 'is_active')
+    list_filter = (DeletedFilter, 'identification_type', 'is_active')
     search_fields = (
         'identification', 'full_name', 'email', 'legal_rep_name',
         'legal_rep_identification',

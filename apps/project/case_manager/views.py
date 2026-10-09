@@ -427,7 +427,8 @@ class PazYSalvoView(TemplateView):
             return context
 
         document = (
-            PazYSalvoDocumentModel.objects.filter(case_id=kwargs['pk'])
+            PazYSalvoDocumentModel.objects.filter(case_id=kwargs['pk'],
+                case__deleted_at__isnull=True, case__client__deleted_at__isnull=True)
             .order_by('-authorized_at').first()
         )
         if document is None:
@@ -473,6 +474,7 @@ class PazYSalvoDownloadView(View):
     def get(self, request, pk):
         documents = PazYSalvoDocumentModel.objects.filter(
             case_id=pk,
+            case__deleted_at__isnull=True, case__client__deleted_at__isnull=True,
             status=PazYSalvoDocumentModel.Status.CERTIFIED,
             case__paz_y_salvo_authorized=True,
         ).exclude(public_copy_file='')

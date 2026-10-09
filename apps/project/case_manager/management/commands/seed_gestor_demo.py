@@ -671,7 +671,7 @@ class Command(BaseCommand):
         for spec in specs:
             identification = spec.get('identification') or (
                 f'{PREFIX}{spec["n"]:06d}')
-            if ClientModel.objects.filter(identification=identification).exists():
+            if ClientModel.all_objects.filter(identification=identification).exists():
                 skipped += 1
                 continue
             with transaction.atomic():

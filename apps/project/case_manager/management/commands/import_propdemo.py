@@ -44,6 +44,7 @@ from datetime import date
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.db.models import Q
 
 from apps.project.case_manager import choices
 from apps.project.case_manager.models import (CaseFinanceModel,
@@ -130,6 +131,12 @@ class Command(BaseCommand):
                     skipped += 1
                     continue
 
+                if ClientModel.all_objects.filter(identification=digits).filter(
+                    Q(deleted_at__isnull=False) | Q(cases__deleted_at__isnull=False)
+                ).exists():
+                    self.stderr.write(f'  se omite "{digits}": cliente o asunto eliminado; restaurar primero')
+                    skipped += 1
+                    continue
                 was_created = self._import_one(digits, name, record)
                 created += was_created
                 updated += not was_created

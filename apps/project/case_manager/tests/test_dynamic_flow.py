@@ -24,7 +24,7 @@ class DynamicFlowTests(TestCase):
                 for process in children or ['']:
                     with self.subTest(service=service, parent=parent, process=process):
                         form = CaseForm(data={'client': self.customer.pk, 'service': service,
-                                              'subtype': parent, 'second_subtype': process, 'stage': 0})
+                                              'subtype': parent, 'second_subtype': process, 'stage': 0, 'confirm_duplicate': True})
                         self.assertTrue(form.is_valid(), form.errors)
                         saved = form.save()
                         opened = CaseForm(instance=saved)
@@ -58,7 +58,7 @@ class DynamicFlowTests(TestCase):
                 # Abrir no modifica la base de datos; la reclasificacion se guarda al confirmar.
                 case.refresh_from_db()
                 self.assertEqual(case.subtype, subtype)
-                submitted = CaseForm(data=opened.initial, instance=case)
+                submitted = CaseForm(data={**opened.initial, 'confirm_duplicate': True}, instance=case)
                 self.assertTrue(submitted.is_valid(), submitted.errors)
                 submitted.save()
                 case.refresh_from_db()

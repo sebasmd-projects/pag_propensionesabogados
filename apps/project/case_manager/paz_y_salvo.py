@@ -218,6 +218,9 @@ def certify(document_id, *, force=False):
     document = (PazYSalvoDocumentModel.objects
                 .select_related('case__client').get(pk=document_id))
 
+    if document.case.deleted_at or document.case.client.deleted_at:
+        return document
+
     if document.status in (Status.CERTIFIED, Status.REVOKED):
         return document
 

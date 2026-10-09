@@ -208,7 +208,7 @@ class ClientListView(GestorRequiredMixin, ListView):
         # puede salir en dos paginas y en ninguna. La cedula, que es unica,
         # desempata a los que se llaman igual.
         queryset = ClientModel.objects.annotate(
-            case_count=Count('cases')
+            case_count=Count('cases', filter=Q(cases__deleted_at__isnull=True))
         ).order_by('full_name', 'identification')
 
         buscado = self.request.GET.get('q', '').strip()
@@ -876,3 +876,38 @@ class CaseNoteCreateView(GestorRequiredMixin, CreateView):
                 'gestor_section': 'cases',
             },
         )
+
+
+class ClientDeleteView(GestorRequiredMixin, View):
+    http_method_names = ['post']
+
+    @transaction.atomic
+    def post(self, request, pk):
+        client = get_object_or_404(ClientModel.objects.select_for_update(), pk=pk)
+        client.soft_delete(request.user)
+        messages.success(request, _('Cliente y asuntos eliminados.'))
+        return redirect('case_manager:gestor_client_list')
+
+
+class CaseDeleteView(GestorRequiredMixin, View):
+    http_method_names = ['post']
+
+    @transaction.atomic
+    def post(self, request, pk):
+        case = get_object_or_404(CaseModel.objects.select_for_update(), pk=pk)
+        case.soft_delete(request.user)
+        messages.success(request, _('Asunto eliminado.'))
+        return redirect('case_manager:gestor_case_list')
+
+
+class ClientRestoreView(GestorRequiredMixin, View):
+    http_method_names = ['post']
+
+    @transaction.atomic
+    def post(self, request, pk):
+        client = get_object_or_404(
+            ClientModel.all_objects.select_for_update(), pk=pk, deleted_at__isnull=False,
+        )
+        client.restore()
+        messages.success(request, _('Cliente restaurado. La vigencia no se reactiva automáticamente.'))
+        return redirect('case_manager:gestor_client_update', pk=pk)

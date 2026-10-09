@@ -81,7 +81,7 @@ class ClassificationTests(TestCase):
         padres = {'second_subtype': {'subtype': 'Laboral'}}
         for name in ('service', 'procedure', 'area', 'subtype', 'second_subtype'):
             with self.subTest(field=name):
-                data = self.data(**{name: 'Otro'}, **padres.get(name, {}))
+                data = self.data(confirm_duplicate=True, **{name: 'Otro'}, **padres.get(name, {}))
                 form = CaseForm(data=data)
                 self.assertFalse(form.is_valid())
                 self.assertIn(name + '_other', form.errors)

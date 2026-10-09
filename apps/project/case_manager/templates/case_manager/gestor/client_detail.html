@@ -12,6 +12,8 @@
 {% endcomment %}
 
 {% block gestor_actions %}
+<button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmDelete" data-delete-url="{% url 'case_manager:gestor_client_delete' client.pk %}" data-delete-message="{% blocktrans with total=client.cases.count %}Se eliminarán el cliente y sus {{ total }} asuntos{% endblocktrans %}">{% trans "Eliminar" %}</button>
+
   <div class="d-flex gap-2 flex-wrap">
     <a class="btn btn-outline-secondary"
        href="{% url 'case_manager:gestor_client_report' client.pk %}">

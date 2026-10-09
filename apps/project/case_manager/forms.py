@@ -17,6 +17,7 @@ import json
 from datetime import date
 
 from django import forms
+from django.db.models import Q
 from django.forms import inlineformset_factory
 from django.utils.translation import gettext_lazy as _
 
@@ -277,6 +278,13 @@ class ClientForm(BootstrapFormMixin, forms.ModelForm):
             raise forms.ValidationError(
                 _('The identification must contain digits only.')
             )
+        self.deleted_client = ClientModel.all_objects.filter(
+            identification=number, deleted_at__isnull=False,
+        ).exclude(pk=self.instance.pk).first()
+        if self.deleted_client:
+            raise forms.ValidationError(_(
+                'Existe un cliente eliminado con ese documento. Puedes restaurarlo.'
+            ))
         return number
 
     def clean_verification_digit(self) -> str:
@@ -297,6 +305,44 @@ class CaseForm(BootstrapFormMixin, forms.ModelForm):
     Sigue servicio -> área/subnivel -> proceso. Los selectores anteriores
     se conservan como datos históricos, fuera del flujo de clasificación.
     """
+
+    confirm_duplicate = forms.BooleanField(required=False, widget=forms.HiddenInput)
+    duplicate_case = None
+
+    def clean(self):
+        data = super().clean()
+        watched = ('client', 'service', 'subtype', 'case_number',
+                   'administrative_case_number', 'police_case_number')
+        if not self.instance._state.adding and not any(
+            name in self.changed_data for name in watched
+        ):
+            return data
+        if not data.get('client') or not data.get('service'):
+            return data
+        def normalize(value):
+            return ''.join((value or '').split()).replace('-', '').upper()
+        reference = next((data.get(name) for name in watched[3:] if data.get(name)), '')
+        candidates = CaseModel.objects.filter(
+            client=data['client'], service=data['service'],
+        ).exclude(pk=self.instance.pk)
+        subtype = data.get('subtype') or ''
+        candidates = candidates.filter(subtype=subtype) if subtype else candidates.filter(
+            Q(subtype='') | Q(subtype__isnull=True)
+        )
+        for case in candidates:
+            existing = case.case_number or case.administrative_case_number or case.police_case_number
+            if not reference or normalize(reference) == normalize(existing):
+                self.duplicate_case = case
+                break
+        if self.duplicate_case and not data.get('confirm_duplicate'):
+            if reference:
+                message = _('El servicio «%(service)s» con radicado «%(reference)s» ya existe para este cliente. ¿Deseas continuar?') % {
+                    'service': data['service'], 'reference': reference,
+                }
+            else:
+                message = _('El servicio «%(service)s» ya existe para este cliente. ¿Deseas continuar?') % {'service': data['service']}
+            raise forms.ValidationError(message)
+        return data
 
     notify_stage_change = forms.BooleanField(
         label=_('Email the client if the stage changes'),

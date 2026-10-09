@@ -1,0 +1,35 @@
+{% load i18n %}
+<div class="modal fade" id="confirmDelete" tabindex="-1" aria-labelledby="confirmDeleteTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="confirmDeleteTitle">{% trans "Eliminar" %}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}"></button></div>
+    <div class="modal-body"><p data-delete-description></p></div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+      <form method="post" data-delete-form>{% csrf_token %}<button type="submit" class="btn btn-danger">{% trans "Eliminar" %}</button></form>
+    </div>
+  </div></div>
+</div>
+<script>
+document.getElementById('confirmDelete').addEventListener('show.bs.modal', event => {
+  const button = event.relatedTarget;
+  event.target.querySelector('[data-delete-description]').textContent = button.dataset.deleteMessage;
+  event.target.querySelector('[data-delete-form]').action = button.dataset.deleteUrl;
+});
+// Run after the form's validation and unsaved-change handlers, preserving submitter data.
+document.addEventListener('submit', event => {
+  const form = event.target;
+  if (event.defaultPrevented || !form.matches('[data-client-form], [data-unsaved-guard]')) return;
+  if (form.dataset.submitting) { event.preventDefault(); return; }
+  form.dataset.submitting = '1';
+  setTimeout(() => {
+    if (event.defaultPrevented) { delete form.dataset.submitting; return; }
+    form.querySelectorAll('button[type="submit"]').forEach(button => { button.disabled = true; });
+  }, 0);
+});
+window.addEventListener('pageshow', () => {
+  document.querySelectorAll('form[data-submitting]').forEach(form => {
+    delete form.dataset.submitting;
+    form.querySelectorAll('button[type="submit"]').forEach(button => { button.disabled = false; });
+  });
+});
+</script>

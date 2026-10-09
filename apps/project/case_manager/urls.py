@@ -14,7 +14,7 @@ no penso.
 from django.urls import path
 from django.utils.translation import gettext_lazy as _
 
-from .gestor import (CaseCreateView, CaseListView, CaseNoteCreateView,
+from .gestor import (ClientDeleteView, CaseDeleteView, ClientRestoreView, CaseCreateView, CaseListView, CaseNoteCreateView,
                      CaseNoteVisibilityView, CaseRetryCertificationView,
                      CaseToggleSettlementView, CaseUpdateView, CaseReportView,
                      ClientCreateView, ClientDetailView, ClientListView,
@@ -47,6 +47,9 @@ public_urls = [
 #: El gestor interno. `gestor_title` y `gestor_section` los pinta
 #: `gestor/base.html`: el titulo de la pantalla y la pestana que va marcada.
 gestor_urls = [
+    path('gestor/clientes/<uuid:pk>/eliminar/', ClientDeleteView.as_view(), name='gestor_client_delete'),
+    path('gestor/clientes/<uuid:pk>/restaurar/', ClientRestoreView.as_view(), name='gestor_client_restore'),
+    path('gestor/asuntos/<uuid:pk>/eliminar/', CaseDeleteView.as_view(), name='gestor_case_delete'),
     path(
         'gestor/asuntos/<uuid:pk>/ficha/descargar/',
         CaseReportView.as_view(),

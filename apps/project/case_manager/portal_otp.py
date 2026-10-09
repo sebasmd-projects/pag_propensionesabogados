@@ -236,6 +236,10 @@ def issue(request, client) -> bool:
     enviarse: la pantalla tiene que decirlo, porque prometer un codigo que no
     va a llegar deja a alguien esperando delante de un campo vacio.
     """
+    from .models import ClientModel
+    if not ClientModel.objects.filter(pk=client.pk).exists():
+        return False
+
     to_office = not client.email
     recipients = office_recipients() if to_office else [client.email]
 
@@ -310,6 +314,11 @@ def verify(request, code: str) -> bool:
     saco de `pending_client_pk()`. Al llegar al tope de intentos el codigo se
     tira: tantear cuesta pedir otro, y pedir otro tiene su escalera.
     """
+    from .models import ClientModel
+    if not ClientModel.objects.filter(pk=pending_client_pk(request) or None).exists():
+        clear(request)
+        return False
+
     from datetime import datetime
 
     data = request.session.get(SESSION_KEY) or {}
