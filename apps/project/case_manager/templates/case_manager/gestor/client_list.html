@@ -12,6 +12,7 @@
 {% block gestor_tables_js %}{% include 'case_manager/gestor/partials/datatables_js.html' %}{% endblock gestor_tables_js %}
 
 {% block gestor_content %}
+  <a class="btn btn-outline-secondary mb-3" href="?deleted=yes">{% trans "Eliminados" %}</a>
 
   {% comment %}
     Ya no hay formulario de busqueda ni paginacion del servidor: la tabla

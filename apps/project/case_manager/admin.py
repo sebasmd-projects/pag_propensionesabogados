@@ -131,6 +131,18 @@ class DeletedFilter(admin.SimpleListFilter):
 class SoftDeleteAdminMixin:
     actions = ['restore_selected']
 
+    def get_list_display(self, request):
+        columns = super().get_list_display(request)
+        if request.GET.get('deleted') == 'yes':
+            return (*columns, 'purge_date')
+        return columns
+
+    @admin.display(description=_('Se elimina definitivamente el'))
+    def purge_date(self, obj):
+        if obj.purge_after:
+            return timezone.localtime(obj.purge_after).strftime('%Y-%m-%d')
+        return '—'
+
     def get_queryset(self, request):
         return self.model.all_objects.all()
 

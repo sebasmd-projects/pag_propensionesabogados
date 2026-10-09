@@ -610,3 +610,73 @@ Para no leer solo la lista de defectos:
 Configure directamente ese destino: el cliente no sigue redirecciones para
 proteger la clave del emisor. Ante un HTTP 3xx, el error muestra el destino
 `Location` y pide revisar `GEA_CERT_API_BASE`.
+# Purga supervisada de clientes y asuntos eliminados
+
+`SOFT_DELETE_RETENTION_DAYS` se lee del `.env` y vale 90 por defecto (entero
+positivo). El dueño debe confirmar que ese plazo cumple sus obligaciones de
+conservación documental antes de autorizar una purga. La fecha mostrada en el
+admin, filtro **Eliminados → Sí**, y en **Eliminados** del gestor es de solo
+lectura: `deleted_at + retención`. No es una tarea programada ni una garantía de
+borrado ese día; siguen siendo necesarias la revisión y la confirmación.
+
+Desde la raíz del proyecto, en PowerShell:
+
+```powershell
+# Revisar el informe; no modifica la BD ni los ficheros.
+.venv\Scripts\python.exe manage.py purge_deleted
+# Revisar y borrar: exige escribir el total exacto de asuntos + clientes.
+.venv\Scripts\python.exe manage.py purge_deleted --apply
+# Solo si el dueño autoriza expresamente la ejecución sin interacción:
+.venv\Scripts\python.exe manage.py purge_deleted --apply --yes
+```
+
+El límite es la medianoche local de hoy menos la retención: solo entran fechas
+de borrado estrictamente anteriores. `--before YYYY-MM-DD` permite restringirlo
+a una fecha **anterior** a ese límite; nunca acortar la retención. El recuento
+que se confirma no incluye dependencias ni registros bloqueados. La simulación
+muestra id corto, cliente, servicio, radicado, fecha y el id corto de quien
+borró, además de los motivos de bloqueo. Proteja ese informe: contiene datos de
+clientes. Una confirmación errónea o la ausencia de entrada cancela todo.
+
+Un cliente solo se propone si está vencido y todos sus asuntos son purgables,
+incluidos los borrados. Cada asunto se revalida bajo bloqueo y se purga en su
+propia transacción con sus dependencias de BD (finanzas, notas, documentos y
+cualquier relación CASCADE). Los retos del portal de este módulo viven en la
+sesión y se invalidan al faltar el cliente; los retos de autenticación de la
+plataforma de insolvencia pertenecen a otros modelos y no se borran aquí.
+El cliente se elimina después, solo si ya no conserva asuntos. Si un registro
+cambió tras la revisión, se omite; nunca se añaden candidatos a lo confirmado.
+
+Un paz y salvo certificado bloquea la purga mientras `gea_revoked` sea falso,
+incluso si ya se marcó revocado localmente. Primero retire su autorización y
+complete la revocación en gea mediante el flujo de paz y salvo existente;
+después vuelva a simular. El comando de purga no revoca certificados.
+
+Los PDF originales y las copias distribuibles se eliminan mediante su almacén
+privado (`PRIVATE_MEDIA_ROOT`) **después del commit** del asunto. El sistema de
+ficheros no es transaccional: un rollback SQL conserva los PDF; si falla la
+limpieza tras el commit, el comando termina con error y registra el id corto.
+En ese caso, revise los PDF remanentes de ese asunto en el almacenamiento
+privado antes de dar la operación por finalizada. No hay reintento automático.
+Una interrupción puede dejar una purga parcial; vuelva a simular antes de
+continuar. Los registros ya purgados no reaparecerán.
+
+El logger `case_manager.purge` escribe una línea INFO por asunto o cliente
+purgado en `DJANGO_LOG_FILE`, con fecha, tipo, id corto, fecha de borrado lógico
+y el id corto del autor (o `—` si ya no existe). No registra nombres, documentos
+de identidad ni radicados. La purga no crea nuevas copias de PII en auditlog;
+la conservación de auditorías anteriores y copias de seguridad se gestiona por
+su política propia.
+
+Ejemplo sugerido de cron mensual en Linux, **solo simulación**, con informe al
+correo configurado en cron (no se instala ninguna tarea):
+
+```cron
+MAILTO=responsable@example.com
+0 8 1 * * cd /ruta/pag_propensionesabogados && .venv/bin/python manage.py purge_deleted 2>&1
+```
+
+Use una cuenta de correo autorizada para recibir el informe. Como alternativa,
+redirija la salida a un fichero con permisos restringidos y rotación. Mantenga
+la simulación programada y ejecute `--apply` tras revisarla. Solo por decisión
+explícita del dueño se puede añadir `--apply --yes` a una programación.

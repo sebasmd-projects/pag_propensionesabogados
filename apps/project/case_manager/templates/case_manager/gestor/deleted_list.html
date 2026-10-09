@@ -1,0 +1,25 @@
+{% extends 'case_manager/gestor/base.html' %}
+{% load i18n %}
+{% block gestor_content %}
+  <h2>{% trans "Eliminados" %}</h2>
+  <p>{% trans "La fecha indica el fin de la retención. La eliminación definitiva requiere revisión y confirmación; puede estar bloqueada por asuntos o certificados pendientes." %}</p>
+  <div class="table-responsive">
+    <table class="table">
+      <thead><tr>
+        <th>ID</th><th>{% trans "Client" %}</th>
+        {% if cases != None %}<th>{% trans "Service" %}</th><th>{% trans "Radicado" %}</th>{% endif %}
+        <th>{% trans "Fecha de eliminación" %}</th>
+        <th>{% trans "Se elimina definitivamente el" %}</th>
+      </tr></thead>
+      <tbody>
+        {% for obj in object_list %}<tr>
+          <td>{{ obj.pk|stringformat:"s"|slice:":8" }}</td>
+          {% if cases != None %}
+            <td>{{ obj.client.full_name }}</td><td>{{ obj.service_display }}</td><td>{{ obj.public_reference }}</td>
+          {% else %}<td>{{ obj.full_name }}</td>{% endif %}
+          <td>{{ obj.deleted_at|date:"Y-m-d" }}</td><td>{{ obj.purge_after|date:"Y-m-d" }}</td>
+        </tr>{% empty %}<tr><td>{% trans "No hay registros eliminados." %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

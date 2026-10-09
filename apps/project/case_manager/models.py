@@ -28,6 +28,7 @@ Tres cosas que conviene entender antes de tocar nada:
 
 import os
 import uuid
+from datetime import timedelta
 
 from auditlog.registry import auditlog
 from django.conf import settings
@@ -69,6 +70,12 @@ class LiveManager(models.Manager):
 
 
 class SoftDeleteModel(TimeStampedModel):
+    @property
+    def purge_after(self):
+        if self.deleted_at is not None:
+            return self.deleted_at + timedelta(days=settings.SOFT_DELETE_RETENTION_DAYS)
+        return None
+
     deleted_at = models.DateTimeField(_('Fecha de eliminación'), null=True, blank=True, editable=False)
     deleted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,

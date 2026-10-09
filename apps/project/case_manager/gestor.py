@@ -187,7 +187,14 @@ class GestorDashboardView(GestorRequiredMixin, TemplateView):
 # Clientes
 # ---------------------------------------------------------------------------
 
-class ClientListView(GestorRequiredMixin, ListView):
+class DeletedListMixin:
+    def get_template_names(self):
+        if self.request.GET.get('deleted') == 'yes':
+            return ['case_manager/gestor/deleted_list.html']
+        return super().get_template_names()
+
+
+class ClientListView(DeletedListMixin, GestorRequiredMixin, ListView):
     """
     Los clientes del despacho, con busqueda por nombre o cedula.
 
@@ -207,6 +214,8 @@ class ClientListView(GestorRequiredMixin, ListView):
         # devuelve las filas en el orden que le apetezca y un mismo cliente
         # puede salir en dos paginas y en ninguna. La cedula, que es unica,
         # desempata a los que se llaman igual.
+        if self.request.GET.get('deleted') == 'yes':
+            return ClientModel.all_objects.filter(deleted_at__isnull=False).order_by('deleted_at', 'pk')
         queryset = ClientModel.objects.annotate(
             case_count=Count('cases', filter=Q(cases__deleted_at__isnull=True))
         ).order_by('full_name', 'identification')
@@ -350,7 +359,7 @@ class ClientUpdateView(GestorRequiredMixin, UpdateView):
 # Asuntos
 # ---------------------------------------------------------------------------
 
-class CaseListView(GestorRequiredMixin, ListView):
+class CaseListView(DeletedListMixin, GestorRequiredMixin, ListView):
     """
     Los asuntos del despacho, todos o los de un cliente.
 
@@ -369,6 +378,9 @@ class CaseListView(GestorRequiredMixin, ListView):
         # `note_count` para que el listado diga cuales llevan notas: la ficha
         # del asunto las tiene abajo del todo y, sin este aviso, quien busca
         # «el caso con varias notas» no tiene por donde empezar.
+        if self.request.GET.get('deleted') == 'yes':
+            self.cliente = None
+            return CaseModel.all_objects.filter(deleted_at__isnull=False).select_related('client').order_by('deleted_at', 'pk')
         queryset = CaseModel.objects.select_related(
             'client', 'finance'
         ).annotate(note_count=Count('notes', distinct=True))

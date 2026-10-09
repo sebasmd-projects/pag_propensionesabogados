@@ -12,6 +12,7 @@
 {% block gestor_tables_js %}{% include 'case_manager/gestor/partials/datatables_js.html' %}{% endblock gestor_tables_js %}
 
 {% block gestor_content %}
+  <a class="btn btn-outline-secondary mb-3" href="?deleted=yes">{% trans "Eliminados" %}</a>
 
   {% if cliente %}
     <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2">

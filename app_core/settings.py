@@ -433,6 +433,8 @@ PAZ_Y_SALVO_PUBLIC_BASE = os.getenv(
 PRIVATE_MEDIA_ROOT = (
     os.getenv('PRIVATE_MEDIA_ROOT') or str(BASE_DIR / 'private_media'))
 
+SOFT_DELETE_RETENTION_DAYS = env_int('SOFT_DELETE_RETENTION_DAYS', 90)
+
 if bool(os.getenv('DJANGO_EMAIL_USE_SSL')):
     EMAIL_USE_SSL = True
     EMAIL_USE_TLS = False
@@ -678,6 +680,9 @@ LOG_FILE = Path(os.getenv('DJANGO_LOG_FILE') or (BASE_DIR / 'stderr.log'))
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'loggers': {
+        'case_manager.purge': {'handlers': ['file'], 'level': 'INFO', 'propagate': False},
+    },
     'formatters': {
         'plain': {
             'format': '%(asctime)s - %(levelname)s - %(message)s',
