@@ -34,13 +34,16 @@ class ThemeWiringTests(TestCase):
 
                 self.assertContains(respuesta, 'custom/css/theme.css')
                 self.assertContains(respuesta, 'custom/js/theme.js')
-                self.assertContains(respuesta, 'class="tema-boton ')
+                self.assertContains(respuesta, 'class="tema-boton')
 
-    def test_la_cabecera_incluye_el_boton_movil_fuera_del_menu(self):
+    def test_la_cabecera_lleva_un_solo_interruptor_dentro_del_menu(self):
+        """En movil no hay un segundo boton fuera del menu, junto al logo."""
         html = self.client.get(reverse('core:index')).content.decode()
-        self.assertIn('class="tema-boton tema-boton-mobile"', html)
-        self.assertLess(html.index('tema-boton-mobile'), html.index('id="navmenu"'))
-        self.assertIn('class="tema-boton tema-boton-menu"', html)
+        cabecera = html.split('<header', 1)[1].split('</header>', 1)[0]
+
+        self.assertEqual(cabecera.count('class="tema-boton'), 1)
+        self.assertLess(cabecera.index('id="navmenu"'),
+                        cabecera.index('class="tema-boton'))
 
     def test_el_tema_se_decide_antes_de_pintar(self):
         """
