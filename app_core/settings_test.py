@@ -22,6 +22,7 @@ fichero deja de necesitar es la base de datos.
 
 Lo que fija, y por que:
 
+* Cache ``LocMemCache`` fija, aunque el ``.env`` lleve ``REDIS_URL``.
 * ``ATOMIC_REQUESTS`` apagado: envuelve cada peticion en una transaccion y se
   lleva mal con las que abre el propio ``TestCase``.
 * ``MEDIA_ROOT`` y ``PRIVATE_MEDIA_ROOT`` en directorios temporales: ninguna
@@ -48,6 +49,16 @@ DATABASES = {
 }
 
 ATOMIC_REQUESTS = False
+
+# Cache en memoria, ocurra lo que ocurra con `REDIS_URL` en el `.env`: las
+# pruebas no deben leer ni escribir en un Redis de verdad (un `clear_cache` o
+# un contador de otra prueba contra el Redis compartido del VPS seria un susto).
+# Las pruebas que necesitan django-redis lo piden con `override_settings`.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
 
 MEDIA_ROOT = tempfile.mkdtemp(prefix='pag_test_media_')
 PRIVATE_MEDIA_ROOT = tempfile.mkdtemp(prefix='pag_test_private_')

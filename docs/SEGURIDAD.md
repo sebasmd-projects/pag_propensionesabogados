@@ -256,7 +256,10 @@ Reales de pag. El 1 ya está resuelto (se deja constancia); el resto sigue abier
    radicación y el límite sólo evita ruido en una tabla). Superado el cupo
    responden **429** (los de API, `{"detail": ...}`). Todos con `RateLimit`
    (`utils/throttling.py`), contados antes de validar.
-2. **Caché no compartida** (`LocMemCache`): los cupos son por worker.
+2. **Caché no compartida** (`LocMemCache`): los cupos son por worker. El código
+   ya admite el Redis compartido del VPS con `REDIS_URL` (usuario propio acotado
+   a `pag:*`); queda pendiente que quien administra el VPS lo monte:
+   [`docs/REDIS.md`](REDIS.md). Hasta entonces `check_security` sigue avisando.
 3. Con el `.env` de **desarrollo**: `COMMON_ATTACK_TERMS` incluye `setup`, que
    secuestra `accounts/two_factor/setup/` (`check_attack_terms`). El de
    `docs/env.example` no lo tiene; revisar el de producción.

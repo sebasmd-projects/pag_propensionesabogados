@@ -87,16 +87,31 @@ def register_failure(ip: str) -> int:
 
     key = _key(ip)
     window = attempt_window()
-    count = cache.get(key, 0) + 1
-    if count == 1:
-        cache.set(key, count, window)
-    else:
-        # `cache.incr` conserva el vencimiento que puso el primer fallo.
-        try:
-            count = cache.incr(key)
-        except ValueError:  # vencio entre el `get` y el `incr`
-            count = 1
-            cache.set(key, count, window)
+
+    # Se cuenta con `add` + `incr`, como `RateLimit`, y no leyendo la cache a
+    # mano: con django-redis e `IGNORE_EXCEPTIONS` un Redis caido NO lanza,
+    # devuelve `None`, y `cache.get(key, 0) + 1` daba siempre 1 -- el limite
+    # que sostiene la clave del portal dejaba de contar sin una sola linea en
+    # el log. `incr` devuelve un entero solo si la operacion surtio efecto.
+    try:
+        cache.add(key, 0, timeout=window)
+        count = cache.incr(key)
+    except ValueError:  # vencio entre el `add` y el `incr`: primer fallo
+        count = 1
+    except Exception:  # noqa: BLE001
+        count = None
+
+    if count is None:
+        # No se puede contar. Fallar abierto seria dejar adivinar la clave sin
+        # limite durante la averia; se falla cerrado, igual que `RateLimit`:
+        # el fallo que acaba de ocurrir cuenta como el ultimo permitido y la
+        # IP descansa. Es lo mismo que le pasaria tras `max_attempts()` fallos.
+        logger.error(
+            'La cache no responde: no se pueden contar los intentos fallidos '
+            'del portal, asi que %s se bloquea en vez de dejarla probar sin '
+            'limite.', ip,
+        )
+        count = max_attempts()
 
     if count >= max_attempts():
         block(ip, count)

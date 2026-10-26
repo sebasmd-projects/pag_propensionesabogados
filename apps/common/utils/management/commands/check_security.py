@@ -677,6 +677,42 @@ class Command(BaseCommand):
             )
 
     # ------------------------------------------------------------------
+    def _check_redis_transport(self):
+        """
+        Si la cache es Redis, que la conexion al servidor vaya cifrada.
+
+        El Redis esta en otra maquina y el trafico sale a internet: la clave
+        del usuario y los contadores viajarian en claro con `redis://`. Un
+        Redis en la propia maquina (localhost) no sale a ningun sitio y no se
+        avisa. `docs/REDIS.md` explica el montaje.
+        """
+        from urllib.parse import urlparse
+
+        config = getattr(settings, 'CACHES', {}).get('default', {})
+
+        if 'redis' not in str(config.get('BACKEND', '')).lower():
+            return
+
+        parsed = urlparse(str(config.get('LOCATION', '')))
+
+        if parsed.scheme == 'rediss':
+            self._ok('Redis por TLS (rediss://).')
+        elif parsed.hostname in ('localhost', '127.0.0.1', '::1'):
+            self._ok('Redis en la propia maquina: el trafico no sale.')
+        else:
+            self._finding(
+                'REDIS_URL usa redis:// hacia otra maquina: la contrasena y '
+                'los contadores viajan en claro. Usa rediss:// con la CA '
+                '(docs/REDIS.md).'
+            )
+
+        if not config.get('OPTIONS', {}).get('IGNORE_EXCEPTIONS'):
+            self._finding(
+                'La cache Redis no lleva IGNORE_EXCEPTIONS: un corte de red '
+                'se convierte en un 500 en el acceso. Es el comportamiento '
+                'que el resto del proyecto da por supuesto.'
+            )
+
     def _check_settings(self):
         self._section('6. Ajustes del entorno')
 
@@ -786,3 +822,4 @@ class Command(BaseCommand):
             )
         else:
             self._ok('Cache compartida: los limites cuentan de verdad.')
+            self._check_redis_transport()

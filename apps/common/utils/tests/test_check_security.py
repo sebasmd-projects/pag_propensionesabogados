@@ -220,6 +220,39 @@ class TheSettingsSectionTests(TestCase):
         self.assertIn('Cache compartida', report)
         self.assertNotIn('La cache no es compartida', report)
 
+    def redis_cache(self, location, ignore=True):
+        return {'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': location,
+            'OPTIONS': {'IGNORE_EXCEPTIONS': ignore},
+        }}
+
+    def test_redis_over_tls_is_a_shared_cache_and_passes(self):
+        report = self.settings_report(CACHES=self.redis_cache(
+            'rediss://pag:x@redis.example.invalid:6380/2'))
+
+        self.assertIn('OK    Cache compartida', report)
+        self.assertIn('OK    Redis por TLS', report)
+        self.assertNotIn('La cache no es compartida', report)
+
+    def test_redis_in_the_clear_to_another_machine_is_reported(self):
+        report = self.settings_report(CACHES=self.redis_cache(
+            'redis://pag:x@redis.example.invalid:6379/2'))
+
+        self.assertIn('REDIS_URL usa redis:// hacia otra maquina', report)
+
+    def test_redis_on_this_machine_in_the_clear_is_fine(self):
+        report = self.settings_report(CACHES=self.redis_cache(
+            'redis://127.0.0.1:6379/2'))
+
+        self.assertNotIn('REDIS_URL usa redis://', report)
+
+    def test_redis_without_ignore_exceptions_is_reported(self):
+        report = self.settings_report(CACHES=self.redis_cache(
+            'rediss://pag:x@redis.example.invalid:6380/2', ignore=False))
+
+        self.assertIn('no lleva IGNORE_EXCEPTIONS', report)
+
     def test_a_missing_field_encryption_key_is_reported(self):
         self.assertIn('FIELD_ENCRYPTION_KEY sin configurar',
                       self.settings_report(FIELD_ENCRYPTION_KEY=''))

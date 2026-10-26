@@ -324,6 +324,50 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SESSION_COOKIE_AGE = 7200
 
+# --- Cache ------------------------------------------------------------------
+# Sin `REDIS_URL`, Django usa `LocMemCache`, que es POR PROCESO: los cupos de
+# `RateLimit` valen "el limite x el numero de workers" y se reinician en cada
+# despliegue. Con ella, una cache compartida (el Redis del VPS, el mismo
+# servidor que usa gea pero con SU PROPIO usuario ACL acotado a `pag:*`).
+# Montaje y comprobacion: docs/REDIS.md. Las sesiones NO van a la cache: siguen
+# en la base de datos, asi que un Redis caido no cierra la sesion de nadie.
+REDIS_URL = os.getenv('REDIS_URL', '').strip()
+
+# El prefijo con el que la cache nombra sus claves. Va AQUI, a nivel de modulo,
+# y no solo dentro de `CACHES`: lo lee alguien mas (las comprobaciones que
+# miran que el usuario del Redis alcance sus claves) y, leido solo dentro del
+# diccionario, `settings` no tiene el atributo y cada comando cae en su propio
+# defecto. Es la trampa de los ajustes que se consultan con `getattr`. Es
+# tambien lo que separa a pag de gea en el mismo Redis: el usuario ACL de cada
+# uno solo ve su prefijo.
+REDIS_KEY_PREFIX = os.getenv('REDIS_KEY_PREFIX', 'pag').strip() or 'pag'
+
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'TIMEOUT': 300,
+            'KEY_PREFIX': REDIS_KEY_PREFIX,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+
+                # Un Redis caido no puede tumbar el login. El precio: la
+                # cache NO lanza, devuelve `None` (ver `utils/throttling.py`,
+                # que detecta la averia por lo que devuelve `incr`).
+                'IGNORE_EXCEPTIONS': True,
+
+                'SOCKET_CONNECT_TIMEOUT': int(
+                    os.getenv('REDIS_CONNECT_TIMEOUT', 3)
+                ),
+                'SOCKET_TIMEOUT': int(os.getenv('REDIS_TIMEOUT', 3)),
+            },
+        }
+    }
+
+    # Que el fallo se vea en el log en vez de desaparecer sin ruido.
+    DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = True
+
 # --- Cookies y subidas: explicito, no por defecto de Django ----------------
 # Los tres primeros valen lo mismo que el defecto de Django; se escriben para
 # que un cambio de version o un descuido no los mueva sin que nadie lo vea.
