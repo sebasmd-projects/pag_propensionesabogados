@@ -84,7 +84,7 @@ GUARD_MIXINS = frozenset({
 #: y ``utils/tests/test_check_security.py`` comprueba que las dos coinciden.
 INTENTIONALLY_PUBLIC = {
     'core:index': 'portada del sitio; lleva el formulario de contacto '
-                  '(con honeypot)',
+                  '(con honeypot y cupo por IP)',
     'core:calendar': 'calendario publico del despacho',
     'core:terms_and_conditions': 'aviso legal, tiene que leerse antes de '
                                  'registrarse',
@@ -104,7 +104,7 @@ INTENTIONALLY_PUBLIC = {
                      'contrasena y otp_login.send_throttle para el codigo '
                      'por correo',
     'account:register': 'alta de cuenta (sin permisos hasta que alguien se '
-                        'los conceda)',
+                        'los conceda); cupo por IP',
     'account:logout': 'cerrar sesion; sin sesion no hace nada',
     'account:forgot_password': 'recuperacion; limitada por IP y destinatario',
     'account:change_password': 'exige sesion (lo comprueba dispatch) y la '
@@ -142,9 +142,9 @@ INTENTIONALLY_PUBLIC_PATHS = {
 #: Formularios publicos que aceptan POST y **tienen que** llevar limite.
 #:
 #: El contacto (`core:index`, `api-contact-create`), el PQRS y el registro
-#: figuran aqui aunque hoy no lo lleven: son justo el tipo de formulario que
-#: un bot llena a golpes, y salen como hallazgo hasta que se les ponga freno.
-#: Ver `docs/SEGURIDAD.md`.
+#: figuran aqui porque son justo el tipo de formulario que un bot llena a
+#: golpes: si alguno pierde su freno, sale como hallazgo. Ver
+#: `docs/SEGURIDAD.md`.
 THROTTLED_FORMS = {
     'account:login',
     'account:register',

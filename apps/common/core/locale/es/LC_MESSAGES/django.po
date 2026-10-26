@@ -1151,3 +1151,7 @@ msgstr "Gracias %(name)s por contactarnos."
 #: apps/common/core/templates/partials/header.html
 msgid "Change password"
 msgstr "Cambiar contraseña"
+
+#: apps/common/core/views.py
+msgid "Too many messages from this connection. Please try again later."
+msgstr "Demasiados mensajes desde esta conexión. Inténtelo más tarde."

@@ -121,19 +121,24 @@ class TheThrottleSectionTests(TestCase):
         report = section(run_check_security(), 2)
 
         for label in ('account:login', 'account:forgot_password',
-                      'case_manager:public_query'):
-            self.assertIn(f'OK    {label} limita', report)
+                      'case_manager:public_query', 'account:register',
+                      'api-contact-create', 'api-pqrs-create', 'core:index'):
+            with self.subTest(label=label):
+                self.assertIn(f'OK    {label} limita', report)
 
     def test_a_form_without_a_brake_is_reported(self):
-        report = section(run_check_security(), 2)
+        """
+        Los cuatro que estaban abiertos ya tienen cupo (y hay pruebas de que
+        el intento N+1 se rechaza en cada app). Aqui se fija que el detector
+        sigue viendo la falta: con el codigo de la vista vacio, no hay freno.
+        """
+        with mock.patch.object(Command, '_source_of', return_value=''):
+            report = section(run_check_security(), 2)
 
-        # Estos cuatro son hallazgos reales de pag (ver docs/SEGURIDAD.md): el
-        # comando los tiene que ver mientras no lleven freno.
         for label in ('account:register', 'api-contact-create',
                       'api-pqrs-create', 'core:index'):
             with self.subTest(label=label):
-                self.assertRegex(
-                    report, rf'(AVISO|OK)\s+{label}')
+                self.assertRegex(report, rf'AVISO\s+{label}')
 
     def test_a_form_that_disappears_from_the_urls_is_reported(self):
         with mock.patch.object(check_security, 'THROTTLED_FORMS',
@@ -149,12 +154,12 @@ class TheThrottleSectionTests(TestCase):
         """
         rows = {row['name']: row for row in Command()._own_views()}
         forgot = Command()._source_of(rows['forgot_password'])
-        register = Command()._source_of(rows['register'])
+        logout = Command()._source_of(rows['logout'])
 
         self.assertTrue(any(
             marker in forgot for marker in check_security.THROTTLE_MARKERS))
         self.assertFalse(any(
-            marker in register for marker in check_security.THROTTLE_MARKERS))
+            marker in logout for marker in check_security.THROTTLE_MARKERS))
 
 
 class TheSettingsSectionTests(TestCase):

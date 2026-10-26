@@ -18,6 +18,7 @@ from apps.common.utils.honeypot import check_honeypot
 
 from .forms import ContactForm
 from .models import ContactModel, ModalBannerModel, TeamMemberModel
+from .throttling import contact_by_ip
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,35 @@ class IndexTemplateView(FormView):
     template_name = "pages/index.html"
     form_class = ContactForm
     success_url = reverse_lazy('core:index')
+
+    #: Lo que se responde al agotar el cupo. No dice cuanto falta: eso le diria
+    #: a quien prueba cuando merece la pena volver.
+    RATE_LIMITED_MESSAGE = _(
+        'Too many messages from this connection. Please try again later.'
+    )
+
+    #: Campos de texto que se devuelven rellenos al rechazar por cupo, para
+    #: que quien escribio un mensaje largo no lo pierda. Nada de captcha.
+    KEEP_ON_RATE_LIMIT = ('name', 'last_name', 'email', 'subject', 'message')
+
+    def post(self, request, *args, **kwargs):
+        # Se apunta antes de validar, para que acertar y fallar cuesten lo
+        # mismo. Este es el formulario que manda un correo a la direccion que
+        # se escriba, de ahi que el limite falle cerrado (ver `throttling`).
+        if not contact_by_ip.consume(request):
+            form = self.form_class(initial={
+                field: request.POST.get(field, '')
+                for field in self.KEEP_ON_RATE_LIMIT
+            })
+
+            return self.render_to_response(
+                self.get_context_data(
+                    form=form, rate_limit_error=self.RATE_LIMITED_MESSAGE
+                ),
+                status=429,
+            )
+
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         unique_id = form.cleaned_data.get('unique_id')

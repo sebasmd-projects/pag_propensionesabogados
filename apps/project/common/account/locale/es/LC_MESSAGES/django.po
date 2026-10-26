@@ -437,3 +437,8 @@ msgstr "Cambiar contraseña"
 #~ "Nadie de Propensiones® te pedirá nunca este código. Si no lo has pedido tú, "
 #~ "puede que alguien esté intentando entrar en tu cuenta: escribe a "
 #~ "%(contact_email)s."
+
+#: apps/project/common/account/views.py
+msgid "Too many sign-up attempts from this connection. Please try again later."
+msgstr ""
+"Demasiados intentos de registro desde esta conexión. Inténtelo más tarde."

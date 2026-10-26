@@ -245,14 +245,17 @@ enlace fuera `golden-team`— caía en la trampa y bloqueaba la IP del usuario.
 
 ### Hallazgos abiertos de `check_security`
 
-Reales de pag, **sin arreglar** (no son triviales: hay que decidir el cupo):
+Reales de pag. El 1 ya está resuelto (se deja constancia); el resto sigue abierto:
 
-1. **Sin límite de intentos** en cuatro formularios públicos:
-   `POST /accounts/register/` (crea cuentas sin freno, aunque nacen sin
-   permisos), `POST /api/v1/contact/` y `POST /api/v1/pqrs/` (públicos, sin
-   captcha) y el formulario de contacto de la portada (`core:index`; este sí
-   lleva honeypot y reCAPTCHA, que lo mitigan, pero no hay cupo). Usar
-   `RateLimit` (`utils/throttling.py`), como el resto de puntos de entrada.
+1. ~~Sin límite de intentos en cuatro formularios públicos~~ **Resuelto**:
+   `POST /accounts/register/` (5 por hora y por IP, falla cerrado),
+   el contacto —portada `core:index` y `POST /api/v1/contact/` comparten cubo:
+   10 por hora y por IP, falla cerrado porque la portada manda un correo a la
+   dirección que se escriba— y `POST /api/v1/pqrs/` (5 por hora y por IP,
+   **falla abierto** con la razón escrita en `pqrs_by_ip`: es un canal de
+   radicación y el límite sólo evita ruido en una tabla). Superado el cupo
+   responden **429** (los de API, `{"detail": ...}`). Todos con `RateLimit`
+   (`utils/throttling.py`), contados antes de validar.
 2. **Caché no compartida** (`LocMemCache`): los cupos son por worker.
 3. Con el `.env` de **desarrollo**: `COMMON_ATTACK_TERMS` incluye `setup`, que
    secuestra `accounts/two_factor/setup/` (`check_attack_terms`). El de

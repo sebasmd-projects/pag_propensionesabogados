@@ -23,6 +23,9 @@
         <form method="POST">
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ next }}" />
+          {% if rate_limit_error %}
+            <div class="alert alert-danger py-2 small" role="alert">{{ rate_limit_error }}</div>
+          {% endif %}
           <div class="row">
             <!-- Nombres -->
             <div class="col-6 form-floating mb-3">

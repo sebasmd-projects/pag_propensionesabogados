@@ -49,13 +49,62 @@ class UserLogoutView(View):
 
 
 class UserRegisterView(FormView):
+    """
+    Alta de cuenta abierta a cualquiera, y por eso con cupo.
+
+    Sin limite, el formulario sirve para crear cuentas a golpes y, de paso, de
+    oraculo: los errores de validacion dicen que usuario o correo ya existen.
+    El cupo es por IP y se apunta antes de validar, para que acertar y fallar
+    cuesten lo mismo. **Falla cerrado** (el defecto de `RateLimit`): aqui el
+    limite es justo lo que impide enumerar cuentas, y un alta que se aplaza
+    mientras la cache esta caida es una molestia, no una perdida.
+
+    Aviso: viven en cache, y sin `REDIS_URL` Django usa `LocMemCache`, que es
+    por proceso: con varios workers el limite es por worker.
+    """
+
     template_name = "account/register.html"
     form_class = UserRegisterForm
+
+    # Cinco altas por hora y por IP: quien se registra lo hace una vez, y
+    # reintenta dos o tres por un error de formulario.
+    REGISTER_MAX_PER_IP = 5
+    REGISTER_WINDOW_SECONDS = 60 * 60
+
+    register_by_ip = RateLimit(
+        'register_ip',
+        limit=REGISTER_MAX_PER_IP,
+        window=REGISTER_WINDOW_SECONDS,
+    )
+
+    #: Lo que se responde al agotar el cupo. No dice cuanto falta: eso le
+    #: diria a quien prueba cuando merece la pena volver.
+    RATE_LIMITED_MESSAGE = _(
+        'Too many sign-up attempts from this connection. '
+        'Please try again later.'
+    )
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:
             return redirect('core:index')
         return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if not self.register_by_ip.consume(request):
+            # Formulario nuevo, sin las claves: ni se devuelven ni se validan.
+            form = self.form_class(initial={
+                field: request.POST.get(field, '')
+                for field in ('first_name', 'last_name', 'username', 'email')
+            })
+
+            return self.render_to_response(
+                self.get_context_data(
+                    form=form, rate_limit_error=self.RATE_LIMITED_MESSAGE
+                ),
+                status=429,
+            )
+
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         UserModel.objects.create_user(
